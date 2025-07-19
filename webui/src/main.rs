@@ -30,7 +30,6 @@ struct Res {
 }
 
 async fn start() -> JsResult<()> {
-
     console::log_1(&"start".into());
 
     let document = window().document().unwrap();
@@ -69,10 +68,9 @@ fn draw(ctx: &CanvasRenderingContext2d, res: &Res, state: &State) {
 }
 
 async fn say_hello() {
-
     console::log_1(&"say_hello".into());
 
-    let txt = http_get("test.txt").await.expect("get test.txt");
+    let txt = http_get_with_trunk_hack("BLAtest.txt").await.expect("get test.txt");
     let txt = String::from_utf8_lossy(&txt);
 
     let document = window().document().unwrap();
@@ -104,7 +102,17 @@ pub async fn load_bitmap(path: &str) -> JsResult<ImageBitmap> {
     Ok(bitmap)
 }
 
-pub async fn http_get(url: &str) -> JsResult<Vec<u8>> {
+// Trunk annoyingly returns index.html when a file is not found.
+// Work around this by recognizing a magic comment in index.html and returning an error instead.
+async fn http_get_with_trunk_hack(url: &str) -> JsResult<Vec<u8>> {
+    let bytes = http_get(url).await?;
+    if bytes.starts_with(b"<!DOCTYPE html> <!-- This comment identifies index.html DO NOT REMOVE -->") {
+        return Err(format!("GET {url}: got some HTML, presumably Trunk 404").into());
+    }
+    Ok(bytes)
+}
+
+async fn http_get(url: &str) -> JsResult<Vec<u8>> {
     let opts = RequestInit::new();
     opts.set_method("GET");
     opts.set_mode(web_sys::RequestMode::Cors);
@@ -117,6 +125,7 @@ pub async fn http_get(url: &str) -> JsResult<Vec<u8>> {
 
     let array_buffer = JsFuture::from(response.array_buffer()?).await?;
     let bytes = Uint8Array::new(&array_buffer).to_vec();
+
     Ok(bytes)
 }
 
