@@ -24,6 +24,10 @@ impl State {
     }
 }
 
+struct Res {
+    img: ImageBitmap,
+}
+
 async fn start() -> JsResult<()> {
     let document = window().unwrap().document().unwrap();
     say_hello();
@@ -35,6 +39,7 @@ async fn start() -> JsResult<()> {
     //ctx.fill_rect(4.0, 5.0, 20.0, 30.0);
 
     let img = load_bitmap("kit3.png").await.expect("load img");
+    let res = Res { img };
 
     let anim_loop: Rc<RefCell<Option<Closure<dyn FnMut()>>>> = Rc::new(RefCell::new(None));
     let anim_loop_clone = anim_loop.clone();
@@ -44,7 +49,7 @@ async fn start() -> JsResult<()> {
     *anim_loop_clone.borrow_mut() = Some(Closure::wrap(Box::new(move || {
         ctx.clear_rect(0.0, 0.0, 100.0, 100.0);
         state.tick();
-        ctx.draw_image_with_image_bitmap(&img, state.x, 0.0).expect("draw");
+        draw(&ctx, &res, &state);
 
         window().unwrap().request_animation_frame(anim_loop.borrow().as_ref().unwrap().as_ref().unchecked_ref()).unwrap();
     }) as Box<dyn FnMut()>));
@@ -53,6 +58,10 @@ async fn start() -> JsResult<()> {
     window().unwrap().request_animation_frame(anim_loop_clone.borrow().as_ref().unwrap().as_ref().unchecked_ref()).unwrap();
 
     Ok(())
+}
+
+fn draw(ctx: &CanvasRenderingContext2d, res: &Res, state: &State) {
+    ctx.draw_image_with_image_bitmap(&res.img, state.x, 0.0).expect("draw");
 }
 
 fn say_hello() {
