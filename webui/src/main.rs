@@ -1,8 +1,9 @@
 use std::{cell::RefCell, rc::Rc};
 
+use js_sys::Uint8Array;
 use wasm_bindgen::{JsCast, JsValue, prelude::Closure};
 use wasm_bindgen_futures::JsFuture;
-use web_sys::{CanvasRenderingContext2d, HtmlCanvasElement, HtmlImageElement, ImageBitmap, console, window};
+use web_sys::{CanvasRenderingContext2d, HtmlCanvasElement, HtmlImageElement, ImageBitmap, Request, RequestInit, Response, Window, console};
 
 type JsResult<T> = Result<T, JsValue>;
 
@@ -17,7 +18,7 @@ struct State {
 
 impl State {
     fn tick(&mut self) {
-        self.x += 2.0;
+        self.x += 1.0;
         if self.x > 100.0 {
             self.x = 0.0
         }
@@ -29,8 +30,11 @@ struct Res {
 }
 
 async fn start() -> JsResult<()> {
-    let document = window().unwrap().document().unwrap();
-    say_hello();
+
+    console::log_1(&"start".into());
+
+    let document = window().document().unwrap();
+    say_hello().await;
 
     let canvas = get_element::<HtmlCanvasElement>("canvas");
 
@@ -51,11 +55,11 @@ async fn start() -> JsResult<()> {
         state.tick();
         draw(&ctx, &res, &state);
 
-        window().unwrap().request_animation_frame(anim_loop.borrow().as_ref().unwrap().as_ref().unchecked_ref()).unwrap();
+        window().request_animation_frame(anim_loop.borrow().as_ref().unwrap().as_ref().unchecked_ref()).unwrap();
     }) as Box<dyn FnMut()>));
 
     // Start animation loop
-    window().unwrap().request_animation_frame(anim_loop_clone.borrow().as_ref().unwrap().as_ref().unchecked_ref()).unwrap();
+    window().request_animation_frame(anim_loop_clone.borrow().as_ref().unwrap().as_ref().unchecked_ref()).unwrap();
 
     Ok(())
 }
@@ -64,11 +68,17 @@ fn draw(ctx: &CanvasRenderingContext2d, res: &Res, state: &State) {
     ctx.draw_image_with_image_bitmap(&res.img, state.x, 0.0).expect("draw");
 }
 
-fn say_hello() {
-    let document = window().and_then(|win| win.document()).expect("Could not access the document");
-    let body = document.body().expect("Could not access document.body");
-    let text_node = document.create_text_node("Hello, world from Vanilla Rust!");
-    body.append_child(text_node.as_ref()).expect("Failed to append text");
+async fn say_hello() {
+
+    console::log_1(&"say_hello".into());
+
+    let txt = http_get("test.txt").await.expect("get test.txt");
+    let txt = String::from_utf8_lossy(&txt);
+
+    let document = window().document().unwrap();
+    let body = document.body().unwrap();
+    let text_node = document.create_text_node(&txt);
+    body.append_child(text_node.as_ref()).unwrap();
 }
 
 pub async fn load_bitmap(path: &str) -> JsResult<ImageBitmap> {
@@ -94,7 +104,27 @@ pub async fn load_bitmap(path: &str) -> JsResult<ImageBitmap> {
     Ok(bitmap)
 }
 
+pub async fn http_get(url: &str) -> JsResult<Vec<u8>> {
+    let opts = RequestInit::new();
+    opts.set_method("GET");
+    opts.set_mode(web_sys::RequestMode::Cors);
+    let request = Request::new_with_str_and_init(url, &opts)?;
+
+    let response = JsFuture::from(window().fetch_with_request(&request)).await?.dyn_into::<Response>()?;
+    if !response.ok() {
+        return Err(JsValue::from_str(&format!("GET {url}: status {}: {}", response.status(), response.status_text())));
+    }
+
+    let array_buffer = JsFuture::from(response.array_buffer()?).await?;
+    let bytes = Uint8Array::new(&array_buffer).to_vec();
+    Ok(bytes)
+}
+
+pub fn window() -> Window {
+    web_sys::window().expect("window")
+}
+
 #[track_caller]
 fn get_element<T: JsCast>(id: &str) -> T {
-    window().unwrap().document().unwrap().get_element_by_id(id).unwrap().dyn_into::<T>().unwrap()
+    web_sys::window().unwrap().document().unwrap().get_element_by_id(id).unwrap().dyn_into::<T>().unwrap()
 }
