@@ -1,6 +1,8 @@
-use wasm_bindgen::{prelude::Closure, JsCast, JsValue};
+use std::{cell::RefCell, rc::Rc};
+
+use wasm_bindgen::{JsCast, JsValue, prelude::Closure};
 use wasm_bindgen_futures::JsFuture;
-use web_sys::{console, window, CanvasRenderingContext2d, HtmlCanvasElement, HtmlImageElement, ImageBitmap};
+use web_sys::{CanvasRenderingContext2d, HtmlCanvasElement, HtmlImageElement, ImageBitmap, console, window};
 
 type JsResult<T> = Result<T, JsValue>;
 
@@ -16,12 +18,29 @@ async fn start() -> JsResult<()> {
     let canvas = get_element::<HtmlCanvasElement>("canvas");
 
     let ctx = canvas.get_context("2d").expect("context2d").unwrap().dyn_into::<CanvasRenderingContext2d>().unwrap();
-    
+
     //ctx.fill_rect(4.0, 5.0, 20.0, 30.0);
-    
+
     let img = load_bitmap("kit3.png").await.expect("load img");
-    
-    ctx.draw_image_with_image_bitmap(&img, 0.0, 0.0).expect("draw");
+
+    let anim_loop: Rc<RefCell<Option<Closure<dyn FnMut()>>>> = Rc::new(RefCell::new(None));
+    let anim_loop_clone = anim_loop.clone();
+
+    let mut x = 0.0;
+
+    *anim_loop_clone.borrow_mut() = Some(Closure::wrap(Box::new(move || {
+        ctx.clear_rect(0.0, 0.0, 100.0, 100.0);
+        x += 1.0;
+        if x > 100.0 {
+            x = 0.0
+        }
+        ctx.draw_image_with_image_bitmap(&img, x, 0.0).expect("draw");
+
+        window().unwrap().request_animation_frame(anim_loop.borrow().as_ref().unwrap().as_ref().unchecked_ref()).unwrap();
+    }) as Box<dyn FnMut()>));
+
+    // Start animation loop
+    window().unwrap().request_animation_frame(anim_loop_clone.borrow().as_ref().unwrap().as_ref().unchecked_ref()).unwrap();
 
     Ok(())
 }
@@ -32,7 +51,6 @@ fn say_hello() {
     let text_node = document.create_text_node("Hello, world from Vanilla Rust!");
     body.append_child(text_node.as_ref()).expect("Failed to append text");
 }
-
 
 pub async fn load_bitmap(path: &str) -> JsResult<ImageBitmap> {
     console::log_1(&format!("load {path}").into());
