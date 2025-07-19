@@ -11,6 +11,19 @@ fn main() {
     wasm_bindgen_futures::spawn_local(async { start().await.expect("main") })
 }
 
+struct State {
+    x: f64,
+}
+
+impl State {
+    fn tick(&mut self) {
+        self.x += 2.0;
+        if self.x > 100.0 {
+            self.x = 0.0
+        }
+    }
+}
+
 async fn start() -> JsResult<()> {
     let document = window().unwrap().document().unwrap();
     say_hello();
@@ -26,15 +39,12 @@ async fn start() -> JsResult<()> {
     let anim_loop: Rc<RefCell<Option<Closure<dyn FnMut()>>>> = Rc::new(RefCell::new(None));
     let anim_loop_clone = anim_loop.clone();
 
-    let mut x = 0.0;
+    let mut state = State { x: 0.0 };
 
     *anim_loop_clone.borrow_mut() = Some(Closure::wrap(Box::new(move || {
         ctx.clear_rect(0.0, 0.0, 100.0, 100.0);
-        x += 1.0;
-        if x > 100.0 {
-            x = 0.0
-        }
-        ctx.draw_image_with_image_bitmap(&img, x, 0.0).expect("draw");
+        state.tick();
+        ctx.draw_image_with_image_bitmap(&img, state.x, 0.0).expect("draw");
 
         window().unwrap().request_animation_frame(anim_loop.borrow().as_ref().unwrap().as_ref().unchecked_ref()).unwrap();
     }) as Box<dyn FnMut()>));
