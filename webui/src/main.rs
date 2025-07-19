@@ -1,14 +1,17 @@
 use std::{cell::RefCell, rc::Rc};
 
 use js_sys::Uint8Array;
+use log::info;
 use wasm_bindgen::{JsCast, JsValue, prelude::Closure};
 use wasm_bindgen_futures::JsFuture;
 use web_sys::{CanvasRenderingContext2d, HtmlCanvasElement, HtmlImageElement, ImageBitmap, Request, RequestInit, Response, Window, console};
+use console_log;
 
 type JsResult<T> = Result<T, JsValue>;
 
 fn main() {
     console_error_panic_hook::set_once();
+    console_log::init_with_level(log::Level::Info).expect("error initializing logger");
     wasm_bindgen_futures::spawn_local(async { start().await.expect("main") })
 }
 
@@ -29,8 +32,9 @@ struct Res {
     img: ImageBitmap,
 }
 
+
 async fn start() -> JsResult<()> {
-    console::log_1(&"start".into());
+    info!("start");
 
     let document = window().document().unwrap();
     say_hello().await;
@@ -68,9 +72,9 @@ fn draw(ctx: &CanvasRenderingContext2d, res: &Res, state: &State) {
 }
 
 async fn say_hello() {
-    console::log_1(&"say_hello".into());
+    info!("say_hello");
 
-    let txt = http_get_with_trunk_hack("BLAtest.txt").await.expect("get test.txt");
+    let txt = http_get_with_trunk_hack("test.txt").await.expect("get test.txt");
     let txt = String::from_utf8_lossy(&txt);
 
     let document = window().document().unwrap();
@@ -80,7 +84,7 @@ async fn say_hello() {
 }
 
 pub async fn load_bitmap(path: &str) -> JsResult<ImageBitmap> {
-    console::log_1(&format!("load {path}").into());
+    info!("load {path}");
 
     // Load image element
     let img = HtmlImageElement::new()?;

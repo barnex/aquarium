@@ -3,3 +3,6 @@
 resolver = "2"
 
 members = ["coregame", "webui"]
+
+[workspace.dependencies]
+log = "0.4"
