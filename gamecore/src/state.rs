@@ -1,3 +1,4 @@
+use crate::prelude::*;
 
 pub struct State {
     pub x: f64,
@@ -9,5 +10,9 @@ impl State {
         if self.x > 100.0 {
             self.x = 0.0
         }
+    }
+
+    pub fn render(&self, out: &mut Output) {
+        out.debug = "hello".into()
     }
 }

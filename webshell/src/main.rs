@@ -4,7 +4,7 @@ use js_sys::Uint8Array;
 use log::info;
 use wasm_bindgen::{JsCast, JsValue, prelude::Closure};
 use wasm_bindgen_futures::JsFuture;
-use web_sys::{CanvasRenderingContext2d, HtmlCanvasElement, HtmlImageElement, ImageBitmap, Request, RequestInit, Response, Window};
+use web_sys::{CanvasRenderingContext2d, HtmlCanvasElement, HtmlElement, HtmlImageElement, ImageBitmap, Request, RequestInit, Response, Window};
 
 use std::cell::RefCell;
 use std::rc::Rc;
@@ -30,14 +30,24 @@ struct Res {
 
 async fn start() -> JsResult<()> {
     info!("start");
-    say_hello().await;
+    test_resource_loading().await;
 
     let img = load_image("kit3.png").await.expect("load img");
     let res = Res { img };
     let mut state = State { x: 0.0 };
+    
+    let mut out = Output::new();
 
     animation_loop(move |ctx| {
+
         state.tick();
+        
+        
+        out.clear();
+        state.render(&mut out);
+        
+        get_element_by_id::<HtmlElement>("debug").set_inner_text(&out.debug);
+        
         draw(&ctx, &res, &state);
     });
 
@@ -48,7 +58,7 @@ fn animation_loop<F>(mut body: F)
 where
     F: FnMut(&CanvasRenderingContext2d) + 'static,
 {
-    let canvas = get_element::<HtmlCanvasElement>("canvas");
+    let canvas = get_element_by_id::<HtmlCanvasElement>("canvas");
 
     let ctx = canvas.get_context("2d").expect("context2d").unwrap().dyn_into::<CanvasRenderingContext2d>().unwrap();
 
@@ -75,7 +85,7 @@ fn draw(ctx: &CanvasRenderingContext2d, res: &Res, state: &State) {
     ctx.draw_image_with_image_bitmap(&res.img, state.x, 0.0).expect("draw");
 }
 
-async fn say_hello() {
+async fn test_resource_loading() {
     info!("say_hello");
 
     let txt = http_get_with_trunk_hack("test.txt").await.expect("get test.txt");
@@ -94,6 +104,6 @@ pub fn window() -> Window {
 }
 
 #[track_caller]
-fn get_element<T: JsCast>(id: &str) -> T {
+fn get_element_by_id<T: JsCast>(id: &str) -> T {
     web_sys::window().unwrap().document().unwrap().get_element_by_id(id).unwrap().dyn_into::<T>().unwrap()
 }
