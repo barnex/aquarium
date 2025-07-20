@@ -21,3 +21,8 @@ draws scenegraph
 
 cd webui
 trunk serve
+
+### Trunk tweaks
+
+trunk config show
+watch = ..
