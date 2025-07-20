@@ -7,14 +7,18 @@ use wasm_bindgen::{JsCast, JsValue, prelude::Closure};
 use wasm_bindgen_futures::JsFuture;
 use web_sys::{CanvasRenderingContext2d, HtmlCanvasElement, HtmlElement, HtmlImageElement, ImageBitmap, Request, RequestInit, Response, Window};
 
-use std::cell::RefCell;
+use std::cell::{Cell, RefCell};
 use std::rc::Rc;
 
 type JsResult<T> = Result<T, JsValue>;
+type HashMap<K, V> = fnv::FnvHashMap<K, V>;
+type HashSet<T> = fnv::FnvHashSet<T>;
 
+mod event_listeners;
 mod http_get;
 mod load_image;
 
+use event_listeners::*;
 use http_get::*;
 use load_image::*;
 
