@@ -80,6 +80,7 @@ fn request_animation_frame(anim_loop_clone: &Rc<RefCell<Option<Closure<dyn FnMut
 }
 
 fn draw(ctx: &CanvasRenderingContext2d, res: &Res, state: &State) {
+    ctx.set_image_smoothing_enabled(false); // crisp, pixellated sprites
     ctx.draw_image_with_image_bitmap(&res.img, state.x, 0.0).expect("draw");
 }
 
