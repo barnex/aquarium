@@ -1,5 +1,5 @@
-use web_sys::{KeyboardEvent, MouseEvent};
 use crate::*;
+use web_sys::{KeyboardEvent, MouseEvent};
 
 fn listen_keys() -> Rc<RefCell<HashSet<String>>> {
     let pressed_keys = Rc::new(RefCell::new(HashSet::default()));
@@ -25,27 +25,27 @@ fn listen_keys() -> Rc<RefCell<HashSet<String>>> {
     pressed_keys
 }
 
-// #[derive(Default, Debug)]
-// pub struct MouseEvents {
-//     pub left_down: Cell<bool>,
-//     pub right_down: Cell<bool>,
-//     pub pos: Cell<vec2i>,
-// }
-// 
-// fn listen_mouse(canvas: &HtmlCanvasElement) -> Rc<MouseEvents> {
-//     let ev = Rc::new(MouseEvents::default());
-//     let closure = {
-//         let ev = ev.clone();
-//         Closure::wrap(Box::new(move |event: MouseEvent| {
-//             ev.pos.set(vec2(event.offset_x(), event.offset_y()));
-//             ev.left_down.set(event.buttons() & 1 != 0);
-//             ev.right_down.set(event.buttons() & 2 != 0);
-//         }) as Box<dyn FnMut(_)>)
-//     };
-//     canvas.add_event_listener_with_callback("mousemove", closure.as_ref().unchecked_ref()).unwrap();
-//     canvas.add_event_listener_with_callback("mouseup", closure.as_ref().unchecked_ref()).unwrap();
-//     canvas.add_event_listener_with_callback("mousedown", closure.as_ref().unchecked_ref()).unwrap();
-//     closure.forget(); // Important: keep closure alive
-// 
-//     ev
-// }
+#[derive(Default, Debug)]
+pub struct MouseEvents {
+    pub left_down: Cell<bool>,
+    pub right_down: Cell<bool>,
+    pub pos: Cell<vec2i>,
+}
+
+fn listen_mouse(canvas: &HtmlCanvasElement) -> Rc<MouseEvents> {
+    let ev = Rc::new(MouseEvents::default());
+    let closure = {
+        let ev = ev.clone();
+        Closure::wrap(Box::new(move |event: MouseEvent| {
+            ev.pos.set(vec2(event.offset_x(), event.offset_y()));
+            ev.left_down.set(event.buttons() & 1 != 0);
+            ev.right_down.set(event.buttons() & 2 != 0);
+        }) as Box<dyn FnMut(_)>)
+    };
+    canvas.add_event_listener_with_callback("mousemove", closure.as_ref().unchecked_ref()).unwrap();
+    canvas.add_event_listener_with_callback("mouseup", closure.as_ref().unchecked_ref()).unwrap();
+    canvas.add_event_listener_with_callback("mousedown", closure.as_ref().unchecked_ref()).unwrap();
+    closure.forget(); // Important: keep closure alive
+
+    ev
+}

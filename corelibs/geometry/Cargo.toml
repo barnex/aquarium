@@ -1,0 +1,14 @@
+[package]
+name = "geometry"
+version = "2.0.0"
+edition = "2024"
+
+[dependencies]
+matrix = { workspace = true }
+num-traits = { workspace = true }
+serde = { workspace = true }
+vector = { workspace = true }
+core_util = { workspace = true }
+
+#[lint.clippy]
+#op_ref = "allow"

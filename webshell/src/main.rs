@@ -3,6 +3,7 @@ use gamecore::*;
 use js_sys::Uint8Array;
 use log::info;
 use num_traits::AsPrimitive as _;
+use vector::*;
 use wasm_bindgen::{JsCast, JsValue, prelude::Closure};
 use wasm_bindgen_futures::JsFuture;
 use web_sys::{CanvasRenderingContext2d, HtmlCanvasElement, HtmlElement, HtmlImageElement, ImageBitmap, Request, RequestInit, Response, Window};

@@ -1,0 +1,12 @@
+[package]
+name = "image_util"
+version = "0.1.0"
+edition = "2024"
+
+[dependencies]
+core_util = { workspace = true }
+geometry = { workspace = true }  # 💀 TODO: remove
+image = { workspace = true }
+serde = { workspace = true }
+vector = { workspace = true }
+anyhow = { workspace = true }
