@@ -1,5 +1,5 @@
 [package]
-name = "webui"
+name = "webshell"
 version = "1.0.0"
 edition = "2024"
 
@@ -25,7 +25,6 @@ web-sys = { version = "0.3.77", features = [
 	"Text",
 	"Url",
 	"Window",
-	"console",
 ] }
-log = {workspace = true}
+log = { workspace = true }
 console_log = "1.0"

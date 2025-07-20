@@ -2,7 +2,7 @@
 
 resolver = "2"
 
-members = ["coregame", "webui"]
+members = ["gamecore", "webshell"]
 
 [workspace.dependencies]
 log = "0.4"
