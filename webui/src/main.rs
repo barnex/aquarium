@@ -1,11 +1,11 @@
 use std::{cell::RefCell, rc::Rc};
 
+use console_log;
 use js_sys::Uint8Array;
 use log::info;
 use wasm_bindgen::{JsCast, JsValue, prelude::Closure};
 use wasm_bindgen_futures::JsFuture;
 use web_sys::{CanvasRenderingContext2d, HtmlCanvasElement, HtmlImageElement, ImageBitmap, Request, RequestInit, Response, Window, console};
-use console_log;
 
 type JsResult<T> = Result<T, JsValue>;
 
@@ -32,22 +32,26 @@ struct Res {
     img: ImageBitmap,
 }
 
-
 async fn start() -> JsResult<()> {
     info!("start");
-
-    let document = window().document().unwrap();
     say_hello().await;
 
-    let canvas = get_element::<HtmlCanvasElement>("canvas");
-
-    let ctx = canvas.get_context("2d").expect("context2d").unwrap().dyn_into::<CanvasRenderingContext2d>().unwrap();
-
-    //ctx.fill_rect(4.0, 5.0, 20.0, 30.0);
 
     let img = load_bitmap("kit3.png").await.expect("load img");
     let res = Res { img };
     let mut state = State { x: 0.0 };
+
+    animation_loop(move |ctx|animation_loop_body(ctx, &res, &mut state));
+
+    Ok(())
+}
+
+fn animation_loop<F>(mut body: F) where F: 
+    FnMut(&CanvasRenderingContext2d) + 'static,
+{
+    let canvas = get_element::<HtmlCanvasElement>("canvas");
+
+    let ctx = canvas.get_context("2d").expect("context2d").unwrap().dyn_into::<CanvasRenderingContext2d>().unwrap();
 
     let anim_loop: Rc<RefCell<Option<Closure<dyn FnMut()>>>> = Rc::new(RefCell::new(None));
     let anim_loop_clone = anim_loop.clone();
@@ -55,22 +59,20 @@ async fn start() -> JsResult<()> {
     *anim_loop_clone.borrow_mut() = Some(Closure::wrap(Box::new(move || {
         ctx.clear_rect(0.0, 0.0, 100.0, 100.0);
 
-        animation_loop_body(&ctx, &res, &mut state);
+        //animation_loop_body(&ctx, &res, &mut state);
+        body(&ctx);
 
         request_animation_frame(&anim_loop);
     }) as Box<dyn FnMut()>));
 
     // Start animation loop
     request_animation_frame(&anim_loop_clone);
-
-    Ok(())
 }
 
 fn animation_loop_body(ctx: &CanvasRenderingContext2d, res: &Res, state: &mut State) {
     state.tick();
     draw(&ctx, &res, &state);
 }
-
 
 fn request_animation_frame(anim_loop_clone: &Rc<RefCell<Option<Closure<dyn FnMut()>>>>) -> i32 {
     window().request_animation_frame(anim_loop_clone.borrow().as_ref().unwrap().as_ref().unchecked_ref()).unwrap()
