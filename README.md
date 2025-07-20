@@ -19,7 +19,11 @@ draws scenegraph
 
 ## Run
 
+
+WARNING: must `cargo check` before `trunk serve` lest it serve an outdated build.
+```
 cargo lcheck --target=wasm32-unknown-unknown && trunk serve
+```
 
 ### Trunk tweaks
 

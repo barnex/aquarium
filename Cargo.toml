@@ -7,3 +7,4 @@ members = ["gamecore", "webshell"]
 [workspace.dependencies]
 log = "0.4"
 gamecore = { path = "gamecore" }
+num-traits = "0.2.19"

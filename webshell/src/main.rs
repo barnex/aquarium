@@ -2,6 +2,7 @@ use gamecore::*;
 
 use js_sys::Uint8Array;
 use log::info;
+use num_traits::AsPrimitive as _;
 use wasm_bindgen::{JsCast, JsValue, prelude::Closure};
 use wasm_bindgen_futures::JsFuture;
 use web_sys::{CanvasRenderingContext2d, HtmlCanvasElement, HtmlElement, HtmlImageElement, ImageBitmap, Request, RequestInit, Response, Window};
@@ -23,7 +24,6 @@ fn main() {
     wasm_bindgen_futures::spawn_local(async { start().await.expect("main") })
 }
 
-
 struct Res {
     img: ImageBitmap,
 }
@@ -34,20 +34,18 @@ async fn start() -> JsResult<()> {
 
     let img = load_image("kit3.png").await.expect("load img");
     let res = Res { img };
-    let mut state = State { x: 0.0 };
-    
+    let mut state = State::new();
+
     let mut out = Output::new();
 
     animation_loop(move |ctx| {
-
         state.tick();
-        
-        
+
         out.clear();
         state.render(&mut out);
-        
+
         get_element_by_id::<HtmlElement>("debug").set_inner_text(&out.debug);
-        
+
         draw(&ctx, &res, &state);
     });
 
@@ -66,7 +64,7 @@ where
     let anim_loop_clone = anim_loop.clone();
 
     *anim_loop_clone.borrow_mut() = Some(Closure::wrap(Box::new(move || {
-        ctx.clear_rect(0.0, 0.0, 100.0, 100.0);
+        ctx.clear_rect(0.0, 0.0, canvas.width().as_(), canvas.height().as_());
 
         body(&ctx);
 
@@ -96,8 +94,6 @@ async fn test_resource_loading() {
     let text_node = document.create_text_node(&txt);
     body.append_child(text_node.as_ref()).unwrap();
 }
-
-
 
 pub fn window() -> Window {
     web_sys::window().expect("window")
