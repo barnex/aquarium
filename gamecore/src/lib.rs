@@ -1,14 +1,12 @@
-pub fn add(left: u64, right: u64) -> u64 {
-    left + right
+pub struct State {
+    pub x: f64,
 }
 
-#[cfg(test)]
-mod tests {
-    use super::*;
-
-    #[test]
-    fn it_works() {
-        let result = add(2, 2);
-        assert_eq!(result, 4);
+impl State {
+    pub fn tick(&mut self) {
+        self.x += 1.0;
+        if self.x > 100.0 {
+            self.x = 0.0
+        }
     }
 }

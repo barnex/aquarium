@@ -1,3 +1,5 @@
+use gamecore::*;
+
 use js_sys::Uint8Array;
 use log::info;
 use wasm_bindgen::{JsCast, JsValue, prelude::Closure};
@@ -15,18 +17,6 @@ fn main() {
     wasm_bindgen_futures::spawn_local(async { start().await.expect("main") })
 }
 
-struct State {
-    x: f64,
-}
-
-impl State {
-    fn tick(&mut self) {
-        self.x += 1.0;
-        if self.x > 100.0 {
-            self.x = 0.0
-        }
-    }
-}
 
 struct Res {
     img: ImageBitmap,
@@ -40,7 +30,10 @@ async fn start() -> JsResult<()> {
     let res = Res { img };
     let mut state = State { x: 0.0 };
 
-    animation_loop(move |ctx| animation_loop_body(ctx, &res, &mut state));
+    animation_loop(move |ctx| {
+        state.tick();
+        draw(&ctx, &res, &state);
+    });
 
     Ok(())
 }
@@ -59,7 +52,6 @@ where
     *anim_loop_clone.borrow_mut() = Some(Closure::wrap(Box::new(move || {
         ctx.clear_rect(0.0, 0.0, 100.0, 100.0);
 
-        //animation_loop_body(&ctx, &res, &mut state);
         body(&ctx);
 
         request_animation_frame(&anim_loop);
@@ -67,11 +59,6 @@ where
 
     // Start animation loop
     request_animation_frame(&anim_loop_clone);
-}
-
-fn animation_loop_body(ctx: &CanvasRenderingContext2d, res: &Res, state: &mut State) {
-    state.tick();
-    draw(&ctx, &res, &state);
 }
 
 fn request_animation_frame(anim_loop_clone: &Rc<RefCell<Option<Closure<dyn FnMut()>>>>) -> i32 {
