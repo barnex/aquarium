@@ -47,24 +47,33 @@ async fn start() -> JsResult<()> {
 
     let img = load_bitmap("kit3.png").await.expect("load img");
     let res = Res { img };
+    let mut state = State { x: 0.0 };
 
     let anim_loop: Rc<RefCell<Option<Closure<dyn FnMut()>>>> = Rc::new(RefCell::new(None));
     let anim_loop_clone = anim_loop.clone();
 
-    let mut state = State { x: 0.0 };
-
     *anim_loop_clone.borrow_mut() = Some(Closure::wrap(Box::new(move || {
         ctx.clear_rect(0.0, 0.0, 100.0, 100.0);
-        state.tick();
-        draw(&ctx, &res, &state);
 
-        window().request_animation_frame(anim_loop.borrow().as_ref().unwrap().as_ref().unchecked_ref()).unwrap();
+        animation_loop_body(&ctx, &res, &mut state);
+
+        request_animation_frame(&anim_loop);
     }) as Box<dyn FnMut()>));
 
     // Start animation loop
-    window().request_animation_frame(anim_loop_clone.borrow().as_ref().unwrap().as_ref().unchecked_ref()).unwrap();
+    request_animation_frame(&anim_loop_clone);
 
     Ok(())
+}
+
+fn animation_loop_body(ctx: &CanvasRenderingContext2d, res: &Res, state: &mut State) {
+    state.tick();
+    draw(&ctx, &res, &state);
+}
+
+
+fn request_animation_frame(anim_loop_clone: &Rc<RefCell<Option<Closure<dyn FnMut()>>>>) -> i32 {
+    window().request_animation_frame(anim_loop_clone.borrow().as_ref().unwrap().as_ref().unchecked_ref()).unwrap()
 }
 
 fn draw(ctx: &CanvasRenderingContext2d, res: &Res, state: &State) {
