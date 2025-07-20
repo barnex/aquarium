@@ -19,8 +19,7 @@ draws scenegraph
 
 ## Run
 
-cd webui
-trunk serve
+cargo lcheck --target=wasm32-unknown-unknown && trunk serve
 
 ### Trunk tweaks
 
