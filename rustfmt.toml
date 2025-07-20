@@ -1,3 +1,4 @@
 style_edition = "2024"
 
 max_width = 255
+reorder_imports = true

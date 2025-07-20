@@ -6,3 +6,4 @@ members = ["gamecore", "webshell"]
 
 [workspace.dependencies]
 log = "0.4"
+gamecore = { path = "gamecore" }

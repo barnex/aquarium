@@ -28,3 +28,4 @@ web-sys = { version = "0.3.77", features = [
 ] }
 log = { workspace = true }
 console_log = "1.0"
+gamecore = {workspace = true}

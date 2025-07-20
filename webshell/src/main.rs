@@ -1,11 +1,11 @@
-use std::{cell::RefCell, rc::Rc};
-
-use console_log;
 use js_sys::Uint8Array;
 use log::info;
 use wasm_bindgen::{JsCast, JsValue, prelude::Closure};
 use wasm_bindgen_futures::JsFuture;
-use web_sys::{CanvasRenderingContext2d, HtmlCanvasElement, HtmlImageElement, ImageBitmap, Request, RequestInit, Response, Window, console};
+use web_sys::{CanvasRenderingContext2d, HtmlCanvasElement, HtmlImageElement, ImageBitmap, Request, RequestInit, Response, Window};
+
+use std::cell::RefCell;
+use std::rc::Rc;
 
 type JsResult<T> = Result<T, JsValue>;
 
@@ -36,18 +36,18 @@ async fn start() -> JsResult<()> {
     info!("start");
     say_hello().await;
 
-
     let img = load_bitmap("kit3.png").await.expect("load img");
     let res = Res { img };
     let mut state = State { x: 0.0 };
 
-    animation_loop(move |ctx|animation_loop_body(ctx, &res, &mut state));
+    animation_loop(move |ctx| animation_loop_body(ctx, &res, &mut state));
 
     Ok(())
 }
 
-fn animation_loop<F>(mut body: F) where F: 
-    FnMut(&CanvasRenderingContext2d) + 'static,
+fn animation_loop<F>(mut body: F)
+where
+    F: FnMut(&CanvasRenderingContext2d) + 'static,
 {
     let canvas = get_element::<HtmlCanvasElement>("canvas");
 
