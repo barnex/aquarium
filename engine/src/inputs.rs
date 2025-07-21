@@ -57,7 +57,7 @@ impl Inputs {
     // To be called on each frame to advance time.
     // "just pressed" evolves to "is_down".
     // "released" gets forgotten.
-    pub fn tick(&mut self) {
+    pub fn start_next_frame(&mut self) {
         // Note: NOT clearing bottons_down.
         self.buttons_pressed.clear();
         self.buttons_released.clear();
@@ -136,8 +136,8 @@ impl Inputs {
         self.buttons_released.insert(button);
         self.buttons_down.remove(&button);
     }
-    
-    pub fn record_mouse_position(&mut self, pos: vec2i){
+
+    pub fn record_mouse_position(&mut self, pos: vec2i) {
         self.mouse_position = pos
     }
 

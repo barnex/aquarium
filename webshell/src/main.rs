@@ -48,12 +48,12 @@ async fn start() -> JsResult<()> {
 
     let mut out = Output::new();
 
-    let input_events = Shared::default();
+    // queue where we receive input events (keys, mouse)
+    let input_events = Shared::<VecDeque<InputEvent>>::default();
     listen_keys(Rc::clone(&input_events));
     listen_mouse(&get_element_by_id("canvas"), Rc::clone(&input_events));
 
     animation_loop(move |ctx| {
-        state.inputs.tick();
         record_input_events(&mut state.inputs, &input_events);
 
         state.tick();
@@ -92,7 +92,10 @@ where
     request_animation_frame(&anim_loop_clone);
 }
 
+// take input events from queue and update Inputs state accordingly
 fn record_input_events(inputs: &mut Inputs, events: &Shared<VecDeque<InputEvent>>) {
+    inputs.start_next_frame();
+
     for event in events.borrow_mut().drain(..) {
         use InputEvent::*;
         match event {
