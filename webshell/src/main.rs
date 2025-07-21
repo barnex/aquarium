@@ -50,6 +50,7 @@ async fn start() -> JsResult<()> {
 
     let input_events = Shared::default();
     listen_keys(Rc::clone(&input_events));
+    listen_mouse(&get_element_by_id("canvas"), Rc::clone(&input_events));
 
     animation_loop(move |ctx| {
 

@@ -5,6 +5,9 @@ use web_sys::{KeyboardEvent, MouseEvent};
 pub(crate) enum InputEvent {
     KeyDown(KeyboardEvent),
     KeyUp(KeyboardEvent),
+    MouseDown(MouseEvent),
+    MouseUp(MouseEvent),
+    //MouseMove(MouseEvent),
 }
 
 pub(crate) fn record_input_events(inputs: &mut Inputs, events: &Shared<VecDeque<InputEvent>>) {
@@ -23,17 +26,22 @@ pub(crate) fn record_input_events(inputs: &mut Inputs, events: &Shared<VecDeque<
                     inputs.record_release(Button(key))
                 }
             }
+            MouseDown(event) => match event.button() {
+                0 => inputs.record_press(Button::MOUSE1),
+                2 => inputs.record_press(Button::MOUSE2),
+                _ => (),
+            },
+            MouseUp(event) => match event.button() {
+                0 => inputs.record_release(Button::MOUSE1),
+                2 => inputs.record_release(Button::MOUSE2),
+                _ => (),
+            },
         }
     }
 }
 
-/// Listen for keyboard events: returns shared channel (`VecDeque`) where events are being pushed (`push_back`).
-/// Consume the events via `pop_front` or `iter_mut`.
-///
-/// Event = (Key, pressed). e.g.
-///     ("a", true)  // key A pressed
-///     ("b", false) // key B released
-///    
+
+/// Listen for keyup/keydown events, push them to `VecDeque` for later later consumption.
 pub(crate) fn listen_keys(events: Shared<VecDeque<InputEvent>>) {
     let keydown_keys = events.clone();
     let keydown_closure = Closure::<dyn FnMut(_)>::new(move |event: KeyboardEvent| {
@@ -62,20 +70,23 @@ pub(crate) struct MouseEvents {
     pub pos: Cell<vec2i>,
 }
 
-pub(crate) fn listen_mouse(canvas: &HtmlCanvasElement) -> Rc<MouseEvents> {
-    let ev = Rc::new(MouseEvents::default());
-    let closure = {
-        let ev = ev.clone();
-        Closure::wrap(Box::new(move |event: MouseEvent| {
-            ev.pos.set(vec2(event.offset_x(), event.offset_y()));
-            ev.left_down.set(event.buttons() & 1 != 0);
-            ev.right_down.set(event.buttons() & 2 != 0);
-        }) as Box<dyn FnMut(_)>)
-    };
-    canvas.add_event_listener_with_callback("mousemove", closure.as_ref().unchecked_ref()).unwrap();
-    canvas.add_event_listener_with_callback("mouseup", closure.as_ref().unchecked_ref()).unwrap();
-    canvas.add_event_listener_with_callback("mousedown", closure.as_ref().unchecked_ref()).unwrap();
-    closure.forget(); // Important: keep closure alive
+pub(crate) fn listen_mouse(canvas: &HtmlCanvasElement, events: Shared<VecDeque<InputEvent>>) {
+    let events_clone = Rc::clone(&events);
+    let mousedown = Closure::wrap(Box::new(move |event: MouseEvent| {
+        events_clone.borrow_mut().push_back(InputEvent::MouseDown(event));
+    }) as Box<dyn FnMut(_)>);
+    
+    
+    let events_clone = Rc::clone(&events);
+    let mouseup = Closure::wrap(Box::new(move |event: MouseEvent| {
+        events_clone.borrow_mut().push_back(InputEvent::MouseUp(event));
+    }) as Box<dyn FnMut(_)>);
 
-    ev
+    canvas.add_event_listener_with_callback("mousedown", mousedown.as_ref().unchecked_ref()).unwrap();
+    mousedown.forget();
+
+    canvas.add_event_listener_with_callback("mouseup", mouseup.as_ref().unchecked_ref()).unwrap();
+    mouseup.forget();
+
+    //canvas.add_event_listener_with_callback("mousemove", closure.as_ref().unchecked_ref()).unwrap();
 }
