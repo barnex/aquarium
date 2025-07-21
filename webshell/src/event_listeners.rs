@@ -1,14 +1,28 @@
 use crate::*;
 use web_sys::{KeyboardEvent, MouseEvent};
 
-pub(crate) fn record_key_events(inputs: &mut Inputs, key_events: &Rc<RefCell<VecDeque<(String, bool)>>>) {
-    for (key, pressed) in key_events.borrow_mut().drain(..) {
-        info!("record key {key} {pressed}");
+#[derive(Debug)]
+pub(crate) enum InputEvent {
+    KeyDown(KeyboardEvent),
+    KeyUp(KeyboardEvent),
+}
 
-        match (Str16::from_str(key.as_str()), pressed) {
-            (Ok(key), true) => inputs.record_press(Button(key)),
-            (Ok(key), false) => inputs.record_release(Button(key)),
-            (Err(e), _) => log::error!("ignored key {key}: {e}"),
+pub(crate) fn record_input_events(inputs: &mut Inputs, events: &Shared<VecDeque<InputEvent>>) {
+    for event in events.borrow_mut().drain(..) {
+        info!("record input event {event:?}");
+
+        use InputEvent::*;
+        match event {
+            KeyDown(event) => {
+                if let Ok(key) = Str16::from_str(&event.key()) {
+                    inputs.record_press(Button(key))
+                }
+            }
+            KeyUp(event) => {
+                if let Ok(key) = Str16::from_str(&event.key()) {
+                    inputs.record_release(Button(key))
+                }
+            }
         }
     }
 }
@@ -20,17 +34,15 @@ pub(crate) fn record_key_events(inputs: &mut Inputs, key_events: &Rc<RefCell<Vec
 ///     ("a", true)  // key A pressed
 ///     ("b", false) // key B released
 ///    
-pub(crate) fn listen_keys() -> Rc<RefCell<VecDeque<(String, bool)>>> {
-    let key_events = Rc::new(RefCell::new(VecDeque::new()));
-
-    let keydown_keys = key_events.clone();
+pub(crate) fn listen_keys(events: Shared<VecDeque<InputEvent>>) {
+    let keydown_keys = events.clone();
     let keydown_closure = Closure::<dyn FnMut(_)>::new(move |event: KeyboardEvent| {
-        keydown_keys.borrow_mut().push_back((event.key(), true));
+        keydown_keys.borrow_mut().push_back(InputEvent::KeyDown(event));
     });
 
-    let keyup_keys = key_events.clone();
+    let keyup_keys = events.clone();
     let keyup_closure = Closure::<dyn FnMut(_)>::new(move |event: KeyboardEvent| {
-        keyup_keys.borrow_mut().push_back((event.key(), false));
+        keyup_keys.borrow_mut().push_back(InputEvent::KeyUp(event));
     });
 
     let window = web_sys::window().unwrap();
@@ -41,7 +53,6 @@ pub(crate) fn listen_keys() -> Rc<RefCell<VecDeque<(String, bool)>>> {
     // Keep the closures alive
     keydown_closure.forget();
     keyup_closure.forget();
-    key_events
 }
 
 #[derive(Default, Debug)]

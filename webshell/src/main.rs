@@ -18,6 +18,7 @@ use std::str::FromStr as _;
 type JsResult<T> = Result<T, JsValue>;
 type HashMap<K, V> = fnv::FnvHashMap<K, V>;
 type HashSet<T> = fnv::FnvHashSet<T>;
+type Shared<T> = Rc<RefCell<T>>;
 
 mod event_listeners;
 mod http_get;
@@ -47,11 +48,13 @@ async fn start() -> JsResult<()> {
 
     let mut out = Output::new();
 
-    let key_events = listen_keys();
+    let input_events = Shared::default();
+    listen_keys(Rc::clone(&input_events));
 
     animation_loop(move |ctx| {
+
         state.inputs.tick();
-        record_key_events(&mut state.inputs, &key_events);
+        record_input_events(&mut state.inputs, &input_events);
 
         state.tick();
 
