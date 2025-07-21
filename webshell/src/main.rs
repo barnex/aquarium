@@ -112,7 +112,8 @@ fn record_input_events(inputs: &mut Inputs, events: &Shared<VecDeque<InputEvent>
                     2 => inputs.record_press(Button::MOUSE2),
                     _ => (),
                 }
-                inputs.record_mouse_position(vec2(event.x().as_(), event.y().as_()));
+                // ⚠️ use `offset_x` for relative position inside canvas
+                inputs.record_mouse_position(vec2(event.offset_x().as_(), event.offset_y().as_()));
             }
             MouseUp(event) => {
                 match event.button() {
@@ -121,10 +122,12 @@ fn record_input_events(inputs: &mut Inputs, events: &Shared<VecDeque<InputEvent>
                     _ => (),
                 }
 
-                inputs.record_mouse_position(vec2(event.x().as_(), event.y().as_()));
+                // ⚠️ use `offset_x` for relative position inside canvas
+                inputs.record_mouse_position(vec2(event.offset_x().as_(), event.offset_y().as_()));
             }
             MouseMove(event) => {
-                inputs.record_mouse_position(vec2(event.x().as_(), event.y().as_()));
+                // ⚠️ use `offset_x` for relative position inside canvas
+                inputs.record_mouse_position(vec2(event.offset_x().as_(), event.offset_y().as_()));
             }
         }
     }
