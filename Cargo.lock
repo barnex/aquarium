@@ -106,6 +106,10 @@ checksum = "05f29059c0c2090612e8d742178b0580d2dc940c837851ad723096f87af6663e"
 [[package]]
 name = "gamecore"
 version = "1.0.0"
+dependencies = [
+ "engine",
+ "fixed_str",
+]
 
 [[package]]
 name = "js-sys"
@@ -295,6 +299,8 @@ version = "1.0.0"
 dependencies = [
  "console_error_panic_hook",
  "console_log",
+ "engine",
+ "fixed_str",
  "fnv",
  "futures-channel",
  "gamecore",

@@ -57,7 +57,7 @@ impl Inputs {
     // To be called on each frame to advance time.
     // "just pressed" evolves to "is_down".
     // "released" gets forgotten.
-    fn tick(&mut self) {
+    pub fn tick(&mut self) {
         // Note: NOT clearing bottons_down.
         self.buttons_pressed.clear();
         self.buttons_released.clear();
@@ -122,19 +122,19 @@ impl Inputs {
     }
 
     /// Record that this button was just pressed.
-    /// Useful for e.g. Bots and automation.
     pub fn record_press(&mut self, button: Button) {
         let button = self.keymap.map(button);
-        self.buttons_pressed.insert(button);
-        self.buttons_down.insert(button);
+        if !self.buttons_down.contains(&button) {
+            self.buttons_pressed.insert(button);
+            self.buttons_down.insert(button);
+        }
     }
 
     /// Record that this button was just released.
-    /// Useful for e.g. Bots and automation.
     pub fn record_release(&mut self, button: Button) {
         let button = self.keymap.map(button);
-        self.buttons_down.remove(&button);
         self.buttons_released.insert(button);
+        self.buttons_down.remove(&button);
     }
 
     fn make_button(&mut self, key: impl Debug) -> Button {

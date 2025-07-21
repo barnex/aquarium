@@ -1,15 +1,19 @@
+use engine::*;
+use fixed_str::*;
 use gamecore::*;
+use vector::*;
 
 use js_sys::Uint8Array;
 use log::info;
 use num_traits::AsPrimitive as _;
-use vector::*;
 use wasm_bindgen::{JsCast, JsValue, prelude::Closure};
 use wasm_bindgen_futures::JsFuture;
 use web_sys::{CanvasRenderingContext2d, HtmlCanvasElement, HtmlElement, HtmlImageElement, ImageBitmap, Request, RequestInit, Response, Window};
 
 use std::cell::{Cell, RefCell};
+use std::collections::VecDeque;
 use std::rc::Rc;
+use std::str::FromStr as _;
 
 type JsResult<T> = Result<T, JsValue>;
 type HashMap<K, V> = fnv::FnvHashMap<K, V>;
@@ -43,7 +47,12 @@ async fn start() -> JsResult<()> {
 
     let mut out = Output::new();
 
+    let key_events = listen_keys();
+
     animation_loop(move |ctx| {
+        state.inputs.tick();
+        record_key_events(&mut state.inputs, &key_events);
+
         state.tick();
 
         out.clear();

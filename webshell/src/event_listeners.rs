@@ -1,17 +1,36 @@
 use crate::*;
 use web_sys::{KeyboardEvent, MouseEvent};
 
-fn listen_keys() -> Rc<RefCell<HashSet<String>>> {
-    let pressed_keys = Rc::new(RefCell::new(HashSet::default()));
+pub(crate) fn record_key_events(inputs: &mut Inputs, key_events: &Rc<RefCell<VecDeque<(String, bool)>>>) {
+    for (key, pressed) in key_events.borrow_mut().drain(..) {
+        info!("record key {key} {pressed}");
 
-    let keydown_keys = pressed_keys.clone();
+        match (Str16::from_str(key.as_str()), pressed) {
+            (Ok(key), true) => inputs.record_press(Button(key)),
+            (Ok(key), false) => inputs.record_release(Button(key)),
+            (Err(e), _) => log::error!("ignored key {key}: {e}"),
+        }
+    }
+}
+
+/// Listen for keyboard events: returns shared channel (`VecDeque`) where events are being pushed (`push_back`).
+/// Consume the events via `pop_front` or `iter_mut`.
+///
+/// Event = (Key, pressed). e.g.
+///     ("a", true)  // key A pressed
+///     ("b", false) // key B released
+///    
+pub(crate) fn listen_keys() -> Rc<RefCell<VecDeque<(String, bool)>>> {
+    let key_events = Rc::new(RefCell::new(VecDeque::new()));
+
+    let keydown_keys = key_events.clone();
     let keydown_closure = Closure::<dyn FnMut(_)>::new(move |event: KeyboardEvent| {
-        keydown_keys.borrow_mut().insert(event.key());
+        keydown_keys.borrow_mut().push_back((event.key(), true));
     });
 
-    let keyup_keys = pressed_keys.clone();
+    let keyup_keys = key_events.clone();
     let keyup_closure = Closure::<dyn FnMut(_)>::new(move |event: KeyboardEvent| {
-        keyup_keys.borrow_mut().remove(&event.key());
+        keyup_keys.borrow_mut().push_back((event.key(), false));
     });
 
     let window = web_sys::window().unwrap();
@@ -22,17 +41,17 @@ fn listen_keys() -> Rc<RefCell<HashSet<String>>> {
     // Keep the closures alive
     keydown_closure.forget();
     keyup_closure.forget();
-    pressed_keys
+    key_events
 }
 
 #[derive(Default, Debug)]
-pub struct MouseEvents {
+pub(crate) struct MouseEvents {
     pub left_down: Cell<bool>,
     pub right_down: Cell<bool>,
     pub pos: Cell<vec2i>,
 }
 
-fn listen_mouse(canvas: &HtmlCanvasElement) -> Rc<MouseEvents> {
+pub(crate) fn listen_mouse(canvas: &HtmlCanvasElement) -> Rc<MouseEvents> {
     let ev = Rc::new(MouseEvents::default());
     let closure = {
         let ev = ev.clone();
