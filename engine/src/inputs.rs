@@ -18,7 +18,7 @@ pub struct Inputs {
     pub(crate) console_input: Option<String>,
     pub(crate) raw_mouse_delta: vec2f,
     pub(crate) filtered_mouse_delta: vec2f,
-    mouse_position: vec2f,
+    mouse_position: vec2i,
 
     keymap: Keymap,
 
@@ -117,7 +117,7 @@ impl Inputs {
 
     /// Mouse position in logical pixels, relative to the top-left corner of the window.
     /// Useful when cursor is not grabbed.
-    pub fn mouse_position(&self) -> vec2f {
+    pub fn mouse_position(&self) -> vec2i {
         self.mouse_position
     }
 
@@ -135,6 +135,10 @@ impl Inputs {
         let button = self.keymap.map(button);
         self.buttons_released.insert(button);
         self.buttons_down.remove(&button);
+    }
+    
+    pub fn record_mouse_position(&mut self, pos: vec2i){
+        self.mouse_position = pos
     }
 
     fn make_button(&mut self, key: impl Debug) -> Button {

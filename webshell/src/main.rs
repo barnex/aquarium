@@ -53,7 +53,6 @@ async fn start() -> JsResult<()> {
     listen_mouse(&get_element_by_id("canvas"), Rc::clone(&input_events));
 
     animation_loop(move |ctx| {
-
         state.inputs.tick();
         record_input_events(&mut state.inputs, &input_events);
 
@@ -91,6 +90,44 @@ where
 
     // Start animation loop
     request_animation_frame(&anim_loop_clone);
+}
+
+fn record_input_events(inputs: &mut Inputs, events: &Shared<VecDeque<InputEvent>>) {
+    for event in events.borrow_mut().drain(..) {
+        use InputEvent::*;
+        match event {
+            KeyDown(event) => {
+                if let Ok(key) = Str16::from_str(&event.key()) {
+                    inputs.record_press(Button(key))
+                }
+            }
+            KeyUp(event) => {
+                if let Ok(key) = Str16::from_str(&event.key()) {
+                    inputs.record_release(Button(key))
+                }
+            }
+            MouseDown(event) => {
+                match event.button() {
+                    0 => inputs.record_press(Button::MOUSE1),
+                    2 => inputs.record_press(Button::MOUSE2),
+                    _ => (),
+                }
+                inputs.record_mouse_position(vec2(event.x().as_(), event.y().as_()));
+            }
+            MouseUp(event) => {
+                match event.button() {
+                    0 => inputs.record_release(Button::MOUSE1),
+                    2 => inputs.record_release(Button::MOUSE2),
+                    _ => (),
+                }
+
+                inputs.record_mouse_position(vec2(event.x().as_(), event.y().as_()));
+            }
+            MouseMove(event) => {
+                inputs.record_mouse_position(vec2(event.x().as_(), event.y().as_()));
+            }
+        }
+    }
 }
 
 fn request_animation_frame(anim_loop_clone: &Rc<RefCell<Option<Closure<dyn FnMut()>>>>) -> i32 {
