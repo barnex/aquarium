@@ -10,15 +10,19 @@ pub struct State {
 
 impl State {
     pub fn new() -> Self {
-        Self { inputs: default(), frame: 0, x: 0.0, score: default() }
+        Self {
+            inputs: default(),
+            frame: 0,
+            x: 0.0,
+            score: default(),
+        }
     }
 
     pub fn tick(&mut self) {
-        
-        if self.inputs.just_pressed(Button(str16!("b"))){
-            self.score+=1
+        if self.inputs.just_pressed(Button(str16!("b"))) {
+            self.score += 1
         }
-        
+
         self.frame += 1;
         self.x += 0.5;
         if self.x > 100.0 {
@@ -27,11 +31,9 @@ impl State {
     }
 
     pub fn render(&self, out: &mut Output) {
-        
         let x = self.x.as_();
-        out.sprites.push((str16!("kit3"), vec2i(x, x)));
+        out.sprites.push((sprite!("kit3"), vec2i(x, x)));
 
-        
         writeln!(&mut out.debug, "frame {}", self.frame).unwrap();
         writeln!(&mut out.debug, "sprites: {}", out.sprites.len()).unwrap();
         writeln!(&mut out.debug, "score {}", self.score).unwrap();
