@@ -1,11 +1,13 @@
+use crate::prelude::*;
+
 #[macro_export]
 macro_rules! sprite {
     ($arg:tt) => {
-        str16!($arg)
+        Sprite { file: str16!($arg) }
     };
 }
 
-
-pub struct Sprite{
-    // TODO
+#[derive(Debug)]
+pub struct Sprite {
+    pub file: Str16,
 }
