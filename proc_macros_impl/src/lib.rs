@@ -1,5 +1,5 @@
 mod derive_setters;
-mod handle_macro;
+mod fixed_str_macros;
 
 pub use derive_setters::*;
-pub use handle_macro::*;
+pub use fixed_str_macros::*;

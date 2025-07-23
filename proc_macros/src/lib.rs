@@ -5,6 +5,6 @@ pub fn derive_setters(input: proc_macro::TokenStream) -> proc_macro::TokenStream
 
 /// Compile-time equivalent of `Str::from_str`
 #[proc_macro]
-pub fn handle(input: proc_macro::TokenStream) -> proc_macro::TokenStream {
-	proc_macros_impl::handle_impl(input.into()).into()
+pub fn str16(input: proc_macro::TokenStream) -> proc_macro::TokenStream {
+	proc_macros_impl::str16_impl(input.into()).into()
 }

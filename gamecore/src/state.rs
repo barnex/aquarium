@@ -15,7 +15,7 @@ impl State {
 
     pub fn tick(&mut self) {
         
-        if self.inputs.just_pressed(Button(Str16::from_slice(b"b\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0"))){
+        if self.inputs.just_pressed(Button(str16!("b"))){
             self.score+=1
         }
         

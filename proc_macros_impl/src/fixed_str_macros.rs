@@ -1,14 +1,15 @@
 use quote::quote;
 use syn::LitStr;
+use std::str::FromStr;
 
-pub fn handle_impl(arg: proc_macro2::TokenStream) -> proc_macro2::TokenStream {
+pub fn str16_impl(arg: proc_macro2::TokenStream) -> proc_macro2::TokenStream {
 	let arg: LitStr = syn::parse2(arg).expect("need single string argument");
 
-	let [v0, v1, v2, v3, v4, v5, v6, v7, v8, v9, va, vb, vc, vd, ve, vf] = from_str(&arg.value());
+	let [v0, v1, v2, v3, v4, v5, v6, v7, v8, v9, va, vb, vc, vd, ve, vf] = fixed_str::Str16::from_str(&arg.value()).expect("valid fixed str16").into_array();
 
 	let mut output = proc_macro2::TokenStream::new();
 	// 🪲 should use handle::Handle so we don't depend on import
-	output.extend(quote! { Handle::from_bytes([#v0, #v1, #v2, #v3, #v4, #v5, #v6, #v7, #v8, #v9, #va, #vb, #vc, #vd, #ve, #vf])});
+	output.extend(quote! { fixed_str::Str16::from_bytes([#v0, #v1, #v2, #v3, #v4, #v5, #v6, #v7, #v8, #v9, #va, #vb, #vc, #vd, #ve, #vf])});
 
 	output
 }

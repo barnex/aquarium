@@ -6,3 +6,4 @@ edition = "2024"
 [dependencies]
 engine = {workspace = true}
 fixed_str = {workspace = true}
+proc_macros = {workspace = true}

@@ -9,6 +9,8 @@ members = [
 	"engine",
 	"gamecore",
 	"webshell",
+	"proc_macros",
+	"proc_macros_impl",
 ]
 
 [workspace.dependencies]
@@ -17,6 +19,7 @@ engine = { path = "engine" }
 fixed_str = { path = "corelibs/fixed_str" }
 gamecore = { path = "gamecore" }
 vector = { path = "corelibs/vector" }
+proc_macros = { path = "proc_macros" }
 
 bytemuck = "1"
 anyhow = "1"
