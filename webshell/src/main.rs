@@ -36,17 +36,16 @@ fn main() {
     wasm_bindgen_futures::spawn_local(async { start().await.expect("main") })
 }
 
-
 async fn start() -> JsResult<()> {
     info!("start");
     test_resource_loading().await;
 
     let img = load_image("kit3.png").await.expect("load img");
-    let res = Res { kitten_Todo_remove: img };
+    let res = Res::new(img);
     let mut state = State::new();
 
     let mut out = Output::new();
-    
+
     let canvas = get_element_by_id("canvas");
 
     // queue where we receive input events (keys, mouse)
@@ -65,7 +64,6 @@ async fn start() -> JsResult<()> {
         draw(&ctx, &res, &out);
 
         get_element_by_id::<HtmlElement>("debug").set_inner_text(&out.debug);
-
     });
 
     Ok(())
@@ -144,12 +142,10 @@ fn request_animation_frame(anim_loop_clone: &Rc<RefCell<Option<Closure<dyn FnMut
 
 fn draw(ctx: &CanvasRenderingContext2d, res: &Res, out: &Output) {
     ctx.set_image_smoothing_enabled(false); // crisp, pixellated sprites
-                                                
 
-    for (sprite, pos) in &out.sprites{
+    for (sprite, pos) in &out.sprites {
         ctx.draw_image_with_image_bitmap(&res.kitten_Todo_remove, pos.x().as_(), pos.y().as_()).expect("draw");
     }
-                                            
 }
 
 async fn test_resource_loading() {
