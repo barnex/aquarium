@@ -109,7 +109,9 @@ version = "1.0.0"
 dependencies = [
  "engine",
  "fixed_str",
+ "num-traits",
  "proc_macros",
+ "vector",
 ]
 
 [[package]]

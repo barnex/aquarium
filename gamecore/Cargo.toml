@@ -4,6 +4,8 @@ version = "1.0.0"
 edition = "2024"
 
 [dependencies]
-engine = {workspace = true}
-fixed_str = {workspace = true}
-proc_macros = {workspace = true}
+engine = { workspace = true }
+fixed_str = { workspace = true }
+num-traits = { workspace = true }
+proc_macros = { workspace = true }
+vector = { workspace = true }

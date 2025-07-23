@@ -35,7 +35,7 @@ fn main() {
 }
 
 struct Res {
-    img: ImageBitmap,
+    kitten_Todo_remove: ImageBitmap,
 }
 
 async fn start() -> JsResult<()> {
@@ -43,15 +43,17 @@ async fn start() -> JsResult<()> {
     test_resource_loading().await;
 
     let img = load_image("kit3.png").await.expect("load img");
-    let res = Res { img };
+    let res = Res { kitten_Todo_remove: img };
     let mut state = State::new();
 
     let mut out = Output::new();
+    
+    let canvas = get_element_by_id("canvas");
 
     // queue where we receive input events (keys, mouse)
     let input_events = Shared::<VecDeque<InputEvent>>::default();
     listen_keys(Rc::clone(&input_events));
-    listen_mouse(&get_element_by_id("canvas"), Rc::clone(&input_events));
+    listen_mouse(&canvas, Rc::clone(&input_events));
 
     animation_loop(move |ctx| {
         record_input_events(&mut state.inputs, &input_events);
@@ -60,10 +62,11 @@ async fn start() -> JsResult<()> {
 
         out.clear();
         state.render(&mut out);
+        ctx.clear_rect(0.0, 0.0, canvas.width().as_(), canvas.height().as_());
+        draw(&ctx, &res, &out);
 
         get_element_by_id::<HtmlElement>("debug").set_inner_text(&out.debug);
 
-        draw(&ctx, &res, &state);
     });
 
     Ok(())
@@ -140,9 +143,14 @@ fn request_animation_frame(anim_loop_clone: &Rc<RefCell<Option<Closure<dyn FnMut
     window().request_animation_frame(anim_loop_clone.borrow().as_ref().unwrap().as_ref().unchecked_ref()).unwrap()
 }
 
-fn draw(ctx: &CanvasRenderingContext2d, res: &Res, state: &State) {
+fn draw(ctx: &CanvasRenderingContext2d, res: &Res, out: &Output) {
     ctx.set_image_smoothing_enabled(false); // crisp, pixellated sprites
-    ctx.draw_image_with_image_bitmap(&res.img, state.x, 0.0).expect("draw");
+                                                
+
+    for (sprite, pos) in &out.sprites{
+        ctx.draw_image_with_image_bitmap(&res.kitten_Todo_remove, pos.x().as_(), pos.y().as_()).expect("draw");
+    }
+                                            
 }
 
 async fn test_resource_loading() {

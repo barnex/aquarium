@@ -19,7 +19,6 @@ impl State {
             self.score+=1
         }
         
-
         self.frame += 1;
         self.x += 0.5;
         if self.x > 100.0 {
@@ -28,7 +27,13 @@ impl State {
     }
 
     pub fn render(&self, out: &mut Output) {
+        
+        let x = self.x.as_();
+        out.sprites.push((str16!("kit3"), vec2i(x, x)));
+
+        
         writeln!(&mut out.debug, "frame {}", self.frame).unwrap();
+        writeln!(&mut out.debug, "sprites: {}", out.sprites.len()).unwrap();
         writeln!(&mut out.debug, "score {}", self.score).unwrap();
         writeln!(&mut out.debug, "inputs {:?}", self.inputs).unwrap();
     }
