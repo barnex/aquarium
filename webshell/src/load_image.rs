@@ -1,5 +1,15 @@
 use crate::*;
 
+fn box_that_fut() {
+    let x = Box::pin(load_image_future("kit3.png"));
+    let mut tasks = HashMap::default();
+    tasks.insert(42, x);
+}
+
+pub fn load_image_future(path: &str) -> impl Future<Output = JsResult<ImageBitmap>> {
+    load_image(path)
+}
+
 pub async fn load_image(path: &str) -> JsResult<ImageBitmap> {
     info!("load {path}");
 
