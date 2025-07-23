@@ -23,10 +23,12 @@ type Shared<T> = Rc<RefCell<T>>;
 mod event_listeners;
 mod http_get;
 mod load_image;
+mod resources;
 
 use event_listeners::*;
 use http_get::*;
 use load_image::*;
+use resources::*;
 
 fn main() {
     console_error_panic_hook::set_once();
@@ -34,9 +36,6 @@ fn main() {
     wasm_bindgen_futures::spawn_local(async { start().await.expect("main") })
 }
 
-struct Res {
-    kitten_Todo_remove: ImageBitmap,
-}
 
 async fn start() -> JsResult<()> {
     info!("start");
