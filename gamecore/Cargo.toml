@@ -6,9 +6,10 @@ edition = "2024"
 [dependencies]
 engine = { workspace = true }
 fixed_str = { workspace = true }
+geometry = { workspace = true }
 num-traits = { workspace = true }
 proc_macros = { workspace = true }
+rand = { workspace = true }
+rand_chacha = { workspace = true }
+serde = { workspace = true }
 vector = { workspace = true }
-rand = {workspace = true}
-geometry = {workspace = true}
-rand_chacha = {workspace = true}

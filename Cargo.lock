@@ -194,6 +194,7 @@ dependencies = [
  "proc_macros",
  "rand",
  "rand_chacha",
+ "serde",
  "vector",
 ]
 

@@ -1,11 +1,13 @@
 use crate::prelude::*;
 
+#[derive(Serialize, Deserialize)]
 pub struct State {
+    #[serde(skip)]
     pub inputs: Inputs,
 
     pub frame: u64,
     pub curr_time_secs: f64,
-    pub last_dt: f64,
+    pub dt: f64,
     pub dt_smooth: f64,
     pub score: u64,
     pub x: f64,
@@ -39,7 +41,7 @@ impl State {
             inputs: default(),
             frame: 0,
             curr_time_secs: 0.0,
-            last_dt: 1.0 / 60.0, // initial fps guess
+            dt: 1.0 / 60.0, // initial fps guess
             dt_smooth: 1.0 / 60.0,
             x: 0.0,
             score: default(),
@@ -77,14 +79,14 @@ impl State {
     }
 
     fn update_fps(&mut self) {
-        self.last_dt = self.inputs.now_secs - self.curr_time_secs;
+        self.dt = (self.inputs.now_secs - self.curr_time_secs).clamp(0.001, 0.1); // clamp dt to 1-100ms to avoid craziness on clock suspend etc.
         self.curr_time_secs = self.inputs.now_secs;
-        self.dt_smooth = lerp(self.dt_smooth, self.last_dt, 0.02);
+        self.dt_smooth = lerp(self.dt_smooth, self.dt, 0.02);
     }
 
     pub fn render(&self, out: &mut Output) {
         out.sprites.extend(self.kits.iter().map(|(sprite, pos, _)| (*sprite, *pos)));
-        
+
         out.sprites.push((sprite!("frame24"), self.inputs.mouse_position()));
 
         writeln!(&mut out.debug, "frame: {}, now: {:.04}s, FPS: {:.01}", self.frame, self.curr_time_secs, 1.0 / self.dt_smooth).unwrap();

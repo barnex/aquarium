@@ -7,7 +7,7 @@ macro_rules! sprite {
     };
 }
 
-#[derive(Debug, Hash, PartialEq, Eq, Clone, Copy)]
+#[derive(Debug, Hash, PartialEq, Eq, Clone, Copy, Serialize, Deserialize)]
 pub struct Sprite {
     pub file: Str16,
 }
