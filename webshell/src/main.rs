@@ -20,10 +20,11 @@ use vector::*;
 use js_sys::Uint8Array;
 use js_sys::Uint8ClampedArray;
 use num_traits::AsPrimitive as _;
-use serde::{de::DeserializeOwned, Serialize};
+use serde::{Serialize, de::DeserializeOwned};
 use wasm_bindgen::prelude::*;
 use wasm_bindgen::{JsCast, JsValue, prelude::Closure};
 use wasm_bindgen_futures::JsFuture;
+use web_sys::Event;
 use web_sys::{CanvasRenderingContext2d, HtmlCanvasElement, HtmlElement, HtmlImageElement, ImageBitmap, ImageData, Request, RequestInit, Response, Window};
 
 use std::cell::{Cell, RefCell};
@@ -48,9 +49,7 @@ async fn start() -> JsResult<()> {
 
     let mut res = Res::new(fallback_bitmap(0, 0, 255).await.unwrap());
     let mut state = State::new();
-
     let mut out = Output::new();
-
     let canvas = get_element_by_id("canvas");
 
     // queue where we receive input events (keys, mouse)
@@ -74,6 +73,20 @@ async fn start() -> JsResult<()> {
     });
 
     Ok(())
+}
+
+fn autosave_handler() {
+    let closure = Closure::wrap(Box::new(move |event: Event| {
+        // Your save logic here
+        log::info!("Window is about to close!");
+
+        // Optional: show a confirmation dialog (browser may ignore)
+    }) as Box<dyn FnMut(_)>);
+
+    window().add_event_listener_with_callback("beforeunload", closure.as_ref().unchecked_ref()).unwrap();
+
+    // Important: store the closure to keep it alive!
+    closure.forget();
 }
 
 #[wasm_bindgen]
