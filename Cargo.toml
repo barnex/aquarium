@@ -21,9 +21,11 @@ gamecore = { path = "gamecore" }
 vector = { path = "corelibs/vector" }
 proc_macros = { path = "proc_macros" }
 
-bytemuck = "1"
 anyhow = "1"
+bytemuck = "1"
 fnv = "1"
 log = "0.4"
 num-traits = "0.2"
+rand = { version = "0.8", default-features = false }
+rand_chacha = "0.3"
 serde = { version = "1", features = ["derive"] }

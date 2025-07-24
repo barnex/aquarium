@@ -28,7 +28,10 @@ impl State {
 
         let N = sprites.len();
 
-        let kits = (0..1000).map(|i| (sprites[i % N], vec2i(i as i32 * 41 % 1000, i as i32 * 97 % 1000), vec2i(i as i32 * 37 % 4, i as i32 * 97 % 4))).collect();
+        let mut rng = ChaCha8Rng::from_seed([42; 32]);
+
+        let (w, h) = (480, 320);
+        let kits = (0..1000).map(|i| (sprites[i % N], vec2i(rng.gen_range(0..w), rng.gen_range(0..h)), vec2i(rng.gen_range(-3..=3), rng.gen_range(1..3)))).collect();
 
         Self {
             inputs: default(),
@@ -40,11 +43,12 @@ impl State {
     }
 
     pub fn tick(&mut self) {
+        let size = [480, 320];
         for (_, pos, vel) in &mut self.kits {
             *pos += *vel;
             for i in 0..2 {
-                if pos[i] > 300 {
-                    pos[i] = 300;
+                if pos[i] > size[i] {
+                    pos[i] = size[i];
                     vel[i] = -vel[i]
                 }
                 if pos[i] < 0 {

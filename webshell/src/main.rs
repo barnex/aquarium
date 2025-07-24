@@ -42,8 +42,6 @@ async fn start() -> JsResult<()> {
     info!("start");
     test_resource_loading().await;
 
-    //let img = load_image("kit3.png").await.expect("load img");
-    //let img = red
     let mut res = Res::new(fallback_bitmap(0,0,255).await.unwrap());
     let mut state = State::new();
 
