@@ -1,7 +1,7 @@
 use crate::*;
 
 pub async fn load_bitmap(path: &str) -> JsResult<ImageBitmap> {
-    info!("load {path}");
+    log::info!("load {path}");
 
     // Load image element
     let img = HtmlImageElement::new()?;

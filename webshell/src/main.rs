@@ -5,7 +5,6 @@ use vector::*;
 
 use js_sys::Uint8Array;
 use js_sys::Uint8ClampedArray;
-use log::info;
 use num_traits::AsPrimitive as _;
 use wasm_bindgen::prelude::*;
 use wasm_bindgen::{JsCast, JsValue, prelude::Closure};
@@ -41,7 +40,7 @@ fn main() {
 }
 
 async fn start() -> JsResult<()> {
-    info!("start");
+    log::info!("start");
     test_resource_loading().await;
 
     let mut res = Res::new(fallback_bitmap(0,0,255).await.unwrap());
@@ -186,7 +185,7 @@ fn draw(ctx: &CanvasRenderingContext2d, res: &mut Res, out: &Output) {
 }
 
 async fn test_resource_loading() {
-    info!("say_hello");
+    log::info!("say_hello");
 
     let txt = http_get_with_trunk_hack("assets/test.txt").await.expect("get test.txt");
     let txt = String::from_utf8_lossy(&txt);
