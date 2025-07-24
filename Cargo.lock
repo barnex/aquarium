@@ -183,10 +183,22 @@ version = "1.0.0"
 dependencies = [
  "engine",
  "fixed_str",
+ "geometry",
  "num-traits",
  "proc_macros",
  "rand",
  "rand_chacha",
+ "vector",
+]
+
+[[package]]
+name = "geometry"
+version = "2.0.0"
+dependencies = [
+ "core_util",
+ "matrix",
+ "num-traits",
+ "serde",
  "vector",
 ]
 
@@ -205,6 +217,15 @@ name = "log"
 version = "0.4.27"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "13dc2df351e3202783a1fe0d44375f7295ffb4049267b0f3018346dc122a1d94"
+
+[[package]]
+name = "matrix"
+version = "1.0.0"
+dependencies = [
+ "bytemuck",
+ "serde",
+ "vector",
+]
 
 [[package]]
 name = "memchr"

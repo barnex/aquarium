@@ -8,11 +8,15 @@ use std::fmt::Write;
 /// and removes OS key repeats.
 #[derive(Debug, Default)]
 pub struct Inputs {
+    keymap: Keymap,
+
     buttons_pressed: HashSet<Button>,
     buttons_down: HashSet<Button>,
     buttons_released: HashSet<Button>,
 
     received_characters: String,
+    
+    pub now_secs: f64,
 
     // updated by engine
     pub(crate) console_input: Option<String>,
@@ -20,7 +24,6 @@ pub struct Inputs {
     pub(crate) filtered_mouse_delta: vec2f,
     mouse_position: vec2i,
 
-    keymap: Keymap,
 
     mouse_wheel: f32,
 }

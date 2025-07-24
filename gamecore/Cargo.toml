@@ -10,4 +10,5 @@ num-traits = { workspace = true }
 proc_macros = { workspace = true }
 vector = { workspace = true }
 rand = {workspace = true}
+geometry = {workspace = true}
 rand_chacha = {workspace = true}

@@ -57,6 +57,7 @@ async fn start() -> JsResult<()> {
     listen_mouse(&canvas, Rc::clone(&input_events));
 
     animation_loop(move |ctx| {
+        state.inputs.now_secs = now_secs();
         record_input_events(&mut state.inputs, &input_events);
 
         state.tick();

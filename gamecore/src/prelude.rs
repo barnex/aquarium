@@ -1,6 +1,7 @@
 pub use crate::*;
 pub use num_traits::AsPrimitive;
 pub use vector::*;
+pub use geometry::*;
 
 pub use engine::*;
 pub use proc_macros::*;

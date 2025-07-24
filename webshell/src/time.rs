@@ -6,5 +6,5 @@ pub fn now_secs() -> f64 {
         .unwrap()
         .performance()
         .unwrap()
-        .now() * 1000.0
+        .now() / 1000.0
 }

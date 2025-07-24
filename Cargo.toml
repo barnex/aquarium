@@ -6,6 +6,8 @@ members = [
 	"corelibs/fixed_str",
 	"corelibs/vector",
 	"corelibs/core_util",
+	"corelibs/geometry",
+	"corelibs/matrix",
 	"engine",
 	"gamecore",
 	"webshell",
@@ -17,6 +19,8 @@ members = [
 core_util = { path = "corelibs/core_util" }
 engine = { path = "engine" }
 fixed_str = { path = "corelibs/fixed_str" }
+geometry = { path = "corelibs/geometry" }
+matrix = { path = "corelibs/matrix" }
 gamecore = { path = "gamecore" }
 vector = { path = "corelibs/vector" }
 proc_macros = { path = "proc_macros" }
