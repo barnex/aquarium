@@ -26,11 +26,13 @@ mod event_listeners;
 mod http_get;
 mod load_bitmap;
 mod resources;
+mod time;
 
 use event_listeners::*;
 use http_get::*;
 use load_bitmap::*;
 use resources::*;
+use time::*;
 
 fn main() {
     console_error_panic_hook::set_once();
