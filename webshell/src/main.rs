@@ -20,6 +20,7 @@ use vector::*;
 use js_sys::Uint8Array;
 use js_sys::Uint8ClampedArray;
 use num_traits::AsPrimitive as _;
+use serde::{de::DeserializeOwned, Serialize};
 use wasm_bindgen::prelude::*;
 use wasm_bindgen::{JsCast, JsValue, prelude::Closure};
 use wasm_bindgen_futures::JsFuture;
