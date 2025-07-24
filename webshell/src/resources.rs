@@ -16,6 +16,18 @@ impl Res {
             kitten_Todo_remove,
         }
     }
+	
+	pub fn get(&mut self, sprite: &Sprite) -> &ImageBitmap{
+		if let Some(bitmap)	 = self.cache.get(sprite){
+			return bitmap
+		}
+		
+		&self.kitten_Todo_remove // 🪲 
+	}
+	
+	pub fn poll() {
+		
+	}
 }
 
 fn box_that_fut() {

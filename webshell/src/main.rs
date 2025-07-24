@@ -4,11 +4,13 @@ use gamecore::*;
 use vector::*;
 
 use js_sys::Uint8Array;
+use js_sys::Uint8ClampedArray;
 use log::info;
 use num_traits::AsPrimitive as _;
+use wasm_bindgen::prelude::*;
 use wasm_bindgen::{JsCast, JsValue, prelude::Closure};
 use wasm_bindgen_futures::JsFuture;
-use web_sys::{CanvasRenderingContext2d, HtmlCanvasElement, HtmlElement, HtmlImageElement, ImageBitmap, Request, RequestInit, Response, Window};
+use web_sys::{CanvasRenderingContext2d, HtmlCanvasElement, HtmlElement, HtmlImageElement, ImageBitmap, ImageData, Request, RequestInit, Response, Window};
 
 use std::cell::{Cell, RefCell};
 use std::collections::VecDeque;
@@ -40,8 +42,9 @@ async fn start() -> JsResult<()> {
     info!("start");
     test_resource_loading().await;
 
-    let img = load_image("kit3.png").await.expect("load img");
-    let res = Res::new(img);
+    //let img = load_image("kit3.png").await.expect("load img");
+    //let img = red
+    let res = Res::new(create_red_imagebitmap().await.unwrap());
     let mut state = State::new();
 
     let mut out = Output::new();
@@ -67,6 +70,36 @@ async fn start() -> JsResult<()> {
     });
 
     Ok(())
+}
+
+#[wasm_bindgen]
+pub async fn create_red_imagebitmap() -> Result<ImageBitmap, JsValue> {
+    let width = 32;
+    let height = 32;
+    let num_pixels = width * height;
+    let mut rgba = Vec::with_capacity(num_pixels * 4);
+
+    // Fill with solid red (R=255, G=0, B=0, A=255)
+    for _ in 0..num_pixels {
+        rgba.push(255); // R
+        rgba.push(0); // G
+        rgba.push(0); // B
+        rgba.push(255); // A
+    }
+
+    // Convert Vec<u8> → Uint8ClampedArray
+    let clamped = Uint8ClampedArray::new_with_length((num_pixels * 4) as u32);
+    clamped.copy_from(&rgba[..]);
+
+    // Wrap in ImageData
+    let image_data = ImageData::new_with_js_u8_clamped_array_and_sh(&clamped, width as u32, height as u32)?;
+
+    // Create ImageBitmap from ImageData
+    let promise = window().create_image_bitmap_with_image_data(&image_data)?;
+    let js_value = JsFuture::from(promise).await?;
+    let bitmap = js_value.dyn_into::<ImageBitmap>()?;
+
+    Ok(bitmap)
 }
 
 fn animation_loop<F>(mut body: F)
