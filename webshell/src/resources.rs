@@ -6,7 +6,7 @@ use std::future::Future;
 use std::task::{Context, Poll};
 
 pub struct Res {
-    fallback: ImageBitmap,
+    loading: ImageBitmap,
     cache: HashMap<Sprite, ImageBitmap>,
     pending: HashMap<Sprite, Pin<Box<dyn Future<Output = ImageBitmap>>>>,
 }
@@ -16,7 +16,7 @@ impl Res {
         Self {
             cache: HashMap::default(),
             pending: HashMap::default(),
-            fallback,
+            loading: fallback,
         }
     }
 
@@ -34,7 +34,7 @@ impl Res {
 
         self.pending.insert(*sprite, Box::pin(load_bitmap_or_fallback(*sprite)));
 
-        None
+        Some(&self.loading)
     }
 
     pub fn poll(&mut self) {
@@ -58,12 +58,12 @@ impl Res {
 }
 
 async fn load_bitmap_or_fallback(sprite: Sprite) -> ImageBitmap {
-    let path = format!("{}.png", sprite.file.as_str());
+    let path = format!("assets/{}.png", sprite.file.as_str());
     match load_bitmap(&path).await {
         Ok(bitmap) => bitmap,
         Err(e) => {
             log::error!("load bitmap {path}: {e:?}");
-            fallback_bitmap().await.unwrap()
+            fallback_bitmap(255, 0, 0).await.unwrap()
         }
     }
 }

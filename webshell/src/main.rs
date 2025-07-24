@@ -44,7 +44,7 @@ async fn start() -> JsResult<()> {
 
     //let img = load_image("kit3.png").await.expect("load img");
     //let img = red
-    let mut res = Res::new(fallback_bitmap().await.unwrap());
+    let mut res = Res::new(fallback_bitmap(0,0,255).await.unwrap());
     let mut state = State::new();
 
     let mut out = Output::new();
@@ -74,7 +74,7 @@ async fn start() -> JsResult<()> {
 }
 
 #[wasm_bindgen]
-pub async fn fallback_bitmap() -> Result<ImageBitmap, JsValue> {
+pub async fn fallback_bitmap(r: u8, g: u8, b: u8) -> Result<ImageBitmap, JsValue> {
     let width = 32;
     let height = 32;
     let num_pixels = width * height;
@@ -82,9 +82,9 @@ pub async fn fallback_bitmap() -> Result<ImageBitmap, JsValue> {
 
     // Fill with solid red (R=255, G=0, B=0, A=255)
     for _ in 0..num_pixels {
-        rgba.push(0); // R
-        rgba.push(0); // G
-        rgba.push(255); // B
+        rgba.push(r);
+        rgba.push(g);
+        rgba.push(b);
         rgba.push(255); // A
     }
 
@@ -187,7 +187,7 @@ fn draw(ctx: &CanvasRenderingContext2d, res: &mut Res, out: &Output) {
 async fn test_resource_loading() {
     info!("say_hello");
 
-    let txt = http_get_with_trunk_hack("test.txt").await.expect("get test.txt");
+    let txt = http_get_with_trunk_hack("assets/test.txt").await.expect("get test.txt");
     let txt = String::from_utf8_lossy(&txt);
 
     let document = window().document().unwrap();
