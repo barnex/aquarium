@@ -24,12 +24,12 @@ type Shared<T> = Rc<RefCell<T>>;
 
 mod event_listeners;
 mod http_get;
-mod load_image;
+mod load_bitmap;
 mod resources;
 
 use event_listeners::*;
 use http_get::*;
-use load_image::*;
+use load_bitmap::*;
 use resources::*;
 
 fn main() {
@@ -64,6 +64,7 @@ async fn start() -> JsResult<()> {
         out.clear();
         state.render(&mut out);
         ctx.clear_rect(0.0, 0.0, canvas.width().as_(), canvas.height().as_());
+        res.poll();
         draw(&ctx, &mut res, &out);
 
         get_element_by_id::<HtmlElement>("debug").set_inner_text(&out.debug);

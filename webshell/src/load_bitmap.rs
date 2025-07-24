@@ -1,6 +1,6 @@
 use crate::*;
 
-pub async fn load_image(path: &str) -> JsResult<ImageBitmap> {
+pub async fn load_bitmap(path: &str) -> JsResult<ImageBitmap> {
     info!("load {path}");
 
     // Load image element
