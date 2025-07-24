@@ -44,7 +44,7 @@ async fn start() -> JsResult<()> {
 
     //let img = load_image("kit3.png").await.expect("load img");
     //let img = red
-    let res = Res::new(create_red_imagebitmap().await.unwrap());
+    let mut res = Res::new(fallback_bitmap().await.unwrap());
     let mut state = State::new();
 
     let mut out = Output::new();
@@ -64,7 +64,7 @@ async fn start() -> JsResult<()> {
         out.clear();
         state.render(&mut out);
         ctx.clear_rect(0.0, 0.0, canvas.width().as_(), canvas.height().as_());
-        draw(&ctx, &res, &out);
+        draw(&ctx, &mut res, &out);
 
         get_element_by_id::<HtmlElement>("debug").set_inner_text(&out.debug);
     });
@@ -73,7 +73,7 @@ async fn start() -> JsResult<()> {
 }
 
 #[wasm_bindgen]
-pub async fn create_red_imagebitmap() -> Result<ImageBitmap, JsValue> {
+pub async fn fallback_bitmap() -> Result<ImageBitmap, JsValue> {
     let width = 32;
     let height = 32;
     let num_pixels = width * height;
@@ -81,9 +81,9 @@ pub async fn create_red_imagebitmap() -> Result<ImageBitmap, JsValue> {
 
     // Fill with solid red (R=255, G=0, B=0, A=255)
     for _ in 0..num_pixels {
-        rgba.push(255); // R
+        rgba.push(0); // R
         rgba.push(0); // G
-        rgba.push(0); // B
+        rgba.push(255); // B
         rgba.push(255); // A
     }
 
@@ -173,11 +173,13 @@ fn request_animation_frame(anim_loop_clone: &Rc<RefCell<Option<Closure<dyn FnMut
     window().request_animation_frame(anim_loop_clone.borrow().as_ref().unwrap().as_ref().unchecked_ref()).unwrap()
 }
 
-fn draw(ctx: &CanvasRenderingContext2d, res: &Res, out: &Output) {
+fn draw(ctx: &CanvasRenderingContext2d, res: &mut Res, out: &Output) {
     ctx.set_image_smoothing_enabled(false); // crisp, pixellated sprites
 
     for (sprite, pos) in &out.sprites {
-        ctx.draw_image_with_image_bitmap(&res.kitten_Todo_remove, pos.x().as_(), pos.y().as_()).expect("draw");
+        if let Some(bitmap) = res.get(sprite) {
+            ctx.draw_image_with_image_bitmap(bitmap, pos.x().as_(), pos.y().as_()).expect("draw");
+        }
     }
 }
 

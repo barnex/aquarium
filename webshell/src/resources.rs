@@ -3,26 +3,26 @@ use std::pin::Pin;
 use crate::*;
 
 pub struct Res {
-    pub kitten_Todo_remove: ImageBitmap,
+    fallback: ImageBitmap,
     cache: HashMap<Sprite, ImageBitmap>,
     pending: HashMap<Sprite, Pin<Box<dyn Future<Output = JsResult<ImageBitmap>>>>>,
 }
 
 impl Res {
-    pub fn new(kitten_Todo_remove: ImageBitmap) -> Self {
+    pub fn new(fallback: ImageBitmap) -> Self {
         Self {
             cache: HashMap::default(),
             pending: HashMap::default(),
-            kitten_Todo_remove,
+            fallback,
         }
     }
 	
-	pub fn get(&mut self, sprite: &Sprite) -> &ImageBitmap{
+	pub fn get(&mut self, sprite: &Sprite) -> Option<&ImageBitmap>{
 		if let Some(bitmap)	 = self.cache.get(sprite){
-			return bitmap
+			return Some(bitmap)
 		}
 		
-		&self.kitten_Todo_remove // 🪲 
+		Some(&self.fallback) // 🪲 
 	}
 	
 	pub fn poll() {
