@@ -20,5 +20,7 @@ pub async fn load_bitmap(path: &str) -> JsResult<ImageBitmap> {
     let bitmap_promise = web_sys::window().unwrap().create_image_bitmap_with_html_image_element(&img)?;
     let bitmap_jsvalue = JsFuture::from(bitmap_promise).await?;
     let bitmap: ImageBitmap = bitmap_jsvalue.dyn_into()?;
+    
+
     Ok(bitmap)
 }

@@ -32,7 +32,7 @@ impl State {
         let mut rng = ChaCha8Rng::from_seed([42; 32]);
 
         let (w, h) = (480, 320);
-        let kits = (0..100).map(|i| (sprites[i % N], vec2i(rng.gen_range(0..w), rng.gen_range(0..h)), vec2i(rng.gen_range(-3..=3), rng.gen_range(1..3)))).collect();
+        let kits = (0..8).map(|i| (sprites[i % N], vec2i(rng.gen_range(0..w), rng.gen_range(0..h)), vec2i(rng.gen_range(-3..=3), rng.gen_range(1..3)))).collect();
 
         Self {
             inputs: default(),
@@ -82,10 +82,9 @@ impl State {
     }
 
     pub fn render(&self, out: &mut Output) {
-        //let x = self.x.as_();
-        //out.sprites.push((sprite!("kit3"), vec2i(x, x)));
-
         out.sprites.extend(self.kits.iter().map(|(sprite, pos, _)| (*sprite, *pos)));
+        
+        out.sprites.push((sprite!("frame24"), self.inputs.mouse_position()));
 
         writeln!(&mut out.debug, "frame: {}, now: {:.04}s, FPS: {:.01}", self.frame, self.curr_time_secs, 1.0 / self.dt_smooth).unwrap();
         writeln!(&mut out.debug, "sprites: {}", out.sprites.len()).unwrap();
