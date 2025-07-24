@@ -1,3 +1,17 @@
+mod event_listeners;
+mod http_get;
+mod load_bitmap;
+mod resources;
+mod storage;
+mod time;
+
+use event_listeners::*;
+use http_get::*;
+use load_bitmap::*;
+use resources::*;
+use storage::*;
+use time::*;
+
 use engine::*;
 use fixed_str::*;
 use gamecore::*;
@@ -21,18 +35,6 @@ type HashMap<K, V> = fnv::FnvHashMap<K, V>;
 type HashSet<T> = fnv::FnvHashSet<T>;
 type Shared<T> = Rc<RefCell<T>>;
 
-mod event_listeners;
-mod http_get;
-mod load_bitmap;
-mod resources;
-mod time;
-
-use event_listeners::*;
-use http_get::*;
-use load_bitmap::*;
-use resources::*;
-use time::*;
-
 fn main() {
     console_error_panic_hook::set_once();
     console_log::init_with_level(log::Level::Info).expect("error initializing logger");
@@ -43,7 +45,7 @@ async fn start() -> JsResult<()> {
     log::info!("start");
     test_resource_loading().await;
 
-    let mut res = Res::new(fallback_bitmap(0,0,255).await.unwrap());
+    let mut res = Res::new(fallback_bitmap(0, 0, 255).await.unwrap());
     let mut state = State::new();
 
     let mut out = Output::new();

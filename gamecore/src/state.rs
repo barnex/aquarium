@@ -2,6 +2,7 @@ use crate::prelude::*;
 
 pub struct State {
     pub inputs: Inputs,
+
     pub frame: u64,
     pub curr_time_secs: f64,
     pub last_dt: f64,

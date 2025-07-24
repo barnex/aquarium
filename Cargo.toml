@@ -26,6 +26,7 @@ vector = { path = "corelibs/vector" }
 proc_macros = { path = "proc_macros" }
 
 anyhow = "1"
+base64 = "0.22"
 bytemuck = "1"
 fnv = "1"
 log = "0.4"
