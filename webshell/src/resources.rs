@@ -1,22 +1,27 @@
-use std::pin::Pin;
+//! Resource loader + cache
 
 use crate::*;
 use futures::task::noop_waker;
-use std::future::Future;
 use std::task::{Context, Poll};
 
-pub struct Res {
-    loading: ImageBitmap,
+/// Resource loader + cache.
+pub struct Resources {
+    /// Loaded sprites, or red square for errored.
     cache: HashMap<Sprite, ImageBitmap>,
+
+    /// Sprites currently loading. Makes progress on each `poll()`.
     pending: HashMap<Sprite, Pin<Box<dyn Future<Output = ImageBitmap>>>>,
+
+    /// Replacement sprite to show while loading (debug only).
+    while_loading: ImageBitmap,
 }
 
-impl Res {
-    pub fn new(fallback: ImageBitmap) -> Self {
+impl Resources {
+    pub fn new(while_loading: ImageBitmap) -> Self {
         Self {
             cache: HashMap::default(),
             pending: HashMap::default(),
-            loading: fallback,
+            while_loading,
         }
     }
 
@@ -34,7 +39,14 @@ impl Res {
 
         self.pending.insert(*sprite, Box::pin(load_bitmap_or_fallback(*sprite)));
 
-        Some(&self.loading)
+        #[cfg(debug_assertions)]
+        {
+            Some(&self.while_loading)
+        }
+        #[cfg(not(debug_assertions))]
+        {
+            None
+        }
     }
 
     pub fn poll(&mut self) {

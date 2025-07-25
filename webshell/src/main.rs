@@ -31,6 +31,8 @@ use web_sys::{CanvasRenderingContext2d, HtmlCanvasElement, HtmlElement, HtmlImag
 
 use std::cell::{Cell, RefCell};
 use std::collections::VecDeque;
+use std::future::Future;
+use std::pin::Pin;
 use std::rc::Rc;
 use std::str::FromStr as _;
 use std::sync::Mutex;
@@ -51,7 +53,7 @@ async fn start() -> JsResult<()> {
     log::info!("async fn start spawned. Hello from async Rust.");
     test_resource_loading().await;
 
-    let mut res = Res::new(fallback_bitmap(0, 0, 255).await.unwrap());
+    let mut res = Resources::new(fallback_bitmap(0, 0, 255).await.unwrap());
     let mut state = match load_game() {
         Some(state) => {
             log::info!("game loaded");
@@ -209,7 +211,7 @@ fn request_animation_frame(anim_loop_clone: &Rc<RefCell<Option<Closure<dyn FnMut
     window().request_animation_frame(anim_loop_clone.borrow().as_ref().unwrap().as_ref().unchecked_ref()).unwrap()
 }
 
-fn draw(ctx: &CanvasRenderingContext2d, res: &mut Res, out: &Output) {
+fn draw(ctx: &CanvasRenderingContext2d, res: &mut Resources, out: &Output) {
     ctx.set_image_smoothing_enabled(false); // crisp, pixellated sprites
 
     for (sprite, pos) in &out.sprites {
@@ -218,7 +220,6 @@ fn draw(ctx: &CanvasRenderingContext2d, res: &mut Res, out: &Output) {
         }
     }
 }
-
 
 pub fn window() -> Window {
     web_sys::window().expect("window")
