@@ -6,6 +6,10 @@ pub struct State {
     pub inputs: Inputs,
 
     pub commands: VecDeque<String>,
+    
+    // hack
+    pub request_save: bool,
+    
 
     pub frame: u64,
     pub curr_time_secs: f64,
@@ -49,6 +53,7 @@ impl State {
             x: 0.0,
             score: default(),
             kits,
+            request_save: false,
         }
     }
 
@@ -90,9 +95,6 @@ impl State {
     }
 
     pub fn render(&self, out: &mut Output) {
-        if self.frame % 300 == 0 {
-            out.request_autosave = true;
-        }
 
         out.sprites.extend(self.kits.iter().map(|(sprite, pos, _)| (*sprite, *pos)));
 
@@ -105,8 +107,20 @@ impl State {
     }
     
     fn exec_commands(&mut self)  {
-        for cmd in self.commands.drain(..){
-            log::info!("cmd: {cmd}")
+        let commands = self.commands.drain(..).collect_vec();
+        for cmd in commands{
+            match self.exec_command(&cmd){
+                Ok(()) => log::info!("command {cmd:?}: OK"),
+                Err(e) => log::info!("command {cmd:?}: {e}")
+            }
+        }
+    }
+    
+    fn exec_command(&mut self, cmd: &str) -> Result<()>{
+        match cmd.trim().split_ascii_whitespace().collect_vec().as_slice(){
+            &["save"] => Ok(self.request_save = true),
+            &[cmd, ..] => Err(anyhow!("unknown command: {cmd:?}")),
+            &[] => Ok(()),
         }
     }
 }

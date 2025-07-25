@@ -1,14 +1,14 @@
-mod js_commands;
 mod event_listeners;
 mod http_get;
+mod js_commands;
 mod load_bitmap;
 mod resources;
 mod storage;
 mod time;
 
-use js_commands::*;
 use event_listeners::*;
 use http_get::*;
+use js_commands::*;
 use load_bitmap::*;
 use resources::*;
 use storage::*;
@@ -86,8 +86,9 @@ async fn start() -> JsResult<()> {
 
         record_commands(&mut state);
 
-        if out.request_autosave {
-            save_game(&state);
+        if state.request_save {
+            save_game(&mut state);
+            state.request_save = false;
         }
     });
 
@@ -107,7 +108,7 @@ const APP_KEY: &str = "a_strategy_game_data_v01";
 
 fn save_game(state: &State) {
     log::info!("autosave... {APP_KEY}");
-    serialize(APP_KEY, state).expect("autosave")
+    serialize(APP_KEY, state).expect("autosave");
 }
 
 fn load_game() -> Option<State> {

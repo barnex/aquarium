@@ -88,6 +88,12 @@ dependencies = [
 ]
 
 [[package]]
+name = "either"
+version = "1.15.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "48c757948c5ede0e46177b7add2e67155f70e33c07fea8284df6576da70b3719"
+
+[[package]]
 name = "engine"
 version = "6.0.0"
 dependencies = [
@@ -207,9 +213,11 @@ dependencies = [
 name = "gamecore"
 version = "1.0.0"
 dependencies = [
+ "anyhow",
  "engine",
  "fixed_str",
  "geometry",
+ "itertools",
  "log",
  "num-traits",
  "proc_macros",
@@ -228,6 +236,15 @@ dependencies = [
  "num-traits",
  "serde",
  "vector",
+]
+
+[[package]]
+name = "itertools"
+version = "0.14.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "2b192c782037fadd9cfa75548310488aabdbf3d2da73885b31bd0abd03351285"
+dependencies = [
+ "either",
 ]
 
 [[package]]

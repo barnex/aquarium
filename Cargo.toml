@@ -27,9 +27,10 @@ proc_macros = { path = "proc_macros" }
 
 anyhow = "1"
 base64 = "0.22"
-bincode = {version="2", features = ["serde"]}
+bincode = { version = "2", features = ["serde"] }
 bytemuck = "1"
 fnv = "1"
+itertools = "0.14"
 log = "0.4"
 num-traits = "0.2"
 rand = { version = "0.8", default-features = false }
