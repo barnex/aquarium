@@ -39,5 +39,5 @@ fn exec_command(state: &mut State, cmd: &str) -> JsResult<()> {
 
 fn save_reload(state: &State) {
     save_game(state);
-    window().location().reload();
+    window().location().reload().expect("reload");
 }
