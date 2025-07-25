@@ -11,6 +11,7 @@ pub use fixed_str::*;
 pub use rand::{Rng, SeedableRng};
 pub use serde::{Serialize, Deserialize};
 pub use rand_chacha::ChaCha8Rng;
+pub use std::collections::VecDeque;
 
 pub use std::fmt::Write as _;
 

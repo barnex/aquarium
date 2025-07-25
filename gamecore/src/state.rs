@@ -5,6 +5,8 @@ pub struct State {
     #[serde(skip)]
     pub inputs: Inputs,
 
+    pub commands: VecDeque<String>,
+
     pub frame: u64,
     pub curr_time_secs: f64,
     pub dt: f64,
@@ -39,6 +41,7 @@ impl State {
 
         Self {
             inputs: default(),
+            commands: default(),
             frame: 0,
             curr_time_secs: 0.0,
             dt: 1.0 / 60.0, // initial fps guess
@@ -51,6 +54,7 @@ impl State {
 
     pub fn tick(&mut self) {
         self.update_fps();
+        self.exec_commands();
 
         let size = [480, 320];
         for (_, pos, vel) in &mut self.kits {
@@ -77,6 +81,7 @@ impl State {
             self.x = 0.0
         }
     }
+    
 
     fn update_fps(&mut self) {
         self.dt = (self.inputs.now_secs - self.curr_time_secs).clamp(0.001, 0.1); // clamp dt to 1-100ms to avoid craziness on clock suspend etc.
@@ -97,5 +102,11 @@ impl State {
         writeln!(&mut out.debug, "sprites: {}", out.sprites.len()).unwrap();
         writeln!(&mut out.debug, "score {}", self.score).unwrap();
         writeln!(&mut out.debug, "inputs {:?}", self.inputs).unwrap();
+    }
+    
+    fn exec_commands(&mut self)  {
+        for cmd in self.commands.drain(..){
+            log::info!("cmd: {cmd}")
+        }
     }
 }

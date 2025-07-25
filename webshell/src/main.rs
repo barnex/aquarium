@@ -1,3 +1,4 @@
+mod commands;
 mod event_listeners;
 mod http_get;
 mod load_bitmap;
@@ -5,6 +6,7 @@ mod resources;
 mod storage;
 mod time;
 
+use commands::*;
 use event_listeners::*;
 use http_get::*;
 use load_bitmap::*;
@@ -38,8 +40,6 @@ type HashMap<K, V> = fnv::FnvHashMap<K, V>;
 type HashSet<T> = fnv::FnvHashSet<T>;
 type Shared<T> = Rc<RefCell<T>>;
 
-pub static COMMAND_BUFFER: Mutex<VecDeque<String>> = Mutex::new(VecDeque::new());
-
 fn main() {
     console_error_panic_hook::set_once();
     console_log::init_with_level(log::Level::Info).expect("error initializing logger");
@@ -55,7 +55,7 @@ async fn start() -> JsResult<()> {
         Some(state) => {
             log::info!("game loaded");
             state
-        },
+        }
         None => {
             log::error!("game not loaded, starting fresh");
             State::new()
@@ -83,12 +83,8 @@ async fn start() -> JsResult<()> {
         draw(&ctx, &mut res, &out);
 
         get_element_by_id::<HtmlElement>("debug").set_inner_text(&out.debug);
-        
 
-        for cmd in COMMAND_BUFFER.lock().unwrap().drain(..){
-            log::info!("<- cmd: {cmd}");
-        }
-        
+        record_commands(&mut state);
 
         if out.request_autosave {
             save_game(&state);
@@ -96,12 +92,6 @@ async fn start() -> JsResult<()> {
     });
 
     Ok(())
-}
-
-#[wasm_bindgen]
-pub fn cmd(cmd: String) {
-    log::info!("-> cmd: {cmd}");
-    COMMAND_BUFFER.lock().unwrap().push_back(cmd);
 }
 
 //fn autosave_handler() {
