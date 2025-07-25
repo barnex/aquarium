@@ -19,6 +19,7 @@ use fixed_str::*;
 use gamecore::*;
 use vector::*;
 
+use itertools::Itertools as _;
 use js_sys::Uint8Array;
 use js_sys::Uint8ClampedArray;
 use num_traits::AsPrimitive as _;
@@ -26,8 +27,7 @@ use serde::{Serialize, de::DeserializeOwned};
 use wasm_bindgen::prelude::*;
 use wasm_bindgen::{JsCast, JsValue, prelude::Closure};
 use wasm_bindgen_futures::JsFuture;
-use web_sys::{CanvasRenderingContext2d, HtmlCanvasElement, HtmlElement, HtmlImageElement, ImageBitmap, ImageData, Request, RequestInit, Response, Window};
-use itertools::Itertools as _;
+use web_sys::{CanvasRenderingContext2d, HtmlCanvasElement, HtmlElement, HtmlImageElement, ImageBitmap, ImageData, KeyboardEvent, MouseEvent, Request, RequestInit, Response, Window};
 
 use std::cell::{Cell, RefCell};
 use std::collections::VecDeque;
