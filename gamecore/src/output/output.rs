@@ -1,11 +1,12 @@
 use crate::prelude::*;
 
 /// Scenegraph, sounds, etc. to output after a tick.
-#[derive(Default, Debug)]
+#[derive(Default, Debug, PartialEq, Eq)]
 pub struct Output {
     pub sprites: Vec<(Sprite, vec2i)>,
 
     pub debug: String,
+    pub request_autosave: bool,
 }
 
 impl Output {
@@ -16,5 +17,7 @@ impl Output {
     pub fn clear(&mut self) {
         self.sprites.clear();
         self.debug.clear();
+        self.request_autosave = false;
+        debug_assert!(self == &default());
     }
 }

@@ -85,6 +85,10 @@ impl State {
     }
 
     pub fn render(&self, out: &mut Output) {
+        if self.frame % 300 == 0 {
+            out.request_autosave = true;
+        }
+
         out.sprites.extend(self.kits.iter().map(|(sprite, pos, _)| (*sprite, *pos)));
 
         out.sprites.push((sprite!("frame24"), self.inputs.mouse_position()));

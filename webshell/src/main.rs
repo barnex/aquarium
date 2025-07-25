@@ -48,7 +48,17 @@ async fn start() -> JsResult<()> {
     test_resource_loading().await;
 
     let mut res = Res::new(fallback_bitmap(0, 0, 255).await.unwrap());
-    let mut state = State::new();
+    let mut state = match load_game() {
+        Some(state) => {
+            log::info!("game loaded");
+            state
+        },
+        None => {
+            log::error!("game not loaded, starting fresh");
+            State::new()
+        }
+    };
+
     let mut out = Output::new();
     let canvas = get_element_by_id("canvas");
 
@@ -70,23 +80,39 @@ async fn start() -> JsResult<()> {
         draw(&ctx, &mut res, &out);
 
         get_element_by_id::<HtmlElement>("debug").set_inner_text(&out.debug);
+
+        if out.request_autosave {
+            save_game(&state);
+        }
     });
 
     Ok(())
 }
 
-fn autosave_handler() {
-    let closure = Closure::wrap(Box::new(move |event: Event| {
-        // Your save logic here
-        log::info!("Window is about to close!");
+#[wasm_bindgen]
+pub fn cmd(cmd: &str) {
+    log::info!("cmd: {cmd}");
+}
 
-        // Optional: show a confirmation dialog (browser may ignore)
-    }) as Box<dyn FnMut(_)>);
+//fn autosave_handler() {
+//    let closure = Closure::wrap(Box::new(move |event: Event| {
+//        log::info!("Window is about to close!");
+//    }) as Box<dyn FnMut(_)>);
+//    window().add_event_listener_with_callback("beforeunload", closure.as_ref().unchecked_ref()).unwrap();
+//    closure.forget();
+//}
+//
 
-    window().add_event_listener_with_callback("beforeunload", closure.as_ref().unchecked_ref()).unwrap();
+const APP_KEY: &str = "a_strategy_game_data_v01";
 
-    // Important: store the closure to keep it alive!
-    closure.forget();
+fn save_game(state: &State) {
+    log::info!("autosave... {APP_KEY}");
+    serialize(APP_KEY, state).expect("autosave")
+}
+
+fn load_game() -> Option<State> {
+    log::info!("loading... {APP_KEY}");
+    deserialize(APP_KEY).map_err(|e| log::error!("load_game {APP_KEY}: {e:?}")).ok()
 }
 
 #[wasm_bindgen]
