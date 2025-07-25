@@ -1,5 +1,7 @@
 use crate::*;
 
+// Load image over HTTP. E.g. `assets/my_sprite.png`
+// TODO: BUG: 🪲 Does not handle errors / not found correctly. Happily returns empty image.
 pub async fn load_bitmap(path: &str) -> JsResult<ImageBitmap> {
     log::info!("load {path}");
 
@@ -20,7 +22,6 @@ pub async fn load_bitmap(path: &str) -> JsResult<ImageBitmap> {
     let bitmap_promise = web_sys::window().unwrap().create_image_bitmap_with_html_image_element(&img)?;
     let bitmap_jsvalue = JsFuture::from(bitmap_promise).await?;
     let bitmap: ImageBitmap = bitmap_jsvalue.dyn_into()?;
-    
 
     Ok(bitmap)
 }
