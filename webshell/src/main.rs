@@ -84,7 +84,7 @@ async fn start() -> JsResult<()> {
 
         get_element_by_id::<HtmlElement>("debug").set_inner_text(&out.debug);
 
-        exec_commands(&mut state);
+        exec_pending_commands(&mut state);
 
         //if state.request_save {
         //    save_game(&mut state);

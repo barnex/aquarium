@@ -1,3 +1,4 @@
+//! Fetch data over HTTP.
 use crate::*;
 
 // Trunk annoyingly returns index.html when a file is not found.
