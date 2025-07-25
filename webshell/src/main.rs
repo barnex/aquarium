@@ -41,13 +41,14 @@ type HashSet<T> = fnv::FnvHashSet<T>;
 type Shared<T> = Rc<RefCell<T>>;
 
 fn main() {
+    web_sys::console::log_1(&"WASM main started. Hello from Rust.".into());
     console_error_panic_hook::set_once();
     console_log::init_with_level(log::Level::Info).expect("error initializing logger");
     wasm_bindgen_futures::spawn_local(async { start().await.expect("main") })
 }
 
 async fn start() -> JsResult<()> {
-    log::info!("start");
+    log::info!("async fn start spawned. Hello from async Rust.");
     test_resource_loading().await;
 
     let mut res = Res::new(fallback_bitmap(0, 0, 255).await.unwrap());
@@ -218,17 +219,6 @@ fn draw(ctx: &CanvasRenderingContext2d, res: &mut Res, out: &Output) {
     }
 }
 
-async fn test_resource_loading() {
-    log::info!("say_hello");
-
-    let txt = http_get_with_trunk_hack("assets/test.txt").await.expect("get test.txt");
-    let txt = String::from_utf8_lossy(&txt);
-
-    let document = window().document().unwrap();
-    let body = document.body().unwrap();
-    let text_node = document.create_text_node(&txt);
-    body.append_child(text_node.as_ref()).unwrap();
-}
 
 pub fn window() -> Window {
     web_sys::window().expect("window")

@@ -1,8 +1,15 @@
 //! Fetch data over HTTP.
 use crate::*;
 
-// Trunk annoyingly returns index.html when a file is not found.
-// Work around this by recognizing a magic comment in index.html and returning an error instead.
+/// Load an asset as sanity check.
+pub async fn test_resource_loading() {
+    let txt = http_get_with_trunk_hack("assets/test.txt").await.expect("get test.txt");
+    let txt = String::from_utf8_lossy(&txt);
+    log::info!("Asset loading tested. assets/text.txt says: {txt:?}");
+}
+
+/// Trunk annoyingly returns index.html when a file is not found.
+/// Work around this by recognizing a magic comment in index.html and returning an error instead.
 pub async fn http_get_with_trunk_hack(url: &str) -> JsResult<Vec<u8>> {
     let bytes = http_get(url).await?;
     if bytes.starts_with(b"<!DOCTYPE html> <!-- This comment identifies index.html DO NOT REMOVE -->") {
@@ -11,8 +18,8 @@ pub async fn http_get_with_trunk_hack(url: &str) -> JsResult<Vec<u8>> {
     Ok(bytes)
 }
 
-// WARNING: ⚠️ Trunk serves index.html instead of 404 Not Found.
-// See `http_get_with_trunk_hack`.
+/// WARNING: ⚠️ Trunk serves index.html instead of 404 Not Found.
+/// See `http_get_with_trunk_hack`.
 async fn http_get(url: &str) -> JsResult<Vec<u8>> {
     let opts = RequestInit::new();
     opts.set_method("GET");
