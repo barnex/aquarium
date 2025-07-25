@@ -33,6 +33,7 @@ pub(crate) fn exec_commands(state: &mut State) {
 fn exec_command(state: &mut State, cmd: &str) -> JsResult<()> {
     match cmd.trim().split_ascii_whitespace().collect::<Vec<_>>().as_slice() {
         &["save"] => Ok(save_game(state)),
+        &["reset"] => Ok(reset(state)),
         &["save_reload"] => Ok(save_reload(state)),
         _ => Ok(state.commands.push_back(cmd.to_owned())),
     }
@@ -41,4 +42,8 @@ fn exec_command(state: &mut State, cmd: &str) -> JsResult<()> {
 fn save_reload(state: &State) {
     save_game(state);
     window().location().reload().expect("reload");
+}
+
+fn reset(state: &mut State){
+    *state = State::new();
 }
