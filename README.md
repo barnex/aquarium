@@ -25,7 +25,15 @@ WARNING: must `cargo check` before `trunk serve` lest it serve an outdated build
 cargo lcheck --target=wasm32-unknown-unknown && trunk serve
 ```
 
+or
+```
+
+miniserve --port 8001 webshell/dist
+```
+
 ### Trunk tweaks
 
 trunk config show
 watch = ..
+
+
