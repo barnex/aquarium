@@ -31,11 +31,14 @@ use std::cell::{Cell, RefCell};
 use std::collections::VecDeque;
 use std::rc::Rc;
 use std::str::FromStr as _;
+use std::sync::Mutex;
 
 type JsResult<T> = Result<T, JsValue>;
 type HashMap<K, V> = fnv::FnvHashMap<K, V>;
 type HashSet<T> = fnv::FnvHashSet<T>;
 type Shared<T> = Rc<RefCell<T>>;
+
+pub static COMMAND_BUFFER: Mutex<VecDeque<String>> = Mutex::new(VecDeque::new());
 
 fn main() {
     console_error_panic_hook::set_once();
@@ -80,6 +83,12 @@ async fn start() -> JsResult<()> {
         draw(&ctx, &mut res, &out);
 
         get_element_by_id::<HtmlElement>("debug").set_inner_text(&out.debug);
+        
+
+        for cmd in COMMAND_BUFFER.lock().unwrap().drain(..){
+            log::info!("<- cmd: {cmd}");
+        }
+        
 
         if out.request_autosave {
             save_game(&state);
@@ -90,8 +99,9 @@ async fn start() -> JsResult<()> {
 }
 
 #[wasm_bindgen]
-pub fn cmd(cmd: &str) {
-    log::info!("cmd: {cmd}");
+pub fn cmd(cmd: String) {
+    log::info!("-> cmd: {cmd}");
+    COMMAND_BUFFER.lock().unwrap().push_back(cmd);
 }
 
 //fn autosave_handler() {
