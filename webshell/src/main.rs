@@ -1,4 +1,4 @@
-mod commands;
+mod js_commands;
 mod event_listeners;
 mod http_get;
 mod load_bitmap;
@@ -6,7 +6,7 @@ mod resources;
 mod storage;
 mod time;
 
-use commands::*;
+use js_commands::*;
 use event_listeners::*;
 use http_get::*;
 use load_bitmap::*;

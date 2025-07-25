@@ -17,8 +17,10 @@
 
 <body>
 	
-	<button onclick='window.wasmBindings.cmd("save")'>💾</button><br/>
+	<button onclick='window.wasmBindings.cmd("save")'>💾</button>
+	<button onclick='window.wasmBindings.cmd("save");window.location.reload()'>💾↻</button>
 
+	<br/>
 	<br/>
 
 	<canvas id="canvas" width="480" height="320" style="border: 1px solid black;"></canvas>
