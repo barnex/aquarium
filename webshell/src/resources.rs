@@ -49,7 +49,9 @@ impl Resources {
         }
     }
 
+    /// To be called on each tick. Newly loaded sprites become available.
     pub fn poll(&mut self) {
+        // borrow checker song and dance.
         let mut ready = Vec::new();
 
         for (sprite, fut) in self.pending.iter_mut() {
@@ -69,6 +71,7 @@ impl Resources {
     }
 }
 
+/// load sprite over HTTP, return fallback (red square) on error.
 async fn load_bitmap_or_fallback(sprite: Sprite) -> ImageBitmap {
     let path = format!("assets/{}.png", sprite.file.as_str());
     match load_bitmap(&path).await {
@@ -78,14 +81,4 @@ async fn load_bitmap_or_fallback(sprite: Sprite) -> ImageBitmap {
             fallback_bitmap(255, 0, 0).await.unwrap()
         }
     }
-}
-
-fn box_that_fut() {
-    let x = Box::pin(load_image_future("kit3.png"));
-    let mut tasks = HashMap::default();
-    tasks.insert(42, x);
-}
-
-fn load_image_future(path: &str) -> impl Future<Output = JsResult<ImageBitmap>> {
-    load_bitmap(path)
 }
