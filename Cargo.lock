@@ -550,6 +550,7 @@ dependencies = [
  "futures",
  "futures-channel",
  "gamecore",
+ "itertools",
  "js-sys",
  "log",
  "num-traits",

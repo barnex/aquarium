@@ -26,8 +26,8 @@ use serde::{Serialize, de::DeserializeOwned};
 use wasm_bindgen::prelude::*;
 use wasm_bindgen::{JsCast, JsValue, prelude::Closure};
 use wasm_bindgen_futures::JsFuture;
-use web_sys::Event;
 use web_sys::{CanvasRenderingContext2d, HtmlCanvasElement, HtmlElement, HtmlImageElement, ImageBitmap, ImageData, Request, RequestInit, Response, Window};
+use itertools::Itertools as _;
 
 use std::cell::{Cell, RefCell};
 use std::collections::VecDeque;
@@ -84,7 +84,7 @@ async fn start() -> JsResult<()> {
 
         get_element_by_id::<HtmlElement>("debug").set_inner_text(&out.debug);
 
-        record_commands(&mut state);
+        exec_commands(&mut state);
 
         if state.request_save {
             save_game(&mut state);
