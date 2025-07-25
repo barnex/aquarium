@@ -7,10 +7,6 @@ pub struct State {
 
     pub commands: VecDeque<String>,
     
-    // hack
-    pub request_save: bool,
-    
-
     pub frame: u64,
     pub curr_time_secs: f64,
     pub dt: f64,
@@ -53,7 +49,6 @@ impl State {
             x: 0.0,
             score: default(),
             kits,
-            request_save: false,
         }
     }
 
@@ -118,7 +113,6 @@ impl State {
     
     fn exec_command(&mut self, cmd: &str) -> Result<()>{
         match cmd.trim().split_ascii_whitespace().collect_vec().as_slice(){
-            &["save"] => Ok(self.request_save = true),
             &[cmd, ..] => Err(anyhow!("unknown command: {cmd:?}")),
             &[] => Ok(()),
         }

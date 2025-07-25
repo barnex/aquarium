@@ -32,6 +32,7 @@ pub(crate) fn exec_commands(state: &mut State) {
 
 fn exec_command(state: &mut State, cmd: &str) -> JsResult<()> {
     match cmd.trim().split_ascii_whitespace().collect::<Vec<_>>().as_slice() {
+        &["save"] => Ok(save_game(state)),
         &["save_reload"] => Ok(save_reload(state)),
         _ => Ok(state.commands.push_back(cmd.to_owned())),
     }

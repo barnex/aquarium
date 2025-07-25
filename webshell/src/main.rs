@@ -86,23 +86,14 @@ async fn start() -> JsResult<()> {
 
         exec_commands(&mut state);
 
-        if state.request_save {
-            save_game(&mut state);
-            state.request_save = false;
-        }
+        //if state.request_save {
+        //    save_game(&mut state);
+        //    state.request_save = false;
+        //}
     });
 
     Ok(())
 }
-
-//fn autosave_handler() {
-//    let closure = Closure::wrap(Box::new(move |event: Event| {
-//        log::info!("Window is about to close!");
-//    }) as Box<dyn FnMut(_)>);
-//    window().add_event_listener_with_callback("beforeunload", closure.as_ref().unchecked_ref()).unwrap();
-//    closure.forget();
-//}
-//
 
 const APP_KEY: &str = "a_strategy_game_data_v01";
 
