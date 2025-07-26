@@ -12,10 +12,14 @@ pub struct State {
     pub curr_time_secs: f64,
     pub dt: f64,
     pub dt_smooth: f64,
-    pub score: u64,
-    pub x: f64,
+    pub score: u64, // 💀 remove
+
     pub kits: Vec<(Sprite, vec2i, vec2i)>,
+    pub tilemap: Tilemap,
 }
+
+pub const TILE_SIZE: u32 = 24;
+pub const TILE_ISIZE: i32 = TILE_SIZE as i32;
 
 impl State {
     pub fn new() -> Self {
@@ -43,12 +47,12 @@ impl State {
         Self {
             inputs: default(),
             commands: default(),
+            tilemap: Tilemap::testmap(vec2u(32, 24)),
             speed: 1,
             frame: 0,
             curr_time_secs: 0.0,
             dt: 1.0 / 60.0, // initial fps guess
             dt_smooth: 1.0 / 60.0,
-            x: 0.0,
             score: default(),
             kits,
         }
@@ -100,6 +104,9 @@ impl State {
     }
 
     pub fn render(&self, out: &mut Output) {
+        
+        self.draw_tilemap( out);
+        
         out.sprites.extend(self.kits.iter().map(|(sprite, pos, _)| (*sprite, *pos)));
 
         out.sprites.push((sprite!("frame24"), self.inputs.mouse_position()));
@@ -107,7 +114,15 @@ impl State {
         writeln!(&mut out.debug, "frame: {}, now: {:.04}s, FPS: {:.01}", self.frame, self.curr_time_secs, 1.0 / self.dt_smooth).unwrap();
         writeln!(&mut out.debug, "sprites: {}", out.sprites.len()).unwrap();
         writeln!(&mut out.debug, "score {}", self.score).unwrap();
-        writeln!(&mut out.debug, "inputs {:?}", self.inputs).unwrap();
+        //writeln!(&mut out.debug, "inputs {:?}", self.inputs).unwrap();
+    }
+    
+    pub fn draw_tilemap(&self, out: &mut Output){
+        
+        for (pos, mat) in self.tilemap.enumerate_all(){
+            out.sprites.push((mat.sprite(), pos * TILE_ISIZE));
+        }
+
     }
 
 }

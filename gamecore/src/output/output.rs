@@ -1,6 +1,7 @@
 use crate::prelude::*;
 
 /// Scenegraph, sounds, etc. to output after a tick.
+/// Sent to the browser who will render it.
 #[derive(Default, Debug, PartialEq, Eq)]
 pub struct Output {
     pub sprites: Vec<(Sprite, vec2i)>,

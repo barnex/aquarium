@@ -19,7 +19,7 @@ use fixed_str::*;
 use gamecore::*;
 use vector::*;
 
-use itertools::Itertools as _;
+pub use itertools::Itertools as _;
 use js_sys::Uint8Array;
 use js_sys::Uint8ClampedArray;
 use num_traits::AsPrimitive as _;
@@ -73,6 +73,7 @@ async fn start() -> JsResult<()> {
     listen_keys(Rc::clone(&input_events));
     listen_mouse(&canvas, Rc::clone(&input_events));
 
+    // 🌍 Main loop
     animation_loop(move |ctx| {
         state.inputs.now_secs = now_secs();
         record_input_events(&mut state.inputs, &input_events);
@@ -88,11 +89,6 @@ async fn start() -> JsResult<()> {
         get_element_by_id::<HtmlElement>("debug").set_inner_text(&out.debug);
 
         exec_pending_commands(&mut state);
-
-        //if state.request_save {
-        //    save_game(&mut state);
-        //    state.request_save = false;
-        //}
     });
 
     Ok(())

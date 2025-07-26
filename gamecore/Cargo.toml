@@ -5,6 +5,7 @@ edition = "2024"
 
 [dependencies]
 anyhow = { workspace = true }
+core_util = { workspace = true }
 engine = { workspace = true }
 fixed_str = { workspace = true }
 geometry = { workspace = true }

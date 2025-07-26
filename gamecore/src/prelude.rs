@@ -13,7 +13,9 @@ pub use rand::{Rng, SeedableRng};
 pub use rand_chacha::ChaCha8Rng;
 pub use serde::{Deserialize, Serialize};
 pub use std::collections::VecDeque;
+pub use core_util::*;
 
+pub use std::cell::Cell;
 pub use std::fmt::Write as _;
 
 pub fn default<T: Default>() -> T {
