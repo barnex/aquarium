@@ -4,9 +4,10 @@ use crate::prelude::*;
 pub struct State {
     #[serde(skip)]
     pub inputs: Inputs,
-
     pub commands: VecDeque<String>,
-    
+
+    pub speed: u32,
+
     pub frame: u64,
     pub curr_time_secs: f64,
     pub dt: f64,
@@ -42,6 +43,7 @@ impl State {
         Self {
             inputs: default(),
             commands: default(),
+            speed: 1,
             frame: 0,
             curr_time_secs: 0.0,
             dt: 1.0 / 60.0, // initial fps guess
@@ -53,9 +55,28 @@ impl State {
     }
 
     pub fn tick(&mut self) {
-        self.update_fps();
-        self.exec_commands();
+        self.update_fps(); // 👈 FPS is gamespeed independent
+        self.exec_commands(); // 👈 exec commands even when paused (speed 0)
 
+        for _ in 0..self.speed {
+            self.tick_once();
+        }
+    }
+
+    fn tick_once(&mut self) {
+        self.frame += 1;
+
+        self.bounce_kittens();
+        self.do_something_on_keypress();
+    }
+
+    fn do_something_on_keypress(&mut self) {
+        if self.inputs.just_pressed(Button(str16!("b"))) {
+            self.score += 1
+        }
+    }
+
+    fn bounce_kittens(&mut self) {
         let size = [480, 320];
         for (_, pos, vel) in &mut self.kits {
             *pos += *vel;
@@ -70,18 +91,7 @@ impl State {
                 }
             }
         }
-
-        if self.inputs.just_pressed(Button(str16!("b"))) {
-            self.score += 1
-        }
-
-        self.frame += 1;
-        self.x += 0.5;
-        if self.x > 100.0 {
-            self.x = 0.0
-        }
     }
-    
 
     fn update_fps(&mut self) {
         self.dt = (self.inputs.now_secs - self.curr_time_secs).clamp(0.001, 0.1); // clamp dt to 1-100ms to avoid craziness on clock suspend etc.
@@ -90,7 +100,6 @@ impl State {
     }
 
     pub fn render(&self, out: &mut Output) {
-
         out.sprites.extend(self.kits.iter().map(|(sprite, pos, _)| (*sprite, *pos)));
 
         out.sprites.push((sprite!("frame24"), self.inputs.mouse_position()));
@@ -100,21 +109,5 @@ impl State {
         writeln!(&mut out.debug, "score {}", self.score).unwrap();
         writeln!(&mut out.debug, "inputs {:?}", self.inputs).unwrap();
     }
-    
-    fn exec_commands(&mut self)  {
-        let commands = self.commands.drain(..).collect_vec();
-        for cmd in commands{
-            match self.exec_command(&cmd){
-                Ok(()) => log::info!("command {cmd:?}: OK"),
-                Err(e) => log::info!("command {cmd:?}: {e}")
-            }
-        }
-    }
-    
-    fn exec_command(&mut self, cmd: &str) -> Result<()>{
-        match cmd.trim().split_ascii_whitespace().collect_vec().as_slice(){
-            &[cmd, ..] => Err(anyhow!("unknown command: {cmd:?}")),
-            &[] => Ok(()),
-        }
-    }
+
 }
