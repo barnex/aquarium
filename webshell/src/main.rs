@@ -53,7 +53,7 @@ async fn start() -> JsResult<()> {
     log::info!("async fn start spawned. Hello from async Rust.");
     test_resource_loading().await;
 
-    let mut res = Resources::new(fallback_bitmap(0, 0, 255).await.unwrap());
+    let mut res = Resources::new(fallback_bitmap((0, 0, 255), TILE_SIZE).await.unwrap());
     let mut state = match load_game() {
         Some(state) => {
             log::info!("game loaded");
@@ -106,10 +106,9 @@ fn load_game() -> Option<State> {
     deserialize(APP_KEY).map_err(|e| log::error!("load_game {APP_KEY}: {e:?}")).ok()
 }
 
-#[wasm_bindgen]
-pub async fn fallback_bitmap(r: u8, g: u8, b: u8) -> Result<ImageBitmap, JsValue> {
-    let width = 32;
-    let height = 32;
+pub async fn fallback_bitmap((r,g,b):(u8,u8,u8), size: u32) -> Result<ImageBitmap, JsValue> {
+    let width = size as usize;
+    let height = size as usize;
     let num_pixels = width * height;
     let mut rgba = Vec::with_capacity(num_pixels * 4);
 

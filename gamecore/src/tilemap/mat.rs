@@ -26,8 +26,8 @@ impl Mat {
             Mat::Mountains => sprite!("mountains"),
             Mat::Sand => sprite!("sand"),
             Mat::Snow => sprite!("snow"),
-            Mat::Water => sprite!("water"),
-            Mat::Block => sprite!("block"),
+            Mat::Water => sprite!("water2"),
+            Mat::Block => sprite!("block24"),
         }
     }
 }

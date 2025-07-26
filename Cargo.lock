@@ -550,6 +550,7 @@ dependencies = [
  "fnv",
  "futures",
  "futures-channel",
+ "futures-util",
  "gamecore",
  "itertools",
  "js-sys",

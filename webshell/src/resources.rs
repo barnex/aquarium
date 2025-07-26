@@ -78,7 +78,7 @@ async fn load_bitmap_or_fallback(sprite: Sprite) -> ImageBitmap {
         Ok(bitmap) => bitmap,
         Err(e) => {
             log::error!("load bitmap {path}: {e:?}");
-            fallback_bitmap(255, 0, 0).await.unwrap()
+            fallback_bitmap((255, 0, 0), TILE_SIZE).await.unwrap()
         }
     }
 }
