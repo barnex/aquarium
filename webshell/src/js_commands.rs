@@ -22,8 +22,8 @@ pub fn cmd(cmd: String) {
 pub(crate) fn exec_pending_commands(state: &mut State) {
     for cmd in COMMAND_BUFFER.lock().unwrap().drain(..) {
         match exec_command(state, &cmd) {
-            Ok(()) => log::info!("command {cmd:?}: OK"),
-            Err(e) => log::info!("command {cmd:?}: {e:?}"),
+            Ok(()) => log::info!("js command {cmd:?}: OK"),
+            Err(e) => log::info!("js command {cmd:?}: {e:?}"),
         }
     }
 }
@@ -36,7 +36,7 @@ fn exec_command(state: &mut State, cmd: &str) -> JsResult<()> {
         &["reset"] => Ok(reset(state)),
         &["save_reload"] => Ok(save_reload(state)),
         // 👇 unknown command: forward to gamestate
-        _ => Ok(state.commands.push_back(cmd.to_owned())),
+        _ => { state.commands.push_back(cmd.to_owned()); Err("sent to game".into())},
     }
 }
 
