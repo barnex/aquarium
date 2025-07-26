@@ -8,7 +8,7 @@ pub struct Tilemap {
 
 impl Tilemap {
     pub fn new(size: vec2u) -> Self {
-        let tiles = vec![default(); (size.x() * size.y()).as_()];
+        let tiles = vec![Cell::new(Mat::Snow); (size.x() * size.y()).as_()];
         Self { size, tiles }
     }
 

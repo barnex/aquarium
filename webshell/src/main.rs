@@ -5,6 +5,7 @@ mod load_bitmap;
 mod resources;
 mod storage;
 mod time;
+mod graphics_postprocessing;
 
 use event_listeners::*;
 use http_get::*;
@@ -82,9 +83,10 @@ async fn start() -> JsResult<()> {
 
         out.clear();
         state.render(&mut out);
+
         ctx.clear_rect(0.0, 0.0, canvas.width().as_(), canvas.height().as_());
         res.poll();
-        draw(&ctx, &mut res, &out);
+        draw(&canvas, &ctx, &mut res, &out);
 
         get_element_by_id::<HtmlElement>("debug").set_inner_text(&out.debug);
 
@@ -206,7 +208,7 @@ fn request_animation_frame(anim_loop_clone: &Rc<RefCell<Option<Closure<dyn FnMut
     window().request_animation_frame(anim_loop_clone.borrow().as_ref().unwrap().as_ref().unchecked_ref()).unwrap()
 }
 
-fn draw(ctx: &CanvasRenderingContext2d, res: &mut Resources, out: &Output) {
+fn draw(canvas: &HtmlCanvasElement, ctx: &CanvasRenderingContext2d, res: &mut Resources, out: &Output) {
     ctx.set_image_smoothing_enabled(false); // crisp, pixellated sprites
 
     for (sprite, pos) in &out.sprites {
@@ -214,6 +216,9 @@ fn draw(ctx: &CanvasRenderingContext2d, res: &mut Resources, out: &Output) {
             ctx.draw_image_with_image_bitmap(bitmap, pos.x().as_(), pos.y().as_()).expect("draw");
         }
     }
+    
+    //graphics_postprocessing::inverse_bloom(canvas, ctx);
+    graphics_postprocessing::vignette(canvas, ctx);
 }
 
 pub fn window() -> Window {
