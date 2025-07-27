@@ -6,6 +6,7 @@ use std::fmt::{Debug, Display};
 pub struct MemKeep<T> {
     storage: Vec<Slot<T>>,
     freelist: RefCell<Vec<u32>>,
+    garbage: RefCell<Vec<u32>>,
 }
 
 struct Slot<T> {
@@ -30,6 +31,7 @@ impl<T> MemKeep<T> {
         Self {
             storage: (0..n).map(|_| Slot::initial()).collect(),
             freelist: RefCell::new((0..n).rev().collect()),
+            garbage: RefCell::new(Vec::new()),
         }
     }
 
@@ -74,6 +76,7 @@ impl<T> MemKeep<T> {
         if slot.generation.get() == id.generation && slot.not_deleted.get() {
             // SAFETY: Handing out shared references. Only mutated in `gc()` where `&mut self` guarantees all shared references are dropped.
             slot.not_deleted.set(false);
+            self.garbage.borrow_mut().push(id.index);
             let v: &Option<T> = unsafe { &*slot.value.get() };
             Some(v.as_ref().unwrap())
         } else {
@@ -82,7 +85,13 @@ impl<T> MemKeep<T> {
     }
 
     pub fn gc(&mut self) {
-
+        for index in self.garbage.get_mut().drain(..) {
+            let slot = &mut self.storage[index as usize];
+            if !slot.not_deleted.get() {
+                slot.value.get_mut().take();
+                self.freelist.get_mut().push(index as u32);
+            }
+        }
     }
 }
 
@@ -154,5 +163,22 @@ mod memkeep_test {
         expect_eq!(m.get(a), Some(&"a"));
         expect_eq!(m.get(b), None); // 👈
         expect_eq!(m.get(c), Some(&"c"));
+    }
+
+    #[gtest]
+    /// Runs out of storage when gc does not work.
+    fn gc() {
+        let mut m = MemKeep::<&'static str>::new();
+
+        let a1 = m.insert("hello, computer!");
+        m.remove(a1);
+        m.gc();
+
+        for _ in 0..20 {
+            let a = m.insert("hello, computer!");
+            expect_eq!(a.index, a1.index);
+            m.remove(a);
+            m.gc();
+        }
     }
 }
