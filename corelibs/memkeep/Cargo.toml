@@ -1,0 +1,9 @@
+[package]
+name = "memkeep"
+version = "1.0.0"
+edition = "2024"
+
+[dependencies]
+
+[dev-dependencies]
+googletest = { workspace = true }

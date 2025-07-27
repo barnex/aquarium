@@ -27,9 +27,12 @@ cargo lcheck --target=wasm32-unknown-unknown && trunk serve
 
 or
 ```
-
 miniserve --port 8001 webshell/dist
 ```
+
+## Test
+
+ cargo +nightly miri test -p memkeep
 
 ### Trunk tweaks
 

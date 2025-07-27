@@ -13,6 +13,7 @@ members = [
 	"webshell",
 	"proc_macros",
 	"proc_macros_impl",
+	"corelibs/memkeep",
 ]
 
 [workspace.dependencies]
@@ -30,6 +31,7 @@ base64 = "0.22"
 bincode = { version = "2", features = ["serde"] }
 bytemuck = "1"
 fnv = "1"
+googletest = "0.14"
 itertools = "0.14"
 log = "0.4"
 num-traits = "0.2"
