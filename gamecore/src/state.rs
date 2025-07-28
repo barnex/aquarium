@@ -87,7 +87,23 @@ impl State {
         }
     }
     
-    fn control_camera(&mut self){}
+    fn control_camera(&mut self){
+        let mut delta = vec2::ZERO;
+        if self.inputs.is_down(K_CAM_DOWN){
+            delta += vec2(0, 1) ;
+        }
+        if self.inputs.is_down(K_CAM_UP){
+            delta += vec2(0, -1) ;
+        }
+        if self.inputs.is_down(K_CAM_LEFT){
+            delta += vec2(-1, 0) ;
+        }
+        if self.inputs.is_down(K_CAM_RIGHT){
+            delta += vec2(1, 0) ;
+        }
+        let speed = 3;
+        self.camera_pos += speed * delta;
+    }
 
     fn bounce_kittens(&mut self) {
         let size = [480, 320];
@@ -113,9 +129,10 @@ impl State {
     }
 
     pub fn render(&self, out: &mut Output) {
+
         self.draw_tilemap(out);
 
-        out.sprites.extend(self.kits.iter().map(|(sprite, pos, _)| (*sprite, *pos)));
+        out.sprites.extend(self.kits.iter().map(|(sprite, pos, _)| (*sprite, *pos - self.camera_pos)));
         out.sprites.push((sprite!("frame24"), self.inputs.mouse_position()));
 
         out.lines.push(Line::new(vec2(0, 0), vec2(30, 20)));
@@ -133,7 +150,7 @@ impl State {
 
     pub fn draw_tilemap(&self, out: &mut Output) {
         for (pos, mat) in self.tilemap.enumerate_all() {
-            out.sprites.push((mat.sprite(), pos * TILE_ISIZE));
+            out.sprites.push((mat.sprite(), pos * TILE_ISIZE - self.camera_pos));
         }
     }
 }

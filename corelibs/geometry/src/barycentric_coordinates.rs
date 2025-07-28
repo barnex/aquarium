@@ -21,13 +21,13 @@ use vector::*;
 /// assert_eq!(barycentric_coordinates(&triangle, (a+b)/2.0), vec3(0.5, 0.5, 0.0));
 /// ```
 pub fn barycentric_coordinates(triangle_vertices: &[vec2f; 3], point: vec2f) -> vec3f {
-	let [(x1, y1), (x2, y2), (x3, y3)] = triangle_vertices.map(|v| v.tuple());
-	let (x, y) = point.tuple();
-	let det = (y2 - y3) * (x1 - x3) + (x3 - x2) * (y1 - y3);
-	let lambda1 = ((y2 - y3) * (x - x3) + (x3 - x2) * (y - y3)) / det;
-	let lambda2 = ((y3 - y1) * (x - x3) + (x1 - x3) * (y - y3)) / det;
-	let lambda3 = 1.0 - lambda1 - lambda2;
-	vec3f(lambda1, lambda2, lambda3)
+    let [(x1, y1), (x2, y2), (x3, y3)] = triangle_vertices.map(|v| v.tuple());
+    let (x, y) = point.tuple();
+    let det = (y2 - y3) * (x1 - x3) + (x3 - x2) * (y1 - y3);
+    let lambda1 = ((y2 - y3) * (x - x3) + (x3 - x2) * (y - y3)) / det;
+    let lambda2 = ((y3 - y1) * (x - x3) + (x1 - x3) * (y - y3)) / det;
+    let lambda3 = 1.0 - lambda1 - lambda2;
+    vec3f(lambda1, lambda2, lambda3)
 }
 
 /// Does a 2D point lie inside a triangle defined by the given vertices?
@@ -50,7 +50,7 @@ pub fn barycentric_coordinates(triangle_vertices: &[vec2f; 3], point: vec2f) -> 
 /// assert_eq!(is_inside(&triangle, vec2(1.5, 2.5)), false);
 /// ```
 pub fn is_inside(triangle_vertices: &[vec2f; 3], point: vec2f) -> bool {
-	barycentric_coordinates(triangle_vertices, point).all(|v| (0.0..=1.0).contains(&v))
+    barycentric_coordinates(triangle_vertices, point).all(|v| (0.0..=1.0).contains(&v))
 }
 
 /// Interpolate between 3 vertex values, using the given scalar weights.
@@ -62,9 +62,9 @@ pub fn is_inside(triangle_vertices: &[vec2f; 3], point: vec2f) -> bool {
 #[inline]
 pub fn barycentric_interpolation<IN, WEIGHT, OUT>(v: vec3<IN>, weight: vec3<WEIGHT>) -> OUT
 where
-	IN: Mul<WEIGHT, Output = OUT> + Copy,
-	WEIGHT: Copy + AsPrimitive<f64>, // 👈 `AsPrimitive` to make sure that weights are scalars (rot strictly needed).
-	OUT: Add<Output = OUT> + Copy,
+    IN: Mul<WEIGHT, Output = OUT> + Copy,
+    WEIGHT: Copy + AsPrimitive<f64>, // 👈 `AsPrimitive` to make sure that weights are scalars (rot strictly needed).
+    OUT: Add<Output = OUT> + Copy,
 {
-	v[0] * weight[0] + v[1] * weight[1] + v[2] * weight[2]
+    v[0] * weight[0] + v[1] * weight[1] + v[2] * weight[2]
 }
