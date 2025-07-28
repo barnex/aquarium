@@ -7,6 +7,8 @@ pub struct MemKeep<T> {
     storage: Vec<Slot<T>>,
     freelist: RefCell<Vec<u32>>,
     garbage: RefCell<Vec<u32>>,
+    // TODO: high water mark for efficient iteration
+    // TODO: grow storage
 }
 
 struct Slot<T> {

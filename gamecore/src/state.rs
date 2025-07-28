@@ -104,25 +104,26 @@ impl State {
     }
 
     pub fn render(&self, out: &mut Output) {
-        
-        self.draw_tilemap( out);
-        
-        out.sprites.extend(self.kits.iter().map(|(sprite, pos, _)| (*sprite, *pos)));
 
+        self.draw_tilemap(out);
+
+        out.sprites.extend(self.kits.iter().map(|(sprite, pos, _)| (*sprite, *pos)));
         out.sprites.push((sprite!("frame24"), self.inputs.mouse_position()));
 
+
+        self.output_debug(out);
+    }
+
+    fn output_debug(&self, out: &mut Output) {
         writeln!(&mut out.debug, "frame: {}, now: {:.04}s, FPS: {:.01}", self.frame, self.curr_time_secs, 1.0 / self.dt_smooth).unwrap();
         writeln!(&mut out.debug, "sprites: {}", out.sprites.len()).unwrap();
         writeln!(&mut out.debug, "score {}", self.score).unwrap();
         //writeln!(&mut out.debug, "inputs {:?}", self.inputs).unwrap();
     }
-    
-    pub fn draw_tilemap(&self, out: &mut Output){
-        
-        for (pos, mat) in self.tilemap.enumerate_all(){
+
+    pub fn draw_tilemap(&self, out: &mut Output) {
+        for (pos, mat) in self.tilemap.enumerate_all() {
             out.sprites.push((mat.sprite(), pos * TILE_ISIZE));
         }
-
     }
-
 }
