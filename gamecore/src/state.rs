@@ -110,6 +110,7 @@ impl State {
         out.sprites.extend(self.kits.iter().map(|(sprite, pos, _)| (*sprite, *pos)));
         out.sprites.push((sprite!("frame24"), self.inputs.mouse_position()));
 
+        out.lines.push(Line::new(vec2(0,0), vec2(30, 20)));
 
         self.output_debug(out);
     }

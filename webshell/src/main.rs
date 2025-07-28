@@ -1,11 +1,11 @@
 mod event_listeners;
+mod graphics_postprocessing;
 mod http_get;
 mod js_commands;
 mod load_bitmap;
 mod resources;
 mod storage;
 mod time;
-mod graphics_postprocessing;
 
 use event_listeners::*;
 use http_get::*;
@@ -108,7 +108,7 @@ fn load_game() -> Option<State> {
     deserialize(APP_KEY).map_err(|e| log::error!("load_game {APP_KEY}: {e:?}")).ok()
 }
 
-pub async fn fallback_bitmap((r,g,b):(u8,u8,u8), size: u32) -> Result<ImageBitmap, JsValue> {
+pub async fn fallback_bitmap((r, g, b): (u8, u8, u8), size: u32) -> Result<ImageBitmap, JsValue> {
     let width = size as usize;
     let height = size as usize;
     let num_pixels = width * height;
@@ -216,7 +216,17 @@ fn draw(canvas: &HtmlCanvasElement, ctx: &CanvasRenderingContext2d, res: &mut Re
             ctx.draw_image_with_image_bitmap(bitmap, pos.x().as_(), pos.y().as_()).expect("draw");
         }
     }
-    
+
+    for line in &out.lines {
+        let color = line.color;
+        ctx.begin_path();
+        ctx.set_stroke_style_str(&format!("#{:02x}{:02x}{:02x}", color.r(), color.g(), color.b()));
+        ctx.set_line_width(line.width.as_());
+        ctx.move_to(line.start.x().as_(), line.start.y().as_());
+        ctx.line_to(line.end.x().as_(), line.end.y().as_());
+        ctx.stroke();
+    }
+
     //graphics_postprocessing::inverse_bloom(canvas, ctx);
     graphics_postprocessing::vignette(canvas, ctx);
 }
