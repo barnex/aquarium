@@ -1,5 +1,4 @@
 use crate::prelude::*;
-use std::fmt::Write;
 
 /// Accumulates input events since the last tick,
 /// allowing for queries like "is this key currently held down?".
@@ -8,14 +7,12 @@ use std::fmt::Write;
 /// and removes OS key repeats.
 #[derive(Debug, Default)]
 pub struct Inputs {
-    keymap: Keymap,
-
     buttons_pressed: HashSet<Button>,
     buttons_down: HashSet<Button>,
     buttons_released: HashSet<Button>,
 
     received_characters: String,
-    
+
     pub now_secs: f64,
 
     // updated by engine
@@ -24,12 +21,18 @@ pub struct Inputs {
     pub(crate) filtered_mouse_delta: vec2f,
     mouse_position: vec2i,
 
-
     mouse_wheel: f32,
 }
 
-#[derive(Serialize, Deserialize, Debug, Clone, Copy, Hash, PartialEq, Eq)]
+#[derive(Serialize, Deserialize, Debug, Clone, Copy, Hash, PartialEq, Eq, PartialOrd, Ord)]
 pub struct Button(pub Str16);
+
+#[macro_export]
+macro_rules! button {
+    ($arg:tt) => {
+        Button(str16!($arg))
+    };
+}
 
 impl Button {
     pub const SCREENSHOT: Self = Self(Str16::from_slice(b"F12\0\0\0\0\0\0\0\0\0\0\0\0\0"));
@@ -125,8 +128,8 @@ impl Inputs {
     }
 
     /// Record that this button was just pressed.
-    pub fn record_press(&mut self, button: Button) {
-        let button = self.keymap.map(button);
+    pub fn record_press(&mut self, keymap: &Keymap, button: Button) {
+        let button = keymap.map(button);
         if !self.buttons_down.contains(&button) {
             self.buttons_pressed.insert(button);
             self.buttons_down.insert(button);
@@ -134,8 +137,8 @@ impl Inputs {
     }
 
     /// Record that this button was just released.
-    pub fn record_release(&mut self, button: Button) {
-        let button = self.keymap.map(button);
+    pub fn record_release(&mut self, keymap: &Keymap, button: Button) {
+        let button = keymap.map(button);
         self.buttons_released.insert(button);
         self.buttons_down.remove(&button);
     }

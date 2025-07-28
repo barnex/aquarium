@@ -15,7 +15,6 @@ use resources::*;
 use storage::*;
 use time::*;
 
-use engine::*;
 use fixed_str::*;
 use gamecore::*;
 use vector::*;
@@ -77,7 +76,7 @@ async fn start() -> JsResult<()> {
     // 🌍 Main loop
     animation_loop(move |ctx| {
         state.inputs.now_secs = now_secs();
-        record_input_events(&mut state.inputs, &input_events);
+        record_input_events(&state.keymap, &mut state.inputs, &input_events);
 
         state.tick();
 
@@ -161,7 +160,7 @@ where
 }
 
 // take input events from queue and update Inputs state accordingly
-fn record_input_events(inputs: &mut Inputs, events: &Shared<VecDeque<InputEvent>>) {
+fn record_input_events(keymap: &Keymap, inputs: &mut Inputs, events: &Shared<VecDeque<InputEvent>>) {
     inputs.start_next_frame();
 
     for event in events.borrow_mut().drain(..) {
@@ -169,18 +168,18 @@ fn record_input_events(inputs: &mut Inputs, events: &Shared<VecDeque<InputEvent>
         match event {
             KeyDown(event) => {
                 if let Ok(key) = Str16::from_str(&event.key()) {
-                    inputs.record_press(Button(key))
+                    inputs.record_press(keymap, Button(key))
                 }
             }
             KeyUp(event) => {
                 if let Ok(key) = Str16::from_str(&event.key()) {
-                    inputs.record_release(Button(key))
+                    inputs.record_release(keymap, Button(key))
                 }
             }
             MouseDown(event) => {
                 match event.button() {
-                    0 => inputs.record_press(Button::MOUSE1),
-                    2 => inputs.record_press(Button::MOUSE2),
+                    0 => inputs.record_press(keymap, Button::MOUSE1),
+                    2 => inputs.record_press(keymap, Button::MOUSE2),
                     _ => (),
                 }
                 // ⚠️ use `offset_x` for relative position inside canvas
@@ -188,8 +187,8 @@ fn record_input_events(inputs: &mut Inputs, events: &Shared<VecDeque<InputEvent>
             }
             MouseUp(event) => {
                 match event.button() {
-                    0 => inputs.record_release(Button::MOUSE1),
-                    2 => inputs.record_release(Button::MOUSE2),
+                    0 => inputs.record_release(keymap, Button::MOUSE1),
+                    2 => inputs.record_release(keymap, Button::MOUSE2),
                     _ => (),
                 }
 

@@ -6,7 +6,6 @@ edition = "2024"
 [dependencies]
 anyhow = { workspace = true }
 core_util = { workspace = true }
-engine = { workspace = true }
 fixed_str = { workspace = true }
 geometry = { workspace = true }
 itertools = { workspace = true }
@@ -17,3 +16,4 @@ rand = { workspace = true }
 rand_chacha = { workspace = true }
 serde = { workspace = true }
 vector = { workspace = true }
+fnv = { workspace = true }

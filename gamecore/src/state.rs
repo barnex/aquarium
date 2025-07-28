@@ -2,17 +2,20 @@ use crate::prelude::*;
 
 #[derive(Serialize, Deserialize)]
 pub struct State {
+    pub keymap: Keymap,
     #[serde(skip)]
     pub inputs: Inputs,
     pub commands: VecDeque<String>,
 
     pub speed: u32,
-
     pub frame: u64,
+
     pub curr_time_secs: f64,
     pub dt: f64,
     pub dt_smooth: f64,
     pub score: u64, // 💀 remove
+
+    pub camera_pos: vec2i,
 
     pub kits: Vec<(Sprite, vec2i, vec2i)>,
     pub tilemap: Tilemap,
@@ -45,7 +48,9 @@ impl State {
         let kits = (0..8).map(|i| (sprites[i % N], vec2i(rng.gen_range(0..w), rng.gen_range(0..h)), vec2i(rng.gen_range(-3..=3), rng.gen_range(1..3)))).collect();
 
         Self {
+            keymap: make_keymap(),
             inputs: default(),
+
             commands: default(),
             tilemap: Tilemap::testmap(vec2u(32, 24)),
             speed: 1,
@@ -53,6 +58,7 @@ impl State {
             curr_time_secs: 0.0,
             dt: 1.0 / 60.0, // initial fps guess
             dt_smooth: 1.0 / 60.0,
+            camera_pos: default(),
             score: default(),
             kits,
         }
@@ -104,13 +110,12 @@ impl State {
     }
 
     pub fn render(&self, out: &mut Output) {
-
         self.draw_tilemap(out);
 
         out.sprites.extend(self.kits.iter().map(|(sprite, pos, _)| (*sprite, *pos)));
         out.sprites.push((sprite!("frame24"), self.inputs.mouse_position()));
 
-        out.lines.push(Line::new(vec2(0,0), vec2(30, 20)));
+        out.lines.push(Line::new(vec2(0, 0), vec2(30, 20)));
 
         self.output_debug(out);
     }
@@ -119,7 +124,8 @@ impl State {
         writeln!(&mut out.debug, "frame: {}, now: {:.04}s, FPS: {:.01}", self.frame, self.curr_time_secs, 1.0 / self.dt_smooth).unwrap();
         writeln!(&mut out.debug, "sprites: {}", out.sprites.len()).unwrap();
         writeln!(&mut out.debug, "score {}", self.score).unwrap();
-        //writeln!(&mut out.debug, "inputs {:?}", self.inputs).unwrap();
+        writeln!(&mut out.debug, "camera {:?}", self.camera_pos).unwrap();
+        writeln!(&mut out.debug, "down {:?}", self.inputs.iter_is_down().sorted().collect_vec()).unwrap();
     }
 
     pub fn draw_tilemap(&self, out: &mut Output) {
@@ -127,4 +133,17 @@ impl State {
             out.sprites.push((mat.sprite(), pos * TILE_ISIZE));
         }
     }
+}
+
+fn make_keymap() -> Keymap {
+    Keymap(
+        [
+            (button!("s"), K_CAM_LEFT), //_
+            (button!("e"), K_CAM_UP), //_
+            (button!("d"), K_CAM_DOWN), //_
+            (button!("f"), K_CAM_RIGHT), //_
+        ]
+        .into_iter()
+        .collect(),
+    )
 }

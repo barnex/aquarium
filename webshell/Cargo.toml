@@ -6,7 +6,6 @@ edition = "2024"
 [dependencies]
 base64 = { workspace = true }
 bincode = { workspace = true }
-engine = { workspace = true }
 fixed_str = { workspace = true }
 fnv = { workspace = true }
 gamecore = { workspace = true }
