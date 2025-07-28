@@ -67,6 +67,7 @@ impl State {
     pub fn tick(&mut self) {
         self.update_fps(); // 👈 FPS is gamespeed independent
         self.exec_commands(); // 👈 exec commands even when paused (speed 0)
+        self.control_camera();
 
         for _ in 0..self.speed {
             self.tick_once();
@@ -85,6 +86,8 @@ impl State {
             self.score += 1
         }
     }
+    
+    fn control_camera(&mut self){}
 
     fn bounce_kittens(&mut self) {
         let size = [480, 320];
