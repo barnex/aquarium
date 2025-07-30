@@ -211,21 +211,6 @@ fn draw(canvas: &HtmlCanvasElement, ctx: &CanvasRenderingContext2d, res: &mut Re
     ctx.set_image_smoothing_enabled(false); // crisp, pixellated sprites
 
     for Layer { sprites, lines, rectangles } in &out.layers {
-        for (sprite, pos) in sprites {
-            if let Some(bitmap) = res.get(sprite) {
-                ctx.draw_image_with_image_bitmap(bitmap, pos.x().as_(), pos.y().as_()).expect("draw");
-            }
-        }
-
-        for line in lines {
-            ctx.begin_path();
-            ctx.set_stroke_style_str(&line.color.hex());
-            ctx.set_line_width(line.width.as_());
-            ctx.move_to(line.start.x().as_(), line.start.y().as_());
-            ctx.line_to(line.end.x().as_(), line.end.y().as_());
-            ctx.stroke();
-        }
-
         for rect in rectangles {
             if rect.fill != RGBA::TRANSPARENT {
                 ctx.set_fill_style_str(&rect.fill.hex());
@@ -239,6 +224,21 @@ fn draw(canvas: &HtmlCanvasElement, ctx: &CanvasRenderingContext2d, res: &mut Re
                 // Offset by half a pixel to align pixel-perfect.
                 ctx.stroke_rect((rect.bounds.min.x() as f64) + 0.5, (rect.bounds.min.y() as f64) + 0.5, (rect.bounds.max.x() as f64) - 1.0, (rect.bounds.max.y() as f64) - 1.0);
             }
+        }
+
+        for (sprite, pos) in sprites {
+            if let Some(bitmap) = res.get(sprite) {
+                ctx.draw_image_with_image_bitmap(bitmap, pos.x().as_(), pos.y().as_()).expect("draw");
+            }
+        }
+
+        for line in lines {
+            ctx.begin_path();
+            ctx.set_stroke_style_str(&line.color.hex());
+            ctx.set_line_width(line.width.as_());
+            ctx.move_to(line.start.x().as_(), line.start.y().as_());
+            ctx.line_to(line.end.x().as_(), line.end.y().as_());
+            ctx.stroke();
         }
     }
 
