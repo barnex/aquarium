@@ -86,20 +86,20 @@ impl State {
             self.score += 1
         }
     }
-    
-    fn control_camera(&mut self){
+
+    fn control_camera(&mut self) {
         let mut delta = vec2::ZERO;
-        if self.inputs.is_down(K_CAM_DOWN){
-            delta += vec2(0, 1) ;
+        if self.inputs.is_down(K_CAM_DOWN) {
+            delta += vec2(0, 1);
         }
-        if self.inputs.is_down(K_CAM_UP){
-            delta += vec2(0, -1) ;
+        if self.inputs.is_down(K_CAM_UP) {
+            delta += vec2(0, -1);
         }
-        if self.inputs.is_down(K_CAM_LEFT){
-            delta += vec2(-1, 0) ;
+        if self.inputs.is_down(K_CAM_LEFT) {
+            delta += vec2(-1, 0);
         }
-        if self.inputs.is_down(K_CAM_RIGHT){
-            delta += vec2(1, 0) ;
+        if self.inputs.is_down(K_CAM_RIGHT) {
+            delta += vec2(1, 0);
         }
         let speed = 3;
         self.camera_pos += speed * delta;
@@ -129,13 +129,14 @@ impl State {
     }
 
     pub fn render(&self, out: &mut Output) {
-
         self.draw_tilemap(out);
 
         out.sprites.extend(self.kits.iter().map(|(sprite, pos, _)| (*sprite, *pos - self.camera_pos)));
         out.sprites.push((sprite!("frame24"), self.inputs.mouse_position()));
 
-        out.lines.push(Line::new(vec2(0, 0), vec2(30, 20)));
+        // test
+        out.push_line(Line::new(vec2(0, 0), vec2(30, 20)));
+        out.push_rect(Rectangle::new(Bounds::new(vec2(10, 10), vec2(74, 138)), RGBA::BLACK).with_fill(RGBA::WHITE));
 
         self.output_debug(out);
     }
@@ -154,4 +155,3 @@ impl State {
         }
     }
 }
-
