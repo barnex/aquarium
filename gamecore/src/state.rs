@@ -16,6 +16,8 @@ pub struct State {
     pub score: u64, // 💀 remove
 
     pub camera_pos: vec2i,
+    
+    pub ui: Ui,
 
     pub kits: Vec<(Sprite, vec2i, vec2i)>,
     pub tilemap: Tilemap,
@@ -59,6 +61,7 @@ impl State {
             dt: 1.0 / 60.0, // initial fps guess
             dt_smooth: 1.0 / 60.0,
             camera_pos: default(),
+            ui: Ui::new(),
             score: default(),
             kits,
         }
@@ -128,7 +131,7 @@ impl State {
         self.dt_smooth = lerp(self.dt_smooth, self.dt, 0.02);
     }
 
-    pub fn render(&self, out: &mut Output) {
+    pub fn render(&mut self, out: &mut Output) {
         self.draw_tilemap(out);
         
         out.new_layer();
@@ -140,7 +143,7 @@ impl State {
 
         out.new_layer();
 
-        draw_menus(out);
+        menu_ui(self, out);
 
         self.output_debug(out);
     }
