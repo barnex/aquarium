@@ -14,6 +14,4 @@ macro_rules! button {
 }
 
 impl Button {
-    pub const MOUSE1: Self = button!("Mouse1");
-    pub const MOUSE2: Self = button!("Mouse2");
 }
