@@ -27,7 +27,9 @@ impl Output {
         self.sprites.push((sprite, pos));
     }
 
-    pub fn push_line(&mut self, line: Line) {}
+    pub fn push_line(&mut self, line: Line) {
+        self.lines.push(line);
+    }
 
     pub fn push_rect(&mut self, rect: Rectangle) {
         self.rectangles.push(rect);

@@ -1,6 +1,6 @@
 use crate::prelude::*;
 
-#[derive(Copy, Clone, Serialize, Deserialize, Default, PartialEq, Eq, Hash)]
+#[derive(Copy, Clone, Serialize, Deserialize, Default, PartialEq, Eq, Hash, TryFromPrimitive)]
 #[repr(u8)]
 pub enum Mat {
     #[default]
@@ -14,6 +14,10 @@ pub enum Mat {
 }
 
 impl Mat {
+    
+    /// WARNING: ‼️ keep in sync with enum values.
+    pub const NUM_MAT: u8 = 7;
+    
     #[inline]
     pub fn as_usize(self) -> usize {
         self as usize

@@ -4,16 +4,18 @@ version = "1.0.0"
 edition = "2024"
 
 [dependencies]
+
 anyhow = { workspace = true }
 core_util = { workspace = true }
 fixed_str = { workspace = true }
+fnv = { workspace = true }
 geometry = { workspace = true }
 itertools = { workspace = true }
 log = { workspace = true }
 num-traits = { workspace = true }
+num_enum = { workspace = true }
 proc_macros = { workspace = true }
 rand = { workspace = true }
 rand_chacha = { workspace = true }
 serde = { workspace = true }
 vector = { workspace = true }
-fnv = { workspace = true }

@@ -134,9 +134,7 @@ impl State {
         out.sprites.extend(self.kits.iter().map(|(sprite, pos, _)| (*sprite, *pos - self.camera_pos)));
         out.sprites.push((sprite!("frame24"), self.inputs.mouse_position()));
 
-        // test
-        out.push_line(Line::new(vec2(0, 0), vec2(30, 20)));
-        out.push_rect(Rectangle::new(Bounds::new(vec2(10, 10), vec2(74, 138)), RGBA::BLACK).with_fill(RGBA::WHITE));
+        draw_menus(out);
 
         self.output_debug(out);
     }
