@@ -178,8 +178,8 @@ fn record_input_events(keymap: &Keymap, inputs: &mut Inputs, events: &Shared<Vec
             }
             MouseDown(event) => {
                 match event.button() {
-                    0 => inputs.record_press(keymap, Button::MOUSE1),
-                    2 => inputs.record_press(keymap, Button::MOUSE2),
+                    0 => inputs.record_press(keymap, K_MOUSE1),
+                    2 => inputs.record_press(keymap, K_MOUSE2),
                     _ => (),
                 }
                 // ⚠️ use `offset_x` for relative position inside canvas
@@ -187,8 +187,8 @@ fn record_input_events(keymap: &Keymap, inputs: &mut Inputs, events: &Shared<Vec
             }
             MouseUp(event) => {
                 match event.button() {
-                    0 => inputs.record_release(keymap, Button::MOUSE1),
-                    2 => inputs.record_release(keymap, Button::MOUSE2),
+                    0 => inputs.record_release(keymap, K_MOUSE1),
+                    2 => inputs.record_release(keymap, K_MOUSE2),
                     _ => (),
                 }
 

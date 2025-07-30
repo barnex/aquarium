@@ -8,4 +8,15 @@ pub const K_CAM_DOWN: Button = button!("cam_down");
 pub const K_CAM_LEFT: Button = button!("cam_left");
 pub const K_CAM_RIGHT: Button = button!("cam_right");
 
-pub fn default_keymap() -> () {}
+pub fn default_keymap() -> Keymap {
+    Keymap(
+        [
+            (button!("s"), K_CAM_LEFT),  //_
+            (button!("e"), K_CAM_UP),    //_
+            (button!("d"), K_CAM_DOWN),  //_
+            (button!("f"), K_CAM_RIGHT), //_
+        ]
+        .into_iter()
+        .collect(),
+    )
+}

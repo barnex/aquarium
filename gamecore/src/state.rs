@@ -48,7 +48,7 @@ impl State {
         let kits = (0..8).map(|i| (sprites[i % N], vec2i(rng.gen_range(0..w), rng.gen_range(0..h)), vec2i(rng.gen_range(-3..=3), rng.gen_range(1..3)))).collect();
 
         Self {
-            keymap: make_keymap(),
+            keymap: default_keymap(),
             inputs: default(),
 
             commands: default(),
@@ -155,15 +155,3 @@ impl State {
     }
 }
 
-fn make_keymap() -> Keymap {
-    Keymap(
-        [
-            (button!("s"), K_CAM_LEFT), //_
-            (button!("e"), K_CAM_UP), //_
-            (button!("d"), K_CAM_DOWN), //_
-            (button!("f"), K_CAM_RIGHT), //_
-        ]
-        .into_iter()
-        .collect(),
-    )
-}
