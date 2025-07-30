@@ -130,9 +130,15 @@ impl State {
 
     pub fn render(&self, out: &mut Output) {
         self.draw_tilemap(out);
+        
+        out.new_layer();
 
-        out.sprites.extend(self.kits.iter().map(|(sprite, pos, _)| (*sprite, *pos - self.camera_pos)));
-        out.sprites.push((sprite!("frame24"), self.inputs.mouse_position()));
+        for (kit, pos) in self.kits.iter().map(|(sprite, pos, _)| (*sprite, *pos - self.camera_pos)) {
+            out.push_sprite(kit, pos);
+        }
+        out.push_sprite(sprite!("frame24"), self.inputs.mouse_position());
+
+        out.new_layer();
 
         draw_menus(out);
 
@@ -141,7 +147,7 @@ impl State {
 
     fn output_debug(&self, out: &mut Output) {
         writeln!(&mut out.debug, "frame: {}, now: {:.04}s, FPS: {:.01}", self.frame, self.curr_time_secs, 1.0 / self.dt_smooth).unwrap();
-        writeln!(&mut out.debug, "sprites: {}", out.sprites.len()).unwrap();
+        //writeln!(&mut out.debug, "sprites: {}", out.sprites.len()).unwrap();
         writeln!(&mut out.debug, "score {}", self.score).unwrap();
         writeln!(&mut out.debug, "camera {:?}", self.camera_pos).unwrap();
         writeln!(&mut out.debug, "down {:?}", self.inputs.iter_is_down().sorted().collect_vec()).unwrap();
@@ -149,7 +155,7 @@ impl State {
 
     pub fn draw_tilemap(&self, out: &mut Output) {
         for (pos, mat) in self.tilemap.enumerate_all() {
-            out.sprites.push((mat.sprite(), pos * TILE_ISIZE - self.camera_pos));
+            out.push_sprite(mat.sprite(), pos * TILE_ISIZE - self.camera_pos);
         }
     }
 }

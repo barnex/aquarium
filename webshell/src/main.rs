@@ -210,33 +210,35 @@ fn request_animation_frame(anim_loop_clone: &Rc<RefCell<Option<Closure<dyn FnMut
 fn draw(canvas: &HtmlCanvasElement, ctx: &CanvasRenderingContext2d, res: &mut Resources, out: &Output) {
     ctx.set_image_smoothing_enabled(false); // crisp, pixellated sprites
 
-    for (sprite, pos) in &out.sprites {
-        if let Some(bitmap) = res.get(sprite) {
-            ctx.draw_image_with_image_bitmap(bitmap, pos.x().as_(), pos.y().as_()).expect("draw");
-        }
-    }
-
-    for line in &out.lines {
-        ctx.begin_path();
-        ctx.set_stroke_style_str(&line.color.hex());
-        ctx.set_line_width(line.width.as_());
-        ctx.move_to(line.start.x().as_(), line.start.y().as_());
-        ctx.line_to(line.end.x().as_(), line.end.y().as_());
-        ctx.stroke();
-    }
-
-    for rect in &out.rectangles {
-        if rect.fill != RGBA::TRANSPARENT {
-            ctx.set_fill_style_str(&rect.fill.hex());
-            ctx.fill_rect(rect.bounds.min.x().as_(), rect.bounds.min.y().as_(), rect.bounds.max.x().as_(), rect.bounds.max.y().as_());
+    for Layer { sprites, lines, rectangles } in &out.layers {
+        for (sprite, pos) in sprites {
+            if let Some(bitmap) = res.get(sprite) {
+                ctx.draw_image_with_image_bitmap(bitmap, pos.x().as_(), pos.y().as_()).expect("draw");
+            }
         }
 
-        if rect.stroke != RGBA::TRANSPARENT {
-            ctx.set_stroke_style_str(&rect.stroke.hex());
-            ctx.set_line_width(1.0);
-            // 👇 HTML Canvas aligns strokes (but not fills) to the edges of pixels instead of to the center.
-            // Offset by half a pixel to align pixel-perfect.
-            ctx.stroke_rect((rect.bounds.min.x() as f64) + 0.5, (rect.bounds.min.y() as f64) + 0.5, (rect.bounds.max.x() as f64) - 1.0, (rect.bounds.max.y() as f64) - 1.0);
+        for line in lines {
+            ctx.begin_path();
+            ctx.set_stroke_style_str(&line.color.hex());
+            ctx.set_line_width(line.width.as_());
+            ctx.move_to(line.start.x().as_(), line.start.y().as_());
+            ctx.line_to(line.end.x().as_(), line.end.y().as_());
+            ctx.stroke();
+        }
+
+        for rect in rectangles {
+            if rect.fill != RGBA::TRANSPARENT {
+                ctx.set_fill_style_str(&rect.fill.hex());
+                ctx.fill_rect(rect.bounds.min.x().as_(), rect.bounds.min.y().as_(), rect.bounds.max.x().as_(), rect.bounds.max.y().as_());
+            }
+
+            if rect.stroke != RGBA::TRANSPARENT {
+                ctx.set_stroke_style_str(&rect.stroke.hex());
+                ctx.set_line_width(1.0);
+                // 👇 HTML Canvas aligns strokes (but not fills) to the edges of pixels instead of to the center.
+                // Offset by half a pixel to align pixel-perfect.
+                ctx.stroke_rect((rect.bounds.min.x() as f64) + 0.5, (rect.bounds.min.y() as f64) + 0.5, (rect.bounds.max.x() as f64) - 1.0, (rect.bounds.max.y() as f64) - 1.0);
+            }
         }
     }
 
