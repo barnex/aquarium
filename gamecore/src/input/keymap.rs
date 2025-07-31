@@ -8,3 +8,9 @@ impl Keymap {
         self.0.get(&button).copied().unwrap_or(button)
     }
 }
+
+impl Default for Keymap {
+    fn default() -> Self {
+        default_keybindings()
+    }
+}

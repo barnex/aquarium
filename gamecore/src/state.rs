@@ -2,9 +2,12 @@ use crate::prelude::*;
 
 #[derive(Serialize, Deserialize)]
 pub struct State {
+    #[serde(skip)]
     pub keymap: Keymap,
+
     #[serde(skip)]
     pub inputs: Inputs,
+
     pub commands: VecDeque<String>,
 
     /// Screen/canvas size in pixels.
@@ -53,7 +56,7 @@ impl State {
         let kits = (0..8).map(|i| (sprites[i % N], vec2i(rng.gen_range(0..w), rng.gen_range(0..h)), vec2i(rng.gen_range(-3..=3), rng.gen_range(1..3)))).collect();
 
         Self {
-            keymap: default_keymap(),
+            keymap: default_keybindings(),
             inputs: default(),
 
             commands: default(),
@@ -104,8 +107,8 @@ impl State {
         }
     }
 
-    fn mouse_position_world(&self) -> vec2i{
-       self.inputs.mouse_position() + self.camera_pos 
+    fn mouse_position_world(&self) -> vec2i {
+        self.inputs.mouse_position() + self.camera_pos
     }
 
     fn control_camera(&mut self) {
