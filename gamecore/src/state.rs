@@ -147,7 +147,7 @@ impl State {
 
         out.new_layer();
 
-        menu_ui(self, out);
+        self.ui.update_and_draw(&mut self.inputs, out);
 
         self.output_debug(out);
     }
