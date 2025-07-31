@@ -14,11 +14,6 @@ impl Palette {
     where
         T: PartialEq + Copy, // TODO: don't require copy bound
     {
-        // out.new_layer();
-
-        let stride = self.button_size + self.margin;
-
-        //writeln!(&mut out.debug, "bounds: {bounds:?}");
 
         let size = vec2(self.cols, self.rows) * (self.button_size + self.margin) + self.margin;
         let rect = Bounds2D::with_size(self.pos, size.as_i32());

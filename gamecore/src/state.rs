@@ -19,7 +19,6 @@ pub struct State {
 
     pub camera_pos: vec2i,
 
-
     #[serde(skip)]
     pub ui: Ui,
 
@@ -76,6 +75,7 @@ impl State {
         self.update_fps(); // 👈 FPS is gamespeed independent
         self.exec_commands(); // 👈 exec commands even when paused (speed 0)
         self.control_camera();
+        self.doodle();
 
         for _ in 0..self.speed {
             self.tick_once();
@@ -93,6 +93,19 @@ impl State {
         if self.inputs.just_pressed(Button(str16!("b"))) {
             self.score += 1
         }
+    }
+
+    fn doodle(&mut self) {
+        if self.inputs.is_down(K_MOUSE1) {
+            if let Some(mat) = self.ui.tile_picker {
+                let idx = self.mouse_position_world() / TILE_ISIZE;
+                self.tilemap.set(idx, mat);
+            }
+        }
+    }
+
+    fn mouse_position_world(&self) -> vec2i{
+       self.inputs.mouse_position() + self.camera_pos 
     }
 
     fn control_camera(&mut self) {
