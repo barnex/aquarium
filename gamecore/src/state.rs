@@ -7,6 +7,8 @@ pub struct State {
     pub inputs: Inputs,
     pub commands: VecDeque<String>,
 
+    /// Screen/canvas size in pixels.
+    pub viewport_size: vec2u,
     pub speed: u32,
     pub frame: u64,
 
@@ -16,7 +18,7 @@ pub struct State {
     pub score: u64, // 💀 remove
 
     pub camera_pos: vec2i,
-    
+
     pub ui: Ui,
 
     pub kits: Vec<(Sprite, vec2i, vec2i)>,
@@ -54,7 +56,8 @@ impl State {
             inputs: default(),
 
             commands: default(),
-            tilemap: Tilemap::testmap(vec2u(32, 24)),
+            tilemap: Tilemap::testmap(vec2(32, 24)),
+            viewport_size: vec2(0, 0), // real value will be set by webshell.
             speed: 1,
             frame: 0,
             curr_time_secs: 0.0,
@@ -132,8 +135,9 @@ impl State {
     }
 
     pub fn render(&mut self, out: &mut Output) {
+        debug_assert!(self.viewport_size != vec2::ZERO);
         self.draw_tilemap(out);
-        
+
         out.new_layer();
 
         for (kit, pos) in self.kits.iter().map(|(sprite, pos, _)| (*sprite, *pos - self.camera_pos)) {
@@ -153,6 +157,7 @@ impl State {
         //writeln!(&mut out.debug, "sprites: {}", out.sprites.len()).unwrap();
         writeln!(&mut out.debug, "score {}", self.score).unwrap();
         writeln!(&mut out.debug, "camera {:?}", self.camera_pos).unwrap();
+        writeln!(&mut out.debug, "viewport_size {:?}", self.viewport_size).unwrap();
         writeln!(&mut out.debug, "down {:?}", self.inputs.iter_is_down().sorted().collect_vec()).unwrap();
     }
 
