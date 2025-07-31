@@ -1,6 +1,6 @@
 use crate::prelude::*;
 
-#[derive(Copy, Clone, Serialize, Deserialize, Default, PartialEq, Eq, Hash, TryFromPrimitive)]
+#[derive(Copy, Clone, Serialize, Deserialize, Default, PartialEq, Eq, Hash, TryFromPrimitive, Debug)]
 #[repr(u8)]
 pub enum Mat {
     #[default]

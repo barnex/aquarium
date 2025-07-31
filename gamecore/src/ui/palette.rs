@@ -10,7 +10,10 @@ pub(super) struct Palette {
 }
 
 impl Palette {
-    pub(super) fn ui(&self, inputs: &mut Inputs, out: &mut Output, selection: &mut Option<usize>, options: impl Iterator<Item = Sprite>) {
+    pub(super) fn ui<T>(&self, inputs: &mut Inputs, out: &mut Output, selection: &mut Option<T>, options: impl Iterator<Item = (T, Sprite)>)
+    where
+        T: PartialEq + Copy, // TODO: don't require copy bound
+    {
         // out.new_layer();
 
         let stride = self.button_size + self.margin;
@@ -19,20 +22,20 @@ impl Palette {
 
         let size = vec2(self.cols, self.rows) * (self.button_size + self.margin) + self.margin;
         let rect = Bounds2D::with_size(self.pos, size.as_i32());
-        out.push_rect(Rectangle::new(rect, RGBA(vec4u8(128,128,128,128))).with_fill(RGBA::WHITE));
+        out.push_rect(Rectangle::new(rect, RGBA(vec4u8(128, 128, 128, 128))).with_fill(RGBA::WHITE));
 
         let (mut row, mut col) = (0, 0);
-        for (i, sprite) in options.enumerate() {
+        for (v, sprite) in options {
             let pos = (vec2(col, row) * (self.button_size + self.margin) + self.margin).as_i32() + self.pos;
             out.push_sprite(sprite, pos);
 
             if inputs.just_pressed(K_MOUSE1) {
                 if Bounds2D::with_size(pos, self.button_size.as_i32()).contains(inputs.mouse_position()) {
-                    *selection = Some(i);
+                    *selection = Some(v);
                 }
             }
 
-            if selection == &Some(i) {
+            if selection == &Some(v) {
                 let min = pos - (self.margin as i32) + 1;
                 let max = pos + self.button_size.as_i32() + (self.margin as i32) - 1;
                 out.push_rect(Rectangle::new(Bounds2D::new(min, max), RGBA::TRANSPARENT).with_fill(RGBA::RED));

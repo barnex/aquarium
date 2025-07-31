@@ -1,12 +1,12 @@
 use super::internal::*;
 
 pub struct Ui {
-    pub tile_picker: Option<usize>,
+    pub tile_picker: Option<Mat>,
 }
 
 impl Ui {
     pub fn new() -> Self {
-        Self { tile_picker: Some(2) }
+        Self { tile_picker: Some(Mat::Block) }
     }
 
     pub fn update_and_draw(&mut self, inputs: &mut Inputs, out: &mut Output) {
@@ -22,7 +22,7 @@ impl Ui {
             button_size: vec2(TILE_SIZE, TILE_SIZE),
             margin,
         }
-        .ui(inputs, out, &mut self.tile_picker, (0..Mat::NUM_MAT).map(|i| Mat::try_from_primitive(i).unwrap().sprite()));
+        .ui(inputs, out, &mut self.tile_picker, (0..Mat::NUM_MAT).map(|i| Mat::try_from_primitive(i).unwrap()).map(|mat| (mat, mat.sprite())));
     }
 }
 
