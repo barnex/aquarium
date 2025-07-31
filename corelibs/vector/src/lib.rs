@@ -105,6 +105,8 @@ mod constructors {
 	#[inline(always)] pub const fn vec3u(x: u32, y: u32, z: u32        ) -> vec3u { Vector([x, y, z]) }
 	/// Constructor
 	#[inline(always)] pub const fn vec4u(x: u32, y: u32, z: u32, w: u32) -> vec4u { Vector([x, y, z, w]) }
+	/// Constructor
+	#[inline(always)] pub const fn vec4u8(x: u8, y: u8, z: u8, w: u8)    -> vec4u8{ Vector([x, y, z, w]) }
 
 	impl<T, const N: usize> Default for Vector<T, N>
 	where
@@ -312,20 +314,20 @@ mod conversions{
 
 impl<T, const N: usize> std::fmt::Debug for Vector<T, N>
 where
-	T: std::fmt::Debug,
+    T: std::fmt::Debug,
 {
-	fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-		f.debug_list().entries(self.0.iter()).finish()
-	}
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        f.debug_list().entries(self.0.iter()).finish()
+    }
 }
 
 impl<T, const N: usize> std::fmt::Display for Vector<T, N>
 where
-	T: std::fmt::Display + std::fmt::Debug,
+    T: std::fmt::Display + std::fmt::Debug,
 {
-	fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-		f.debug_list().entries(self.0.iter()).finish()
-	}
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        f.debug_list().entries(self.0.iter()).finish()
+    }
 }
 
 /// Internal-only trait implemented for supported vector sizes (2, 3, 4).
@@ -333,172 +335,172 @@ where
 /// is currently missing a few required methods like `zip`.
 /// (Also see <https://doc.rust-lang.org/std/primitive.array.html#method.each_mut>).
 pub trait SupportedSize<const N: usize> {
-	fn zip<T, U>(a: Vector<T, N>, b: Vector<U, N>) -> Vector<(T, U), N>;
-	fn reduce<T, F: Fn(T, T) -> T>(a: Vector<T, N>, f: F) -> T;
-	fn zip_mut_with<T, U, F: Fn(&mut T, U)>(a: &mut Vector<T, N>, b: Vector<U, N>, f: F);
+    fn zip<T, U>(a: Vector<T, N>, b: Vector<U, N>) -> Vector<(T, U), N>;
+    fn reduce<T, F: Fn(T, T) -> T>(a: Vector<T, N>, f: F) -> T;
+    fn zip_mut_with<T, U, F: Fn(&mut T, U)>(a: &mut Vector<T, N>, b: Vector<U, N>, f: F);
 
-	#[inline(always)]
-	fn for_each<T, F: Fn(&mut T)>(a: &mut Vector<T, N>, f: F) {
-		Self::zip_mut_with(a, Vector::splat(()), |ptr, ()| f(ptr))
-	}
+    #[inline(always)]
+    fn for_each<T, F: Fn(&mut T)>(a: &mut Vector<T, N>, f: F) {
+        Self::zip_mut_with(a, Vector::splat(()), |ptr, ()| f(ptr))
+    }
 
-	#[inline(always)]
-	fn zip_with<T, U, V, F: Fn(T, U) -> V>(a: Vector<T, N>, b: Vector<U, N>, f: F) -> Vector<V, N> {
-		Self::zip(a, b).map(|(a, b)| f(a, b))
-	}
+    #[inline(always)]
+    fn zip_with<T, U, V, F: Fn(T, U) -> V>(a: Vector<T, N>, b: Vector<U, N>, f: F) -> Vector<V, N> {
+        Self::zip(a, b).map(|(a, b)| f(a, b))
+    }
 }
 
 impl SupportedSize<2> for () {
-	#[inline(always)]
-	fn zip<T, U>(Vector([a0, a1]): Vector<T, 2>, Vector([b0, b1]): Vector<U, 2>) -> Vector<(T, U), 2> {
-		Vector([(a0, b0), (a1, b1)])
-	}
+    #[inline(always)]
+    fn zip<T, U>(Vector([a0, a1]): Vector<T, 2>, Vector([b0, b1]): Vector<U, 2>) -> Vector<(T, U), 2> {
+        Vector([(a0, b0), (a1, b1)])
+    }
 
-	#[inline(always)]
-	fn zip_mut_with<T, U, F: Fn(&mut T, U)>(a: &mut Vector<T, 2>, Vector([b0, b1]): Vector<U, 2>, f: F) {
-		f(&mut a[0], b0);
-		f(&mut a[1], b1);
-	}
+    #[inline(always)]
+    fn zip_mut_with<T, U, F: Fn(&mut T, U)>(a: &mut Vector<T, 2>, Vector([b0, b1]): Vector<U, 2>, f: F) {
+        f(&mut a[0], b0);
+        f(&mut a[1], b1);
+    }
 
-	#[inline(always)]
-	fn reduce<T, F: Fn(T, T) -> T>(Vector([a0, a1]): Vector<T, 2>, f: F) -> T {
-		f(a0, a1)
-	}
+    #[inline(always)]
+    fn reduce<T, F: Fn(T, T) -> T>(Vector([a0, a1]): Vector<T, 2>, f: F) -> T {
+        f(a0, a1)
+    }
 }
 
 impl SupportedSize<3> for () {
-	#[inline(always)]
-	fn zip<T, U>(Vector([a0, a1, a2]): Vector<T, 3>, Vector([b0, b1, b2]): Vector<U, 3>) -> Vector<(T, U), 3> {
-		Vector([(a0, b0), (a1, b1), (a2, b2)])
-	}
+    #[inline(always)]
+    fn zip<T, U>(Vector([a0, a1, a2]): Vector<T, 3>, Vector([b0, b1, b2]): Vector<U, 3>) -> Vector<(T, U), 3> {
+        Vector([(a0, b0), (a1, b1), (a2, b2)])
+    }
 
-	#[inline(always)]
-	fn zip_mut_with<T, U, F: Fn(&mut T, U)>(a: &mut Vector<T, 3>, Vector([b0, b1, b2]): Vector<U, 3>, f: F) {
-		f(&mut a[0], b0);
-		f(&mut a[1], b1);
-		f(&mut a[2], b2);
-	}
+    #[inline(always)]
+    fn zip_mut_with<T, U, F: Fn(&mut T, U)>(a: &mut Vector<T, 3>, Vector([b0, b1, b2]): Vector<U, 3>, f: F) {
+        f(&mut a[0], b0);
+        f(&mut a[1], b1);
+        f(&mut a[2], b2);
+    }
 
-	#[inline(always)]
-	fn reduce<T, F: Fn(T, T) -> T>(Vector([a0, a1, a2]): Vector<T, 3>, f: F) -> T {
-		f(f(a0, a1), a2)
-	}
+    #[inline(always)]
+    fn reduce<T, F: Fn(T, T) -> T>(Vector([a0, a1, a2]): Vector<T, 3>, f: F) -> T {
+        f(f(a0, a1), a2)
+    }
 }
 
 impl SupportedSize<4> for () {
-	#[inline(always)]
-	fn zip<T, U>(Vector([a0, a1, a2, a3]): Vector<T, 4>, Vector([b0, b1, b2, b3]): Vector<U, 4>) -> Vector<(T, U), 4> {
-		Vector([(a0, b0), (a1, b1), (a2, b2), (a3, b3)])
-	}
+    #[inline(always)]
+    fn zip<T, U>(Vector([a0, a1, a2, a3]): Vector<T, 4>, Vector([b0, b1, b2, b3]): Vector<U, 4>) -> Vector<(T, U), 4> {
+        Vector([(a0, b0), (a1, b1), (a2, b2), (a3, b3)])
+    }
 
-	#[inline(always)]
-	fn zip_mut_with<T, U, F: Fn(&mut T, U)>(a: &mut Vector<T, 4>, Vector([b0, b1, b2, b3]): Vector<U, 4>, f: F) {
-		f(&mut a[0], b0);
-		f(&mut a[1], b1);
-		f(&mut a[2], b2);
-		f(&mut a[3], b3);
-	}
+    #[inline(always)]
+    fn zip_mut_with<T, U, F: Fn(&mut T, U)>(a: &mut Vector<T, 4>, Vector([b0, b1, b2, b3]): Vector<U, 4>, f: F) {
+        f(&mut a[0], b0);
+        f(&mut a[1], b1);
+        f(&mut a[2], b2);
+        f(&mut a[3], b3);
+    }
 
-	#[inline(always)]
-	fn reduce<T, F: Fn(T, T) -> T>(Vector([a0, a1, a2, a3]): Vector<T, 4>, f: F) -> T {
-		f(f(a0, a1), f(a2, a3))
-	}
+    #[inline(always)]
+    fn reduce<T, F: Fn(T, T) -> T>(Vector([a0, a1, a2, a3]): Vector<T, 4>, f: F) -> T {
+        f(f(a0, a1), f(a2, a3))
+    }
 }
 
 /// Iterator-like method, but with fixed sizes where appropriate.
 mod iterator {
-	use super::*;
+    use super::*;
 
-	impl<T, const N: usize> Vector<T, N> {
-		/// Iterate over the elements.
-		#[inline]
-		pub fn iter(self) -> impl Iterator<Item = T> {
-			self.0.into_iter()
-		}
+    impl<T, const N: usize> Vector<T, N> {
+        /// Iterate over the elements.
+        #[inline]
+        pub fn iter(self) -> impl Iterator<Item = T> {
+            self.0.into_iter()
+        }
 
-		/// Map each element to `f(element)`.
-		#[inline]
-		pub fn map<U, F: Fn(T) -> U>(self, f: F) -> Vector<U, N> {
-			Vector(self.0.map(f))
-		}
-	}
+        /// Map each element to `f(element)`.
+        #[inline]
+        pub fn map<U, F: Fn(T) -> U>(self, f: F) -> Vector<U, N> {
+            Vector(self.0.map(f))
+        }
+    }
 
-	impl<T, const N: usize> Vector<T, N>
-	where
-		(): SupportedSize<N>,
-	{
-		/// Is `predicate` true for all elements?.
-		/// ```
-		/// # use vector::*;
-		/// assert!(vec2(1, 2).all(|v| v > 0));
-		/// ```
-		#[inline]
-		pub fn all<F: Fn(T) -> bool>(self, predicate: F) -> bool {
-			self.map(predicate).reduce(|a, b| a && b)
-		}
+    impl<T, const N: usize> Vector<T, N>
+    where
+        (): SupportedSize<N>,
+    {
+        /// Is `predicate` true for all elements?.
+        /// ```
+        /// # use vector::*;
+        /// assert!(vec2(1, 2).all(|v| v > 0));
+        /// ```
+        #[inline]
+        pub fn all<F: Fn(T) -> bool>(self, predicate: F) -> bool {
+            self.map(predicate).reduce(|a, b| a && b)
+        }
 
-		/// Is `predicate` true for any of the elements?.
-		/// ```
-		/// # use vector::*;
-		/// assert!(vec2(0, 1).any(|v| v == 0));
-		/// ```
-		#[inline]
-		pub fn any<F: Fn(T) -> bool>(self, f: F) -> bool {
-			self.map(f).reduce(|a, b| a || b)
-		}
+        /// Is `predicate` true for any of the elements?.
+        /// ```
+        /// # use vector::*;
+        /// assert!(vec2(0, 1).any(|v| v == 0));
+        /// ```
+        #[inline]
+        pub fn any<F: Fn(T) -> bool>(self, f: F) -> bool {
+            self.map(f).reduce(|a, b| a || b)
+        }
 
-		/// Reduce elements via `f` (assumed associative).
-		/// ```
-		/// # use vector::*;
-		/// # use std::ops::Add;
-		/// assert_eq!(vec3(1, 2, 3).reduce(i32::add), 6);
-		/// ```
-		#[inline]
-		pub fn reduce<F: Fn(T, T) -> T>(self, f: F) -> T {
-			<()>::reduce(self, f)
-		}
+        /// Reduce elements via `f` (assumed associative).
+        /// ```
+        /// # use vector::*;
+        /// # use std::ops::Add;
+        /// assert_eq!(vec3(1, 2, 3).reduce(i32::add), 6);
+        /// ```
+        #[inline]
+        pub fn reduce<F: Fn(T, T) -> T>(self, f: F) -> T {
+            <()>::reduce(self, f)
+        }
 
-		/// Zip `vec<T>`, `vec<U>` into `vec<(T, U)>`.
-		#[inline]
-		pub fn zip<U>(self, rhs: Vector<U, N>) -> Vector<(T, U), N> {
-			<()>::zip(self, rhs)
-		}
+        /// Zip `vec<T>`, `vec<U>` into `vec<(T, U)>`.
+        #[inline]
+        pub fn zip<U>(self, rhs: Vector<U, N>) -> Vector<(T, U), N> {
+            <()>::zip(self, rhs)
+        }
 
-		/// Zip and apply `f` to each resulting pair.
-		/// ```
-		/// # use vector::*;
-		/// # use std::ops::Add;
-		/// assert_eq!(vec2(1, 2).zip_with(vec2(3, 4), i32::add), vec2(4, 6));
-		/// ```
-		#[inline]
-		pub fn zip_with<U, V, F: Fn(T, U) -> V>(self, rhs: Vector<U, N>, f: F) -> Vector<V, N> {
-			<()>::zip_with(self, rhs, f)
-		}
-	}
+        /// Zip and apply `f` to each resulting pair.
+        /// ```
+        /// # use vector::*;
+        /// # use std::ops::Add;
+        /// assert_eq!(vec2(1, 2).zip_with(vec2(3, 4), i32::add), vec2(4, 6));
+        /// ```
+        #[inline]
+        pub fn zip_with<U, V, F: Fn(T, U) -> V>(self, rhs: Vector<U, N>, f: F) -> Vector<V, N> {
+            <()>::zip_with(self, rhs, f)
+        }
+    }
 
-	impl<T, const N: usize> Vector<T, N>
-	where
-		(): SupportedSize<N>,
-		T: Add<Output = T>,
-	{
-		/// Sum of elements.
-		#[inline]
-		pub fn sum(self) -> T {
-			self.reduce(T::add)
-		}
-	}
+    impl<T, const N: usize> Vector<T, N>
+    where
+        (): SupportedSize<N>,
+        T: Add<Output = T>,
+    {
+        /// Sum of elements.
+        #[inline]
+        pub fn sum(self) -> T {
+            self.reduce(T::add)
+        }
+    }
 
-	impl<T, const N: usize> Vector<T, N>
-	where
-		(): SupportedSize<N>,
-		T: Mul<Output = T>,
-	{
-		/// Product of elements.
-		#[inline]
-		pub fn product(self) -> T {
-			self.reduce(T::mul)
-		}
-	}
+    impl<T, const N: usize> Vector<T, N>
+    where
+        (): SupportedSize<N>,
+        T: Mul<Output = T>,
+    {
+        /// Product of elements.
+        #[inline]
+        pub fn product(self) -> T {
+            self.reduce(T::mul)
+        }
+    }
 }
 
 /// The indexing operator `[]`.
@@ -508,11 +510,11 @@ mod iterator {
 /// assert_eq!(vec3(1,2,3)[1], 2);
 /// ```
 impl<T, const N: usize> Index<usize> for Vector<T, N> {
-	type Output = T;
+    type Output = T;
 
-	fn index(&self, index: usize) -> &Self::Output {
-		&self.0[index]
-	}
+    fn index(&self, index: usize) -> &Self::Output {
+        &self.0[index]
+    }
 }
 
 /// The indexing operator `[]`.
@@ -523,9 +525,9 @@ impl<T, const N: usize> Index<usize> for Vector<T, N> {
 /// assert_eq!(v, vec2(0, 42))
 /// ```
 impl<T, const N: usize> IndexMut<usize> for Vector<T, N> {
-	fn index_mut(&mut self, index: usize) -> &mut Self::Output {
-		&mut self.0[index]
-	}
+    fn index_mut(&mut self, index: usize) -> &mut Self::Output {
+        &mut self.0[index]
+    }
 }
 
 /// The addition operator `+`.
@@ -536,14 +538,14 @@ impl<T, const N: usize> IndexMut<usize> for Vector<T, N> {
 /// ```
 impl<T, const N: usize> Add for Vector<T, N>
 where
-	(): SupportedSize<N>,
-	T: Add<Output = T>,
+    (): SupportedSize<N>,
+    T: Add<Output = T>,
 {
-	type Output = Self;
+    type Output = Self;
 
-	fn add(self, rhs: Self) -> Self::Output {
-		<()>::zip_with(self, rhs, T::add)
-	}
+    fn add(self, rhs: Self) -> Self::Output {
+        <()>::zip_with(self, rhs, T::add)
+    }
 }
 
 /// Vector + constant adds the constant to each component.
@@ -554,14 +556,14 @@ where
 /// ```
 impl<T, const N: usize> Add<T> for Vector<T, N>
 where
-	(): SupportedSize<N>,
-	T: Add<Output = T> + Copy,
+    (): SupportedSize<N>,
+    T: Add<Output = T> + Copy,
 {
-	type Output = Self;
+    type Output = Self;
 
-	fn add(self, rhs: T) -> Self::Output {
-		self + Vector::splat(rhs)
-	}
+    fn add(self, rhs: T) -> Self::Output {
+        self + Vector::splat(rhs)
+    }
 }
 
 /// The addition assignment operator `+=`.
@@ -573,13 +575,13 @@ where
 /// ```
 impl<T, const N: usize> AddAssign for Vector<T, N>
 where
-	(): SupportedSize<N>,
-	T: AddAssign,
+    (): SupportedSize<N>,
+    T: AddAssign,
 {
-	#[inline(always)]
-	fn add_assign(&mut self, rhs: Self) {
-		<()>::zip_mut_with(self, rhs, T::add_assign)
-	}
+    #[inline(always)]
+    fn add_assign(&mut self, rhs: Self) {
+        <()>::zip_mut_with(self, rhs, T::add_assign)
+    }
 }
 
 /// The division operator `/`.
@@ -589,15 +591,15 @@ where
 /// ```
 impl<T, const N: usize> Div for Vector<T, N>
 where
-	(): SupportedSize<N>,
-	T: Div<Output = T>,
+    (): SupportedSize<N>,
+    T: Div<Output = T>,
 {
-	type Output = Vector<T, N>;
+    type Output = Vector<T, N>;
 
-	#[inline(always)]
-	fn div(self, rhs: Self) -> Self::Output {
-		<()>::zip_with(self, rhs, T::div)
-	}
+    #[inline(always)]
+    fn div(self, rhs: Self) -> Self::Output {
+        <()>::zip_with(self, rhs, T::div)
+    }
 }
 
 /// The division operator `/`.
@@ -607,15 +609,15 @@ where
 /// ```
 impl<T, const N: usize> Div<T> for Vector<T, N>
 where
-	(): SupportedSize<N>,
-	T: Div<Output = T> + Copy,
+    (): SupportedSize<N>,
+    T: Div<Output = T> + Copy,
 {
-	type Output = Vector<T, N>;
+    type Output = Vector<T, N>;
 
-	#[inline(always)]
-	fn div(self, rhs: T) -> Self::Output {
-		self.map(|v| v / rhs)
-	}
+    #[inline(always)]
+    fn div(self, rhs: T) -> Self::Output {
+        self.map(|v| v / rhs)
+    }
 }
 
 /// The division assignment operator `/=`.
@@ -627,13 +629,13 @@ where
 /// ```
 impl<T, const N: usize> DivAssign for Vector<T, N>
 where
-	(): SupportedSize<N>,
-	T: DivAssign,
+    (): SupportedSize<N>,
+    T: DivAssign,
 {
-	#[inline(always)]
-	fn div_assign(&mut self, rhs: Self) {
-		<()>::zip_mut_with(self, rhs, T::div_assign)
-	}
+    #[inline(always)]
+    fn div_assign(&mut self, rhs: Self) {
+        <()>::zip_mut_with(self, rhs, T::div_assign)
+    }
 }
 
 /// The division assignment operator `/=`.
@@ -645,13 +647,13 @@ where
 /// ```
 impl<T, const N: usize> DivAssign<T> for Vector<T, N>
 where
-	(): SupportedSize<N>,
-	T: DivAssign + Copy,
+    (): SupportedSize<N>,
+    T: DivAssign + Copy,
 {
-	#[inline(always)]
-	fn div_assign(&mut self, rhs: T) {
-		<()>::for_each(self, |v| *v /= rhs)
-	}
+    #[inline(always)]
+    fn div_assign(&mut self, rhs: T) {
+        <()>::for_each(self, |v| *v /= rhs)
+    }
 }
 
 /// The multiplication operator `*`.
@@ -662,15 +664,15 @@ where
 /// ```
 impl<T, const N: usize> Mul<Self> for Vector<T, N>
 where
-	(): SupportedSize<N>,
-	T: Mul<Output = T>,
+    (): SupportedSize<N>,
+    T: Mul<Output = T>,
 {
-	type Output = Vector<T, N>;
+    type Output = Vector<T, N>;
 
-	#[inline(always)]
-	fn mul(self, rhs: Self) -> Self::Output {
-		<()>::zip_with(self, rhs, T::mul)
-	}
+    #[inline(always)]
+    fn mul(self, rhs: Self) -> Self::Output {
+        <()>::zip_with(self, rhs, T::mul)
+    }
 }
 
 /// The multiplication operator `*`.
@@ -681,15 +683,15 @@ where
 /// ```
 impl<T, const N: usize> Mul<T> for Vector<T, N>
 where
-	(): SupportedSize<N>,
-	T: Mul<Output = T> + Copy,
+    (): SupportedSize<N>,
+    T: Mul<Output = T> + Copy,
 {
-	type Output = Vector<T, N>;
+    type Output = Vector<T, N>;
 
-	#[inline(always)]
-	fn mul(self, rhs: T) -> Self::Output {
-		self.map(|v| v * rhs)
-	}
+    #[inline(always)]
+    fn mul(self, rhs: T) -> Self::Output {
+        self.map(|v| v * rhs)
+    }
 }
 
 /// Left-multiply primitive types (f32,...) with `vec`. E.g. `2 * vec3(1, 2, 3)`. 
@@ -723,13 +725,13 @@ impl<const N: usize> Mul<Vector<i8 , N>> for i8  { type Output = Vector<i8 , N>;
 /// ```
 impl<T, const N: usize> MulAssign for Vector<T, N>
 where
-	(): SupportedSize<N>,
-	T: MulAssign,
+    (): SupportedSize<N>,
+    T: MulAssign,
 {
-	#[inline(always)]
-	fn mul_assign(&mut self, rhs: Self) {
-		<()>::zip_mut_with(self, rhs, T::mul_assign)
-	}
+    #[inline(always)]
+    fn mul_assign(&mut self, rhs: Self) {
+        <()>::zip_mut_with(self, rhs, T::mul_assign)
+    }
 }
 
 /// The multiplication assignment operator `*=`.
@@ -741,13 +743,13 @@ where
 /// ```
 impl<T, const N: usize> MulAssign<T> for Vector<T, N>
 where
-	(): SupportedSize<N>,
-	T: MulAssign + Copy,
+    (): SupportedSize<N>,
+    T: MulAssign + Copy,
 {
-	#[inline(always)]
-	fn mul_assign(&mut self, rhs: T) {
-		<()>::for_each(self, |v| *v *= rhs)
-	}
+    #[inline(always)]
+    fn mul_assign(&mut self, rhs: T) {
+        <()>::for_each(self, |v| *v *= rhs)
+    }
 }
 
 /// The unary negation operator `-`.
@@ -757,15 +759,15 @@ where
 /// ```
 impl<T, const N: usize> Neg for Vector<T, N>
 where
-	(): SupportedSize<N>,
-	T: Neg<Output = T>,
+    (): SupportedSize<N>,
+    T: Neg<Output = T>,
 {
-	type Output = Vector<T, N>;
+    type Output = Vector<T, N>;
 
-	#[inline(always)]
-	fn neg(self) -> Self::Output {
-		self.map(T::neg)
-	}
+    #[inline(always)]
+    fn neg(self) -> Self::Output {
+        self.map(T::neg)
+    }
 }
 
 /// The subtraction operator `-`.
@@ -776,15 +778,15 @@ where
 /// ```
 impl<T, const N: usize> Sub for Vector<T, N>
 where
-	(): SupportedSize<N>,
-	T: Sub<Output = T>,
+    (): SupportedSize<N>,
+    T: Sub<Output = T>,
 {
-	type Output = Vector<T, N>;
+    type Output = Vector<T, N>;
 
-	#[inline(always)]
-	fn sub(self, rhs: Self) -> Self::Output {
-		<()>::zip_with(self, rhs, T::sub)
-	}
+    #[inline(always)]
+    fn sub(self, rhs: Self) -> Self::Output {
+        <()>::zip_with(self, rhs, T::sub)
+    }
 }
 
 /// Vector - constant subtracts the constant from each component.
@@ -795,14 +797,14 @@ where
 /// ```
 impl<T, const N: usize> Sub<T> for Vector<T, N>
 where
-	(): SupportedSize<N>,
-	T: Sub<Output = T> + Copy,
+    (): SupportedSize<N>,
+    T: Sub<Output = T> + Copy,
 {
-	type Output = Self;
+    type Output = Self;
 
-	fn sub(self, rhs: T) -> Self::Output {
-		self - Vector::splat(rhs)
-	}
+    fn sub(self, rhs: T) -> Self::Output {
+        self - Vector::splat(rhs)
+    }
 }
 
 /// The addition assignment operator `+=`.
@@ -814,220 +816,212 @@ where
 /// ```
 impl<T, const N: usize> SubAssign for Vector<T, N>
 where
-	(): SupportedSize<N>,
-	T: SubAssign,
+    (): SupportedSize<N>,
+    T: SubAssign,
 {
-	#[inline(always)]
-	fn sub_assign(&mut self, rhs: Self) {
-		<()>::zip_mut_with(self, rhs, T::sub_assign)
-	}
+    #[inline(always)]
+    fn sub_assign(&mut self, rhs: Self) {
+        <()>::zip_mut_with(self, rhs, T::sub_assign)
+    }
 }
 
 impl<T, const N: usize> Vector<T, N>
 where
-	(): SupportedSize<N>,
-	T: Add<Output = T> + Mul<Output = T> + Copy,
+    (): SupportedSize<N>,
+    T: Add<Output = T> + Mul<Output = T> + Copy,
 {
-	/// The dot (inner) product of two vectors.
-	/// ```
-	/// # use vector::*;
-	/// assert_eq!(vec2(2, 3).dot(vec2(4, 5)), 23);
-	/// assert_eq!(vec3(1, 2, 3).dot(vec3(0, 0, 4)), 12);
-	/// assert_eq!(vec4(1, 2, 3, 4).dot(vec4(0, 1, 0, 0)), 2);
-	/// ```
-	#[inline]
-	pub fn dot(self, rhs: Self) -> T {
-		(self * rhs).sum()
-	}
+    /// The dot (inner) product of two vectors.
+    /// ```
+    /// # use vector::*;
+    /// assert_eq!(vec2(2, 3).dot(vec2(4, 5)), 23);
+    /// assert_eq!(vec3(1, 2, 3).dot(vec3(0, 0, 4)), 12);
+    /// assert_eq!(vec4(1, 2, 3, 4).dot(vec4(0, 1, 0, 0)), 2);
+    /// ```
+    #[inline]
+    pub fn dot(self, rhs: Self) -> T {
+        (self * rhs).sum()
+    }
 
-	/// Length squared.
-	/// ```
-	/// # use vector::*;
-	/// assert_eq!(vec2(3, 4).len2(), 25);
-	/// ```
-	#[inline]
-	pub fn len2(self) -> T {
-		self.dot(self)
-	}
+    /// Length squared.
+    /// ```
+    /// # use vector::*;
+    /// assert_eq!(vec2(3, 4).len2(), 25);
+    /// ```
+    #[inline]
+    pub fn len2(self) -> T {
+        self.dot(self)
+    }
 }
 
 impl<T, const N: usize> Vector<T, N>
 where
-	(): SupportedSize<N>,
-	T: Add<Output = T> + Mul<Output = T> + Sub<Output = T> + Copy,
+    (): SupportedSize<N>,
+    T: Add<Output = T> + Mul<Output = T> + Sub<Output = T> + Copy,
 {
-	/// Distance between two points, squared
-	/// ```
-	/// # use vector::*;
-	/// assert_eq!(vec2i(3, 4).distance_squared(vec2i(2, 4)), 1);
-	/// ```
-	#[inline]
-	pub fn distance_squared(self, rhs: Self) -> T {
-		(self - rhs).len2()
-	}
+    /// Distance between two points, squared
+    /// ```
+    /// # use vector::*;
+    /// assert_eq!(vec2i(3, 4).distance_squared(vec2i(2, 4)), 1);
+    /// ```
+    #[inline]
+    pub fn distance_squared(self, rhs: Self) -> T {
+        (self - rhs).len2()
+    }
 }
 
 impl<T, const N: usize> Vector<T, N>
 where
-	(): SupportedSize<N>,
-	T: Float,
+    (): SupportedSize<N>,
+    T: Float,
 {
-	/// Length (norm) of a vector.
-	/// ```
-	/// # use vector::*;
-	/// assert_eq!(vec2f(3.0, 4.0).len(), 5.0);
-	/// assert_eq!(vec3d(0.0, 3.0, 4.0).len(), 5.0);
-	/// ```
-	#[inline]
-	pub fn len(self) -> T {
-		self.len2().sqrt()
-	}
+    /// Length (norm) of a vector.
+    /// ```
+    /// # use vector::*;
+    /// assert_eq!(vec2f(3.0, 4.0).len(), 5.0);
+    /// assert_eq!(vec3d(0.0, 3.0, 4.0).len(), 5.0);
+    /// ```
+    #[inline]
+    pub fn len(self) -> T {
+        self.len2().sqrt()
+    }
 
-	/// Distance between two points.
-	/// ```
-	/// # use vector::*;
-	/// assert_eq!(vec2f(3.0, 4.0).distance_to(vec2f(2.0, 4.0)), 1.0);
-	/// ```
-	#[inline]
-	pub fn distance_to(self, rhs: Self) -> T {
-		(self - rhs).len()
-	}
+    /// Distance between two points.
+    /// ```
+    /// # use vector::*;
+    /// assert_eq!(vec2f(3.0, 4.0).distance_to(vec2f(2.0, 4.0)), 1.0);
+    /// ```
+    #[inline]
+    pub fn distance_to(self, rhs: Self) -> T {
+        (self - rhs).len()
+    }
 
-	/// Vector with same direction but length normalized to 1,
-	/// unless length was zero.
-	/// ```
-	/// # use vector::*;
-	/// assert_eq!(vec3(0.0, 3.0, 4.0).normalized(), vec3(0.0, 3.0, 4.0) / 5.0);
-	/// assert_eq!(vec2(0.0, 0.0).normalized(), vec2(0.0, 0.0));
-	/// ```
-	#[must_use]
-	#[inline]
-	pub fn normalized(self) -> Self {
-		let len = self.len();
-		if len == T::zero() {
-			self
-		} else {
-			self / len
-		}
-	}
+    /// Vector with same direction but length normalized to 1,
+    /// unless length was zero.
+    /// ```
+    /// # use vector::*;
+    /// assert_eq!(vec3(0.0, 3.0, 4.0).normalized(), vec3(0.0, 3.0, 4.0) / 5.0);
+    /// assert_eq!(vec2(0.0, 0.0).normalized(), vec2(0.0, 0.0));
+    /// ```
+    #[must_use]
+    #[inline]
+    pub fn normalized(self) -> Self {
+        let len = self.len();
+        if len == T::zero() { self } else { self / len }
+    }
 
-	/// Like `normalized`, but in-place.
-	#[inline]
-	pub fn normalize(&mut self) {
-		*self = self.normalized()
-	}
+    /// Like `normalized`, but in-place.
+    #[inline]
+    pub fn normalize(&mut self) {
+        *self = self.normalized()
+    }
 
-	#[inline]
-	pub fn is_finite(self) -> bool {
-		self.all(|v| v.is_finite())
-	}
+    #[inline]
+    pub fn is_finite(self) -> bool {
+        self.all(|v| v.is_finite())
+    }
 }
 
 impl<T> vec3<T>
 where
-	T: Copy + Mul<T, Output = T> + Sub<T, Output = T>,
+    T: Copy + Mul<T, Output = T> + Sub<T, Output = T>,
 {
-	/// Cross product.
-	/// ```
-	/// # use vector::*;
-	/// assert_eq!(vec3(1,0,0).cross(vec3(0,1,0)), vec3(0,0,1));
-	/// ```
-	#[inline]
-	pub fn cross(self, rhs: Self) -> Self {
-		Self([
-			self.y() * rhs.z() - self.z() * rhs.y(),
-			self.z() * rhs.x() - self.x() * rhs.z(),
-			self.x() * rhs.y() - self.y() * rhs.x(),
-		])
-	}
+    /// Cross product.
+    /// ```
+    /// # use vector::*;
+    /// assert_eq!(vec3(1,0,0).cross(vec3(0,1,0)), vec3(0,0,1));
+    /// ```
+    #[inline]
+    pub fn cross(self, rhs: Self) -> Self {
+        Self([self.y() * rhs.z() - self.z() * rhs.y(), self.z() * rhs.x() - self.x() * rhs.z(), self.x() * rhs.y() - self.y() * rhs.x()])
+    }
 }
 
 impl<T> vec2<T>
 where
-	T: Copy + Mul<T, Output = T> + Sub<T, Output = T> + Number,
+    T: Copy + Mul<T, Output = T> + Sub<T, Output = T> + Number,
 {
-	/// Cross product.
-	/// ```
-	/// # use vector::*;
-	/// assert_eq!(vec2(1,0).cross(vec2(0,1)), 1);
-	/// ```
-	#[inline]
-	pub fn cross(self, rhs: Self) -> T {
-		self.append(T::ZERO).cross(rhs.append(T::ZERO)).z()
-	}
+    /// Cross product.
+    /// ```
+    /// # use vector::*;
+    /// assert_eq!(vec2(1,0).cross(vec2(0,1)), 1);
+    /// ```
+    #[inline]
+    pub fn cross(self, rhs: Self) -> T {
+        self.append(T::ZERO).cross(rhs.append(T::ZERO)).z()
+    }
 }
 
 impl<const N: usize> Vector<f32, N>
 where
-	(): SupportedSize<N>,
+    (): SupportedSize<N>,
 {
-	#[inline]
-	pub fn floor(self) -> Vector<i32, N> {
-		self.map(|v| v.floor() as i32)
-	}
+    #[inline]
+    pub fn floor(self) -> Vector<i32, N> {
+        self.map(|v| v.floor() as i32)
+    }
 
-	#[inline]
-	pub fn round(self) -> Vector<i32, N> {
-		self.map(|v| v.round() as i32)
-	}
+    #[inline]
+    pub fn round(self) -> Vector<i32, N> {
+        self.map(|v| v.round() as i32)
+    }
 }
 
 impl<T, const N: usize> Vector<T, N>
 where
-	T: PartialOrd,
+    T: PartialOrd,
 {
-	/// Index of the largest element.
-	/// ```
-	/// # use vector::*;
-	/// assert_eq!(vec3(1,0,0).argmax(), 0);
-	/// assert_eq!(vec3(0,1,0).argmax(), 1);
-	/// assert_eq!(vec3(0,0,1).argmax(), 2);
-	/// assert_eq!(vec4(0,0,0,1).argmax(), 3);
-	/// ```
-	pub fn argmax(&self) -> usize {
-		let mut arg = 0;
-		for i in 1..N {
-			if self[i] > self[arg] {
-				arg = i
-			}
-		}
-		arg
-	}
+    /// Index of the largest element.
+    /// ```
+    /// # use vector::*;
+    /// assert_eq!(vec3(1,0,0).argmax(), 0);
+    /// assert_eq!(vec3(0,1,0).argmax(), 1);
+    /// assert_eq!(vec3(0,0,1).argmax(), 2);
+    /// assert_eq!(vec4(0,0,0,1).argmax(), 3);
+    /// ```
+    pub fn argmax(&self) -> usize {
+        let mut arg = 0;
+        for i in 1..N {
+            if self[i] > self[arg] {
+                arg = i
+            }
+        }
+        arg
+    }
 }
 
 impl<T, const N: usize> std::iter::Sum for Vector<T, N>
 where
-	Vector<T, N>: Add<Output = Vector<T, N>> + Default,
+    Vector<T, N>: Add<Output = Vector<T, N>> + Default,
 {
-	fn sum<I: Iterator<Item = Self>>(iter: I) -> Self {
-		iter.reduce(|a, b| a + b).unwrap_or_default()
-	}
+    fn sum<I: Iterator<Item = Self>>(iter: I) -> Self {
+        iter.reduce(|a, b| a + b).unwrap_or_default()
+    }
 }
 
 // As of 2024, serde does not support [T;N] for arbitrary N (https://github.com/serde-rs/serde/issues/1937).
 // When supported, these impls can be replaced by #[derive].
 impl<T, const N: usize> Serialize for Vector<T, N>
 where
-	[T; N]: Serialize,
+    [T; N]: Serialize,
 {
-	fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
-	where
-		S: serde::Serializer,
-	{
-		self.0.serialize(serializer)
-	}
+    fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
+    where
+        S: serde::Serializer,
+    {
+        self.0.serialize(serializer)
+    }
 }
 
 impl<'de, T, const N: usize> Deserialize<'de> for Vector<T, N>
 where
-	[T; N]: Deserialize<'de>,
+    [T; N]: Deserialize<'de>,
 {
-	fn deserialize<D>(deserializer: D) -> Result<Self, D::Error>
-	where
-		D: serde::Deserializer<'de>,
-	{
-		Ok(Self(Deserialize::deserialize(deserializer)?))
-	}
+    fn deserialize<D>(deserializer: D) -> Result<Self, D::Error>
+    where
+        D: serde::Deserializer<'de>,
+    {
+        Ok(Self(Deserialize::deserialize(deserializer)?))
+    }
 }
 
 unsafe impl<T, const N: usize> Zeroable for Vector<T, N> where T: Pod + Zeroable {}

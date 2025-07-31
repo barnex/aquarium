@@ -19,6 +19,8 @@ pub struct State {
 
     pub camera_pos: vec2i,
 
+
+    #[serde(skip)]
     pub ui: Ui,
 
     pub kits: Vec<(Sprite, vec2i, vec2i)>,
@@ -159,6 +161,7 @@ impl State {
         writeln!(&mut out.debug, "camera {:?}", self.camera_pos).unwrap();
         writeln!(&mut out.debug, "viewport_size {:?}", self.viewport_size).unwrap();
         writeln!(&mut out.debug, "down {:?}", self.inputs.iter_is_down().sorted().collect_vec()).unwrap();
+        writeln!(&mut out.debug, "tile_picker {:?}", self.ui.tile_picker).unwrap();
     }
 
     pub fn draw_tilemap(&self, out: &mut Output) {

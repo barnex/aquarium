@@ -1,10 +1,10 @@
 use crate::prelude::*;
 
 #[derive(Debug, PartialEq, Eq, Hash, Clone, Copy)]
-pub struct RGB(vec3u8);
+pub struct RGB(pub vec3u8);
 
 #[derive(Debug, PartialEq, Eq, Hash, Clone, Copy)]
-pub struct RGBA(vec4u8);
+pub struct RGBA(pub vec4u8);
 
 impl RGB {
     pub const BLACK: Self = Self(vec3(0, 0, 0));
@@ -25,6 +25,10 @@ impl RGB {
 
 impl RGBA {
     pub const BLACK: Self = Self(vec4(0, 0, 0, 255));
+    pub const RED: Self = Self(vec4(255, 0, 0, 255));
+    pub const YELLOW: Self = Self(vec4(255, 255, 0, 255));
+    pub const GREEN: Self = Self(vec4(0, 255, 0, 255));
+    pub const BLUE: Self = Self(vec4(0, 0, 255, 255));
     pub const WHITE: Self = Self(vec4(255,255, 255, 255));
     pub const TRANSPARENT: Self = Self(vec4(0, 0, 0, 0));
 
