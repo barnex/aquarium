@@ -211,7 +211,7 @@ fn request_animation_frame(anim_loop_clone: &Rc<RefCell<Option<Closure<dyn FnMut
 fn draw(canvas: &HtmlCanvasElement, ctx: &CanvasRenderingContext2d, res: &mut Resources, out: &Output) {
     ctx.set_image_smoothing_enabled(false); // crisp, pixellated sprites
 
-    for Layer { sprites, lines, rectangles } in &out.layers {
+    for (i,Layer { sprites, lines, rectangles }) in out.layers.iter().enumerate() {
         for rect in rectangles {
             if rect.fill != RGBA::TRANSPARENT {
                 ctx.set_fill_style_str(&rect.fill.hex());
