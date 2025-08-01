@@ -2,6 +2,10 @@ use crate::prelude::*;
 
 #[derive(Serialize, Deserialize)]
 pub struct State {
+    // 🌍 game world
+    pub tilemap: Tilemap,
+    pub buildings: Vec<Building>,
+
     // 🕣 timekeeping
     pub frame: u64,
     pub now_secs: f64,
@@ -16,9 +20,6 @@ pub struct State {
     pub commands: VecDeque<String>,
     #[serde(skip)]
     pub keymap: Keymap,
-
-    // 🌍 game world
-    pub tilemap: Tilemap,
 
     // ⏯️ UI
     #[serde(skip)]
@@ -38,7 +39,10 @@ pub const TILE_ISIZE: i32 = TILE_SIZE as i32;
 
 impl State {
     pub fn new() -> Self {
+        let buildings = vec![Building { typ: BuildingTyp::HQ, tile: vec2(12, 8) }];
+
         Self {
+            buildings,
             camera_pos: default(),
             commands: default(),
             now_secs: 0.0,
@@ -79,9 +83,22 @@ impl State {
         // Note: ⚠️ UI already rendered (may consume input events)
 
         self.draw_tilemap();
+        self.draw_buildings();
         self.draw_sprites();
         self.draw_cursor();
         self.output_debug();
+    }
+
+    pub fn draw_tilemap(&mut self) {
+        for (pos, mat) in self.tilemap.enumerate_all() {
+            self.out.push_sprite(L_TILES, mat.sprite(), pos * TILE_ISIZE - self.camera_pos);
+        }
+    }
+
+    pub fn draw_buildings(&mut self) {
+        for building in &self.buildings {
+            self.out.push_sprite(L_SPRITES, building.typ.sprite(), building.tile * TILE_ISIZE - self.camera_pos);
+        }
     }
 
     fn draw_cursor(&mut self) {
@@ -92,12 +109,6 @@ impl State {
         //for (kit, pos) in self.kits.iter().map(|(sprite, pos, _)| (*sprite, *pos - self.camera_pos)) {
         //    self.out.push_sprite(L_SPRITES, kit, pos);
         //}
-    }
-
-    pub fn draw_tilemap(&mut self) {
-        for (pos, mat) in self.tilemap.enumerate_all() {
-            self.out.push_sprite(L_TILES, mat.sprite(), pos * TILE_ISIZE - self.camera_pos);
-        }
     }
 
     fn tick_once(&mut self) {
