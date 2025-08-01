@@ -11,7 +11,6 @@ pub struct Inputs {
     buttons_down: HashSet<Button>,
     buttons_released: HashSet<Button>,
 
-    pub now_secs: f64,
 
     mouse_position: vec2i,
     mouse_wheel: f32,

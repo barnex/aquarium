@@ -147,8 +147,8 @@ impl State {
     }
 
     fn update_fps(&mut self) {
-        self.dt = (self.inputs.now_secs - self.curr_time_secs).clamp(0.001, 0.1); // clamp dt to 1-100ms to avoid craziness on clock suspend etc.
-        self.curr_time_secs = self.inputs.now_secs;
+        self.dt = (self.curr_time_secs - self.curr_time_secs).clamp(0.001, 0.1); // clamp dt to 1-100ms to avoid craziness on clock suspend etc.
+        self.curr_time_secs = self.curr_time_secs;
         self.dt_smooth = lerp(self.dt_smooth, self.dt, 0.02);
     }
 
