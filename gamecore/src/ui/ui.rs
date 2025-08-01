@@ -10,15 +10,15 @@ impl Ui {
     }
 
     pub fn update_and_draw(&mut self, inputs: &mut Inputs, out: &mut Output) {
-        self.tile_palette_ui(inputs, out)
+        self.tile_picker_ui(inputs, out)
     }
 
-    fn tile_palette_ui(&mut self, inputs: &mut Inputs, out: &mut Output) {
+    fn tile_picker_ui(&mut self, inputs: &mut Inputs, out: &mut Output) {
         let margin = 3;
         Palette {
-            pos: vec2(4, 2),
+            pos: vec2(2, 120),
             cols: 2,
-            rows: 8, // ?
+            rows: 5, // ?
             button_size: vec2(TILE_SIZE, TILE_SIZE),
             margin,
         }

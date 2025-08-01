@@ -79,31 +79,41 @@ impl State {
     }
 
     pub fn tick(&mut self) {
+        self.out.clear();
+
         self.update_fps(); // 👈 FPS is gamespeed independent
         self.exec_commands(); // 👈 exec commands even when paused (speed 0)
         self.control_camera();
+
+        self.ui.update_and_draw(&mut self.inputs, &mut self.out); // 👈 may consume inputs
         self.doodle();
 
         for _ in 0..self.speed {
             self.tick_once();
         }
 
-        self.render();
+        self.render_game();
     }
 
-    pub fn render(&mut self) {
-        self.out.clear();
-        self.ui.update_and_draw(&mut self.inputs, &mut self.out);
-
+    pub fn render_game(&mut self) {
         debug_assert!(self.viewport_size != vec2::ZERO);
-        self.draw_tilemap();
 
+        // Note: ⚠️ UI already rendered (may consume input events)
+
+        self.draw_tilemap();
+        self.draw_sprites();
+        self.draw_cursor();
+        self.output_debug();
+    }
+
+    fn draw_cursor(&mut self) {
+        self.out.push_sprite(L_SPRITES, sprite!("grid24"), self.mouse_tile() * TILE_ISIZE - self.camera_pos);
+    }
+
+    fn draw_sprites(&mut self) {
         for (kit, pos) in self.kits.iter().map(|(sprite, pos, _)| (*sprite, *pos - self.camera_pos)) {
             self.out.push_sprite(L_SPRITES, kit, pos);
         }
-        self.out.push_sprite(L_SPRITES, sprite!("frame24"), self.inputs.mouse_position());
-
-        self.output_debug();
     }
 
     pub fn draw_tilemap(&mut self) {
@@ -128,14 +138,17 @@ impl State {
     fn doodle(&mut self) {
         if self.inputs.is_down(K_MOUSE1) {
             if let Some(mat) = self.ui.tile_picker {
-                let idx = self.mouse_position_world() / TILE_ISIZE;
-                self.tilemap.set(idx, mat);
+                self.tilemap.set(self.mouse_tile(), mat);
             }
         }
     }
 
     fn mouse_position_world(&self) -> vec2i {
         self.inputs.mouse_position() + self.camera_pos
+    }
+
+    fn mouse_tile(&self) -> vec2i {
+        self.mouse_position_world() / TILE_ISIZE
     }
 
     fn control_camera(&mut self) {
@@ -184,7 +197,7 @@ impl State {
         writeln!(&mut self.out.debug, "score {}", self.score).unwrap();
         writeln!(&mut self.out.debug, "camera {:?}", self.camera_pos).unwrap();
         writeln!(&mut self.out.debug, "viewport_size {:?}", self.viewport_size).unwrap();
-        writeln!(&mut self.out.debug, "sprites {:?}", self.out.layers.iter().map(|l|l.sprites.len()).sum::<usize>()).unwrap();
+        writeln!(&mut self.out.debug, "sprites {:?}", self.out.layers.iter().map(|l| l.sprites.len()).sum::<usize>()).unwrap();
         writeln!(&mut self.out.debug, "down {:?}", self.inputs.iter_is_down().sorted().collect_vec()).unwrap();
         writeln!(&mut self.out.debug, "tile_picker {:?}", self.ui.tile_picker).unwrap();
     }
