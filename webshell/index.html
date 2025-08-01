@@ -38,11 +38,16 @@
 	<br />
 	<br />
 
-	<canvas id="canvas" width="800" height="600" draggable="false" style="border: 1px solid black;"></canvas>
+	<canvas id="canvas" width="480" height="320" draggable="false" style="border: 1px solid black;"></canvas>
 
 	<pre id="debug" style="white-space:pre-wrap; word-break:break-word;"></pre>
 
 
 </body>
+
+<script>
+	// Prevent default context menu on canvas.
+	document.getElementById('canvas').addEventListener('contextmenu', function (event) { event.preventDefault(); });
+</script>
 
 </html
