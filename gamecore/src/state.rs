@@ -118,7 +118,7 @@ impl State {
 
     fn doodle(&mut self) {
         if self.inputs.is_down(K_MOUSE1) {
-            if let Some(mat) = self.ui.tile_picker {
+            if let Tool::Tile(mat) = self.ui.active_tool {
                 self.tilemap.set(self.mouse_tile(), mat);
             }
         }
@@ -162,6 +162,6 @@ impl State {
         writeln!(&mut self.out.debug, "viewport_size {:?}", self.viewport_size).unwrap();
         writeln!(&mut self.out.debug, "sprites {:?}", self.out.layers.iter().map(|l| l.sprites.len()).sum::<usize>()).unwrap();
         writeln!(&mut self.out.debug, "down {:?}", self.inputs.iter_is_down().sorted().collect_vec()).unwrap();
-        writeln!(&mut self.out.debug, "tile_picker {:?}", self.ui.tile_picker).unwrap();
+        writeln!(&mut self.out.debug, "tile_picker {:?}", self.ui.active_tool).unwrap();
     }
 }
