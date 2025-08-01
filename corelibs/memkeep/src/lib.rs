@@ -183,10 +183,29 @@ impl<T> MemKeep<T> {
     }
 }
 
-#[derive(Clone, Copy, PartialEq, Eq, Hash, Serialize, Deserialize)]
+#[derive(Clone, Copy, PartialEq, Eq, Hash)]
 pub struct Id {
     index: u32,
     generation: u32,
+}
+
+impl Serialize for Id {
+    fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
+    where
+        S: serde::Serializer,
+    {
+        (self.index, self.generation).serialize(serializer)
+    }
+}
+
+impl<'de> Deserialize<'de> for Id {
+    fn deserialize<D>(deserializer: D) -> Result<Self, D::Error>
+    where
+        D: Deserializer<'de>,
+    {
+        let (index, generation) = <(u32, u32)>::deserialize(deserializer)?;
+        Ok(Id { index, generation })
+    }
 }
 
 impl Debug for Id {
@@ -249,11 +268,11 @@ mod memkeep_test {
         m.gc();
         m.remove(d);
 
-        expect_eq!(m.get(a), Some(&"a"));
-        expect_eq!(m.get(b), Some(&"b"));
-        expect_eq!(m.get(c), None);
-        expect_eq!(m.get(d), None);
-        expect_eq!(m.get(e), Some(&"e"));
+        assert_eq!(m.get(a), Some(&"a"));
+        assert_eq!(m.get(b), Some(&"b"));
+        assert_eq!(m.get(c), None);
+        assert_eq!(m.get(d), None);
+        assert_eq!(m.get(e), Some(&"e"));
 
         expect_eq!(m.enumerate().collect::<Vec<_>>(), vec![(a, &"a"), (b, &"b"), (e, &"e"),])
     }
@@ -270,16 +289,29 @@ mod memkeep_test {
         m.remove(c);
         m.gc();
         m.remove(d);
-        expect_eq!(m.get(a), Some(&"a".to_string()));
-        expect_eq!(m.get(b), Some(&"b".to_string()));
-        expect_eq!(m.get(c), None);
-        expect_eq!(m.get(d), None);
-        expect_eq!(m.get(e), Some(&"e".to_string()));
-        
-        let bytes = ron::to_string(&m).unwrap();
+        assert_eq!(m.get(a), Some(&"a".to_string()));
+        assert_eq!(m.get(b), Some(&"b".to_string()));
+        assert_eq!(m.get(c), None);
+        assert_eq!(m.get(d), None);
+        assert_eq!(m.get(e), Some(&"e".to_string()));
 
-        //expect_eq!(bytes, "");
+        let serialized = ron::to_string(&m).unwrap();
 
+        let de: MemKeep<String> = ron::from_str(&serialized).unwrap();
+
+        let m = m.enumerate().collect::<Vec<_>>();
+        let de = de.enumerate().collect::<Vec<_>>();
+
+        expect_eq!(m, de);
+    }
+
+    #[gtest]
+    fn deserialize_ron() {
+        let m: MemKeep<String> = ron::from_str("[((0,1),\"a\"),((1,1),\"b\"),((4,2),\"e\")]").unwrap();
+        expect_eq!(
+            m.enumerate().collect::<Vec<_>>(),
+            vec![(Id { index: 0, generation: 1 }, &"a".to_string()), (Id { index: 1, generation: 1 }, &"b".to_string()), (Id { index: 4, generation: 2 }, &"e".to_string()),]
+        )
     }
 
     #[gtest]
