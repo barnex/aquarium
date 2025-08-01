@@ -8,6 +8,7 @@ members = [
 	"corelibs/core_util",
 	"corelibs/geometry",
 	"corelibs/matrix",
+	"corelibs/memkeep",
 	"gamecore",
 	"webshell",
 	"proc_macros",
@@ -18,9 +19,10 @@ members = [
 [workspace.dependencies]
 core_util = { path = "corelibs/core_util" }
 fixed_str = { path = "corelibs/fixed_str" }
+gamecore = { path = "gamecore" }
 geometry = { path = "corelibs/geometry" }
 matrix = { path = "corelibs/matrix" }
-gamecore = { path = "gamecore" }
+memkeep = { path = "corelibs/memkeep" }
 vector = { path = "corelibs/vector" }
 proc_macros = { path = "proc_macros" }
 

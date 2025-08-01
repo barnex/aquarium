@@ -222,6 +222,7 @@ dependencies = [
  "geometry",
  "itertools",
  "log",
+ "memkeep",
  "num-traits",
  "num_enum",
  "proc_macros",
@@ -326,6 +327,7 @@ name = "memkeep"
 version = "1.0.0"
 dependencies = [
  "googletest",
+ "serde",
 ]
 
 [[package]]

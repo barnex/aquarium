@@ -1,3 +1,4 @@
+use serde::{Deserialize, Serialize};
 use std::cell::{Cell, RefCell, UnsafeCell};
 use std::fmt::{Debug, Display};
 
@@ -10,6 +11,18 @@ pub struct MemKeep<T> {
     // TODO: high water mark for efficient iteration
     // TODO: grow storage
 }
+
+//impl<T> Serialize for MemKeep<T>
+//where
+//    T: Serialize,
+//{
+//    fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
+//    where
+//        S: serde::Serializer,
+//    {
+//        self.enumerate().collect::<Vec<_>>().serialize(serializer)
+//    }
+//}
 
 struct Slot<T> {
     generation: Cell<u32>,
@@ -86,6 +99,20 @@ impl<T> MemKeep<T> {
         }
     }
 
+    pub fn enumerate(&self) -> impl Iterator<Item = (Id, &T)> {
+        // SAFETY: Only shared references can be handed out at this moment.
+        // Only mutated in `gc()` where `&mut self` guarantees all shared references are dropped.
+        self.storage.iter().enumerate().filter(|(_, slot)| slot.not_deleted.get() && unsafe { &*slot.value.get() }.is_some()).map(|(i, slot)| {
+            (
+                Id {
+                    index: i as u32,
+                    generation: slot.generation.get(),
+                },
+                unsafe { &*slot.value.get() }.as_ref().unwrap(),
+            )
+        })
+    }
+
     pub fn gc(&mut self) {
         for index in self.garbage.get_mut().drain(..) {
             let slot = &mut self.storage[index as usize];
@@ -146,6 +173,30 @@ mod memkeep_test {
         expect_eq!(m.get(a), Some(&"a"));
         expect_eq!(m.get(b), Some(&"b"));
         expect_eq!(m.get(c), Some(&"c"));
+    }
+
+    #[gtest]
+    fn enumerate() {
+        let mut m = MemKeep::<&'static str>::new();
+
+        let a = m.insert("a");
+        let b = m.insert("b");
+        let c = m.insert("c");
+        let d = m.insert("d");
+        let e = m.insert("e");
+
+        // exercise garbage, collected and alive
+        m.remove(c);
+        m.gc();
+        m.remove(d);
+
+        expect_eq!(m.get(a), Some(&"a"));
+        expect_eq!(m.get(b), Some(&"b"));
+        expect_eq!(m.get(c), None);
+        expect_eq!(m.get(d), None);
+        expect_eq!(m.get(e), Some(&"e"));
+
+        expect_eq!(m.enumerate().collect::<Vec<_>>(), vec![(a, &"a"), (b, &"b"), (e, &"e"),])
     }
 
     #[gtest]
