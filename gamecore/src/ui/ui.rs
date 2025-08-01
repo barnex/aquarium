@@ -10,6 +10,7 @@ pub struct Ui {
 pub enum Tool {
     Pointer,
     Tile(Mat),
+    Pawn(PawnTyp),
 }
 
 impl Ui {
@@ -27,7 +28,10 @@ impl Ui {
                 (0..Mat::NUM_MAT) //_
                     .map(|i| Mat::try_from_primitive(i).unwrap())
                     .map(|mat| (Tool::Tile(mat), mat.sprite())),
-            );
+            ).chain(
+                (0..PawnTyp::NUM_TYP) //_
+                    .map(|i| PawnTyp::try_from_primitive(i as u8).unwrap())
+                    .map(|mat| (Tool::Pawn(mat), mat.sprite())));
 
         let margin = 3;
         Palette {

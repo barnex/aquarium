@@ -6,7 +6,7 @@ mod output;
 mod state;
 mod tilemap;
 mod ui;
-mod buildings;
+mod entities;
 
 pub use game_commands::*;
 pub use input::*;
@@ -14,4 +14,4 @@ pub use output::*;
 pub use state::*;
 pub use tilemap::*;
 pub use ui::*;
-pub use buildings::*;
+pub use entities::*;
