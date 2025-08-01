@@ -31,6 +31,7 @@ base64 = "0.22"
 bincode = { version = "2", features = ["serde"] }
 bytemuck = "1"
 fnv = "1"
+ron = "0.10"
 googletest = "0.14"
 itertools = "0.14"
 log = "0.4"

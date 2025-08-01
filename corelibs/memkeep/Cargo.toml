@@ -8,3 +8,4 @@ serde = { workspace = true }
 
 [dev-dependencies]
 googletest = { workspace = true }
+ron = { workspace = true }

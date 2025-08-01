@@ -1,6 +1,8 @@
-use serde::{Deserialize, Serialize};
+use serde::de::{SeqAccess, Visitor};
+use serde::{Deserialize, Deserializer, Serialize};
 use std::cell::{Cell, RefCell, UnsafeCell};
 use std::fmt::{Debug, Display};
+use std::marker::PhantomData;
 
 /// A memory arena indexed by generational indices,
 /// that hands out references (`&T`).
@@ -12,17 +14,64 @@ pub struct MemKeep<T> {
     // TODO: grow storage
 }
 
-//impl<T> Serialize for MemKeep<T>
-//where
-//    T: Serialize,
-//{
-//    fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
-//    where
-//        S: serde::Serializer,
-//    {
-//        self.enumerate().collect::<Vec<_>>().serialize(serializer)
-//    }
-//}
+impl<T> Serialize for MemKeep<T>
+where
+    T: Serialize,
+{
+    fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
+    where
+        S: serde::Serializer,
+    {
+        self.enumerate().collect::<Vec<_>>().serialize(serializer)
+    }
+}
+
+impl<'de, T> Deserialize<'de> for MemKeep<T>
+where
+    T: Deserialize<'de>,
+{
+    fn deserialize<D>(deserializer: D) -> Result<Self, D::Error>
+    where
+        D: Deserializer<'de>,
+    {
+        struct MyWrapperVisitor<T> {
+            marker: PhantomData<fn() -> MemKeep<T>>,
+        }
+
+        impl<'de, T> Visitor<'de> for MyWrapperVisitor<T>
+        where
+            T: Deserialize<'de>,
+        {
+            type Value = MemKeep<T>;
+
+            fn expecting(&self, formatter: &mut std::fmt::Formatter) -> std::fmt::Result {
+                formatter.write_str("a list of items for MyWrapper")
+            }
+
+            fn visit_seq<A>(self, mut seq: A) -> Result<Self::Value, A::Error>
+            where
+                A: SeqAccess<'de>,
+            {
+                let mut m = MemKeep::new();
+
+                while let Some((id, v)) = seq.next_element()? {
+                    m._insert_at(id, v)
+                }
+
+                for (i, slot) in m.storage.iter_mut().enumerate().rev() {
+                    if !slot.not_deleted.get() {
+                        debug_assert!(slot.value.get_mut().is_none());
+                        m.freelist.get_mut().push(i as u32);
+                    }
+                }
+
+                Ok(m)
+            }
+        }
+
+        deserializer.deserialize_seq(MyWrapperVisitor { marker: PhantomData })
+    }
+}
 
 struct Slot<T> {
     generation: Cell<u32>,
@@ -84,6 +133,16 @@ impl<T> MemKeep<T> {
         Id { index, generation }
     }
 
+    // For deserialize only
+    // !! Must rebuild freelist after.
+    fn _insert_at(&mut self, id: Id, v: T) {
+        let slot = &mut self.storage[id.index as usize];
+        let generation = id.generation;
+        slot.generation.set(generation);
+        slot.not_deleted.set(true);
+        slot.value = UnsafeCell::new(Some(v));
+    }
+
     pub fn remove(&self, id: Id) -> Option<&T> {
         debug_assert!((id.index as usize) < self.storage.len(), "Id index out of bounds, can only happen if an invalid Id is passed (e.g. obtained from a different MemKeep)");
 
@@ -124,7 +183,7 @@ impl<T> MemKeep<T> {
     }
 }
 
-#[derive(Clone, Copy, PartialEq, Eq, Hash)]
+#[derive(Clone, Copy, PartialEq, Eq, Hash, Serialize, Deserialize)]
 pub struct Id {
     index: u32,
     generation: u32,
@@ -197,6 +256,30 @@ mod memkeep_test {
         expect_eq!(m.get(e), Some(&"e"));
 
         expect_eq!(m.enumerate().collect::<Vec<_>>(), vec![(a, &"a"), (b, &"b"), (e, &"e"),])
+    }
+
+    #[gtest]
+    fn serde() {
+        let mut m = MemKeep::<String>::new();
+        let a = m.insert("a".into());
+        let b = m.insert("b".into());
+        let c = m.insert("c".into());
+        let d = m.insert("d".into());
+        let e = m.insert("e".into());
+        // exercise garbage, collected and alive
+        m.remove(c);
+        m.gc();
+        m.remove(d);
+        expect_eq!(m.get(a), Some(&"a".to_string()));
+        expect_eq!(m.get(b), Some(&"b".to_string()));
+        expect_eq!(m.get(c), None);
+        expect_eq!(m.get(d), None);
+        expect_eq!(m.get(e), Some(&"e".to_string()));
+        
+        let bytes = ron::to_string(&m).unwrap();
+
+        //expect_eq!(bytes, "");
+
     }
 
     #[gtest]
