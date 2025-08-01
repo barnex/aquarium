@@ -75,7 +75,7 @@ async fn start() -> JsResult<()> {
 
     // 🌍 Main loop
     animation_loop(move |ctx| {
-        state.curr_time_secs = now_secs();
+        state.now_secs = now_secs();
         state.viewport_size = vec2(canvas.width(), canvas.height());
         record_input_events(&state.keymap, &mut state.inputs, &input_events);
 

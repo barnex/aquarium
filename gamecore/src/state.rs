@@ -4,7 +4,8 @@ use crate::prelude::*;
 pub struct State {
     // 🕣 timekeeping
     pub frame: u64,
-    pub curr_time_secs: f64,
+    pub now_secs: f64,
+    _prev_secs: f64,
     pub dt: f64,
     pub dt_smooth: f64,
     pub speed: u32,
@@ -40,7 +41,8 @@ impl State {
         Self {
             camera_pos: default(),
             commands: default(),
-            curr_time_secs: 0.0,
+            now_secs: 0.0,
+            _prev_secs: 0.0,
             dt: 1.0 / 60.0, // initial fps guess
             dt_smooth: 1.0 / 60.0,
             frame: 0,
@@ -138,13 +140,13 @@ impl State {
     }
 
     fn update_fps(&mut self) {
-        self.dt = (self.curr_time_secs - self.curr_time_secs).clamp(0.001, 0.1); // clamp dt to 1-100ms to avoid craziness on clock suspend etc.
-        self.curr_time_secs = self.curr_time_secs;
+        self.dt = (self.now_secs - self._prev_secs).clamp(0.001, 0.1); // clamp dt to 1-100ms to avoid craziness on clock suspend etc.
+        self._prev_secs = self.now_secs;
         self.dt_smooth = lerp(self.dt_smooth, self.dt, 0.02);
     }
 
     fn output_debug(&mut self) {
-        writeln!(&mut self.out.debug, "frame: {}, now: {:.04}s, FPS: {:.01}", self.frame, self.curr_time_secs, 1.0 / self.dt_smooth).unwrap();
+        writeln!(&mut self.out.debug, "frame: {}, now: {:.04}s, FPS: {:.01}", self.frame, self.now_secs, 1.0 / self.dt_smooth).unwrap();
         writeln!(&mut self.out.debug, "camera {:?}", self.camera_pos).unwrap();
         writeln!(&mut self.out.debug, "viewport_size {:?}", self.viewport_size).unwrap();
         writeln!(&mut self.out.debug, "sprites {:?}", self.out.layers.iter().map(|l| l.sprites.len()).sum::<usize>()).unwrap();
