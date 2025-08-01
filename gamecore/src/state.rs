@@ -5,7 +5,7 @@ pub struct State {
     // 🌍 game world
     pub tilemap: Tilemap,
     pub buildings: Vec<Building>,
-    pub pawns: Vec<Pawn>,
+    pub pawns: MemKeep<Pawn>,
 
     // 🕣 timekeeping
     pub frame: u64,
@@ -41,7 +41,8 @@ pub const TILE_ISIZE: i32 = TILE_SIZE as i32;
 impl State {
     pub fn new() -> Self {
         let buildings = vec![Building { typ: BuildingTyp::HQ, tile: vec2(12, 8) }];
-        let pawns = vec![Pawn { typ: PawnTyp::Leaf, tile: vec2(17, 7) }];
+        let pawns = MemKeep::new();
+        pawns.extend([Pawn { typ: PawnTyp::Leaf, tile: vec2(17, 7) }]);
 
         Self {
             buildings,
@@ -105,7 +106,7 @@ impl State {
     }
 
     fn draw_pawns(&mut self) {
-        for pawn in &self.pawns {
+        for pawn in self.pawns.values() {
             self.out.push_sprite(L_SPRITES, pawn.typ.sprite(), pawn.tile * TILE_ISIZE - self.camera_pos);
         }
     }
@@ -122,7 +123,6 @@ impl State {
 
     fn tick_once(&mut self) {
         self.frame += 1;
-        //self.bounce_kittens();
     }
 
     fn doodle(&mut self) {
@@ -134,7 +134,7 @@ impl State {
                 Tool::Tile(mat) => self.tilemap.set(self.mouse_tile(), mat),
                 Tool::Pawn(typ) => {
                     if self.inputs.just_pressed(K_MOUSE1) {
-                        self.pawns.push(Pawn { tile: self.mouse_tile(), typ })
+                        self.pawns.insert(Pawn { tile: self.mouse_tile(), typ });
                     }
                 }
             }
@@ -177,7 +177,7 @@ impl State {
         writeln!(&mut self.out.debug, "frame: {}, now: {:.04}s, FPS: {:.01}", self.frame, self.now_secs, 1.0 / self.dt_smooth).unwrap();
         writeln!(&mut self.out.debug, "camera {:?}", self.camera_pos).unwrap();
         writeln!(&mut self.out.debug, "viewport_size {:?}", self.viewport_size).unwrap();
-        writeln!(&mut self.out.debug, "buildings: {}, pawns: {}", self.buildings.len(), self.pawns.len()).unwrap();
+        //writeln!(&mut self.out.debug, "buildings: {}, pawns: {}", self.buildings.len(), self.pawns.len()).unwrap();
         writeln!(&mut self.out.debug, "sprites {:?}", self.out.layers.iter().map(|l| l.sprites.len()).sum::<usize>()).unwrap();
         writeln!(&mut self.out.debug, "down {:?}", self.inputs.iter_is_down().sorted().collect_vec()).unwrap();
         writeln!(&mut self.out.debug, "tile_picker {:?}", self.ui.active_tool).unwrap();

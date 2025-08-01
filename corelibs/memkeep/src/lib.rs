@@ -133,6 +133,12 @@ impl<T> MemKeep<T> {
         Id { index, generation }
     }
 
+    pub fn extend(&self, v: impl IntoIterator<Item = T>) {
+        for v in v {
+            self.insert(v);
+        }
+    }
+
     // For deserialize only
     // !! Must rebuild freelist after.
     fn _insert_at(&mut self, id: Id, v: T) {
@@ -170,6 +176,10 @@ impl<T> MemKeep<T> {
                 unsafe { &*slot.value.get() }.as_ref().unwrap(),
             )
         })
+    }
+
+    pub fn values(&self) -> impl Iterator<Item = &T> {
+        self.enumerate().map(|(_, v)| v)
     }
 
     pub fn gc(&mut self) {
