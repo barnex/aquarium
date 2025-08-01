@@ -18,7 +18,6 @@ pub struct State {
 
     // 🌍 game world
     pub tilemap: Tilemap,
-    pub kits: Vec<(Sprite, vec2i, vec2i)>,
 
     // ⏯️ UI
     #[serde(skip)]
@@ -38,43 +37,20 @@ pub const TILE_ISIZE: i32 = TILE_SIZE as i32;
 
 impl State {
     pub fn new() -> Self {
-        let sprites = [
-            sprite!("kit0"),
-            sprite!("kit1"),
-            sprite!("kit2"),
-            sprite!("kit3"),
-            sprite!("kit4"),
-            sprite!("kit5"),
-            sprite!("kit6"),
-            sprite!("kit7"),
-            sprite!("kit8"),
-            sprite!("kit9"),
-            sprite!("blabla"), // 🪲 TODO: BUG: should load red replacement, but returns invalid bitmap or something
-        ];
-
-        let N = sprites.len();
-
-        let mut rng = ChaCha8Rng::from_seed([42; 32]);
-
-        let (w, h) = (480, 320);
-        let kits = (0..8).map(|i| (sprites[i % N], vec2i(rng.gen_range(0..w), rng.gen_range(0..h)), vec2i(rng.gen_range(-3..=3), rng.gen_range(1..3)))).collect();
-
         Self {
-            keymap: default_keybindings(),
-            inputs: default(),
-
+            camera_pos: default(),
             commands: default(),
-            tilemap: Tilemap::testmap(vec2(32, 24)),
-            viewport_size: vec2(0, 0), // real value will be set by webshell.
-            speed: 1,
-            frame: 0,
             curr_time_secs: 0.0,
             dt: 1.0 / 60.0, // initial fps guess
             dt_smooth: 1.0 / 60.0,
-            camera_pos: default(),
-            ui: Ui::new(),
-            kits,
+            frame: 0,
+            inputs: default(),
+            keymap: default_keybindings(),
             out: default(),
+            speed: 1,
+            tilemap: Tilemap::testmap(vec2(32, 24)),
+            ui: Ui::new(),
+            viewport_size: vec2(0, 0), // real value will be set by webshell.
         }
     }
 
@@ -111,9 +87,9 @@ impl State {
     }
 
     fn draw_sprites(&mut self) {
-        for (kit, pos) in self.kits.iter().map(|(sprite, pos, _)| (*sprite, *pos - self.camera_pos)) {
-            self.out.push_sprite(L_SPRITES, kit, pos);
-        }
+        //for (kit, pos) in self.kits.iter().map(|(sprite, pos, _)| (*sprite, *pos - self.camera_pos)) {
+        //    self.out.push_sprite(L_SPRITES, kit, pos);
+        //}
     }
 
     pub fn draw_tilemap(&mut self) {
@@ -124,8 +100,7 @@ impl State {
 
     fn tick_once(&mut self) {
         self.frame += 1;
-
-        self.bounce_kittens();
+        //self.bounce_kittens();
     }
 
     fn doodle(&mut self) {
@@ -160,23 +135,6 @@ impl State {
         }
         let speed = 3;
         self.camera_pos += speed * delta;
-    }
-
-    fn bounce_kittens(&mut self) {
-        let size = [480, 320];
-        for (_, pos, vel) in &mut self.kits {
-            *pos += *vel;
-            for i in 0..2 {
-                if pos[i] > size[i] {
-                    pos[i] = size[i];
-                    vel[i] = -vel[i]
-                }
-                if pos[i] < 0 {
-                    pos[i] = 0;
-                    vel[i] = -vel[i]
-                }
-            }
-        }
     }
 
     fn update_fps(&mut self) {
