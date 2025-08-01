@@ -102,7 +102,11 @@ impl State {
     }
 
     fn draw_cursor(&mut self) {
-        self.out.push_sprite(L_SPRITES, sprite!("grid24"), self.mouse_tile() * TILE_ISIZE - self.camera_pos);
+        let sprite = match self.ui.active_tool{
+            Tool::Pointer => sprite!("grid24"),
+            Tool::Tile(mat) => mat.sprite(),
+        };
+        self.out.push_sprite(L_SPRITES, sprite, self.mouse_tile() * TILE_ISIZE - self.camera_pos);
     }
 
     fn draw_sprites(&mut self) {
