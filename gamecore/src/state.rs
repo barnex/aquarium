@@ -2,32 +2,33 @@ use crate::prelude::*;
 
 #[derive(Serialize, Deserialize)]
 pub struct State {
-    #[serde(skip)]
-    pub keymap: Keymap,
-
-    #[serde(skip)]
-    pub inputs: Inputs,
-
-    pub commands: VecDeque<String>,
-
-    /// Screen/canvas size in pixels.
-    pub viewport_size: vec2u,
-    pub speed: u32,
+    // 🕣 timekeeping
     pub frame: u64,
-
     pub curr_time_secs: f64,
     pub dt: f64,
     pub dt_smooth: f64,
-    pub score: u64, // 💀 remove
+    pub speed: u32,
 
-    pub camera_pos: vec2i,
+    // 🕹️ input events
+    #[serde(skip)]
+    pub inputs: Inputs,
+    pub commands: VecDeque<String>,
+    #[serde(skip)]
+    pub keymap: Keymap,
 
+    // 🌍 game world
+    pub tilemap: Tilemap,
+    pub kits: Vec<(Sprite, vec2i, vec2i)>,
+
+    // ⏯️ UI
     #[serde(skip)]
     pub ui: Ui,
 
-    pub kits: Vec<(Sprite, vec2i, vec2i)>,
-    pub tilemap: Tilemap,
-
+    // 📺 output/rendering
+    /// Screen/canvas size in pixels.
+    pub viewport_size: vec2u,
+    /// Camera position in world coordinates.
+    pub camera_pos: vec2i,
     #[serde(skip)]
     pub out: Output,
 }
@@ -72,7 +73,6 @@ impl State {
             dt_smooth: 1.0 / 60.0,
             camera_pos: default(),
             ui: Ui::new(),
-            score: default(),
             kits,
             out: default(),
         }
@@ -126,13 +126,6 @@ impl State {
         self.frame += 1;
 
         self.bounce_kittens();
-        self.do_something_on_keypress();
-    }
-
-    fn do_something_on_keypress(&mut self) {
-        if self.inputs.just_pressed(Button(str16!("b"))) {
-            self.score += 1
-        }
     }
 
     fn doodle(&mut self) {
@@ -194,7 +187,6 @@ impl State {
 
     fn output_debug(&mut self) {
         writeln!(&mut self.out.debug, "frame: {}, now: {:.04}s, FPS: {:.01}", self.frame, self.curr_time_secs, 1.0 / self.dt_smooth).unwrap();
-        writeln!(&mut self.out.debug, "score {}", self.score).unwrap();
         writeln!(&mut self.out.debug, "camera {:?}", self.camera_pos).unwrap();
         writeln!(&mut self.out.debug, "viewport_size {:?}", self.viewport_size).unwrap();
         writeln!(&mut self.out.debug, "sprites {:?}", self.out.layers.iter().map(|l| l.sprites.len()).sum::<usize>()).unwrap();
