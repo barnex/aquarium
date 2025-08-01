@@ -16,6 +16,8 @@ impl Palette {
     {
         let size = vec2(self.cols, self.rows) * (self.button_size + self.margin) + self.margin;
         let rect = Bounds2D::with_size(self.pos, size.as_i32());
+        
+        
         out.push_rect(L_UI_BG, Rectangle::new(rect, RGBA(vec4u8(128, 128, 128, 128))).with_fill(RGBA::WHITE));
 
         let (mut row, mut col) = (0, 0);
@@ -43,6 +45,11 @@ impl Palette {
             if row >= self.rows {
                 break;
             }
+        }
+
+        if rect.contains(inputs.mouse_position()){
+            inputs.consume(K_MOUSE1);
+            inputs.consume(K_MOUSE2);
         }
     }
 }

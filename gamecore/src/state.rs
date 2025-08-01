@@ -153,6 +153,7 @@ impl State {
     }
 
     pub fn render(&mut self, out: &mut Output) {
+
         self.ui.update_and_draw(&mut self.inputs, out);
 
         debug_assert!(self.viewport_size != vec2::ZERO);

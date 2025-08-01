@@ -11,19 +11,11 @@ pub struct Inputs {
     buttons_down: HashSet<Button>,
     buttons_released: HashSet<Button>,
 
-    received_characters: String,
-
     pub now_secs: f64,
 
-    // updated by engine
-    pub(crate) console_input: Option<String>,
-    pub(crate) raw_mouse_delta: vec2f,
-    pub(crate) filtered_mouse_delta: vec2f,
     mouse_position: vec2i,
-
     mouse_wheel: f32,
 }
-
 
 impl Inputs {
     // To be called on each frame to advance time.
@@ -33,9 +25,6 @@ impl Inputs {
         // Note: NOT clearing bottons_down.
         self.buttons_pressed.clear();
         self.buttons_released.clear();
-        self.received_characters.clear();
-        self.raw_mouse_delta = vec2::ZERO;
-        self.filtered_mouse_delta = vec2::ZERO;
     }
 
     /// Is a button currently held down?
@@ -71,20 +60,10 @@ impl Inputs {
         self.buttons_released.iter().cloned()
     }
 
-    /// The unicode characters typed since the last tick.
-    pub fn received_characters(&self) -> &str {
-        &self.received_characters
-    }
-
-    /// Command typed in the engine console.
-    pub fn console_input(&self) -> Option<&str> {
-        self.console_input.as_deref()
-    }
-
-    /// Mouse movement since last frame.
-    /// Only recorded when the mouse cursor is grabbed ([`grab_cursor`]).
-    pub fn mouse_delta(&self) -> vec2f {
-        self.filtered_mouse_delta
+    pub fn consume(&mut self, but: Button) {
+        self.buttons_down.remove(&but);
+        self.buttons_pressed.remove(&but);
+        self.buttons_released.remove(&but);
     }
 
     /// Mouse position in logical pixels, relative to the top-left corner of the window.
