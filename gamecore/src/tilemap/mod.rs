@@ -1,7 +1,7 @@
 mod map;
-mod mat;
+mod tile;
 mod testmap;
 
 pub(crate) use map::*;
-pub(crate) use mat::*;
+pub(crate) use tile::*;
 pub(crate) use testmap::*;

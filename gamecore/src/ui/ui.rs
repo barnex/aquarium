@@ -9,7 +9,7 @@ pub struct Ui {
 #[derive(PartialEq, Eq, Clone, Copy, Debug)]
 pub enum Tool {
     Pointer,
-    Tile(Mat),
+    Tile(Tile),
     Pawn(PawnTyp),
 }
 
@@ -24,11 +24,7 @@ impl Ui {
 
     fn tile_picker_ui(&mut self, inputs: &mut Inputs, out: &mut Output) {
         let options = iter::once((Tool::Pointer, sprite!("pointer"))) //_
-            .chain(
-                (0..Mat::NUM_MAT) //_
-                    .map(|i| Mat::try_from_primitive(i).unwrap())
-                    .map(|mat| (Tool::Tile(mat), mat.sprite())),
-            )
+            .chain(Tile::all().map(|typ| (Tool::Tile(typ), typ.sprite())))
             .chain(PawnTyp::all().map(|typ| (Tool::Pawn(typ), typ.sprite())));
 
         let margin = 3;
