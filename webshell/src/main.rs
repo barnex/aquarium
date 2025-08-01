@@ -65,7 +65,7 @@ async fn start() -> JsResult<()> {
         }
     };
 
-    let mut out = Output::new();
+    //let mut out = Output::new();
     let canvas = get_element_by_id("canvas");
 
     // queue where we receive input events (keys, mouse)
@@ -81,14 +81,15 @@ async fn start() -> JsResult<()> {
 
         state.tick();
 
-        out.clear();
-        state.render(&mut out);
+        //out.clear();
+        //state.render();
 
         ctx.clear_rect(0.0, 0.0, canvas.width().as_(), canvas.height().as_());
         res.poll();
-        draw(&canvas, &ctx, &mut res, &out);
 
-        get_element_by_id::<HtmlElement>("debug").set_inner_text(&out.debug);
+        draw(&canvas, &ctx, &mut res, &state.out);
+
+        get_element_by_id::<HtmlElement>("debug").set_inner_text(&state.out.debug);
 
         exec_pending_commands(&mut state);
     });
