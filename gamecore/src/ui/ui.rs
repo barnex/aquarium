@@ -28,16 +28,14 @@ impl Ui {
                 (0..Mat::NUM_MAT) //_
                     .map(|i| Mat::try_from_primitive(i).unwrap())
                     .map(|mat| (Tool::Tile(mat), mat.sprite())),
-            ).chain(
-                (0..PawnTyp::NUM_TYP) //_
-                    .map(|i| PawnTyp::try_from_primitive(i as u8).unwrap())
-                    .map(|mat| (Tool::Pawn(mat), mat.sprite())));
+            )
+            .chain(PawnTyp::all().map(|typ| (Tool::Pawn(typ), typ.sprite())));
 
         let margin = 3;
         Palette {
             pos: vec2(2, 120),
             cols: 2,
-            rows: 5, // ?
+            rows: 8,
             button_size: vec2(TILE_SIZE, TILE_SIZE),
             margin,
         }
