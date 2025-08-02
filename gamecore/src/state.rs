@@ -10,7 +10,7 @@ pub struct State {
     // 🕣 timekeeping
     pub frame: u64,
     pub now_secs: f64,
-    _prev_secs: f64,
+    _prev_secs: f64, // to compute dt
     pub dt: f64,
     pub dt_smooth: f64,
     pub speed: u32,
@@ -72,7 +72,9 @@ impl State {
         self.control_camera();
 
         self.ui.update_and_draw(&mut self.inputs, &mut self.out); // 👈 may consume inputs
+        //
         self.doodle();
+        self.command_pawns();
 
         for _ in 0..self.speed {
             self.tick_once();
@@ -139,6 +141,18 @@ impl State {
                 }
             }
         }
+    }
+
+    fn command_pawns(&mut self) {
+        if self.ui.active_tool == Tool::Pointer && self.inputs.just_pressed(K_MOUSE1) {
+            if let Some(pawn) = self.pawn_at(self.mouse_tile()) {
+                log::info!("{pawn:?}");
+            }
+        }
+    }
+
+    fn pawn_at(&self, tile: vec2i16) -> Option<&Pawn> {
+        self.pawns.values().find(|p| p.tile == tile)
     }
 
     fn mouse_position_world(&self) -> vec2i {

@@ -13,7 +13,6 @@ pub struct MemKeep<T> {
     // TODO: grow storage
 }
 
-
 struct Slot<T> {
     generation: Cell<u32>,
     not_deleted: Cell<bool>,
@@ -139,7 +138,6 @@ pub struct Id {
     index: u32,
     generation: u32,
 }
-
 
 impl Debug for Id {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
