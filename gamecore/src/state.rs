@@ -121,7 +121,7 @@ impl State {
         self.out.push_sprite(L_SPRITES, sprite!("grid24"), self.mouse_tile().pos() - self.camera_pos);
     }
 
-    fn tick_once(&mut self) {
+    pub(crate) fn tick_once(&mut self) {
         self.frame += 1;
     }
 

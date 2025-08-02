@@ -17,10 +17,12 @@ impl State {
     fn exec_command(&mut self, cmd: &str) -> Result<()> {
         match cmd.trim().split_ascii_whitespace().collect_vec().as_slice() {
             &["pause"] => self.cmd_pause_or_resume(),
+            &["tick"] => self.cmd_tick(),
             &[cmd, ..] => Err(anyhow!("unknown command: {cmd:?}")),
             &[] => Ok(()),
         }
     }
+
 
     /// pause button: pause or resume (if already paused)
     fn cmd_pause_or_resume(&mut self) -> Result<()> {
@@ -28,6 +30,11 @@ impl State {
             0 => 1,
             _ => 0,
         };
+        Ok(())
+    }
+
+    fn cmd_tick(&mut self) -> Result<()> {
+        self.tick_once();
         Ok(())
     }
 }
