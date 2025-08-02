@@ -35,8 +35,33 @@ fn exec_command(state: &mut State, cmd: &str) -> JsResult<()> {
         &["save"] => Ok(save_game(state)),
         &["reset"] => Ok(reset(state)),
         &["save_reload"] => Ok(save_reload(state)),
+        &["toggle_large"] => Ok(toggle_large()),
         // 👇 unknown command: forward to gamestate
-        _ => { state.commands.push_back(cmd.to_owned()); Err("sent to game".into())},
+        _ => {
+            state.commands.push_back(cmd.to_owned());
+            Err("sent to game".into())
+        }
+    }
+}
+
+// toggle between large & small canvas size.
+fn toggle_large() {
+    let canvas = get_element_by_id::<HtmlCanvasElement>("canvas");
+    let screen_width = window().inner_width().unwrap().as_f64().unwrap();
+    let screen_height = window().inner_height().unwrap().as_f64().unwrap();
+
+    let margin_x = 50.0;
+    let margin_y = 80.0;
+    let new_size = ((screen_width - margin_x) as u32, (screen_height - margin_y) as u32);
+    let curr_size = (canvas.width(), canvas.height());
+
+    if new_size != curr_size {
+        canvas.set_width(new_size.0);
+        canvas.set_height(new_size.1);
+    } else {
+        // was already at large size: toggle back to small
+        canvas.set_height(320);
+        canvas.set_width(480);
     }
 }
 

@@ -40,3 +40,7 @@ trunk config show
 watch = ..
 
 
+## Git
+```
+git push origin HEAD:main
+```
