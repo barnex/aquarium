@@ -66,6 +66,13 @@ pub type vec3u16 = vec3<u16>;
 /// u16 vector
 pub type vec4u16 = vec4<u16>;
 
+/// i16 vector
+pub type vec2i16 = vec2<i16>;
+/// i16 vector
+pub type vec3i16 = vec3<i16>;
+/// i16 vector
+pub type vec4i16 = vec4<i16>;
+
 /// Convenience constructors.
 #[rustfmt::skip]
 mod constructors {
@@ -105,8 +112,27 @@ mod constructors {
 	#[inline(always)] pub const fn vec3u(x: u32, y: u32, z: u32        ) -> vec3u { Vector([x, y, z]) }
 	/// Constructor
 	#[inline(always)] pub const fn vec4u(x: u32, y: u32, z: u32, w: u32) -> vec4u { Vector([x, y, z, w]) }
+    
 	/// Constructor
-	#[inline(always)] pub const fn vec4u8(x: u8, y: u8, z: u8, w: u8)    -> vec4u8{ Vector([x, y, z, w]) }
+	#[inline(always)] pub const fn vec2u8(x: u8, y: u8               ) -> vec2u8 { Vector([x, y]) }
+	/// Constructor
+	#[inline(always)] pub const fn vec3u8(x: u8, y: u8, z: u8        ) -> vec3u8 { Vector([x, y, z]) }
+	/// Constructor
+	#[inline(always)] pub const fn vec4u8(x: u8, y: u8, z: u8, w: u8)  -> vec4u8{ Vector([x, y, z, w]) }
+    
+	/// Constructor
+	#[inline(always)] pub const fn vec2u16(x: u16, y: u16                ) -> vec2u16 { Vector([x, y]) }
+	/// Constructor
+	#[inline(always)] pub const fn vec3u16(x: u16, y: u16, z: u16        ) -> vec3u16 { Vector([x, y, z]) }
+	/// Constructor
+	#[inline(always)] pub const fn vec4u16(x: u16, y: u16, z: u16, w: u16) -> vec4u16 { Vector([x, y, z, w]) }
+    
+	/// Constructor
+	#[inline(always)] pub const fn vec2i16(x: i16, y: i16                ) -> vec2i16 { Vector([x, y]) }
+	/// Constructor
+	#[inline(always)] pub const fn vec3i16(x: i16, y: i16, z: i16        ) -> vec3i16 { Vector([x, y, z]) }
+	/// Constructor
+	#[inline(always)] pub const fn vec4i16(x: i16, y: i16, z: i16, w: i16) -> vec4i16 { Vector([x, y, z, w]) }
 
 	impl<T, const N: usize> Default for Vector<T, N>
 	where
