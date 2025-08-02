@@ -94,8 +94,8 @@ impl State {
     }
 
     pub fn draw_tilemap(&mut self) {
-        for (pos, mat) in self.tilemap.enumerate_all() {
-            self.out.push_sprite(L_TILES, mat.sprite(), pos * TILE_ISIZE - self.camera_pos);
+        for (idx, mat) in self.tilemap.enumerate_all() {
+            self.out.push_sprite(L_TILES, mat.sprite(), idx.pos() - self.camera_pos);
         }
     }
 
@@ -107,7 +107,7 @@ impl State {
 
     fn draw_pawns(&mut self) {
         for pawn in self.pawns.values() {
-            self.out.push_sprite(L_SPRITES, pawn.typ.sprite(), pawn.tile * TILE_ISIZE - self.camera_pos);
+            self.out.push_sprite(L_SPRITES, pawn.typ.sprite(), pawn.tile.pos() - self.camera_pos);
         }
     }
 
@@ -117,8 +117,8 @@ impl State {
             Tool::Tile(typ) => typ.sprite(),
             Tool::Pawn(typ) => typ.sprite(),
         };
-        self.out.push_sprite(L_SPRITES, sprite, self.mouse_tile() * TILE_ISIZE - self.camera_pos);
-        self.out.push_sprite(L_SPRITES, sprite!("grid24"), self.mouse_tile() * TILE_ISIZE - self.camera_pos);
+        self.out.push_sprite(L_SPRITES, sprite, self.mouse_tile().pos() - self.camera_pos);
+        self.out.push_sprite(L_SPRITES, sprite!("grid24"), self.mouse_tile().pos() - self.camera_pos);
     }
 
     fn tick_once(&mut self) {
@@ -145,8 +145,8 @@ impl State {
         self.inputs.mouse_position() + self.camera_pos
     }
 
-    fn mouse_tile(&self) -> vec2i {
-        self.mouse_position_world() / TILE_ISIZE
+    fn mouse_tile(&self) -> vec2i16 {
+        self.mouse_position_world().to_tile()
     }
 
     fn control_camera(&mut self) {

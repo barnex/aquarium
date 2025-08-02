@@ -1,7 +1,7 @@
 use crate::prelude::*;
 
 impl Tilemap {
-    pub fn testmap(size: vec2u) -> Self {
+    pub fn testmap(size: vec2u16) -> Self {
         Self::new(size).with(|m| {
             for (x, y) in cross(2..5, 3..7) {
                 m.set(vec2(x, y), Tile::Water);

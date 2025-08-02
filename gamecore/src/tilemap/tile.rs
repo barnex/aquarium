@@ -10,7 +10,7 @@ pub enum Tile {
     Snow = 4,
     Water = 5,
     Block = 6,
-    // WARNING: ‼️ keep in sync with enum values.
+    // WARNING: ‼️ keep in sync with `all`
 }
 
 impl Tile {
