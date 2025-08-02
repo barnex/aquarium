@@ -1,0 +1,10 @@
+[package]
+name = "pathfinder"
+version = "2.0.0"
+edition = "2024"
+
+[dependencies]
+serde = { workspace = true }
+fnv = { workspace = true }
+vector = { workspace = true }
+core_util = { workspace = true }

@@ -10,6 +10,7 @@ members = [
 	"corelibs/matrix",
 	"corelibs/memkeep",
 	"corelibs/memkeep",
+	"corelibs/pathfinder",
 	"corelibs/vector",
 	"gamecore",
 	"proc_macros",
