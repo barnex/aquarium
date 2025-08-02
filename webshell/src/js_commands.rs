@@ -50,8 +50,8 @@ fn toggle_large() {
     let screen_width = window().inner_width().unwrap().as_f64().unwrap();
     let screen_height = window().inner_height().unwrap().as_f64().unwrap();
 
-    let margin_x = 50.0;
-    let margin_y = 80.0;
+    let margin_x = 2.0; // +2 for 1px margin on each side.
+    let margin_y = (canvas.client_top() + 2) as f64;
     let new_size = ((screen_width - margin_x) as u32, (screen_height - margin_y) as u32);
     let curr_size = (canvas.width(), canvas.height());
 

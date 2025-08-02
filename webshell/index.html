@@ -6,6 +6,8 @@
 		body {
 			background: white;
 			color: black;
+			margin: 0;
+			overflow: hidden;
 		}
 
 		@media (prefers-color-scheme: dark) {
@@ -35,7 +37,6 @@
 	<button title="Reset" onclick='window.wasmBindings.cmd("reset")'>❌</button>
 	<button title="Large" onclick='window.wasmBindings.cmd("toggle_large")'>↔️</button>
 
-	<br />
 	<br />
 
 	<canvas id="canvas" width="480" height="320" draggable="false" style="border: 1px solid black;"></canvas>
