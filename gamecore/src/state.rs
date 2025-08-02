@@ -58,7 +58,7 @@ impl State {
             keymap: default_keybindings(),
             out: default(),
             speed: 1,
-            tilemap: Tilemap::testmap(vec2(32, 24)),
+            tilemap: Tilemap::testmap(vec2(64, 48)),
             ui: Ui::new(),
             viewport_size: vec2(0, 0), // real value will be set by webshell.
         }
