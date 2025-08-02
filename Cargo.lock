@@ -71,6 +71,16 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "5c76a5792e44e4abe34d3abf15636779261d45a7450612059293d1d2cfc63422"
 
 [[package]]
+name = "cel"
+version = "2.0.0"
+dependencies = [
+ "core_util",
+ "googletest",
+ "serde",
+ "vector",
+]
+
+[[package]]
 name = "cfg-if"
 version = "1.0.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -225,6 +235,7 @@ name = "gamecore"
 version = "1.0.0"
 dependencies = [
  "anyhow",
+ "cel",
  "core_util",
  "fixed_str",
  "fnv",

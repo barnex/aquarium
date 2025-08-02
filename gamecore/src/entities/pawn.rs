@@ -2,7 +2,7 @@ use crate::prelude::*;
 
 #[derive(Serialize, Deserialize)]
 pub struct Pawn {
-    pub tile: vec2i16,
+    pub tile: Cel<vec2i16>,
     pub typ: PawnTyp,
 }
 

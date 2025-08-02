@@ -3,6 +3,7 @@ pub use geometry::*;
 pub use num_traits::AsPrimitive;
 pub use vector::*;
 pub use memkeep::*;
+pub use cel::*;
 
 pub use fixed_str::*;
 pub use proc_macros::*;

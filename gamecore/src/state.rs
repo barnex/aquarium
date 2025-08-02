@@ -42,7 +42,7 @@ impl State {
     pub fn new() -> Self {
         let buildings = vec![Building { typ: BuildingTyp::HQ, tile: vec2(12, 8) }];
         let pawns = MemKeep::new();
-        pawns.extend([Pawn { typ: PawnTyp::Leaf, tile: vec2(17, 7) }]);
+        pawns.extend([Pawn { typ: PawnTyp::Leaf, tile: vec2(17, 7).cel() }]);
 
         Self {
             buildings,
@@ -134,7 +134,7 @@ impl State {
                 Tool::Tile(mat) => self.tilemap.set(self.mouse_tile(), mat),
                 Tool::Pawn(typ) => {
                     if self.inputs.just_pressed(K_MOUSE1) {
-                        self.pawns.insert(Pawn { tile: self.mouse_tile(), typ });
+                        self.pawns.insert(Pawn { tile: self.mouse_tile().cel(), typ });
                     }
                 }
             }

@@ -3,28 +3,30 @@
 resolver = "2"
 
 members = [
-	"corelibs/fixed_str",
-	"corelibs/vector",
+	"corelibs/cel",
 	"corelibs/core_util",
+	"corelibs/fixed_str",
 	"corelibs/geometry",
 	"corelibs/matrix",
 	"corelibs/memkeep",
+	"corelibs/memkeep",
+	"corelibs/vector",
 	"gamecore",
-	"webshell",
 	"proc_macros",
 	"proc_macros_impl",
-	"corelibs/memkeep",
+	"webshell",
 ]
 
 [workspace.dependencies]
+cel = { path = "corelibs/cel" }
 core_util = { path = "corelibs/core_util" }
 fixed_str = { path = "corelibs/fixed_str" }
 gamecore = { path = "gamecore" }
 geometry = { path = "corelibs/geometry" }
 matrix = { path = "corelibs/matrix" }
 memkeep = { path = "corelibs/memkeep" }
-vector = { path = "corelibs/vector" }
 proc_macros = { path = "proc_macros" }
+vector = { path = "corelibs/vector" }
 
 anyhow = "1"
 base64 = "0.22"

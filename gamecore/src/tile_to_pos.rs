@@ -18,9 +18,23 @@ impl ToTile for vec2i {
     }
 }
 
+impl ToTile for &Cel<vec2i> {
+    #[inline]
+    fn to_tile(self) -> vec2i16 {
+        self.get().to_tile()
+    }
+}
+
 impl ToPos for vec2i16 {
     #[inline]
     fn pos(self) -> vec2i {
         self.as_i32() * TILE_ISIZE
+    }
+}
+
+impl ToPos for &Cel<vec2i16> {
+    #[inline]
+    fn pos(self) -> vec2i {
+        self.get().pos()
     }
 }
