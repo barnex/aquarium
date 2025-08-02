@@ -21,6 +21,16 @@
 			image-rendering: pixelated;
 			image-rendering: crisp-edges;
 		}
+
+		.button-row {
+			display: inline-flex;
+			gap: 2px;
+			align-items: stretch;
+		}
+
+		.button-row button {
+			white-space: nowrap;
+		}
 	</style>
 	<meta charset="utf-8" />
 	<title>game</title>
@@ -31,13 +41,14 @@
 
 <body>
 
-	<button title="Paws, err Pause" onclick='window.wasmBindings.cmd("pause")'>⏸️</button>
-	<button title="Save game" onclick='window.wasmBindings.cmd("save")'>💾</button>
-	<button title="Save & reload" onclick='window.wasmBindings.cmd("save_reload")'>↻</button>
-	<button title="Reset" onclick='window.wasmBindings.cmd("reset")'>❌</button>
-	<button title="Large" onclick='window.wasmBindings.cmd("toggle_large")'>↔️</button>
+	<div class="button-row">
+		<button title="Paws, err Pause" onclick='window.wasmBindings.cmd("pause")'>⏸️</button>
+		<button title="Save game" onclick='window.wasmBindings.cmd("save")'>💾</button>
+		<button title="Save & reload" onclick='window.wasmBindings.cmd("save_reload")'>↻</button>
+		<button title="Reset game" onclick='window.wasmBindings.cmd("reset")'>❌</button>
+		<button title="Toggle large screen" onclick='window.wasmBindings.cmd("toggle_large")'>↔️</button>
+	</div><br />
 
-	<br />
 
 	<canvas id="canvas" width="480" height="320" draggable="false" style="border: 1px solid black;"></canvas>
 
