@@ -27,6 +27,7 @@ use serde::{Serialize, de::DeserializeOwned};
 use wasm_bindgen::prelude::*;
 use wasm_bindgen::{JsCast, JsValue, prelude::Closure};
 use wasm_bindgen_futures::JsFuture;
+use web_sys::HtmlAnchorElement;
 use web_sys::{CanvasRenderingContext2d, HtmlCanvasElement, HtmlElement, HtmlImageElement, ImageBitmap, ImageData, KeyboardEvent, MouseEvent, Request, RequestInit, Response, Window};
 
 use std::cell::{Cell, RefCell};
@@ -72,7 +73,7 @@ async fn start() -> JsResult<()> {
     let input_events = Shared::<VecDeque<InputEvent>>::default();
     listen_keys(Rc::clone(&input_events));
     listen_mouse(&canvas, Rc::clone(&input_events));
-    
+
     let mut out = Output::default();
 
     // 🌍 Main loop
@@ -259,4 +260,23 @@ pub fn window() -> Window {
 #[track_caller]
 fn get_element_by_id<T: JsCast>(id: &str) -> T {
     web_sys::window().unwrap().document().unwrap().get_element_by_id(id).unwrap().dyn_into::<T>().unwrap()
+}
+
+pub fn download_screenshot(filename: &str) -> JsResult<()> {
+    // Get document and canvas
+    let window = web_sys::window().unwrap();
+    let document = window.document().unwrap();
+
+    let canvas = get_element_by_id::<HtmlCanvasElement>("canvas");
+
+    // Get canvas as data URL (PNG)
+    let data_url = canvas.to_data_url()?; // defaults to image/png
+
+    // Create anchor element
+    let a = document.create_element("a")?.dyn_into::<HtmlAnchorElement>()?;
+
+    a.set_href(&data_url);
+    a.set_download(filename);
+    a.click();
+    Ok(())
 }

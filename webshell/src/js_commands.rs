@@ -36,6 +36,7 @@ fn exec_command(state: &mut State, cmd: &str) -> JsResult<()> {
         &["reset"] => Ok(reset(state)),
         &["save_reload"] => Ok(save_reload(state)),
         &["toggle_large"] => Ok(toggle_large()),
+        &["screenshot"] => download_screenshot("screenshot.png"),
         // 👇 unknown command: forward to gamestate
         _ => {
             state.commands.push_back(cmd.to_owned());
