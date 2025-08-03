@@ -34,8 +34,6 @@ pub struct State {
     pub viewport_size: vec2u,
     /// Camera position in world coordinates.
     pub camera_pos: vec2i,
-    #[serde(skip)]
-    pub out: Output,
 }
 
 pub const TILE_SIZE: u32 = 24;
@@ -60,7 +58,6 @@ impl State {
             frame: 0,
             inputs: default(),
             keymap: default_keybindings(),
-            out: default(),
             speed: 1,
             tilemap: Tilemap::testmap(vec2(64, 48)),
             ui: Ui::new(),
@@ -68,14 +65,12 @@ impl State {
         }
     }
 
-    pub fn tick(&mut self) {
-        self.out.clear();
-
+    pub fn tick(&mut self, out: &mut Output) {
         self.update_fps(); // 👈 FPS is gamespeed independent
         self.exec_commands(); // 👈 exec commands even when paused (speed 0)
         self.control_camera();
 
-        self.ui.update_and_draw(&mut self.inputs, &mut self.out); // 👈 may consume inputs
+        self.ui.update_and_draw(&mut self.inputs, out); // 👈 may consume inputs
         //
         self.doodle();
 
@@ -86,54 +81,54 @@ impl State {
             self.tick_once();
         }
 
-        self.render_game();
+        self.render_game(out);
     }
 
-    pub fn render_game(&mut self) {
+    pub fn render_game(&mut self, out: &mut Output) {
         debug_assert!(self.viewport_size != vec2::ZERO);
 
         // Note: ⚠️ UI already rendered (may consume input events)
 
-        self.draw_tilemap();
-        self.draw_buildings();
-        self.draw_pawns();
-        self.draw_selection();
-        self.draw_cursor();
-        self.output_debug();
+        self.draw_tilemap(out);
+        self.draw_buildings(out);
+        self.draw_pawns(out);
+        self.draw_selection(out);
+        self.draw_cursor(out);
+        self.output_debug(&mut out.debug);
     }
 
-    pub fn draw_tilemap(&mut self) {
+    pub fn draw_tilemap(&mut self, out: &mut Output) {
         for (idx, mat) in self.tilemap.enumerate_all() {
-            self.out.push_sprite(L_TILES, mat.sprite(), idx.pos() - self.camera_pos);
+            out.push_sprite(L_TILES, mat.sprite(), idx.pos() - self.camera_pos);
         }
     }
 
-    pub fn draw_buildings(&mut self) {
+    pub fn draw_buildings(&mut self, out: &mut Output) {
         for building in &self.buildings {
-            self.out.push_sprite(L_SPRITES, building.typ.sprite(), building.tile * TILE_ISIZE - self.camera_pos);
+            out.push_sprite(L_SPRITES, building.typ.sprite(), building.tile * TILE_ISIZE - self.camera_pos);
         }
     }
 
-    fn draw_pawns(&mut self) {
+    fn draw_pawns(&mut self, out: &mut Output) {
         for pawn in self.pawns.iter() {
-            self.out.push_sprite(L_SPRITES, pawn.typ.sprite(), pawn.tile.pos() - self.camera_pos);
+            out.push_sprite(L_SPRITES, pawn.typ.sprite(), pawn.tile.pos() - self.camera_pos);
         }
     }
 
-    fn draw_cursor(&mut self) {
+    fn draw_cursor(&mut self, out: &mut Output) {
         let sprite = match self.ui.active_tool {
             Tool::Pointer => sprite!("grid24"),
             Tool::Tile(typ) => typ.sprite(),
             Tool::Pawn(typ) => typ.sprite(),
         };
-        self.out.push_sprite(L_SPRITES, sprite, self.mouse_tile().pos() - self.camera_pos);
-        self.out.push_sprite(L_SPRITES, sprite!("grid24"), self.mouse_tile().pos() - self.camera_pos);
+        out.push_sprite(L_SPRITES, sprite, self.mouse_tile().pos() - self.camera_pos);
+        out.push_sprite(L_SPRITES, sprite!("grid24"), self.mouse_tile().pos() - self.camera_pos);
     }
 
-    fn draw_selection(&mut self) -> Option<()> {
+    fn draw_selection(&mut self, out: &mut Output) -> Option<()> {
         let sel = self.pawns.get(self.selected.get()?)?;
 
-        self.out.push_rect(L_SPRITES, Rectangle::new(sel.bounds().translated(-self.camera_pos), RGBA::BLUE).with_fill(RGB::BLUE.with_alpha(64)));
+        out.push_rect(L_SPRITES, Rectangle::new(sel.bounds().translated(-self.camera_pos), RGBA::BLUE).with_fill(RGB::BLUE.with_alpha(64)));
 
         OK
     }
@@ -194,15 +189,15 @@ impl State {
         self.dt_smooth = lerp(self.dt_smooth, self.dt, 0.02);
     }
 
-    fn output_debug(&mut self) {
-        writeln!(&mut self.out.debug, "frame: {}, now: {:.04}s, FPS: {:.01}", self.frame, self.now_secs, 1.0 / self.dt_smooth).unwrap();
-        writeln!(&mut self.out.debug, "camera {:?}", self.camera_pos).unwrap();
-        writeln!(&mut self.out.debug, "viewport_size {:?}", self.viewport_size).unwrap();
-        //writeln!(&mut self.out.debug, "buildings: {}, pawns: {}", self.buildings.len(), self.pawns.len()).unwrap();
-        writeln!(&mut self.out.debug, "sprites {:?}", self.out.layers.iter().map(|l| l.sprites.len()).sum::<usize>()).unwrap();
-        writeln!(&mut self.out.debug, "down {:?}", self.inputs.iter_is_down().sorted().collect_vec()).unwrap();
-        writeln!(&mut self.out.debug, "tile_picker {:?}", self.ui.active_tool).unwrap();
-        writeln!(&mut self.out.debug, "selected: {:?}", self.selected).unwrap();
+    fn output_debug(&mut self, debug: &mut String) {
+        writeln!(debug, "frame: {}, now: {:.04}s, FPS: {:.01}", self.frame, self.now_secs, 1.0 / self.dt_smooth).unwrap();
+        writeln!(debug, "camera {:?}", self.camera_pos).unwrap();
+        writeln!(debug, "viewport_size {:?}", self.viewport_size).unwrap();
+        //writelnt.debug, "buildings: {}, pawns: {}", self.buildings.len(), self.pawns.len()).unwrap();
+        //writeln!(debug, "sprites {:?}", self.out.layers.iter().map(|l| l.sprites.len()).sum::<usize>()).unwrap();
+        writeln!(debug, "down {:?}", self.inputs.iter_is_down().sorted().collect_vec()).unwrap();
+        writeln!(debug, "tile_picker {:?}", self.ui.active_tool).unwrap();
+        writeln!(debug, "selected: {:?}", self.selected).unwrap();
     }
 }
 

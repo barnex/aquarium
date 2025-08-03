@@ -72,6 +72,8 @@ async fn start() -> JsResult<()> {
     let input_events = Shared::<VecDeque<InputEvent>>::default();
     listen_keys(Rc::clone(&input_events));
     listen_mouse(&canvas, Rc::clone(&input_events));
+    
+    let mut out = Output::default();
 
     // 🌍 Main loop
     animation_loop(move |ctx| {
@@ -79,7 +81,8 @@ async fn start() -> JsResult<()> {
         state.viewport_size = vec2(canvas.width(), canvas.height());
         record_input_events(&state.keymap, &mut state.inputs, &input_events);
 
-        state.tick();
+        out.clear();
+        state.tick(&mut out);
 
         //out.clear();
         //state.render();
@@ -87,9 +90,9 @@ async fn start() -> JsResult<()> {
         ctx.clear_rect(0.0, 0.0, canvas.width().as_(), canvas.height().as_());
         res.poll();
 
-        draw(&canvas, &ctx, &mut res, &state.out);
+        draw(&canvas, &ctx, &mut res, &out);
 
-        get_element_by_id::<HtmlElement>("debug").set_inner_text(&state.out.debug);
+        get_element_by_id::<HtmlElement>("debug").set_inner_text(&out.debug);
 
         exec_pending_commands(&mut state);
     });
