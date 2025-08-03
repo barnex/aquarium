@@ -1,5 +1,5 @@
 use crate::internal::*;
-use std::cmp::PartialOrd;
+use std::{cmp::PartialOrd, ops::AddAssign};
 
 pub type Bounds2Di = Bounds2D<i32>;
 pub type Bounds2Du = Bounds2D<u32>;
@@ -65,6 +65,15 @@ where
 {
     pub fn from_pos_size(pos: vec2<T>, size: vec2<T>) -> Self {
         Self { min: pos, max: pos + size }
+    }
+}
+
+impl<T: Copy + AddAssign> Bounds2D<T> {
+    #[must_use = "Does not modify original"]
+    pub fn translated(mut self, delta: vec2<T>) -> Self {
+        self.min += delta;
+        self.max += delta;
+        self
     }
 }
 
