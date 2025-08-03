@@ -51,7 +51,7 @@ impl State {
             selected: None.cel(),
             buildings,
             pawns,
-            camera_pos: default(),
+            camera_pos: vec2(40, 70), // nonzero so we notice offset issues without having to pan
             commands: default(),
             now_secs: 0.0,
             _prev_secs: 0.0,
@@ -130,9 +130,11 @@ impl State {
         self.out.push_sprite(L_SPRITES, sprite!("grid24"), self.mouse_tile().pos() - self.camera_pos);
     }
 
-    fn draw_selection(&mut self) -> Option<()>{
+    fn draw_selection(&mut self) -> Option<()> {
         let sel = self.pawns.get(self.selected.get()?)?;
-        self.out.push_rect(L_SPRITES, Rectangle::new(sel.bounds(), RGBA::BLUE).with_fill(RGB::BLUE.with_alpha(128)));
+
+        self.out.push_rect(L_SPRITES, Rectangle::new(sel.bounds().translated(-self.camera_pos), RGBA::BLUE).with_fill(RGB::BLUE.with_alpha(64)));
+
         OK
     }
 
