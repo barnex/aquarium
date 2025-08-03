@@ -68,14 +68,10 @@ impl State {
     pub fn tick(&mut self, out: &mut Output) {
         self.update_fps(); // 👈 FPS is gamespeed independent
         self.exec_commands(); // 👈 exec commands even when paused (speed 0)
-        self.control_camera();
 
         self.ui.update_and_draw(&mut self.inputs, out); // 👈 may consume inputs
-        //
-        self.doodle();
 
-        select_pawns(self);
-        command_pawns(self);
+        self.control();
 
         for _ in 0..self.speed {
             self.tick_once();
@@ -89,50 +85,16 @@ impl State {
         self.frame += 1;
     }
 
-    fn doodle(&mut self) {
-        if self.inputs.is_down(K_MOUSE1) {
-            if let Tool::Tile(mat) = self.ui.active_tool {}
-
-            match self.ui.active_tool {
-                Tool::Pointer => (),
-                Tool::Tile(mat) => self.tilemap.set(self.mouse_tile(), mat),
-                Tool::Pawn(typ) => {
-                    if self.inputs.just_pressed(K_MOUSE1) {
-                        self.pawns.insert(Pawn::new(typ, self.mouse_tile()));
-                    }
-                }
-            }
-        }
-    }
-
-    fn pawn_at(&self, tile: vec2i16) -> Option<&Pawn> {
+    pub fn pawn_at(&self, tile: vec2i16) -> Option<&Pawn> {
         self.pawns.iter().find(|v| v.tile == tile)
     }
 
-    fn mouse_position_world(&self) -> vec2i {
+    pub fn mouse_position_world(&self) -> vec2i {
         self.inputs.mouse_position() + self.camera_pos
     }
 
     pub fn mouse_tile(&self) -> vec2i16 {
         self.mouse_position_world().to_tile()
-    }
-
-    fn control_camera(&mut self) {
-        let mut delta = vec2::ZERO;
-        if self.inputs.is_down(K_CAM_DOWN) {
-            delta += vec2(0, 1);
-        }
-        if self.inputs.is_down(K_CAM_UP) {
-            delta += vec2(0, -1);
-        }
-        if self.inputs.is_down(K_CAM_LEFT) {
-            delta += vec2(-1, 0);
-        }
-        if self.inputs.is_down(K_CAM_RIGHT) {
-            delta += vec2(1, 0);
-        }
-        let speed = 3;
-        self.camera_pos += speed * delta;
     }
 
     fn update_fps(&mut self) {
@@ -150,25 +112,5 @@ impl State {
         writeln!(debug, "down {:?}", self.inputs.iter_is_down().sorted().collect_vec()).unwrap();
         writeln!(debug, "tile_picker {:?}", self.ui.active_tool).unwrap();
         writeln!(debug, "selected: {:?}", self.selected).unwrap();
-    }
-}
-
-fn select_pawns(s: &mut State) {
-    if s.ui.active_tool == Tool::Pointer {
-        if s.inputs.just_pressed(K_MOUSE1) {
-            if let Some(pawn) = s.pawn_at(s.mouse_tile()) {
-                s.selected.set(Some(pawn.id))
-            }
-        }
-    }
-}
-
-fn command_pawns(s: &mut State) {
-    if s.ui.active_tool == Tool::Pointer {
-        if s.inputs.just_pressed(K_MOUSE1) {}
-
-        if let Some(pawn) = s.pawn_at(s.mouse_tile()) {
-            log::info!("{pawn:?}");
-        }
     }
 }

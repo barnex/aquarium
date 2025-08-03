@@ -1,7 +1,8 @@
+//! Draw the world.
 use crate::prelude::*;
 
 impl State {
-    pub fn draw_world(&mut self, out: &mut Output) {
+    pub fn draw_world(&self, out: &mut Output) {
         debug_assert!(self.viewport_size != vec2::ZERO);
         // Note: ⚠️ UI already rendered (may consume input events)
 
