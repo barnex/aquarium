@@ -2,6 +2,10 @@ use std::cell::{Cell, RefCell, UnsafeCell};
 use std::fmt::{Debug, Display};
 use std::marker::PhantomData;
 mod serde_support;
+mod with_id;
+pub use with_id::*;
+mod id;
+pub use id::*;
 
 /// A memory arena indexed by generational indices,
 /// that hands out references (`&T`).
@@ -26,6 +30,14 @@ impl<T> Slot<T> {
             not_deleted: false.into(),
             value: UnsafeCell::new(None),
         }
+    }
+
+    unsafe fn insert(&self, v: T) {
+        // SAFETY: We just check that the slot is free, so no other pointers exist.
+        // debug_assert double-checks this.
+        let ptr = unsafe { &mut *self.value.get() };
+        debug_assert!(ptr.is_none());
+        *ptr = Some(v);
     }
 }
 
@@ -54,28 +66,38 @@ impl<T> MemKeep<T> {
         }
     }
 
-    pub fn insert(&self, v: T) -> Id {
+    pub fn insert_raw(&self, v: T) -> Id {
+        let (id, slot) = self._prepare_slot();
+        unsafe { slot.insert(v) };
+        //{
+        //    // SAFETY: We just check that the slot is free, so no other pointers exist.
+        //    // debug_assert double-checks this.
+        //    let ptr = unsafe { &mut *slot.value.get() };
+        //    debug_assert!(ptr.is_none());
+        //    *ptr = Some(v);
+        //    // drop ptr
+        //}
+        id
+    }
+
+    fn _prepare_slot(&self) -> (Id, &Slot<T>) {
         let index = self.freelist.borrow_mut().pop().expect("MemKeep full");
         debug_assert!(self.storage[index as usize].not_deleted.get() == false);
 
         let slot = &self.storage[index as usize];
         let generation = slot.generation.get().wrapping_add(1);
+
         slot.generation.set(generation);
+
         slot.not_deleted.set(true);
-        {
-            // SAFETY: We just check that the slot is free, so no other pointers exist.
-            // debug_assert double-checks this.
-            let ptr = unsafe { &mut *slot.value.get() };
-            debug_assert!(ptr.is_none());
-            *ptr = Some(v);
-            // drop ptr
-        }
-        Id { index, generation }
+
+        let id = Id { index, generation };
+        (id, slot)
     }
 
     pub fn extend(&self, v: impl IntoIterator<Item = T>) {
         for v in v {
-            self.insert(v);
+            self.insert_raw(v);
         }
     }
 
@@ -118,7 +140,7 @@ impl<T> MemKeep<T> {
         })
     }
 
-    pub fn values(&self) -> impl Iterator<Item = &T> {
+    pub fn iter(&self) -> impl Iterator<Item = &T> {
         self.enumerate().map(|(_, v)| v)
     }
 
@@ -133,24 +155,6 @@ impl<T> MemKeep<T> {
     }
 }
 
-#[derive(Clone, Copy, PartialEq, Eq, Hash)]
-pub struct Id {
-    index: u32,
-    generation: u32,
-}
-
-impl Debug for Id {
-    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        <Self as Display>::fmt(self, f)
-    }
-}
-
-impl Display for Id {
-    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        write!(f, "{:08x}.{:08x}", self.index, self.generation)
-    }
-}
-
 #[cfg(test)]
 mod memkeep_test {
 
@@ -161,9 +165,9 @@ mod memkeep_test {
     fn unique_ids() {
         let m = MemKeep::<&'static str>::new();
 
-        let a = m.insert("a");
-        let b = m.insert("b");
-        let c = m.insert("c");
+        let a = m.insert_raw("a");
+        let b = m.insert_raw("b");
+        let c = m.insert_raw("c");
 
         // references are unique
         expect_ne!(a, b);
@@ -175,9 +179,9 @@ mod memkeep_test {
     fn get() {
         let m = MemKeep::<&'static str>::new();
 
-        let a = m.insert("a");
-        let b = m.insert("b");
-        let c = m.insert("c");
+        let a = m.insert_raw("a");
+        let b = m.insert_raw("b");
+        let c = m.insert_raw("c");
 
         expect_eq!(m.get(a), Some(&"a"));
         expect_eq!(m.get(b), Some(&"b"));
@@ -188,11 +192,11 @@ mod memkeep_test {
     fn enumerate() {
         let mut m = MemKeep::<&'static str>::new();
 
-        let a = m.insert("a");
-        let b = m.insert("b");
-        let c = m.insert("c");
-        let d = m.insert("d");
-        let e = m.insert("e");
+        let a = m.insert_raw("a");
+        let b = m.insert_raw("b");
+        let c = m.insert_raw("c");
+        let d = m.insert_raw("d");
+        let e = m.insert_raw("e");
 
         // exercise garbage, collected and alive
         m.remove(c);
@@ -211,11 +215,11 @@ mod memkeep_test {
     #[gtest]
     fn serde() {
         let mut m = MemKeep::<String>::new();
-        let a = m.insert("a".into());
-        let b = m.insert("b".into());
-        let c = m.insert("c".into());
-        let d = m.insert("d".into());
-        let e = m.insert("e".into());
+        let a = m.insert_raw("a".into());
+        let b = m.insert_raw("b".into());
+        let c = m.insert_raw("c".into());
+        let d = m.insert_raw("d".into());
+        let e = m.insert_raw("e".into());
         // exercise garbage, collected and alive
         m.remove(c);
         m.gc();
@@ -249,9 +253,9 @@ mod memkeep_test {
     fn remove() {
         let m = MemKeep::<&'static str>::new();
 
-        let a = m.insert("a");
-        let b = m.insert("b");
-        let c = m.insert("c");
+        let a = m.insert_raw("a");
+        let b = m.insert_raw("b");
+        let c = m.insert_raw("c");
 
         expect_eq!(m.get(a), Some(&"a"));
         expect_eq!(m.get(b), Some(&"b"));
@@ -269,12 +273,12 @@ mod memkeep_test {
     fn gc() {
         let mut m = MemKeep::<&'static str>::new();
 
-        let a1 = m.insert("hello, computer!");
+        let a1 = m.insert_raw("hello, computer!");
         m.remove(a1);
         m.gc();
 
         for _ in 0..20 {
-            let a = m.insert("hello, computer!");
+            let a = m.insert_raw("hello, computer!");
             expect_eq!(a.index, a1.index);
             m.remove(a);
             m.gc();
