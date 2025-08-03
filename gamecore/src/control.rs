@@ -14,22 +14,22 @@ impl State {
     }
 }
 
-fn select_pawns(s: &mut State) {
-    if s.ui.active_tool == Tool::Pointer {
-        if s.inputs.just_pressed(K_MOUSE1) {
-            if let Some(pawn) = s.pawn_at(s.mouse_tile()) {
-                s.selected.set(Some(pawn.id))
+fn select_pawns(g: &mut State) {
+    if g.ui.active_tool == Tool::Pointer {
+        if g.inputs.just_pressed(K_MOUSE1) {
+            if let Some(pawn) = g.pawn_at(g.mouse_tile()) {
+                g.selected.set(Some(pawn.id))
             }
         }
     }
 }
 
-fn command_pawns(s: &mut State) {
-    if s.ui.active_tool == Tool::Pointer {
-        if s.inputs.just_pressed(K_MOUSE1) {}
-
-        if let Some(pawn) = s.pawn_at(s.mouse_tile()) {
-            log::info!("{pawn:?}");
+fn command_pawns(g: &mut State) {
+    if g.ui.active_tool == Tool::Pointer {
+        if g.inputs.just_pressed(K_MOUSE2) {
+            if let Some(pawn) = g.selected.and_then(|id|g.pawn(id)){
+                pawn.set_destination(g.mouse_tile())
+            }
         }
     }
 }

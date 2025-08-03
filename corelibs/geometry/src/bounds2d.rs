@@ -1,6 +1,9 @@
 use crate::internal::*;
 use std::{cmp::PartialOrd, ops::AddAssign};
 
+/// TODO: remove MyNumber etc in favor of num_traits
+use num_traits::Num;
+
 pub type Bounds2Di = Bounds2D<i32>;
 pub type Bounds2Du = Bounds2D<u32>;
 pub type Bounds2Df = Bounds2D<f32>;
@@ -79,7 +82,7 @@ impl<T: Copy + AddAssign> Bounds2D<T> {
 
 impl<T> Bounds2D<T>
 where
-    T: Float,
+    T: Num + Copy,
 {
     /// Center position.
     /// ```norun

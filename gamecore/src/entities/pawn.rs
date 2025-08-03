@@ -5,6 +5,7 @@ pub struct Pawn {
     pub id: Id,
     pub typ: PawnTyp,
     pub tile: Cel<vec2i16>,
+    pub dest: Cel<vec2i16>,
 }
 
 #[derive(Serialize, Deserialize, Clone, Copy, PartialEq, Eq, Hash, TryFromPrimitive, Debug)]
@@ -36,12 +37,30 @@ impl PawnTyp {
 
 impl Pawn {
     pub fn new(typ: PawnTyp, tile: vec2i16) -> Self {
-        Self { tile: tile.cel(), typ, id: Id::default() }
+        Self {
+            tile: tile.cel(),
+            dest: tile.cel(),
+            typ,
+            id: Id::default(),
+        }
+    }
+
+    pub fn bounds(&self) -> Bounds2Di {
+        Bounds2D::with_size(self.tile.pos(), vec2::splat(TILE_ISIZE))
+    }
+
+    pub fn center(&self) -> vec2i {
+        self.bounds().center()
     }
     
-    pub fn bounds(&self) -> Bounds2Di{
-        Bounds2D::with_size(self.tile.pos(), vec2::splat(TILE_ISIZE)) 
+    pub fn set_destination(&self, dest: vec2i16){
+        self.dest.set(dest); 
     }
+
+    pub fn is_at_destination(&self) -> bool{
+        self.tile == self.dest
+    }
+
 }
 
 impl SetId for Pawn {

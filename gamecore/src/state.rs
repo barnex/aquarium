@@ -84,6 +84,10 @@ impl State {
     pub(crate) fn tick_once(&mut self) {
         self.frame += 1;
     }
+    
+    pub fn pawn(&self, id: Id) -> Option<&Pawn> {
+        self.pawns.get(id)
+    }
 
     pub fn pawn_at(&self, tile: vec2i16) -> Option<&Pawn> {
         self.pawns.iter().find(|v| v.tile == tile)
@@ -111,6 +115,6 @@ impl State {
         //writeln!(debug, "sprites {:?}", self.out.layers.iter().map(|l| l.sprites.len()).sum::<usize>()).unwrap();
         writeln!(debug, "down {:?}", self.inputs.iter_is_down().sorted().collect_vec()).unwrap();
         writeln!(debug, "tile_picker {:?}", self.ui.active_tool).unwrap();
-        writeln!(debug, "selected: {:?}", self.selected).unwrap();
+        writeln!(debug, "selected: {:?}: {:?}", self.selected, self.selected.map(|id|self.pawn(id))).unwrap();
     }
 }

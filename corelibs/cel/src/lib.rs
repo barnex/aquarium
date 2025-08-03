@@ -2,7 +2,7 @@ mod cel;
 mod into_cel;
 mod backcompat;
 mod serde_support;
-mod vector_support;
+mod special_impls;
 
 pub use cel::*;
 pub use into_cel::IntoCell as _;

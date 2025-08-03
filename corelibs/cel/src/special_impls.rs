@@ -4,6 +4,22 @@ use crate::*;
 use core_util::*;
 use vector::*;
 
+// ---------- option
+
+impl<T: Copy> Cel<Option<T>> {
+    /// Shorthand for `my_cel.get().map(f)`
+    pub fn map<U, F: FnOnce(T) -> U>(&self, f: F) -> Option<U> {
+        self.get().map(f)
+    }
+
+    /// Shorthand for `my_cel.get().and_then(f)`
+    pub fn and_then<U, F: FnOnce(T) -> Option<U>>(&self, f: F) -> Option<U> {
+        self.get().and_then(f)
+    }
+}
+
+// ---------- vector
+
 impl<T: Copy> Cel<Vector<T, 2>> {
     /// X component.
     #[inline(always)]
