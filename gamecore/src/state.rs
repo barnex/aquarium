@@ -97,6 +97,7 @@ impl State {
         self.draw_tilemap();
         self.draw_buildings();
         self.draw_pawns();
+        self.draw_selection();
         self.draw_cursor();
         self.output_debug();
     }
@@ -127,6 +128,12 @@ impl State {
         };
         self.out.push_sprite(L_SPRITES, sprite, self.mouse_tile().pos() - self.camera_pos);
         self.out.push_sprite(L_SPRITES, sprite!("grid24"), self.mouse_tile().pos() - self.camera_pos);
+    }
+
+    fn draw_selection(&mut self) -> Option<()>{
+        let sel = self.pawns.get(self.selected.get()?)?;
+        self.out.push_rect(L_SPRITES, Rectangle::new(sel.bounds(), RGBA::BLUE).with_fill(RGB::BLUE.with_alpha(128)));
+        OK
     }
 
     pub(crate) fn tick_once(&mut self) {

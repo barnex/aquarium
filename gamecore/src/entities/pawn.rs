@@ -38,6 +38,10 @@ impl Pawn {
     pub fn new(typ: PawnTyp, tile: vec2i16) -> Self {
         Self { tile: tile.cel(), typ, id: Id::default() }
     }
+    
+    pub fn bounds(&self) -> Bounds2Di{
+        Bounds2D::with_size(self.tile.pos(), vec2::splat(TILE_ISIZE)) 
+    }
 }
 
 impl SetId for Pawn {

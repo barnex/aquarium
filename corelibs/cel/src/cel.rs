@@ -2,7 +2,7 @@ use crate::*;
 
 use std::cell::Cell;
 use std::fmt::{Debug, Display};
-use std::ops::Add;
+use std::ops::{Add};
 
 
 pub struct Cel<T: Copy>(Cell<T>);

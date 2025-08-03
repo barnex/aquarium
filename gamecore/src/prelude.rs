@@ -1,9 +1,9 @@
 pub use crate::*;
+pub use cel::*;
 pub use geometry::*;
+pub use memkeep::*;
 pub use num_traits::AsPrimitive;
 pub use vector::*;
-pub use memkeep::*;
-pub use cel::*;
 
 pub use fixed_str::*;
 pub use proc_macros::*;
@@ -32,3 +32,6 @@ pub type Bounds = Bounds2D<i32>;
 pub fn default<T: Default>() -> T {
     T::default()
 }
+
+/// Shorthand for returning `Some(())` from functions that return `Option<()>`  to support `?`.
+pub const OK: Option<()> = Some(());
