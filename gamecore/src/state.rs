@@ -1,3 +1,5 @@
+use std::ops::{Deref, DerefMut};
+
 use crate::prelude::*;
 
 #[derive(Serialize, Deserialize)]
@@ -6,6 +8,11 @@ pub struct State {
     pub tilemap: Tilemap,
     pub buildings: Vec<Building>,
     pub pawns: MemKeep<Pawn>,
+
+    // ⏯️ UI
+    #[serde(skip)]
+    pub ui: Ui,
+    pub selected: Cel<Option<Id>>,
 
     // 🕣 timekeeping
     pub frame: u64,
@@ -21,10 +28,6 @@ pub struct State {
     pub commands: VecDeque<String>,
     #[serde(skip)]
     pub keymap: Keymap,
-
-    // ⏯️ UI
-    #[serde(skip)]
-    pub ui: Ui,
 
     // 📺 output/rendering
     /// Screen/canvas size in pixels.
@@ -42,9 +45,10 @@ impl State {
     pub fn new() -> Self {
         let buildings = vec![Building { typ: BuildingTyp::HQ, tile: vec2(12, 8) }];
         let pawns = MemKeep::new();
-        pawns.extend([Pawn { typ: PawnTyp::Leaf, tile: vec2(17, 7).cel() }]);
+        pawns.insert(Pawn::new(PawnTyp::Leaf, vec2(17, 7)));
 
         Self {
+            selected: None.cel(),
             buildings,
             pawns,
             camera_pos: default(),
@@ -74,7 +78,9 @@ impl State {
         self.ui.update_and_draw(&mut self.inputs, &mut self.out); // 👈 may consume inputs
         //
         self.doodle();
-        self.command_pawns();
+
+        select_pawns(self);
+        command_pawns(self);
 
         for _ in 0..self.speed {
             self.tick_once();
@@ -108,7 +114,7 @@ impl State {
     }
 
     fn draw_pawns(&mut self) {
-        for pawn in self.pawns.values() {
+        for pawn in self.pawns.iter() {
             self.out.push_sprite(L_SPRITES, pawn.typ.sprite(), pawn.tile.pos() - self.camera_pos);
         }
     }
@@ -136,23 +142,15 @@ impl State {
                 Tool::Tile(mat) => self.tilemap.set(self.mouse_tile(), mat),
                 Tool::Pawn(typ) => {
                     if self.inputs.just_pressed(K_MOUSE1) {
-                        self.pawns.insert(Pawn { tile: self.mouse_tile().cel(), typ });
+                        self.pawns.insert(Pawn::new(typ, self.mouse_tile()));
                     }
                 }
             }
         }
     }
 
-    fn command_pawns(&mut self) {
-        if self.ui.active_tool == Tool::Pointer && self.inputs.just_pressed(K_MOUSE1) {
-            if let Some(pawn) = self.pawn_at(self.mouse_tile()) {
-                log::info!("{pawn:?}");
-            }
-        }
-    }
-
     fn pawn_at(&self, tile: vec2i16) -> Option<&Pawn> {
-        self.pawns.values().find(|p| p.tile == tile)
+        self.pawns.iter().find(|v| v.tile == tile)
     }
 
     fn mouse_position_world(&self) -> vec2i {
@@ -195,5 +193,26 @@ impl State {
         writeln!(&mut self.out.debug, "sprites {:?}", self.out.layers.iter().map(|l| l.sprites.len()).sum::<usize>()).unwrap();
         writeln!(&mut self.out.debug, "down {:?}", self.inputs.iter_is_down().sorted().collect_vec()).unwrap();
         writeln!(&mut self.out.debug, "tile_picker {:?}", self.ui.active_tool).unwrap();
+        writeln!(&mut self.out.debug, "selected: {:?}", self.selected).unwrap();
+    }
+}
+
+fn select_pawns(s: &mut State) {
+    if s.ui.active_tool == Tool::Pointer {
+        if s.inputs.just_pressed(K_MOUSE1) {
+            if let Some(pawn) = s.pawn_at(s.mouse_tile()) {
+                s.selected.set(Some(pawn.id))
+            }
+        }
+    }
+}
+
+fn command_pawns(s: &mut State) {
+    if s.ui.active_tool == Tool::Pointer {
+        if s.inputs.just_pressed(K_MOUSE1) {}
+
+        if let Some(pawn) = s.pawn_at(s.mouse_tile()) {
+            log::info!("{pawn:?}");
+        }
     }
 }

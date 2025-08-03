@@ -2,8 +2,9 @@ use crate::prelude::*;
 
 #[derive(Serialize, Deserialize, Debug)]
 pub struct Pawn {
-    pub tile: Cel<vec2i16>,
+    pub id: Id,
     pub typ: PawnTyp,
+    pub tile: Cel<vec2i16>,
 }
 
 #[derive(Serialize, Deserialize, Clone, Copy, PartialEq, Eq, Hash, TryFromPrimitive, Debug)]
@@ -34,9 +35,13 @@ impl PawnTyp {
 }
 
 impl Pawn {
-    //pub fn draw(&self, out: &mut Output){
-    //	let sprite = match self.typ{
-    //		PawnTyp::Leaf => sprite!("leaf"),
-    //	}
-    //}
+    pub fn new(typ: PawnTyp, tile: vec2i16) -> Self {
+        Self { tile: tile.cel(), typ, id: Id::default() }
+    }
+}
+
+impl SetId for Pawn {
+    fn set_id(&mut self, id: Id) {
+        self.id = id;
+    }
 }

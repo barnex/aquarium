@@ -95,12 +95,6 @@ impl<T> MemKeep<T> {
         (id, slot)
     }
 
-    pub fn extend(&self, v: impl IntoIterator<Item = T>) {
-        for v in v {
-            self.insert_raw(v);
-        }
-    }
-
     // For deserialize only
     // !! Must rebuild freelist after.
     fn _insert_at(&mut self, id: Id, v: T) {
