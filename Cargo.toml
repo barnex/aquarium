@@ -20,6 +20,7 @@ members = [
 
 [workspace.dependencies]
 cel = { path = "corelibs/cel" }
+pathfinder = { path = "corelibs/pathfinder" }
 core_util = { path = "corelibs/core_util" }
 fixed_str = { path = "corelibs/fixed_str" }
 gamecore = { path = "gamecore" }

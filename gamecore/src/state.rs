@@ -83,7 +83,15 @@ impl State {
 
     pub(crate) fn tick_once(&mut self) {
         self.frame += 1;
+        self.tick_pawns();
     }
+    
+    pub(crate) fn tick_pawns(&mut self) {
+        for p in self.pawns.iter(){
+            p.tick(self);
+        }
+    }
+    
     
     pub fn pawn(&self, id: Id) -> Option<&Pawn> {
         self.pawns.get(id)

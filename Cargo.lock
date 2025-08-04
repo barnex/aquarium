@@ -245,6 +245,7 @@ dependencies = [
  "memkeep",
  "num-traits",
  "num_enum",
+ "pathfinder",
  "proc_macros",
  "rand",
  "rand_chacha",

@@ -15,12 +15,13 @@ pub enum PawnTyp {
     Pollen = 2,
     Cat = 3,
     Crablet = 4,
-    // ⚠️ update `all()` below!
+    // ⚠️👇 update `all()` below!
 }
 impl PawnTyp {
-    // ⚠️ keep in sync!
     pub fn all() -> impl Iterator<Item = Self> {
-        ((Self::Leaf as u8)..=(Self::Crablet as u8)).map(|i| Self::try_from_primitive(i).unwrap())
+        let first = Self::Leaf;
+        let last = Self::Crablet; // 👈⚠️ keep in sync!
+        ((first as u8)..=(last as u8)).map(|i| Self::try_from_primitive(i).unwrap())
     }
 }
 
@@ -45,6 +46,10 @@ impl Pawn {
         }
     }
 
+    pub(crate) fn tick(&self, arg: &State) {
+        
+    }
+
     pub fn bounds(&self) -> Bounds2Di {
         Bounds2D::with_size(self.tile.pos(), vec2::splat(TILE_ISIZE))
     }
@@ -52,17 +57,17 @@ impl Pawn {
     pub fn center(&self) -> vec2i {
         self.bounds().center()
     }
-    
-    pub fn set_destination(&self, dest: vec2i16){
-        self.dest.set(dest); 
+
+    pub fn set_destination(&self, dest: vec2i16) {
+        self.dest.set(dest);
     }
 
-    pub fn is_at_destination(&self) -> bool{
+    pub fn is_at_destination(&self) -> bool {
         self.tile == self.dest
     }
-
 }
 
+// For MemKeep::insert.
 impl SetId for Pawn {
     fn set_id(&mut self, id: Id) {
         self.id = id;
