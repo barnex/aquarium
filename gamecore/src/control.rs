@@ -4,7 +4,7 @@
 //! (but will only carry out when time progresses).
 use crate::prelude::*;
 
-impl State {
+impl G {
     /// User inputs give commands to the world.
     pub fn control(&mut self) {
         control_camera(self);
@@ -14,7 +14,7 @@ impl State {
     }
 }
 
-fn select_pawns(g: &mut State) {
+fn select_pawns(g: &mut G) {
     if g.ui.active_tool == Tool::Pointer {
         if g.inputs.just_pressed(K_MOUSE1) {
             if let Some(pawn) = g.pawn_at(g.mouse_tile()) {
@@ -24,7 +24,7 @@ fn select_pawns(g: &mut State) {
     }
 }
 
-fn command_pawns(g: &mut State) {
+fn command_pawns(g: &mut G) {
     if g.ui.active_tool == Tool::Pointer {
         if g.inputs.just_pressed(K_MOUSE2) {
             if let Some(pawn) = g.selected.and_then(|id|g.pawn(id)){
@@ -34,7 +34,7 @@ fn command_pawns(g: &mut State) {
     }
 }
 
-fn draw_on_map(g: &mut State) {
+fn draw_on_map(g: &mut G) {
     if g.inputs.is_down(K_MOUSE1) {
         if let Tool::Tile(mat) = g.ui.active_tool {}
 
@@ -50,7 +50,7 @@ fn draw_on_map(g: &mut State) {
     }
 }
 
-fn control_camera(g: &mut State) {
+fn control_camera(g: &mut G) {
     let mut delta = vec2::ZERO;
     if g.inputs.is_down(K_CAM_DOWN) {
         delta += vec2(0, 1);

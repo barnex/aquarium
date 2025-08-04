@@ -1,6 +1,6 @@
 use crate::prelude::*;
 
-impl State {
+impl G {
     /// Consume command buffer, execute all commands.
     /// Powers console mode.
     pub(crate) fn exec_commands(&mut self) {

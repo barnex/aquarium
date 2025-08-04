@@ -2,8 +2,10 @@ use std::ops::{Deref, DerefMut};
 
 use crate::prelude::*;
 
+/// The Game State.
+/// Short name `g: &G`, because it's passed down ehhhhhhverywhere.
 #[derive(Serialize, Deserialize)]
-pub struct State {
+pub struct G {
     // 🌍 game world
     pub tilemap: Tilemap,
     pub buildings: Vec<Building>,
@@ -39,7 +41,7 @@ pub struct State {
 pub const TILE_SIZE: u32 = 24;
 pub const TILE_ISIZE: i32 = TILE_SIZE as i32;
 
-impl State {
+impl G {
     pub fn new() -> Self {
         let buildings = vec![Building { typ: BuildingTyp::HQ, tile: vec2(12, 8) }];
         let pawns = MemKeep::new();

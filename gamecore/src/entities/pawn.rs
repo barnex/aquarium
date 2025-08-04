@@ -48,34 +48,34 @@ impl Pawn {
         }
     }
 
-    pub(crate) fn tick(&self, g: &State) {
-        if !self.is_at_destination(){
+    pub(crate) fn tick(&self, g: &G) {
+        if !self.is_at_destination() {
             self.walk_to_destination(g);
             return;
         }
     }
 
-    fn teleport_to(&self, g: &State, dst: vec2i16) {
+    fn teleport_to(&self, g: &G, dst: vec2i16) {
         self.tile.set(dst);
     }
-    
-    fn walk_to_destination(&self, g: &State){
-        if let Some(next_tile) = self.route.next(){
+
+    fn walk_to_destination(&self, g: &G) {
+        if let Some(next_tile) = self.route.next() {
             self.tile.set(next_tile);
-        }else{
-            if ! self.is_at_destination(){
+        } else {
+            if !self.is_at_destination() {
                 self.compute_route(g);
             }
         }
     }
-    
-    fn compute_route(&self, g: &State){
+
+    fn compute_route(&self, g: &G) {
         let distance_map = DistanceMap::new(self.dest.get(), 254, |p| g.is_walkable(p));
-        if let Some(path) = distance_map.path_to_center(self.tile.get()){
+        if let Some(path) = distance_map.path_to_center(self.tile.get()) {
             self.route.set(path);
         }
     }
-    
+
     pub fn bounds(&self) -> Bounds2Di {
         Bounds2D::with_size(self.tile.pos(), vec2::splat(TILE_ISIZE))
     }
