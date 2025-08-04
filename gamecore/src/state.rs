@@ -74,7 +74,11 @@ impl State {
         self.control();
 
         for _ in 0..self.speed {
-            self.tick_once();
+            self.frame += 1;
+            if self.frame % 8 == 0 {
+                // 🪲 TODO: time major tick
+                self.tick_once();
+            }
         }
 
         self.draw_world(out);
@@ -82,7 +86,6 @@ impl State {
     }
 
     pub(crate) fn tick_once(&mut self) {
-        self.frame += 1;
         self.tick_pawns();
     }
 
