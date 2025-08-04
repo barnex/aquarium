@@ -5,6 +5,7 @@ use std::cell::Cell;
 use std::fmt::{Debug, Display};
 use std::ops::Add;
 
+#[derive(Default)]
 pub struct Cel<T: Copy>(Cell<T>);
 
 impl<T: Copy> Cel<T> {
@@ -99,6 +100,7 @@ impl<T: Copy + Add<Output = T>> CelAdd<&Cel<T>> for Cel<T> {
 }
 
 impl<T: Copy + Num> Cel<T> {
+    /// Increment value by 1.
     pub fn inc(&self) {
         self.0.set(self.0.get() + T::one());
     }
