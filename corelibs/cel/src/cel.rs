@@ -1,9 +1,9 @@
 use crate::*;
 
+use num_traits::Num;
 use std::cell::Cell;
 use std::fmt::{Debug, Display};
-use std::ops::{Add};
-
+use std::ops::Add;
 
 pub struct Cel<T: Copy>(Cell<T>);
 
@@ -98,6 +98,14 @@ impl<T: Copy + Add<Output = T>> CelAdd<&Cel<T>> for Cel<T> {
     }
 }
 
+impl<T: Copy + Num> Cel<T> {
+    pub fn inc(&self) {
+        self.0.set(self.0.get() + T::one());
+    }
+}
+
+// ---------- fmt
+
 impl<T> Debug for Cel<T>
 where
     T: Copy + Debug,
@@ -177,5 +185,12 @@ mod test {
 
         a.add(&5.cel());
         expect_eq!(a, 12);
+    }
+
+    #[gtest]
+    fn inc() {
+        let a = 1.cel();
+        a.inc();
+        expect_eq!(a, 2);
     }
 }
