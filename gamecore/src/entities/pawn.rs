@@ -46,10 +46,14 @@ impl Pawn {
         }
     }
 
-    pub(crate) fn tick(&self, arg: &State) {
-        
+    pub(crate) fn tick(&self, g: &State) {
+        self.teleport_to(g, self.dest.get());
     }
 
+    fn teleport_to(&self, g: &State, dst: vec2i16) {
+        self.tile.set(dst);
+    }
+    
     pub fn bounds(&self) -> Bounds2Di {
         Bounds2D::with_size(self.tile.pos(), vec2::splat(TILE_ISIZE))
     }

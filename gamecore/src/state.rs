@@ -91,8 +91,7 @@ impl State {
             p.tick(self);
         }
     }
-    
-    
+     
     pub fn pawn(&self, id: Id) -> Option<&Pawn> {
         self.pawns.get(id)
     }
@@ -125,4 +124,5 @@ impl State {
         writeln!(debug, "tile_picker {:?}", self.ui.active_tool).unwrap();
         writeln!(debug, "selected: {:?}: {:?}", self.selected, self.selected.map(|id|self.pawn(id))).unwrap();
     }
+    
 }
