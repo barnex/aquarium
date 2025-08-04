@@ -1,4 +1,5 @@
 use crate::internal::*;
+use math::{max, min};
 use std::{cmp::PartialOrd, ops::AddAssign};
 
 /// TODO: remove MyNumber etc in favor of num_traits
@@ -49,6 +50,18 @@ where
         U: Copy,
     {
         Bounds2D { min: self.min.map(f), max: self.max.map(f) }
+    }
+}
+
+impl<T> Bounds2D<T>
+where
+    T: Copy + PartialOrd + std::fmt::Debug + Ord,
+{
+    /// Like `new`, but no need for `min<max`. Values are automatically sorted
+    pub fn new_sorted(a: vec2<T>, b: vec2<T>) -> Self {
+        let min = a.zip_with(b, min);
+        let max = a.zip_with(b, max);
+        Self::new(min, max)
     }
 }
 
