@@ -599,7 +599,7 @@ where
 /// v += vec2(1, 2);
 /// assert_eq!(v, vec2(4,6));
 /// ```
-impl<T, const N: usize> AddAssign for Vector<T, N>
+impl<T, const N: usize> AddAssign<Vector<T, N>> for Vector<T, N>
 where
     (): SupportedSize<N>,
     T: AddAssign,
@@ -607,6 +607,24 @@ where
     #[inline(always)]
     fn add_assign(&mut self, rhs: Self) {
         <()>::zip_mut_with(self, rhs, T::add_assign)
+    }
+}
+///
+/// The addition assignment operator `+=`.
+/// ```
+/// # use vector::*;
+/// let mut v = vec2(3, 4);
+/// v += vec2(1, 2);
+/// assert_eq!(v, vec2(4,6));
+/// ```
+impl<T, const N: usize> AddAssign<T> for Vector<T, N>
+where
+    (): SupportedSize<N>,
+    T: AddAssign + Copy,
+{
+    #[inline(always)]
+    fn add_assign(&mut self, rhs: T) {
+        self.add_assign(Self::splat(rhs));
     }
 }
 
