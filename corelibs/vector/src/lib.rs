@@ -609,13 +609,14 @@ where
         <()>::zip_mut_with(self, rhs, T::add_assign)
     }
 }
-///
-/// The addition assignment operator `+=`.
+
+/// The addition assignment operator `+=` with scalar argument.
+/// Adds `rhs` to each vector component.
 /// ```
 /// # use vector::*;
 /// let mut v = vec2(3, 4);
-/// v += vec2(1, 2);
-/// assert_eq!(v, vec2(4,6));
+/// v += 5;
+/// assert_eq!(v, vec2(8, 9));
 /// ```
 impl<T, const N: usize> AddAssign<T> for Vector<T, N>
 where
@@ -625,6 +626,25 @@ where
     #[inline(always)]
     fn add_assign(&mut self, rhs: T) {
         self.add_assign(Self::splat(rhs));
+    }
+}
+
+/// The subtraction assignment operator `-=` with scalar argument.
+/// Adds `rhs` to each vector component.
+/// ```
+/// # use vector::*;
+/// let mut v = vec2(3, 4);
+/// v -= 1;
+/// assert_eq!(v, vec2(2, 3));
+/// ```
+impl<T, const N: usize> SubAssign<T> for Vector<T, N>
+where
+    (): SupportedSize<N>,
+    T: SubAssign + Copy,
+{
+    #[inline(always)]
+    fn sub_assign(&mut self, rhs: T) {
+        self.sub_assign(Self::splat(rhs));
     }
 }
 
