@@ -1,6 +1,9 @@
 use crate::internal::*;
 use math::{max, min};
-use std::{cmp::PartialOrd, ops::AddAssign};
+use std::{
+    cmp::PartialOrd,
+    ops::{AddAssign, Range},
+};
 
 /// TODO: remove MyNumber etc in favor of num_traits
 use num_traits::Num;
@@ -129,6 +132,23 @@ where
 		&& point.x() <= self.max.x()
 		&& point.y() >= self.min.y()
 		&& point.y() <= self.max.y()
+    }
+
+    /// Overlapping bounds? (Have some point(s) in common).
+    /// Bounds considered *Exclusive*.
+    pub fn overlaps(&self, rhs: &Self) -> bool {
+        // Rectangles overlap if X ranges overlap and Y ranges overlap.
+        Self::range_overlaps(&self.range(0), &rhs.range(0)) && Self::range_overlaps(&self.range(1), &rhs.range(1))
+    }
+
+    // Range spanned by one component (`X` or `Y`).
+    fn range(&self, comp: usize) -> Range<T> {
+        self.min[comp]..self.max[comp]
+    }
+
+    // Ranges have some point(s) in common?
+    fn range_overlaps(a: &Range<T>, b: &Range<T>) -> bool {
+        a.contains(&b.start) || a.contains(&b.end) || b.contains(&a.start) || b.contains(&a.end)
     }
 }
 
