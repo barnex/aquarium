@@ -45,6 +45,19 @@ fn draw_cursor(g: &G, out: &mut Output) {
 }
 
 fn draw_selection(g: &G, out: &mut Output) -> Option<()> {
+    
+    if let Some(start) = g.selection_start{
+        let end = g.mouse_position_world();
+        
+        let min = start.zip_with(end, i32::min);
+        let max = start.zip_with(end, i32::max);
+        let sel = Bounds2D::new(min, max);
+        
+        out.push_rect(L_SPRITES, Rectangle::new(sel.translated(-g.camera_pos), RGBA::BLUE).with_fill(RGB::BLUE.with_alpha(64)));
+    }
+
+
+    
     let sel = g.pawns.get(g.selected.get()?)?;
     out.push_rect(L_SPRITES, Rectangle::new(sel.bounds().translated(-g.camera_pos), RGBA::BLUE).with_fill(RGB::BLUE.with_alpha(64)));
     OK

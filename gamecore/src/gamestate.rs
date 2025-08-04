@@ -14,6 +14,8 @@ pub struct G {
     // ⏯️ UI
     #[serde(skip)]
     pub ui: Ui,
+
+    pub selection_start: Option<vec2i>,
     pub selected: Cel<Option<Id>>,
 
     // 🕣 timekeeping
@@ -49,6 +51,7 @@ impl G {
 
         Self {
             selected: None.cel(),
+            selection_start: None,
             buildings,
             pawns,
             camera_pos: vec2(40, 70), // nonzero so we notice offset issues without having to pan

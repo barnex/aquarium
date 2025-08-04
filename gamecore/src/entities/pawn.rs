@@ -53,6 +53,8 @@ impl Pawn {
             self.walk_to_destination(g);
             return;
         }
+        
+        
     }
 
     fn teleport_to(&self, g: &G, dst: vec2i16) {

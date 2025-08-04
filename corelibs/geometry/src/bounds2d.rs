@@ -138,6 +138,7 @@ where
     /// Bounds considered *Exclusive*.
     pub fn overlaps(&self, rhs: &Self) -> bool {
         // Rectangles overlap if X ranges overlap and Y ranges overlap.
+        // TODO: probably faster via intersect() + !empty.
         Self::range_overlaps(&self.range(0), &rhs.range(0)) && Self::range_overlaps(&self.range(1), &rhs.range(1))
     }
 
