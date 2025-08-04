@@ -58,7 +58,7 @@ impl DistanceMap {
         Some(to_center.with(|v| v.extend_from_slice(&from_center)))
     }
 
-    fn path_to_center(&self, start: vec2i16) -> Option<Vec<vec2i16>> {
+    pub fn path_to_center(&self, start: vec2i16) -> Option<Vec<vec2i16>> {
         let mut curr_dist = *self.dist_to.get(&start)?; // 👈 returns `None` if unreachable
         let initial_dist = curr_dist;
         let mut path = Vec::with_capacity(curr_dist as usize + 1); // exact capacity

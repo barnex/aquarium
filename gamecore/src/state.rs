@@ -85,13 +85,26 @@ impl State {
         self.frame += 1;
         self.tick_pawns();
     }
-    
+
     pub(crate) fn tick_pawns(&mut self) {
-        for p in self.pawns.iter(){
+        for p in self.pawns.iter() {
             p.tick(self);
         }
     }
-     
+
+    /// 🥾 Can one generally walk on tile?
+    /// TODO: ambiguous.
+    pub(crate) fn is_walkable(&self, tile: vec2i16) -> bool {
+        match self.tilemap.at(tile) {
+            Tile::Dunes => false,
+            Tile::Mountains => false,
+            Tile::Sand => true,
+            Tile::Snow => true,
+            Tile::Water => false,
+            Tile::Block => false,
+        }
+    }
+
     pub fn pawn(&self, id: Id) -> Option<&Pawn> {
         self.pawns.get(id)
     }
@@ -122,7 +135,6 @@ impl State {
         //writeln!(debug, "sprites {:?}", self.out.layers.iter().map(|l| l.sprites.len()).sum::<usize>()).unwrap();
         writeln!(debug, "down {:?}", self.inputs.iter_is_down().sorted().collect_vec()).unwrap();
         writeln!(debug, "tile_picker {:?}", self.ui.active_tool).unwrap();
-        writeln!(debug, "selected: {:?}: {:?}", self.selected, self.selected.map(|id|self.pawn(id))).unwrap();
+        writeln!(debug, "selected: {:?}: {:?}", self.selected, self.selected.map(|id| self.pawn(id))).unwrap();
     }
-    
 }

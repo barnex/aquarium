@@ -6,6 +6,7 @@ pub struct Pawn {
     pub typ: PawnTyp,
     pub tile: Cel<vec2i16>,
     pub dest: Cel<vec2i16>,
+    pub route: Route,
 }
 
 #[derive(Serialize, Deserialize, Clone, Copy, PartialEq, Eq, Hash, TryFromPrimitive, Debug)]
@@ -39,19 +40,40 @@ impl PawnTyp {
 impl Pawn {
     pub fn new(typ: PawnTyp, tile: vec2i16) -> Self {
         Self {
+            id: Id::default(),
+            typ,
             tile: tile.cel(),
             dest: tile.cel(),
-            typ,
-            id: Id::default(),
+            route: default(),
         }
     }
 
     pub(crate) fn tick(&self, g: &State) {
-        self.teleport_to(g, self.dest.get());
+        if !self.is_at_destination(){
+            self.walk_to_destination(g);
+            return;
+        }
     }
 
     fn teleport_to(&self, g: &State, dst: vec2i16) {
         self.tile.set(dst);
+    }
+    
+    fn walk_to_destination(&self, g: &State){
+        if let Some(next_tile) = self.route.next(){
+            self.tile.set(next_tile);
+        }else{
+            if ! self.is_at_destination(){
+                self.compute_route(g);
+            }
+        }
+    }
+    
+    fn compute_route(&self, g: &State){
+        let distance_map = DistanceMap::new(self.dest.get(), 254, |p| g.is_walkable(p));
+        if let Some(path) = distance_map.path_to_center(self.tile.get()){
+            self.route.set(path);
+        }
     }
     
     pub fn bounds(&self) -> Bounds2Di {
