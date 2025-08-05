@@ -116,26 +116,33 @@ impl G {
         }
     }
 
+    /// Pawn with given Id, if any.
     pub fn pawn(&self, id: Id) -> Option<&Pawn> {
         self.pawns.get(id)
     }
 
+    /// Pawn at given position, if any.
+    /// TODO: make faster via a hierarchy.
     pub fn pawn_at(&self, tile: vec2i16) -> Option<&Pawn> {
         self.pawns.iter().find(|v| v.tile == tile)
     }
 
+    /// All currently selected Pawn Ids.
     pub fn selected_pawn_ids(&self) -> impl Iterator<Item = Id> {
         self.selected_pawn_ids.iter().copied()
     }
 
+    /// All currently selected Pawns.
     pub fn selected_pawns(&self) -> impl Iterator<Item = &Pawn> {
         self.selected_pawn_ids.iter().filter_map(|&id| self.pawn(id))
     }
 
+    /// Current mouse position in world coordinates.
     pub fn mouse_position_world(&self) -> vec2i {
         self.inputs.mouse_position() + self.camera_pos
     }
 
+    /// Tile the mouse currently hovers over.
     pub fn mouse_tile(&self) -> vec2i16 {
         self.mouse_position_world().to_tile()
     }
