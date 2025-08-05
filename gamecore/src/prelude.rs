@@ -3,8 +3,8 @@ pub use cel::*;
 pub use geometry::*;
 pub use memkeep::*;
 pub use num_traits::AsPrimitive;
-pub use vector::*;
 pub use pathfinder::*;
+pub use vector::*;
 
 pub use fixed_str::*;
 pub use proc_macros::*;
@@ -16,14 +16,15 @@ pub use num_enum::{IntoPrimitive, TryFromPrimitive};
 pub use rand::{Rng, SeedableRng};
 pub use rand_chacha::ChaCha8Rng;
 pub use serde::{Deserialize, Serialize};
-pub use std::convert::TryFrom;
 pub use std::cell::RefCell;
+pub use std::convert::TryFrom;
 
 pub use std::collections::VecDeque;
 
 pub use std::cell::Cell;
 pub use std::fmt::Debug;
 pub use std::fmt::Write as _;
+pub use std::ops::Range;
 
 pub type HashSet<T> = fnv::FnvHashSet<T>;
 pub type HashMap<K, V> = fnv::FnvHashMap<K, V>;

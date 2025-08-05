@@ -61,7 +61,7 @@ impl Pawn {
     fn take_personal_space(&self, g: &G) {
         let standing_on_other = g.pawns().filter(|p| p.id != self.id).find(|p| p.tile == self.tile).is_some();
         if standing_on_other {
-            log::error!("TODO: take_personal_space");
+            //self.teleport_to(g, self.tile + g.random_vec_incl(-1..=1));
         }
     }
 

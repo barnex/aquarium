@@ -1,6 +1,6 @@
 /// Game Objects (implementing `SetId`) have their `Id` automatically updated upon insertion.
 /// E.g.
-/// ```
+/// ```text
 /// let m = MemKeep::new();
 /// m.insert(Monster::new()); // sets monster Id.
 /// ...

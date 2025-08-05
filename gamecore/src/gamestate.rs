@@ -1,4 +1,4 @@
-use std::ops::{Deref, DerefMut};
+use std::ops::RangeInclusive;
 
 use crate::prelude::*;
 
@@ -41,6 +41,8 @@ pub struct G {
     pub viewport_size: vec2u,
     /// Camera position in world coordinates.
     pub camera_pos: vec2i,
+
+    rng: RefCell<ChaCha8Rng>,
 }
 
 pub const TILE_SIZE: u32 = 24;
@@ -70,6 +72,7 @@ impl G {
             tilemap: Tilemap::testmap(vec2(64, 48)),
             ui: Ui::new(),
             viewport_size: vec2(0, 0), // real value will be set by webshell.
+            rng: RefCell::new(ChaCha8Rng::seed_from_u64(12345678)),
         }
     }
 
@@ -92,7 +95,7 @@ impl G {
         self.draw_world(out);
         self.output_debug(&mut out.debug);
     }
-    
+
     pub(crate) fn tick_once(&mut self) {
         self.tick_pawns();
     }
@@ -167,5 +170,50 @@ impl G {
         writeln!(debug, "down {:?}", self.inputs.iter_is_down().sorted().collect_vec()).unwrap();
         writeln!(debug, "tile_picker {:?}", self.ui.active_tool).unwrap();
         writeln!(debug, "selected: {:?}", self.selected_pawn_ids.len()).unwrap();
+    }
+
+    pub fn random<T>(&self) -> T
+    where
+        rand::distributions::Standard: rand::prelude::Distribution<T>,
+    {
+        self.rng.borrow_mut().r#gen()
+    }
+
+    pub fn random_range<T>(&self, range: Range<T>) -> T
+    where
+        rand::distributions::Standard: rand::prelude::Distribution<T>,
+        T: rand::distributions::uniform::SampleUniform,
+        T: PartialOrd,
+    {
+        self.rng.borrow_mut().gen_range(range)
+    }
+
+    pub fn random_range_incl<T>(&self, range: RangeInclusive<T>) -> T
+    where
+        rand::distributions::Standard: rand::prelude::Distribution<T>,
+        T: rand::distributions::uniform::SampleUniform,
+        T: PartialOrd,
+    {
+        self.rng.borrow_mut().gen_range(range)
+    }
+
+    pub fn random_vec<T>(&self, range: Range<T>) -> vec2<T>
+    where
+        rand::distributions::Standard: rand::prelude::Distribution<T>,
+        T: rand::distributions::uniform::SampleUniform,
+        T: PartialOrd,
+        T: Clone,
+    {
+        vec2(self.random_range(range.clone()), self.random_range(range))
+    }
+
+    pub fn random_vec_incl<T>(&self, range: RangeInclusive<T>) -> vec2<T>
+    where
+        rand::distributions::Standard: rand::prelude::Distribution<T>,
+        T: rand::distributions::uniform::SampleUniform,
+        T: PartialOrd,
+        T: Clone,
+    {
+        vec2(self.random_range_incl(range.clone()), self.random_range_incl(range))
     }
 }
