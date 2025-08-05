@@ -99,13 +99,6 @@ impl<T: Copy + Add<Output = T>> CelAdd<&Cel<T>> for Cel<T> {
     }
 }
 
-impl<T: Copy + Num> Cel<T> {
-    /// Increment value by 1.
-    pub fn inc(&self) {
-        self.0.set(self.0.get() + T::one());
-    }
-}
-
 // ---------- Add (+)
 //. impl<T: Add<Output = T> + Copy> Add<T> for Cel<T> {
 //.     type Output = T;
@@ -202,7 +195,7 @@ mod test {
     #[gtest]
     fn inc() {
         let a = 1.cel();
-        a.inc();
+        a.add(1);
         expect_eq!(a, 2);
     }
 }

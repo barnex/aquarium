@@ -10,7 +10,7 @@ impl Route {
     pub fn next(&self) -> Option<vec2i16> {
         match self.steps.borrow().get(self.i.get() as usize) {
             Some(pos) => {
-                self.i.inc();
+                self.i.add(1);
                 Some(*pos)
             }
             None => None,
