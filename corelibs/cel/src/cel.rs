@@ -78,23 +78,27 @@ impl<T: Copy + Eq> Eq for Cel<T> {}
 // ---------- add (assign-like)
 
 pub trait CelAdd<T> {
-    fn add(&self, rhs: T);
+    /// Increment value by `rhs`.
+    fn inc(&self, rhs: T);
 }
 
 impl<T: Copy + Add<Output = T>> CelAdd<T> for Cel<T> {
-    fn add(&self, rhs: T) {
+    /// Increment value by `rhs`.
+    fn inc(&self, rhs: T) {
         self.set(self.get() + rhs);
     }
 }
 
 impl<T: Copy + Add<Output = T>> CelAdd<&T> for Cel<T> {
-    fn add(&self, rhs: &T) {
+    /// Increment value by `rhs`.
+    fn inc(&self, rhs: &T) {
         self.set(self.get() + *rhs);
     }
 }
 
 impl<T: Copy + Add<Output = T>> CelAdd<&Cel<T>> for Cel<T> {
-    fn add(&self, rhs: &Cel<T>) {
+    /// Increment value by `rhs`.
+    fn inc(&self, rhs: &Cel<T>) {
         self.set(self.get() + rhs.get());
     }
 }
@@ -182,20 +186,20 @@ mod test {
     #[gtest]
     fn add() {
         let a = 1.cel();
-        a.add(2);
+        a.inc(2);
         expect_eq!(a, 3);
 
-        a.add(&4);
+        a.inc(&4);
         expect_eq!(a, 7);
 
-        a.add(&5.cel());
+        a.inc(&5.cel());
         expect_eq!(a, 12);
     }
 
     #[gtest]
     fn inc() {
         let a = 1.cel();
-        a.add(1);
+        a.inc(1);
         expect_eq!(a, 2);
     }
 }
