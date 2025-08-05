@@ -75,7 +75,7 @@ where
 
 impl<T: Copy + Eq> Eq for Cel<T> {}
 
-// ---------- add
+// ---------- add (assign-like)
 
 pub trait CelAdd<T> {
     fn add(&self, rhs: T);
@@ -105,6 +105,16 @@ impl<T: Copy + Num> Cel<T> {
         self.0.set(self.0.get() + T::one());
     }
 }
+
+// ---------- Add (+)
+//. impl<T: Add<Output = T> + Copy> Add<T> for Cel<T> {
+//.     type Output = T;
+//.
+//.     fn add(self, rhs: T) -> Self::Output {
+//.         self.0.get() + rhs
+//.     }
+//. }
+//.
 
 // ---------- fmt
 
