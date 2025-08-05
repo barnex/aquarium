@@ -75,7 +75,7 @@ where
 
 impl<T: Copy + Eq> Eq for Cel<T> {}
 
-// ---------- add (assign-like)
+// ---------- increment
 
 pub trait CelAdd<T> {
     /// Increment value by `rhs`.
@@ -84,6 +84,7 @@ pub trait CelAdd<T> {
 
 impl<T: Copy + Add<Output = T>> CelAdd<T> for Cel<T> {
     /// Increment value by `rhs`.
+    #[inline(always)]
     fn inc(&self, rhs: T) {
         self.set(self.get() + rhs);
     }
@@ -91,6 +92,7 @@ impl<T: Copy + Add<Output = T>> CelAdd<T> for Cel<T> {
 
 impl<T: Copy + Add<Output = T>> CelAdd<&T> for Cel<T> {
     /// Increment value by `rhs`.
+    #[inline(always)]
     fn inc(&self, rhs: &T) {
         self.set(self.get() + *rhs);
     }
@@ -98,20 +100,13 @@ impl<T: Copy + Add<Output = T>> CelAdd<&T> for Cel<T> {
 
 impl<T: Copy + Add<Output = T>> CelAdd<&Cel<T>> for Cel<T> {
     /// Increment value by `rhs`.
+    #[inline(always)]
     fn inc(&self, rhs: &Cel<T>) {
         self.set(self.get() + rhs.get());
     }
 }
 
-// ---------- Add (+)
-//. impl<T: Add<Output = T> + Copy> Add<T> for Cel<T> {
-//.     type Output = T;
-//.
-//.     fn add(self, rhs: T) -> Self::Output {
-//.         self.0.get() + rhs
-//.     }
-//. }
-//.
+// NOTE: operators (+, -, *, /) not very useful due to the need to borrow cel (not Copy).
 
 // ---------- fmt
 
