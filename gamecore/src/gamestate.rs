@@ -19,7 +19,7 @@ pub struct G {
     pub selection_start: Option<vec2i>,
 
     /// Currently selected `Pawn`s.
-    pub selected: Vec<Id>,
+    pub selected_pawn_ids: Vec<Id>,
 
     // 🕣 timekeeping
     pub frame: u64,
@@ -53,7 +53,7 @@ impl G {
         pawns.insert(Pawn::new(PawnTyp::Leaf, vec2(17, 7)));
 
         Self {
-            selected: default(),
+            selected_pawn_ids: default(),
             selection_start: None,
             buildings,
             pawns,
@@ -124,6 +124,14 @@ impl G {
         self.pawns.iter().find(|v| v.tile == tile)
     }
 
+    pub fn selected_pawn_ids(&self) -> impl Iterator<Item = Id> {
+        self.selected_pawn_ids.iter().copied()
+    }
+
+    pub fn selected_pawns(&self) -> impl Iterator<Item = &Pawn> {
+        self.selected_pawn_ids.iter().filter_map(|&id| self.pawn(id))
+    }
+
     pub fn mouse_position_world(&self) -> vec2i {
         self.inputs.mouse_position() + self.camera_pos
     }
@@ -146,6 +154,6 @@ impl G {
         //writeln!(debug, "sprites {:?}", self.out.layers.iter().map(|l| l.sprites.len()).sum::<usize>()).unwrap();
         writeln!(debug, "down {:?}", self.inputs.iter_is_down().sorted().collect_vec()).unwrap();
         writeln!(debug, "tile_picker {:?}", self.ui.active_tool).unwrap();
-        writeln!(debug, "selected: {:?}", self.selected. len()).unwrap();
+        writeln!(debug, "selected: {:?}", self.selected_pawn_ids.len()).unwrap();
     }
 }

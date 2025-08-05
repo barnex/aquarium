@@ -25,7 +25,7 @@ fn select_pawns(g: &mut G) {
 
     if g.inputs.just_released(K_MOUSE1) {
         if let Some(start) = g.selection_start {
-            g.selected.clear();
+            g.selected_pawn_ids.clear();
 
             let end = g.mouse_position_world();
             let selection = Bounds2D::new_sorted(start, end);
@@ -33,7 +33,7 @@ fn select_pawns(g: &mut G) {
 
             for p in g.pawns.iter() {
                 if selection.overlaps(&p.bounds()) {
-                    g.selected.push(p.id) //
+                    g.selected_pawn_ids.push(p.id) //
                 }
             }
         }
@@ -44,7 +44,7 @@ fn select_pawns(g: &mut G) {
 fn command_pawns(g: &mut G) {
     if g.ui.active_tool == Tool::Pointer {
         if g.inputs.just_pressed(K_MOUSE2) {
-            for pawn in g.selected.iter().filter_map(|&id| g.pawn(id)) {
+            for pawn in g.selected_pawns() {
                 pawn.set_destination(g.mouse_tile())
             }
         }

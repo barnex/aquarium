@@ -55,14 +55,14 @@ fn draw_selection(g: &G, out: &mut Output) -> Option<()> {
         out.push_rect(L_SPRITES, Rectangle::new(sel.translated(-g.camera_pos), RGBA::BLUE).with_fill(RGB::BLUE.with_alpha(64)));
     }
 
-    for sel in g.selected.iter().filter_map(|&id| g.pawn(id)) {
-        out.push_rect(L_SPRITES, Rectangle::new(sel.bounds().translated(-g.camera_pos), RGBA::BLUE).with_fill(RGB::BLUE.with_alpha(64)));
+    for pawn in g.selected_pawns(){
+        out.push_rect(L_SPRITES, Rectangle::new(pawn.bounds().translated(-g.camera_pos), RGBA::BLUE).with_fill(RGB::BLUE.with_alpha(64)));
     }
     OK
 }
 
 fn draw_routes(g: &G, out: &mut Output) {
-    for pawn in g.selected.iter().filter_map(|&id| g.pawn(id)) {
+    for pawn in g.selected_pawns(){
         if !pawn.is_at_destination() {
             out.push_line(L_SPRITES, Line::new(pawn.center(), pawn.dest.pos() + TILE_ISIZE / 2).with_color(RGB::WHITE.with_alpha(128)).translated(-g.camera_pos));
         }
