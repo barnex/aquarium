@@ -15,8 +15,11 @@ pub struct G {
     #[serde(skip)]
     pub ui: Ui,
 
+    /// Where selection rectangle started (mouse down position).
     pub selection_start: Option<vec2i>,
-    pub selected: Cel<Option<Id>>,
+
+    /// Currently selected `Pawn`s.
+    pub selected: Vec<Id>,
 
     // 🕣 timekeeping
     pub frame: u64,
@@ -50,7 +53,7 @@ impl G {
         pawns.insert(Pawn::new(PawnTyp::Leaf, vec2(17, 7)));
 
         Self {
-            selected: None.cel(),
+            selected: default(),
             selection_start: None,
             buildings,
             pawns,
@@ -143,6 +146,6 @@ impl G {
         //writeln!(debug, "sprites {:?}", self.out.layers.iter().map(|l| l.sprites.len()).sum::<usize>()).unwrap();
         writeln!(debug, "down {:?}", self.inputs.iter_is_down().sorted().collect_vec()).unwrap();
         writeln!(debug, "tile_picker {:?}", self.ui.active_tool).unwrap();
-        writeln!(debug, "selected: {:?}: {:?}", self.selected, self.selected.map(|id| self.pawn(id))).unwrap();
+        writeln!(debug, "selected: {:?}", self.selected. len()).unwrap();
     }
 }

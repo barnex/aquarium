@@ -45,29 +45,26 @@ fn draw_cursor(g: &G, out: &mut Output) {
 }
 
 fn draw_selection(g: &G, out: &mut Output) -> Option<()> {
-    
-    if let Some(start) = g.selection_start{
+    if let Some(start) = g.selection_start {
         let end = g.mouse_position_world();
-        
+
         let min = start.zip_with(end, i32::min);
         let max = start.zip_with(end, i32::max);
         let sel = Bounds2D::new(min, max);
-        
+
         out.push_rect(L_SPRITES, Rectangle::new(sel.translated(-g.camera_pos), RGBA::BLUE).with_fill(RGB::BLUE.with_alpha(64)));
     }
 
-
-    
-    let sel = g.pawns.get(g.selected.get()?)?;
-    out.push_rect(L_SPRITES, Rectangle::new(sel.bounds().translated(-g.camera_pos), RGBA::BLUE).with_fill(RGB::BLUE.with_alpha(64)));
+    for sel in g.selected.iter().filter_map(|&id| g.pawn(id)) {
+        out.push_rect(L_SPRITES, Rectangle::new(sel.bounds().translated(-g.camera_pos), RGBA::BLUE).with_fill(RGB::BLUE.with_alpha(64)));
+    }
     OK
 }
 
-fn draw_routes(g: &G, out: &mut Output) -> Option<()> {
-    let pawn = g.pawns.get(g.selected.get()?)?;
-    if !pawn.is_at_destination() {
-        out.push_line(L_SPRITES, Line::new(pawn.center(), pawn.dest.pos() + TILE_ISIZE / 2).with_color(RGB::WHITE.with_alpha(128)).translated(-g.camera_pos));
+fn draw_routes(g: &G, out: &mut Output) {
+    for pawn in g.selected.iter().filter_map(|&id| g.pawn(id)) {
+        if !pawn.is_at_destination() {
+            out.push_line(L_SPRITES, Line::new(pawn.center(), pawn.dest.pos() + TILE_ISIZE / 2).with_color(RGB::WHITE.with_alpha(128)).translated(-g.camera_pos));
+        }
     }
-
-    OK
 }

@@ -25,28 +25,26 @@ fn select_pawns(g: &mut G) {
 
     if g.inputs.just_released(K_MOUSE1) {
         if let Some(start) = g.selection_start {
-            
-            g.selected.set(None);
-            
+            g.selected.clear();
+
             let end = g.mouse_position_world();
             let selection = Bounds2D::new_sorted(start, end);
             let selection = selection.with(|s| s.max += 1);
 
             for p in g.pawns.iter() {
                 if selection.overlaps(&p.bounds()) {
-                    g.selected.set(Some(p.id)) //
+                    g.selected.push(p.id) //
                 }
             }
         }
         g.selection_start = None;
     }
-
 }
 
 fn command_pawns(g: &mut G) {
     if g.ui.active_tool == Tool::Pointer {
         if g.inputs.just_pressed(K_MOUSE2) {
-            if let Some(pawn) = g.selected.and_then(|id| g.pawn(id)) {
+            for pawn in g.selected.iter().filter_map(|&id| g.pawn(id)) {
                 pawn.set_destination(g.mouse_tile())
             }
         }
