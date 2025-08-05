@@ -92,7 +92,7 @@ impl G {
         self.draw_world(out);
         self.output_debug(&mut out.debug);
     }
-
+    
     pub(crate) fn tick_once(&mut self) {
         self.tick_pawns();
     }
@@ -119,6 +119,11 @@ impl G {
     /// Pawn with given Id, if any.
     pub fn pawn(&self, id: Id) -> Option<&Pawn> {
         self.pawns.get(id)
+    }
+
+    /// Iterate over all Pawns.
+    pub fn pawns(&self) -> impl Iterator<Item = &Pawn> {
+        self.pawns.iter()
     }
 
     /// Pawn at given position, if any.

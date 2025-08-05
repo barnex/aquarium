@@ -53,12 +53,23 @@ impl Pawn {
             self.walk_to_destination(g);
             return;
         }
-        
-        
+
+        self.take_personal_space(g);
+    }
+
+    /// If standing on another pawn, move aside randomly.
+    fn take_personal_space(&self, g: &G) {
+        let standing_on_other = g.pawns().filter(|p| p.id != self.id).find(|p| p.tile == self.tile).is_some();
+        if standing_on_other {
+            log::error!("TODO: take_personal_space");
+        }
     }
 
     fn teleport_to(&self, g: &G, dst: vec2i16) {
-        self.tile.set(dst);
+        if g.is_walkable(dst) {
+            self.dest.set(dst);
+            self.tile.set(dst);
+        }
     }
 
     fn walk_to_destination(&self, g: &G) {
