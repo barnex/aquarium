@@ -19,6 +19,7 @@ impl G {
             &["pause"] => self.cmd_pause_or_resume(),
             &["tick"] => self.cmd_tick(),
             &["show_walkable"] => Ok(toggle(&mut self.debug.show_walkable)),
+            &["show_home"] => Ok(toggle(&mut self.debug.show_home)),
             &[cmd, ..] => Err(anyhow!("unknown command: {cmd:?}")),
             &[] => Ok(()),
         }

@@ -12,7 +12,7 @@ impl G {
         draw_pawns(g, out);
         draw_cursor(g, out);
         draw_selection(g, out);
-        draw_routes(g, out);
+        draw_destinations(g, out);
 
         draw_debug_overlay(g, out);
     }
@@ -21,6 +21,11 @@ impl G {
 fn visible_tiles(g: &G) -> impl Iterator<Item = (vec2i16, Tile)> {
     // 🪲 TODO: restrict to viewport
     g.tilemap.enumerate_all()
+}
+
+fn visible_pawns(g: &G) -> impl Iterator<Item = &Pawn> {
+    // 🪲 TODO: restrict to viewport
+    g.pawns.iter()
 }
 
 fn draw_tilemap(g: &G, out: &mut Out) {
@@ -33,6 +38,9 @@ fn draw_debug_overlay(g: &G, out: &mut Out) {
     if g.debug.show_walkable {
         draw_walkalbe_overlay(g, out);
     }
+    if g.debug.show_home {
+        draw_home_overlay(g, out);
+    }
 }
 
 fn draw_walkalbe_overlay(g: &G, out: &mut Out) {
@@ -41,6 +49,15 @@ fn draw_walkalbe_overlay(g: &G, out: &mut Out) {
         if !g.is_walkable(idx) {
             let bounds = Bounds2D::from_pos_size(idx.pos(), TILE_VSIZE).translated(-g.camera_pos);
             out.push_rect(L_SPRITES + 1, Rectangle::new(bounds, color).with_fill(color));
+        }
+    }
+}
+
+fn draw_home_overlay(g: &G, out: &mut Out) {
+    let color = RGBA::new(0, 0, 255, 100);
+    for pawn in visible_pawns(g) {
+        if let Some(home) = g.buildings.get_maybe(pawn.home.get()) {
+            out.push_line(L_SPRITES + 1, Line::new(pawn.center(), home.tile.pos()).with_color(color).with_width(2).translated(-g.camera_pos));
         }
     }
 }
@@ -85,9 +102,11 @@ fn draw_selection(g: &G, out: &mut Out) -> Option<()> {
     OK
 }
 
-fn draw_routes(g: &G, out: &mut Out) {
+fn draw_destinations(g: &G, out: &mut Out) {
     for pawn in g.selected_pawns() {
-        if let Some(destination) = pawn.route.destination() && !pawn.is_at_destination() {
+        if let Some(destination) = pawn.route.destination()
+            && !pawn.is_at_destination()
+        {
             out.push_line(L_SPRITES, Line::new(pawn.center(), destination.pos() + TILE_ISIZE / 2).with_color(RGB::WHITE.with_alpha(128)).translated(-g.camera_pos));
         }
     }

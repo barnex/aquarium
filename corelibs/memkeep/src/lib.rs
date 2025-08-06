@@ -66,6 +66,10 @@ impl<T> MemKeep<T> {
         }
     }
 
+    pub fn get_maybe(&self, id: Option<Id>) -> Option<&T> {
+        id.and_then(|id| self.get(id))
+    }
+
     pub fn insert_raw(&self, v: T) -> Id {
         let (id, slot) = self._prepare_slot();
         unsafe { slot.insert(v) };
@@ -279,5 +283,3 @@ mod memkeep_test {
         }
     }
 }
-
-

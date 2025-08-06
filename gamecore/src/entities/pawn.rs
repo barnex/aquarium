@@ -6,6 +6,7 @@ pub struct Pawn {
     pub typ: PawnTyp,
     pub tile: Cel<vec2i16>,
     pub route: Route,
+    pub home: Cel<Option<Id>>,
 }
 
 #[derive(Serialize, Deserialize, Clone, Copy, PartialEq, Eq, Hash, TryFromPrimitive, Debug)]
@@ -43,6 +44,7 @@ impl Pawn {
             typ,
             tile: tile.cel(),
             route: default(),
+            home: None.cel(),
         }
     }
 
@@ -108,7 +110,8 @@ impl Pawn {
     }
 
     fn start_route_to(&self, g: &G, dest: vec2i16) {
-        let distance_map = DistanceMap::new(dest, 254, |p| g.is_walkable(p));
+        let max_dist = 100;
+        let distance_map = DistanceMap::new(dest, max_dist, |p| g.is_walkable(p));
         if let Some(path) = distance_map.path_to_center(self.tile.get()) {
             self.route.set(path);
         }

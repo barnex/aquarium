@@ -52,11 +52,19 @@ pub const TILE_VSIZE: vec2i = vec2(TILE_ISIZE, TILE_ISIZE);
 
 impl G {
     pub fn new() -> Self {
-        let buildings = MemKeep::new();
-        buildings.insert(Building{ id:default(), typ: BuildingTyp::HQ, tile: vec2(12, 8) });
-
         let pawns = MemKeep::new();
         pawns.insert(Pawn::new(PawnTyp::Leaf, vec2(17, 7)));
+        let crab = pawns.insert(Pawn::new(PawnTyp::Crablet, vec2(10, 4)));
+
+        let buildings = MemKeep::new();
+        let hq = buildings.insert(Building {
+            id: default(),
+            typ: BuildingTyp::HQ,
+            tile: vec2(12, 8),
+            workers: vec![crab],
+        });
+
+        pawns.get(crab).unwrap().home.set(Some(hq));
 
         Self {
             selected_pawn_ids: default(),

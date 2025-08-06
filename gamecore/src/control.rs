@@ -65,7 +65,12 @@ fn draw_on_map(g: &mut G) {
             }
             Tool::Building(typ) => {
                 if g.inputs.just_pressed(K_MOUSE1) {
-                    let building = Building { id: default(), typ, tile: g.mouse_tile() };
+                    let building = Building {
+                        id: default(),
+                        typ,
+                        tile: g.mouse_tile(),
+                        workers: default(),
+                    };
                     try_spawn_building(g, building);
                 }
             }

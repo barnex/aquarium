@@ -5,6 +5,7 @@ pub struct Building {
     pub id: Id,
     pub typ: BuildingTyp,
     pub tile: vec2i16,
+    pub workers: Vec<Id>,
 }
 
 #[derive(Serialize, Deserialize, Clone, Copy, PartialEq, Eq, Hash, TryFromPrimitive, Debug)]
