@@ -28,12 +28,22 @@ pub struct Out {
 pub struct DrawSprite {
     pub sprite: Sprite,
     pub pos: vec2i,
+    pub dst_size: Option<vec2<NonZeroU8>>,
 }
 
 impl DrawSprite {
     /// Draw sprite at position. Natural size.
     pub fn at_pos(sprite: Sprite, pos: vec2i) -> Self {
-        Self { sprite, pos }
+        Self { sprite, pos, dst_size: None }
+    }
+
+    pub fn with_size(self, dst_size: vec2u8) -> Self {
+        if let (Some(x), Some(y)) = (NonZeroU8::new(dst_size.x()), NonZeroU8::new(dst_size.y())) {
+            self.with(|s| s.dst_size = Some(vec2(x, y)))
+        } else {
+            debug_assert!(dst_size != vec2::ZERO, "zero dst_size");
+            self
+        }
     }
 }
 
@@ -56,6 +66,10 @@ impl Out {
 
     pub fn push_sprite(&mut self, layer: u8, sprite: Sprite, pos: vec2i) {
         self.layer(layer).sprites.push(DrawSprite::at_pos(sprite, pos));
+    }
+
+    pub fn push_sprite_with_size(&mut self, layer: u8, sprite: Sprite, pos: vec2i, dst_size: vec2u8) {
+        self.layer(layer).sprites.push(DrawSprite::at_pos(sprite, pos).with_size(dst_size));
     }
 
     pub fn push_line(&mut self, layer: u8, line: Line) {

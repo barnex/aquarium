@@ -18,6 +18,7 @@ pub use rand_chacha::ChaCha8Rng;
 pub use serde::{Deserialize, Serialize};
 pub use std::cell::RefCell;
 pub use std::convert::TryFrom;
+pub use std::num::NonZeroU8;
 
 pub use std::collections::VecDeque;
 

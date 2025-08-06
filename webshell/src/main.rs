@@ -237,6 +237,12 @@ fn draw(canvas: &HtmlCanvasElement, ctx: &CanvasRenderingContext2d, res: &mut Re
         // 🦀 sprites
         for cmd in sprites {
             if let Some(bitmap) = res.get(&cmd.sprite) {
+
+                let dst_size = match cmd.dst_size{
+                    None => vec2(bitmap.width(), bitmap.height()),
+                    Some(dst_size) => dst_size.map(|v| v.get().as_()),
+                };
+
                 ctx.draw_image_with_image_bitmap_and_sw_and_sh_and_dx_and_dy_and_dw_and_dh(
                     bitmap,
                     0.0,                   // source x
@@ -245,8 +251,8 @@ fn draw(canvas: &HtmlCanvasElement, ctx: &CanvasRenderingContext2d, res: &mut Re
                     bitmap.height().as_(), // source height
                     cmd.pos.x().as_(),         // dest x
                     cmd.pos.y().as_(),         // dest y
-                    bitmap.width().as_(),  // dest width
-                    bitmap.height().as_(), // dest height
+                    dst_size.x().as_(),  // dest width
+                    dst_size.y().as_(), // dest height
                 )
                 .expect("draw");
             }
