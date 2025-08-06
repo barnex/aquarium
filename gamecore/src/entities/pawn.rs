@@ -72,6 +72,22 @@ impl Pawn {
         }
     }
 
+    fn is_commandable(&self) -> bool {
+        use PawnTyp::*;
+        match self.typ {
+            Leaf => false,
+            _ => true,
+        }
+    }
+
+    fn can_move(&self) -> bool {
+        use PawnTyp::*;
+        match self.typ {
+            Leaf => false,
+            _ => true,
+        }
+    }
+
     fn walk_to_destination(&self, g: &G) {
         if let Some(next_tile) = self.route.next() {
             self.tile.set(next_tile);
@@ -98,6 +114,9 @@ impl Pawn {
     }
 
     pub fn set_destination(&self, dest: vec2i16) {
+        if !self.can_move() {
+            return;
+        }
         self.dest.set(dest);
     }
 
