@@ -63,6 +63,11 @@ fn draw_on_map(g: &mut G) {
                     g.pawns.insert(Pawn::new(typ, g.mouse_tile()));
                 }
             }
+            Tool::Building(typ) => {
+                if g.inputs.just_pressed(K_MOUSE1) {
+                    g.buildings.insert(Building { id: default(), typ, tile: g.mouse_tile() });
+                }
+            }
         }
     }
 }

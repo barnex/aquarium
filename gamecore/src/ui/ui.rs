@@ -11,6 +11,7 @@ pub enum Tool {
     Pointer,
     Tile(Tile),
     Pawn(PawnTyp),
+    Building(BuildingTyp),
 }
 
 impl Ui {
@@ -19,13 +20,14 @@ impl Ui {
     }
 
     pub fn update_and_draw(&mut self, inputs: &mut Inputs, out: &mut Out) {
-        self.tile_picker_ui(inputs, out)
+        self.menu_ui(inputs, out)
     }
 
-    fn tile_picker_ui(&mut self, inputs: &mut Inputs, out: &mut Out) {
+    fn menu_ui(&mut self, inputs: &mut Inputs, out: &mut Out) {
         let options = iter::once((Tool::Pointer, sprite!("pointer"))) //_
             .chain(Tile::all().map(|typ| (Tool::Tile(typ), typ.sprite())))
-            .chain(PawnTyp::all().map(|typ| (Tool::Pawn(typ), typ.sprite())));
+            .chain(PawnTyp::all().map(|typ| (Tool::Pawn(typ), typ.sprite())))
+            .chain(BuildingTyp::all().map(|typ| (Tool::Building(typ), typ.sprite())));
 
         let margin = 3;
         Palette {

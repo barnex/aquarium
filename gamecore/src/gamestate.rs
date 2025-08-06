@@ -6,7 +6,7 @@ use crate::prelude::*;
 pub struct G {
     // 🌍 game world
     pub tilemap: Tilemap,
-    pub buildings: Vec<Building>,
+    pub buildings: MemKeep<Building>,
     pub pawns: MemKeep<Pawn>,
 
     // ⏯️ UI
@@ -52,7 +52,9 @@ pub const TILE_VSIZE: vec2i = vec2(TILE_ISIZE, TILE_ISIZE);
 
 impl G {
     pub fn new() -> Self {
-        let buildings = vec![Building { typ: BuildingTyp::HQ, tile: vec2(12, 8) }];
+        let buildings = MemKeep::new();
+        buildings.insert(Building{ id:default(), typ: BuildingTyp::HQ, tile: vec2(12, 8) });
+
         let pawns = MemKeep::new();
         pawns.insert(Pawn::new(PawnTyp::Leaf, vec2(17, 7)));
 
@@ -125,7 +127,7 @@ impl G {
             return false;
         }
 
-        for b in &self.buildings {
+        for b in self.buildings.iter() {
             if b.tile_bounds().contains(tile) {
                 return false;
             }

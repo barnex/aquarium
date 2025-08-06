@@ -2,17 +2,25 @@ use crate::prelude::*;
 
 #[derive(Serialize, Deserialize)]
 pub struct Building {
+    pub id: Id,
     pub typ: BuildingTyp,
     pub tile: vec2i16,
 }
 
-#[derive(Serialize, Deserialize, Clone, Copy, PartialEq, Eq, Hash)]
+#[derive(Serialize, Deserialize, Clone, Copy, PartialEq, Eq, Hash, TryFromPrimitive, Debug)]
 #[repr(u8)]
 pub enum BuildingTyp {
     HQ = 1,
+    // 👆 ⚠️ keep in sync!
 }
 
 impl BuildingTyp {
+    pub fn all() -> impl Iterator<Item = Self> {
+        let first = Self::HQ;
+        let last = Self::HQ; // 👈⚠️ keep in sync!
+        ((first as u8)..=(last as u8)).map(|i| Self::try_from_primitive(i).unwrap())
+    }
+
     pub fn sprite(&self) -> Sprite {
         use BuildingTyp::*;
         match self {
@@ -30,8 +38,14 @@ impl Building {
         }
         .into()
     }
-    
-    pub fn tile_bounds(&self) -> Bounds2Di16{
+
+    pub fn tile_bounds(&self) -> Bounds2Di16 {
         Bounds2D::with_size(self.tile, self.size().as_i16())
+    }
+}
+
+impl SetId for Building {
+    fn set_id(&mut self, id: Id) {
+        self.id = id;
     }
 }

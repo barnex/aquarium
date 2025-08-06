@@ -22,7 +22,7 @@ impl Palette {
         let (mut row, mut col) = (0, 0);
         for (option, sprite) in options {
             let pos = (vec2(col, row) * (self.button_size + self.margin) + self.margin).as_i32() + self.pos;
-            out.push_sprite(L_UI, sprite, pos);
+            out.push_sprite_with_size(L_UI, sprite, pos, self.button_size.as_u8());
 
             if inputs.just_pressed(K_MOUSE1) {
                 if Bounds2D::with_size(pos, self.button_size.as_i32()).contains_incl(inputs.mouse_position()) {
