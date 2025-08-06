@@ -23,9 +23,23 @@ pub struct Out {
     pub debug: String,
 }
 
+/// Command to draw a sprite.
+#[derive(Debug, PartialEq, Eq)]
+pub struct DrawSprite {
+    pub sprite: Sprite,
+    pub pos: vec2i,
+}
+
+impl DrawSprite {
+    /// Draw sprite at position. Natural size.
+    pub fn at_pos(sprite: Sprite, pos: vec2i) -> Self {
+        Self { sprite, pos }
+    }
+}
+
 #[derive(Default, Debug, PartialEq, Eq)]
 pub struct Layer {
-    pub sprites: Vec<(Sprite, vec2i)>,
+    pub sprites: Vec<DrawSprite>,
     pub lines: Vec<Line>,
     pub rectangles: Vec<Rectangle>,
 }
@@ -41,7 +55,7 @@ impl Out {
     }
 
     pub fn push_sprite(&mut self, layer: u8, sprite: Sprite, pos: vec2i) {
-        self.layer(layer).sprites.push((sprite, pos));
+        self.layer(layer).sprites.push(DrawSprite::at_pos(sprite, pos));
     }
 
     pub fn push_line(&mut self, layer: u8, line: Line) {

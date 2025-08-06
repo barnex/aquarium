@@ -235,16 +235,16 @@ fn draw(canvas: &HtmlCanvasElement, ctx: &CanvasRenderingContext2d, res: &mut Re
         }
 
         // 🦀 sprites
-        for (sprite, pos) in sprites {
-            if let Some(bitmap) = res.get(sprite) {
+        for cmd in sprites {
+            if let Some(bitmap) = res.get(&cmd.sprite) {
                 ctx.draw_image_with_image_bitmap_and_sw_and_sh_and_dx_and_dy_and_dw_and_dh(
                     bitmap,
                     0.0,                   // source x
                     0.0,                   // source y
                     bitmap.width().as_(),  // source width
                     bitmap.height().as_(), // source height
-                    pos.x().as_(),         // dest x
-                    pos.y().as_(),         // dest y
+                    cmd.pos.x().as_(),         // dest x
+                    cmd.pos.y().as_(),         // dest y
                     bitmap.width().as_(),  // dest width
                     bitmap.height().as_(), // dest height
                 )
