@@ -152,10 +152,21 @@ where
         Self::range_overlaps(&self.range(0), &rhs.range(0)) && Self::range_overlaps(&self.range(1), &rhs.range(1))
     }
 
+    // Range spanned by one component.
+    pub fn x_range(&self) -> Range<T> {
+        self.range(0)
+    }
+
+    // Range spanned by one component.
+    pub fn y_range(&self) -> Range<T> {
+        self.range(1)
+    }
+
     // Range spanned by one component (`X` or `Y`).
     fn range(&self, comp: usize) -> Range<T> {
         self.min[comp]..self.max[comp]
     }
+
 
     // Ranges have some point(s) in common?
     fn range_overlaps(a: &Range<T>, b: &Range<T>) -> bool {

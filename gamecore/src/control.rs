@@ -65,10 +65,20 @@ fn draw_on_map(g: &mut G) {
             }
             Tool::Building(typ) => {
                 if g.inputs.just_pressed(K_MOUSE1) {
-                    g.buildings.insert(Building { id: default(), typ, tile: g.mouse_tile() });
+                    let building = Building { id: default(), typ, tile: g.mouse_tile() };
+                    try_spawn_building(g, building);
                 }
             }
         }
+    }
+}
+
+fn try_spawn_building(g: &G, building: Building) {
+    let bounds = building.tile_bounds();
+    let mut footprint = cross(bounds.x_range(), bounds.y_range());
+    let can_build = footprint.all(|(x, y)| g.is_walkable(vec2(x, y)));
+    if can_build {
+        g.buildings.insert(building);
     }
 }
 
