@@ -24,7 +24,7 @@ pub use std::collections::VecDeque;
 pub use std::cell::Cell;
 pub use std::fmt::Debug;
 pub use std::fmt::Write as _;
-pub use std::ops::Range;
+pub use std::ops::{Range, RangeInclusive};
 
 pub type HashSet<T> = fnv::FnvHashSet<T>;
 pub type HashMap<K, V> = fnv::FnvHashMap<K, V>;
