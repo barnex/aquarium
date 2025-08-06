@@ -45,7 +45,7 @@ fn command_pawns(g: &mut G) {
     if g.ui.active_tool == Tool::Pointer {
         if g.inputs.just_pressed(K_MOUSE2) {
             for pawn in g.selected_pawns() {
-                pawn.set_destination(g.mouse_tile())
+                pawn.set_destination(g, g.mouse_tile())
             }
         }
     }

@@ -87,8 +87,8 @@ fn draw_selection(g: &G, out: &mut Out) -> Option<()> {
 
 fn draw_routes(g: &G, out: &mut Out) {
     for pawn in g.selected_pawns() {
-        if !pawn.is_at_destination() {
-            out.push_line(L_SPRITES, Line::new(pawn.center(), pawn.dest.pos() + TILE_ISIZE / 2).with_color(RGB::WHITE.with_alpha(128)).translated(-g.camera_pos));
+        if let Some(destination) = pawn.route.destination() && !pawn.is_at_destination() {
+            out.push_line(L_SPRITES, Line::new(pawn.center(), destination.pos() + TILE_ISIZE / 2).with_color(RGB::WHITE.with_alpha(128)).translated(-g.camera_pos));
         }
     }
 }

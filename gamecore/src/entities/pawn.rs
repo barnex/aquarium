@@ -5,7 +5,6 @@ pub struct Pawn {
     pub id: Id,
     pub typ: PawnTyp,
     pub tile: Cel<vec2i16>,
-    pub dest: Cel<vec2i16>,
     pub route: Route,
 }
 
@@ -43,7 +42,6 @@ impl Pawn {
             id: Id::default(),
             typ,
             tile: tile.cel(),
-            dest: tile.cel(),
             route: default(),
         }
     }
@@ -67,8 +65,8 @@ impl Pawn {
 
     fn teleport_to(&self, g: &G, dst: vec2i16) {
         if g.is_walkable(dst) {
-            self.dest.set(dst);
             self.tile.set(dst);
+            self.route.clear();
         }
     }
 
@@ -95,15 +93,19 @@ impl Pawn {
             } else {
                 // TODO: handle destination unreachable
             }
-        } else {
-            if !self.is_at_destination() {
-                self.compute_route(g);
-            }
         }
     }
 
-    fn compute_route(&self, g: &G) {
-        let distance_map = DistanceMap::new(self.dest.get(), 254, |p| g.is_walkable(p));
+    pub fn set_destination(&self, g: &G, dest: vec2i16) {
+        if !self.can_move() {
+            return;
+        }
+        self.start_route_to(g, dest);
+        //TODO: self.route.clear();
+    }
+
+    fn start_route_to(&self, g: &G, dest: vec2i16) {
+        let distance_map = DistanceMap::new(dest, 254, |p| g.is_walkable(p));
         if let Some(path) = distance_map.path_to_center(self.tile.get()) {
             self.route.set(path);
         }
@@ -117,16 +119,9 @@ impl Pawn {
         self.bounds().center()
     }
 
-    pub fn set_destination(&self, dest: vec2i16) {
-        if !self.can_move() {
-            return;
-        }
-        self.dest.set(dest);
-        //TODO: self.route.clear();
-    }
 
     pub fn is_at_destination(&self) -> bool {
-        self.tile == self.dest
+        self.route.is_finished()
     }
 }
 
