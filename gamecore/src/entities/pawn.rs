@@ -57,6 +57,9 @@ impl Pawn {
 
     /// If standing on another pawn, move aside randomly.
     fn take_personal_space(&self, g: &G) {
+        if !self.can_move() {
+            return;
+        }
         let standing_on_other = g.pawns().filter(|p| p.id != self.id).find(|p| p.tile == self.tile).is_some();
         if standing_on_other {
             self.teleport_to(g, self.tile.get() + g.random_vec_incl::<i16>(-1..=1));
@@ -118,7 +121,6 @@ impl Pawn {
     pub fn center(&self) -> vec2i {
         self.bounds().center()
     }
-
 
     pub fn is_at_destination(&self) -> bool {
         self.route.is_finished()
