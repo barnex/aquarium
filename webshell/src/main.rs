@@ -74,7 +74,7 @@ async fn start() -> JsResult<()> {
     listen_keys(Rc::clone(&input_events));
     listen_mouse(&canvas, Rc::clone(&input_events));
 
-    let mut out = Output::default();
+    let mut out = Out::default();
 
     // 🌍 Main loop
     animation_loop(move |ctx| {
@@ -213,7 +213,7 @@ fn request_animation_frame(anim_loop_clone: &Rc<RefCell<Option<Closure<dyn FnMut
     window().request_animation_frame(anim_loop_clone.borrow().as_ref().unwrap().as_ref().unchecked_ref()).unwrap()
 }
 
-fn draw(canvas: &HtmlCanvasElement, ctx: &CanvasRenderingContext2d, res: &mut Resources, out: &Output) {
+fn draw(canvas: &HtmlCanvasElement, ctx: &CanvasRenderingContext2d, res: &mut Resources, out: &Out) {
     ctx.set_image_smoothing_enabled(false); // crisp, pixellated sprites
 
     // Draw layers starting from 0 for correct Z-ordering.

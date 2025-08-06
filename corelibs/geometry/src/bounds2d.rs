@@ -9,6 +9,7 @@ use std::{
 use num_traits::Num;
 
 pub type Bounds2Di = Bounds2D<i32>;
+pub type Bounds2Di16 = Bounds2D<i16>;
 pub type Bounds2Du = Bounds2D<u32>;
 pub type Bounds2Df = Bounds2D<f32>;
 

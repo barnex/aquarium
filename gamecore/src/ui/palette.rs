@@ -10,14 +10,14 @@ pub(super) struct Palette {
 }
 
 impl Palette {
-    pub(super) fn ui<T>(&self, inputs: &mut Inputs, out: &mut Output, selection: &mut T, options: impl Iterator<Item = (T, Sprite)>)
+    pub(super) fn ui<T>(&self, inputs: &mut Inputs, out: &mut Out, selection: &mut T, options: impl Iterator<Item = (T, Sprite)>)
     where
         T: PartialEq + Copy, // TODO: don't require copy bound
     {
         let size = vec2(self.cols, self.rows) * (self.button_size + self.margin) + self.margin;
         let rect = Bounds2D::with_size(self.pos, size.as_i32());
 
-        out.push_rect(L_UI_BG, Rectangle::new(rect, RGBA(vec4u8(128, 128, 128, 128))).with_fill(RGBA::WHITE));
+        out.push_rect(L_UI_BG, Rectangle::new(rect, RGBA([128, 128, 128, 128])).with_fill(RGBA::WHITE));
 
         let (mut row, mut col) = (0, 0);
         for (option, sprite) in options {

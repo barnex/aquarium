@@ -42,10 +42,13 @@ pub struct G {
 
     /// Use methods `random_XYZ()`.
     pub(super) _rng: RefCell<ChaCha8Rng>,
+
+    pub debug: DebugOpts,
 }
 
 pub const TILE_SIZE: u32 = 24;
 pub const TILE_ISIZE: i32 = TILE_SIZE as i32;
+pub const TILE_VSIZE: vec2i = vec2(TILE_ISIZE, TILE_ISIZE);
 
 impl G {
     pub fn new() -> Self {
@@ -72,10 +75,11 @@ impl G {
             ui: Ui::new(),
             viewport_size: vec2(0, 0), // real value will be set by webshell.
             _rng: RefCell::new(ChaCha8Rng::seed_from_u64(12345678)),
+            debug: default(),
         }
     }
 
-    pub fn tick(&mut self, out: &mut Output) {
+    pub fn tick(&mut self, out: &mut Out) {
         self.update_fps(); // 👈 FPS is gamespeed independent
         self.exec_commands(); // 👈 exec commands even when paused (speed 0)
 

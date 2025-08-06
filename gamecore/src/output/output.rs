@@ -18,7 +18,7 @@ pub const L_UI_FG: u8 = 4;
 /// Scenegraph, sounds, etc. to output after a tick.
 /// Sent to the browser who will render it.
 #[derive(Default, Debug, PartialEq, Eq)]
-pub struct Output {
+pub struct Out {
     pub layers: Vec<Layer>,
     pub debug: String,
 }
@@ -30,7 +30,7 @@ pub struct Layer {
     pub rectangles: Vec<Rectangle>,
 }
 
-impl Output {
+impl Out {
     pub fn new() -> Self {
         Self::default()
     }

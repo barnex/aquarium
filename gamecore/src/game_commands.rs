@@ -18,11 +18,11 @@ impl G {
         match cmd.trim().split_ascii_whitespace().collect_vec().as_slice() {
             &["pause"] => self.cmd_pause_or_resume(),
             &["tick"] => self.cmd_tick(),
+            &["show_walkable"] => Ok(toggle(&mut self.debug.show_walkable)),
             &[cmd, ..] => Err(anyhow!("unknown command: {cmd:?}")),
             &[] => Ok(()),
         }
     }
-
 
     /// pause button: pause or resume (if already paused)
     fn cmd_pause_or_resume(&mut self) -> Result<()> {
@@ -37,5 +37,8 @@ impl G {
         self.tick_once();
         Ok(())
     }
+}
 
+fn toggle(v: &mut bool) {
+    *v = !*v
 }

@@ -1,18 +1,22 @@
 use crate::prelude::*;
 
 #[derive(Debug, PartialEq, Eq, Hash, Clone, Copy)]
-pub struct RGB(pub vec3u8);
+pub struct RGB(pub [u8; 3]);
 
 #[derive(Debug, PartialEq, Eq, Hash, Clone, Copy)]
-pub struct RGBA(pub vec4u8);
+pub struct RGBA(pub [u8; 4]);
 
 impl RGB {
-    pub const BLACK: Self = Self(vec3(0, 0, 0));
-    pub const RED: Self = Self(vec3(255, 0, 0));
-    pub const YELLOW: Self = Self(vec3(255, 255, 0));
-    pub const GREEN: Self = Self(vec3(0, 255, 0));
-    pub const BLUE: Self = Self(vec3(0, 0, 255));
-    pub const WHITE: Self = Self(vec3(255, 255, 255));
+    pub const BLACK: Self = Self([0, 0, 0]);
+    pub const RED: Self = Self([255, 0, 0]);
+    pub const YELLOW: Self = Self([255, 255, 0]);
+    pub const GREEN: Self = Self([0, 255, 0]);
+    pub const BLUE: Self = Self([0, 0, 255]);
+    pub const WHITE: Self = Self([255, 255, 255]);
+
+    pub const fn new(r: u8, g: u8, b: u8) -> Self {
+        Self([r, g, b])
+    }
 
     pub fn r(&self) -> u8 {
         self.0[0]
@@ -27,19 +31,23 @@ impl RGB {
         format!("#{:02x}{:02x}{:02x}", self.r(), self.g(), self.b())
     }
     pub fn with_alpha(&self, a: u8) -> RGBA {
-        let RGB(Vector([r, g, b])) = *self;
-        RGBA(Vector([r, g, b, a]))
+        let RGB([r, g, b]) = *self;
+        RGBA([r, g, b, a])
     }
 }
 
 impl RGBA {
-    pub const BLACK: Self = Self(vec4(0, 0, 0, 255));
-    pub const RED: Self = Self(vec4(255, 0, 0, 255));
-    pub const YELLOW: Self = Self(vec4(255, 255, 0, 255));
-    pub const GREEN: Self = Self(vec4(0, 255, 0, 255));
-    pub const BLUE: Self = Self(vec4(0, 0, 255, 255));
-    pub const WHITE: Self = Self(vec4(255, 255, 255, 255));
-    pub const TRANSPARENT: Self = Self(vec4(0, 0, 0, 0));
+    pub const BLACK: Self = Self([0, 0, 0, 255]);
+    pub const RED: Self = Self([255, 0, 0, 255]);
+    pub const YELLOW: Self = Self([255, 255, 0, 255]);
+    pub const GREEN: Self = Self([0, 255, 0, 255]);
+    pub const BLUE: Self = Self([0, 0, 255, 255]);
+    pub const WHITE: Self = Self([255, 255, 255, 255]);
+    pub const TRANSPARENT: Self = Self([0, 0, 0, 0]);
+
+    pub const fn new(r: u8, g: u8, b: u8, a: u8) -> Self {
+        Self([r, g, b, a])
+    }
 
     pub fn r(&self) -> u8 {
         self.0[0]
@@ -57,7 +65,7 @@ impl RGBA {
         format!("#{:02x}{:02x}{:02x}{:02x}", self.r(), self.g(), self.b(), self.a())
     }
     pub fn with_alpha(&self, a: u8) -> RGBA {
-        let RGBA(Vector([r, g, b, _])) = *self;
-        RGBA(Vector([r, g, b, a]))
+        let RGBA([r, g, b, _]) = *self;
+        RGBA([r, g, b, a])
     }
 }
