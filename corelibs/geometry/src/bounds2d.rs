@@ -128,11 +128,20 @@ where
 
     /// Test if a point lies inside the bounding box
     /// (including its boundaries).
-    pub fn contains(&self, point: vec2<T>) -> bool {
+    pub fn contains_incl(&self, point: vec2<T>) -> bool {
         point.x() >= self.min.x() //.
 		&& point.x() <= self.max.x()
 		&& point.y() >= self.min.y()
 		&& point.y() <= self.max.y()
+    }
+
+    /// Test if a point lies inside the bounding box
+    /// (excluding its boundaries).
+    pub fn contains(&self, point: vec2<T>) -> bool {
+        point.x() >= self.min.x() //.
+		&& point.x() < self.max.x()
+		&& point.y() >= self.min.y()
+		&& point.y() < self.max.y()
     }
 
     /// Overlapping bounds? (Have some point(s) in common).

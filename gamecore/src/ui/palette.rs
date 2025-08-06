@@ -25,7 +25,7 @@ impl Palette {
             out.push_sprite(L_UI, sprite, pos);
 
             if inputs.just_pressed(K_MOUSE1) {
-                if Bounds2D::with_size(pos, self.button_size.as_i32()).contains(inputs.mouse_position()) {
+                if Bounds2D::with_size(pos, self.button_size.as_i32()).contains_incl(inputs.mouse_position()) {
                     *selection = option;
                 }
             }
@@ -46,7 +46,7 @@ impl Palette {
             }
         }
 
-        if rect.contains(inputs.mouse_position()) {
+        if rect.contains_incl(inputs.mouse_position()) {
             inputs.consume(K_MOUSE1);
             inputs.consume(K_MOUSE2);
         }

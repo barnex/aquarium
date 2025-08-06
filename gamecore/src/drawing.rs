@@ -40,7 +40,7 @@ fn draw_walkalbe_overlay(g: &G, out: &mut Out) {
     for (idx, _) in visible_tiles(g) {
         if !g.is_walkable(idx) {
             let bounds = Bounds2D::from_pos_size(idx.pos(), TILE_VSIZE).translated(-g.camera_pos);
-            out.push_rect(L_TILES + 1, Rectangle::new(bounds, color).with_fill(color));
+            out.push_rect(L_SPRITES + 1, Rectangle::new(bounds, color).with_fill(color));
         }
     }
 }
