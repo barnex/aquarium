@@ -90,7 +90,11 @@ impl Pawn {
 
     fn walk_to_destination(&self, g: &G) {
         if let Some(next_tile) = self.route.next() {
-            self.tile.set(next_tile);
+            if g.is_walkable(next_tile) {
+                self.tile.set(next_tile);
+            } else {
+                // TODO: handle destination unreachable
+            }
         } else {
             if !self.is_at_destination() {
                 self.compute_route(g);
@@ -118,6 +122,7 @@ impl Pawn {
             return;
         }
         self.dest.set(dest);
+        //TODO: self.route.clear();
     }
 
     pub fn is_at_destination(&self) -> bool {
