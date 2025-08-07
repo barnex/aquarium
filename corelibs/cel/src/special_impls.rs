@@ -23,6 +23,16 @@ impl<T: Copy> Cel<Option<T>> {
         self.set(None);
         v
     }
+
+    /// Like `Option::is_none()`.
+    pub fn is_none(&self) -> bool {
+        self.get().is_none()
+    }
+
+    /// Like `Option::is_some()`.
+    pub fn is_some(&self) -> bool {
+        self.get().is_some()
+    }
 }
 
 // ---------- vector
