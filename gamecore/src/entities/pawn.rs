@@ -12,7 +12,7 @@ pub struct Pawn {
 #[derive(Serialize, Deserialize, Clone, Copy, PartialEq, Eq, Hash, TryFromPrimitive, Debug)]
 #[repr(u8)]
 pub enum PawnTyp {
-    Leaf = 1,
+    Kitten = 1,
     Pollen = 2,
     Cat = 3,
     Crablet = 4,
@@ -20,7 +20,7 @@ pub enum PawnTyp {
 }
 impl PawnTyp {
     pub fn all() -> impl Iterator<Item = Self> {
-        let first = Self::Leaf;
+        let first = Self::Kitten;
         let last = Self::Crablet; // 👈⚠️ keep in sync!
         ((first as u8)..=(last as u8)).map(|i| Self::try_from_primitive(i).unwrap())
     }
@@ -29,7 +29,7 @@ impl PawnTyp {
 impl PawnTyp {
     pub fn sprite(&self) -> Sprite {
         match self {
-            PawnTyp::Leaf => sprite!("leaf"),
+            PawnTyp::Kitten => sprite!("kit7"),
             PawnTyp::Pollen => sprite!("pollen"),
             PawnTyp::Cat => sprite!("kit4"),
             PawnTyp::Crablet => sprite!("ferris"),

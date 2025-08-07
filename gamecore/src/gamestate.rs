@@ -53,7 +53,7 @@ pub const TILE_VSIZE: vec2i = vec2(TILE_ISIZE, TILE_ISIZE);
 impl G {
     pub fn new() -> Self {
         let pawns = MemKeep::new();
-        pawns.insert(Pawn::new(PawnTyp::Leaf, vec2(17, 7)));
+        pawns.insert(Pawn::new(PawnTyp::Kitten, vec2(17, 7)));
         let crab = pawns.insert(Pawn::new(PawnTyp::Crablet, vec2(10, 4)));
 
         let buildings = MemKeep::new();
