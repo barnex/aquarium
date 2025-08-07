@@ -7,6 +7,7 @@ pub struct Pawn {
     pub tile: Cel<vec2i16>,
     pub route: Route,
     pub home: Cel<Option<Id>>,
+    pub carrying: Cel<Option<ResourceTyp>>,
 }
 
 #[derive(Serialize, Deserialize, Clone, Copy, PartialEq, Eq, Hash, TryFromPrimitive, Debug)]
@@ -45,15 +46,18 @@ impl Pawn {
             tile: tile.cel(),
             route: default(),
             home: None.cel(),
+            carrying: None.cel(),
         }
     }
 
     pub(crate) fn tick(&self, g: &G) {
+        // 🥾
         if !self.is_at_destination() {
             self.walk_to_destination(g);
             return;
         }
 
+        // 😴
         self.take_personal_space(g);
     }
 
@@ -76,17 +80,13 @@ impl Pawn {
     }
 
     fn is_commandable(&self) -> bool {
-        use PawnTyp::*;
         match self.typ {
-            Leaf => false,
             _ => true,
         }
     }
 
     fn can_move(&self) -> bool {
-        use PawnTyp::*;
         match self.typ {
-            Leaf => false,
             _ => true,
         }
     }
@@ -97,6 +97,7 @@ impl Pawn {
                 self.tile.set(next_tile);
             } else {
                 // TODO: handle destination unreachable
+                self.route.clear(); // ☹️
             }
         }
     }

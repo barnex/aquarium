@@ -50,6 +50,9 @@ fn draw_resources(g: &G, out: &mut Out) {
 fn draw_pawns(g: &G, out: &mut Out) {
     for pawn in g.pawns.iter() {
         out.push_sprite(L_SPRITES, pawn.typ.sprite(), pawn.tile.pos() - g.camera_pos);
+        if let Some(res) = pawn.carrying.get() {
+            out.push_sprite(L_SPRITES + 1, res.sprite(), pawn.tile.pos() - g.camera_pos + vec2(0, 8));
+        }
     }
 }
 
