@@ -16,6 +16,13 @@ impl<T: Copy> Cel<Option<T>> {
     pub fn and_then<U, F: FnOnce(T) -> Option<U>>(&self, f: F) -> Option<U> {
         self.get().and_then(f)
     }
+
+    /// Like `Option::take`: replaces inner value by `None` and return it, if any.
+    pub fn take(&self) -> Option<T> {
+        let v = self.get();
+        self.set(None);
+        v
+    }
 }
 
 // ---------- vector
