@@ -6,6 +6,7 @@ use crate::prelude::*;
 pub struct G {
     // 🌍 game world
     pub tilemap: Tilemap,
+    pub resources: ResourceMap,
     pub buildings: MemKeep<Building>,
     pub pawns: MemKeep<Pawn>,
 
@@ -64,9 +65,16 @@ impl G {
             workers: vec![crab],
         });
 
+        let resources = ResourceMap::default();
+        resources.insert(vec2(3, 9), ResourceTyp::Leaf);
+        resources.insert(vec2(7, 19), ResourceTyp::Rock);
+        resources.insert(vec2(17, 9), ResourceTyp::Rock);
+        resources.insert(vec2(15, 12), ResourceTyp::Leaf);
+
         pawns.get(crab).unwrap().home.set(Some(hq));
 
         Self {
+            resources,
             selected_pawn_ids: default(),
             selection_start: None,
             buildings,

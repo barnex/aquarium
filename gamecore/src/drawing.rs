@@ -9,6 +9,7 @@ impl G {
         let g = self;
         draw_tilemap(g, out);
         draw_buildings(g, out);
+        draw_resources(g, out);
         draw_pawns(g, out);
         draw_cursor(g, out);
         draw_selection(g, out);
@@ -34,10 +35,15 @@ fn draw_tilemap(g: &G, out: &mut Out) {
     }
 }
 
-
 fn draw_buildings(g: &G, out: &mut Out) {
     for building in g.buildings.iter() {
         out.push_sprite(L_SPRITES, building.typ.sprite(), building.tile.pos() - g.camera_pos);
+    }
+}
+
+fn draw_resources(g: &G, out: &mut Out) {
+    for (tile, res) in g.resources.iter() {
+        out.push_sprite(L_SPRITES, res.sprite(), tile.pos() - g.camera_pos);
     }
 }
 
