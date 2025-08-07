@@ -55,7 +55,7 @@ impl G {
     pub fn new() -> Self {
         let pawns = MemKeep::new();
         pawns.insert(Pawn::new(PawnTyp::Kitten, vec2(17, 7)));
-        let crab = pawns.insert(Pawn::new(PawnTyp::Crablet, vec2(10, 4)).with(|p| p.carrying = Some(ResourceTyp::Leaf).cel()));
+        let crab = pawns.insert(Pawn::new(PawnTyp::Crablet, vec2(10, 4)).with(|p| p.cargo = Some(ResourceTyp::Leaf).cel()));
 
         let buildings = MemKeep::new();
         let hq = buildings.insert(Building {

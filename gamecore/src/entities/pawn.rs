@@ -7,7 +7,7 @@ pub struct Pawn {
     pub tile: Cel<vec2i16>,
     pub route: Route,
     pub home: Cel<Option<Id>>,
-    pub carrying: Cel<Option<ResourceTyp>>,
+    pub cargo: Cel<Option<ResourceTyp>>,
 }
 
 #[derive(Serialize, Deserialize, Clone, Copy, PartialEq, Eq, Hash, TryFromPrimitive, Debug)]
@@ -46,10 +46,11 @@ impl Pawn {
             tile: tile.cel(),
             route: default(),
             home: None.cel(),
-            carrying: None.cel(),
+            cargo: None.cel(),
         }
     }
 
+    // ⏱️
     pub(crate) fn tick(&self, g: &G) {
         // 🥾
         if !self.is_at_destination() {
@@ -57,8 +58,40 @@ impl Pawn {
             return;
         }
 
+        // we are at some destination
+
+        if let Some(home) = self.home(g) {
+            // 🏭 home? deliver
+            if self.tile == home.tile {
+                self.deliver_cargo(home);
+
+                // find new target
+            } else {
+                // ✋☘️ at resource with hands free: take
+                if self.cargo.is_none() {
+                    // TODO: only suitable resources
+                    self.cargo.set(g.resources.remove(self.tile.get()));
+                }
+                if self.cargo.is_none() {
+                    // wtf, someone stole it.
+                    // find nearby or go home?
+                }
+                self.set_destination(g, home.tile);
+            }
+        }
+
         // 😴
         self.take_personal_space(g);
+    }
+
+    pub fn deliver_cargo(&self, home: &Building) {
+        // 🪲 TODO: add to factory.
+        log::error!("TODO: add to factory");
+        self.cargo.take();
+    }
+
+    pub fn home<'a>(&self, g: &'a G) -> Option<&'a Building> {
+        g.buildings.get_maybe(self.home.get())
     }
 
     /// If standing on another pawn, move aside randomly.
