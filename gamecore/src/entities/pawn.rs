@@ -66,6 +66,9 @@ impl Pawn {
                 self.deliver_cargo(home);
 
                 // find new target
+                if let Some(new_dest) = g.resources.iter().min_by_key(|(tile, res)| tile.distance_squared(self.tile.get())).map(|(tile, res)| tile) {
+                    self.set_destination(g, new_dest);
+                }
             } else {
                 // ✋☘️ at resource with hands free: take
                 if self.cargo.is_none() {
