@@ -11,7 +11,7 @@ mod ui;
 mod drawing;
 mod control;
 mod random;
-mod debug_opts;
+mod debugging;
 
 pub use entities::*;
 pub use game_commands::*;
@@ -23,7 +23,7 @@ pub use ui::*;
 pub use drawing::*;
 pub use control::*;
 pub use random::*;
-pub use debug_opts::*;
+pub use debugging::*;
 
 pub(crate) use tile_to_pos::ToPos as _;
 pub(crate) use tile_to_pos::ToTile as _;
