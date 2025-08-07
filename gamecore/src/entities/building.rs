@@ -43,6 +43,10 @@ impl Building {
     pub fn tile_bounds(&self) -> Bounds2Di16 {
         Bounds2D::with_size(self.tile, self.size().as_i16())
     }
+
+    pub fn entrance(&self) -> vec2i16 {
+        self.tile // TODO
+    }
 }
 
 impl SetId for Building {

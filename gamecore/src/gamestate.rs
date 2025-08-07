@@ -122,26 +122,40 @@ impl G {
     /// 🥾 Can one generally walk on tile?
     /// TODO: ambiguous.
     pub(crate) fn is_walkable(&self, tile: vec2i16) -> bool {
-        let tile_walkable = match self.tilemap.at(tile) {
+        if !Self::tile_is_walkable(self.tilemap.at(tile)) {
+            return false;
+        }
+        for b in self.buildings.iter() {
+            if b.tile_bounds().contains(tile) && b.entrance() != tile {
+                return false;
+            }
+        }
+        true
+    }
+
+    /// 🧱 Can one generally build something on this tile?
+    pub(crate) fn is_buildable(&self, tile: vec2i16) -> bool {
+        if !Self::tile_is_walkable(self.tilemap.at(tile)) {
+            return false;
+        }
+        for b in self.buildings.iter() {
+            if b.tile_bounds().contains(tile) {
+                return false;
+            }
+        }
+        true
+    }
+
+    /// 🥾 Can one generally walk on this kind of tile?
+    fn tile_is_walkable(tile: Tile) -> bool {
+        match tile {
             Tile::Dunes => false,
             Tile::Mountains => false,
             Tile::Sand => true,
             Tile::Snow => true,
             Tile::Water => false,
             Tile::Block => false,
-        };
-
-        if !tile_walkable {
-            return false;
         }
-
-        for b in self.buildings.iter() {
-            if b.tile_bounds().contains(tile) {
-                return false;
-            }
-        }
-
-        true
     }
 
     /// Pawn with given Id, if any.
