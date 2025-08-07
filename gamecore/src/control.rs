@@ -74,6 +74,11 @@ fn draw_on_map(g: &mut G) {
                     try_spawn_building(g, building);
                 }
             }
+            Tool::Resource(typ) => {
+                if g.inputs.just_pressed(K_MOUSE1) {
+                    g.resources.insert(g.mouse_tile(), typ);
+                }
+            }
         }
     }
 }

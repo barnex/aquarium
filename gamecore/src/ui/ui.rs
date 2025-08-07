@@ -12,6 +12,7 @@ pub enum Tool {
     Tile(Tile),
     Pawn(PawnTyp),
     Building(BuildingTyp),
+    Resource(ResourceTyp),
 }
 
 impl Ui {
@@ -24,10 +25,11 @@ impl Ui {
     }
 
     fn menu_ui(&mut self, inputs: &mut Inputs, out: &mut Out) {
-        let options = iter::once((Tool::Pointer, sprite!("pointer"))) //_
+        let buttons = iter::once((Tool::Pointer, sprite!("pointer"))) //_
             .chain(Tile::all().map(|typ| (Tool::Tile(typ), typ.sprite())))
             .chain(PawnTyp::all().map(|typ| (Tool::Pawn(typ), typ.sprite())))
-            .chain(BuildingTyp::all().map(|typ| (Tool::Building(typ), typ.sprite())));
+            .chain(BuildingTyp::all().map(|typ| (Tool::Building(typ), typ.sprite())))
+            .chain(ResourceTyp::all().map(|typ|(Tool::Resource(typ), typ.sprite())));
 
         let margin = 3;
         Palette {
@@ -37,7 +39,7 @@ impl Ui {
             button_size: vec2(TILE_SIZE, TILE_SIZE),
             margin,
         }
-        .ui(inputs, out, &mut self.active_tool, options);
+        .ui(inputs, out, &mut self.active_tool, buttons);
     }
 }
 

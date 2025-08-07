@@ -59,6 +59,7 @@ fn draw_cursor(g: &G, out: &mut Out) {
         Tool::Tile(typ) => typ.sprite(),
         Tool::Pawn(typ) => typ.sprite(),
         Tool::Building(typ) => typ.sprite(),
+        Tool::Resource(typ) => typ.sprite(),
     };
     out.push_sprite(L_SPRITES, sprite, g.mouse_tile().pos() - g.camera_pos);
     out.push_sprite(L_SPRITES, sprite!("grid24"), g.mouse_tile().pos() - g.camera_pos);
