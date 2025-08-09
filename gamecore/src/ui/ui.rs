@@ -21,7 +21,13 @@ impl Ui {
     }
 
     pub fn update_and_draw(&mut self, inputs: &mut Inputs, out: &mut Out) {
-        self.menu_ui(inputs, out)
+        self.menu_ui(inputs, out);
+
+        // Right-click on map deselects and switches to pointer.
+        if inputs.just_pressed(K_MOUSE2){
+            self.active_tool = Tool::Pointer;
+        }
+
     }
 
     fn menu_ui(&mut self, inputs: &mut Inputs, out: &mut Out) {
