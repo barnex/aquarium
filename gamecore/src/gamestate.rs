@@ -14,6 +14,9 @@ pub struct G {
     #[serde(skip)]
     pub ui: Ui,
 
+    /// What will happen when MOUSE2 is pressed. Depends on context.
+    pub contextual_action: Action,
+
     /// Where selection rectangle started (mouse down position).
     pub selection_start: Option<vec2i>,
 
@@ -74,6 +77,7 @@ impl G {
         pawns.get(crab).unwrap().home.set(Some(hq));
 
         Self {
+            contextual_action: Action::None,
             resources,
             selected_pawn_ids: default(),
             selection_start: None,
@@ -236,5 +240,6 @@ impl G {
         writeln!(debug, "down {:?}", self.inputs.iter_is_down().sorted().collect_vec()).unwrap();
         writeln!(debug, "tile_picker {:?}", self.ui.active_tool).unwrap();
         writeln!(debug, "selected: {:?}", self.selected_pawn_ids.len()).unwrap();
+        writeln!(debug, "contextual_action: {:?}", self.contextual_action).unwrap();
     }
 }

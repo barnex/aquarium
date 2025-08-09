@@ -4,14 +4,49 @@
 //! (but will only carry out when time progresses).
 use crate::prelude::*;
 
+/// Contextual action, happens when right-clicking.
+#[derive(Serialize, Deserialize, Default, PartialEq, Eq, Clone, Copy, Debug)]
+#[repr(u8)]
+pub enum Action {
+    /// Do nothing. E.g. when no units selected.
+    #[default]
+    None,
+
+    /// Move to location. E.g. when mouse above empty terrain.
+    Move,
+
+    /// Assign worker to factory.
+    Assign,
+}
+
 impl G {
     /// User inputs give commands to the world.
     pub fn control(&mut self) {
+        update_contextual_action(self);
         control_camera(self);
         draw_on_map(self);
         select_pawns(self);
         command_pawns(self);
     }
+}
+
+/// 🎯 Update g.contextual_action
+fn update_contextual_action(g: &mut G) {
+    let mouse = g.mouse_tile();
+    let selected = !g.selected_pawn_ids.is_empty();
+
+    // ⏬ Assign pawns to factory.
+    if selected && g.building_at(mouse).is_some() {
+        // TODO: and building is friendly
+        return g.contextual_action = Action::Assign;
+    }
+
+    // 🥾 Move to location
+    if selected {
+        return g.contextual_action = Action::Move;
+    }
+
+    g.contextual_action = Action::None;
 }
 
 fn select_pawns(g: &mut G) {
