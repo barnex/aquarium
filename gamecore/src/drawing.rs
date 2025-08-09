@@ -56,16 +56,35 @@ fn draw_pawns(g: &G, out: &mut Out) {
     }
 }
 
+// ↑
 fn draw_cursor(g: &G, out: &mut Out) {
-    let sprite = match g.ui.active_tool {
+    let sprite = cursor_sprite(g);
+    out.push_sprite(L_SPRITES, sprite, g.mouse_tile().pos() - g.camera_pos);
+    out.push_sprite(L_SPRITES, sprite!("grid24"), g.mouse_tile().pos() - g.camera_pos);
+}
+
+fn cursor_sprite(g: &G) -> Sprite {
+    //  🪲  🪲  🪲  🪲  🪲  🪲  🪲  🪲  🪲  🪲  🪲  🪲  🪲 🪲
+    // TODO: Gamestate::mouse1_action, mouse2_action
+    // set at beginning of tick.
+    // draw cursor accordingly
+    // +help text
+    // Don't recalculate action (possibly inconsistent)
+    //  🪲  🪲  🪲  🪲  🪲  🪲  🪲  🪲  🪲  🪲  🪲  🪲  🪲 🪲
+
+    if matches!(g.ui.active_tool, Tool::Pointer) {
+        if !g.selected_pawn_ids.is_empty() && g.building_at(g.mouse_tile()).is_some() {
+            return sprite!("assign");
+        }
+    }
+
+    match g.ui.active_tool {
         Tool::Pointer => sprite!("grid24"),
         Tool::Tile(typ) => typ.sprite(),
         Tool::Pawn(typ) => typ.sprite(),
         Tool::Building(typ) => typ.sprite(),
         Tool::Resource(typ) => typ.sprite(),
-    };
-    out.push_sprite(L_SPRITES, sprite, g.mouse_tile().pos() - g.camera_pos);
-    out.push_sprite(L_SPRITES, sprite!("grid24"), g.mouse_tile().pos() - g.camera_pos);
+    }
 }
 
 fn draw_selection(g: &G, out: &mut Out) -> Option<()> {

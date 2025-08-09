@@ -48,7 +48,21 @@ fn command_pawns(g: &mut G) {
                 pawn.set_destination(g, g.mouse_tile())
             }
         }
+
+        if g.inputs.just_pressed(K_MOUSE1) {
+            if let Some(building) = g.building_at(g.mouse_tile()) {
+                g.selected_pawns().for_each(|pawn| assign_to(g, pawn, building));
+            }
+        }
     }
+}
+
+fn assign_to(g: &G, pawn: &Pawn, building: &Building) {
+    if let Some(home) = pawn.home(g) {
+        home.workers.remove(&pawn.id);
+    }
+    building.workers.insert(pawn.id);
+    pawn.home.set(Some(building.id));
 }
 
 fn draw_on_map(g: &mut G) {

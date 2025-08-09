@@ -62,7 +62,7 @@ impl G {
             id: default(),
             typ: BuildingTyp::HQ,
             tile: vec2(12, 8),
-            workers: vec![crab],
+            workers: CSet::from_iter([crab]),
         });
 
         let resources = ResourceMap::default();
@@ -115,6 +115,9 @@ impl G {
 
         self.draw_world(out);
         self.output_debug(&mut out.debug);
+
+        self.pawns.gc();
+        self.buildings.gc();
     }
 
     pub(crate) fn tick_once(&mut self) {
@@ -195,6 +198,22 @@ impl G {
     /// Current mouse position in world coordinates.
     pub fn mouse_position_world(&self) -> vec2i {
         self.inputs.mouse_position() + self.camera_pos
+    }
+
+    /// Building with given Id, if any.
+    pub fn building(&self, id: Id) -> Option<&Building> {
+        self.buildings.get(id)
+    }
+
+    /// Iterate over all Buildings.
+    pub fn buildings(&self) -> impl Iterator<Item = &Building> {
+        self.buildings.iter()
+    }
+
+    /// Building at given position, if any.
+    /// TODO: make faster via a hierarchy.
+    pub fn building_at(&self, tile: vec2i16) -> Option<&Building> {
+        self.buildings.iter().find(|v| v.tile_bounds().contains_incl(tile))
     }
 
     /// Tile the mouse currently hovers over.
