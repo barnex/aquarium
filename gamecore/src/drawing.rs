@@ -64,26 +64,16 @@ fn draw_cursor(g: &G, out: &mut Out) {
 }
 
 fn cursor_sprite(g: &G) -> Sprite {
-    //  🪲  🪲  🪲  🪲  🪲  🪲  🪲  🪲  🪲  🪲  🪲  🪲  🪲 🪲
-    // TODO: Gamestate::mouse1_action, mouse2_action
-    // set at beginning of tick.
-    // draw cursor accordingly
-    // +help text
-    // Don't recalculate action (possibly inconsistent)
-    //  🪲  🪲  🪲  🪲  🪲  🪲  🪲  🪲  🪲  🪲  🪲  🪲  🪲 🪲
-
-    if matches!(g.ui.active_tool, Tool::Pointer) {
-        if !g.selected_pawn_ids.is_empty() && g.building_at(g.mouse_tile()).is_some() {
-            return sprite!("assign");
-        }
-    }
-
     match g.ui.active_tool {
-        Tool::Pointer => sprite!("grid24"),
         Tool::Tile(typ) => typ.sprite(),
         Tool::Pawn(typ) => typ.sprite(),
         Tool::Building(typ) => typ.sprite(),
         Tool::Resource(typ) => typ.sprite(),
+        Tool::Pointer => match g.contextual_action {
+            Action::Move => sprite!("target"),
+            Action::Assign => sprite!("assign"),
+            Action::None => sprite!("grid24"),
+        },
     }
 }
 

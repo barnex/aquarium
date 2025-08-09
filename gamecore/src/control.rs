@@ -30,8 +30,14 @@ impl G {
     }
 }
 
-/// 🎯 Update g.contextual_action
+/// 🎯 Update g.contextual_action (what to do on right click: move, assign, attack,...).
+/// Action depends on selected units and thing under cursor.
 fn update_contextual_action(g: &mut G) {
+
+    if g.ui.active_tool != Tool::Pointer{
+        g.contextual_action = Action::None;
+    }
+
     let mouse = g.mouse_tile();
     let selected = !g.selected_pawn_ids.is_empty();
 
@@ -79,14 +85,18 @@ fn select_pawns(g: &mut G) {
 fn command_pawns(g: &mut G) {
     if g.ui.active_tool == Tool::Pointer {
         if g.inputs.just_pressed(K_MOUSE2) {
+            match g.contextual_action {
+                Action::None => (),
+                Action::Move => g.pawns().for_each(|p| p.set_destination(g, g.mouse_tile())),
+                Action::Assign => {
+                    if let Some(building) = g.building_at(g.mouse_tile()) {
+                        g.selected_pawns().for_each(|pawn| assign_to(g, pawn, building));
+                    }
+                }
+            }
+
             for pawn in g.selected_pawns() {
                 pawn.set_destination(g, g.mouse_tile())
-            }
-        }
-
-        if g.inputs.just_pressed(K_MOUSE1) {
-            if let Some(building) = g.building_at(g.mouse_tile()) {
-                g.selected_pawns().for_each(|pawn| assign_to(g, pawn, building));
             }
         }
     }
