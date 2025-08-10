@@ -56,7 +56,7 @@ pub const TILE_VSIZE: vec2i = vec2(TILE_ISIZE, TILE_ISIZE);
 
 impl G {
     pub fn test_world() -> Self {
-        let g = Self::new(vec2(48,32));
+        let g = Self::new(vec2(48, 32));
 
         g.spawn(Pawn::new(PawnTyp::Kitten, vec2(17, 7)));
         let crab = g.spawn(Pawn::new(PawnTyp::Crablet, vec2(10, 4)).with(|p| p.cargo = Some(ResourceTyp::Leaf).cel()));
@@ -178,7 +178,8 @@ impl G {
         }
     }
 
-    pub fn spawn(&self, pawn: Pawn) -> Id{
+    pub fn spawn(&self, pawn: Pawn) -> Id {
+        log::trace!("spawn {:?} @ tile {}", pawn.typ, pawn.tile);
         self.pawns.insert(pawn)
     }
 
