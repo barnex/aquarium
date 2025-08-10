@@ -22,3 +22,7 @@ rand = { workspace = true }
 rand_chacha = { workspace = true }
 serde = { workspace = true }
 vector = { workspace = true }
+
+[dev-dependencies]
+googletest = { workspace = true }
+env_logger = { workspace = true }

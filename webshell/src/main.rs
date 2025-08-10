@@ -62,7 +62,7 @@ async fn start() -> JsResult<()> {
         }
         None => {
             log::error!("game not loaded, starting fresh");
-            G::new()
+            G::test_world()
         }
     };
 
@@ -237,8 +237,7 @@ fn draw(canvas: &HtmlCanvasElement, ctx: &CanvasRenderingContext2d, res: &mut Re
         // 🦀 sprites
         for cmd in sprites {
             if let Some(bitmap) = res.get(&cmd.sprite) {
-
-                let dst_size = match cmd.dst_size{
+                let dst_size = match cmd.dst_size {
                     None => vec2(bitmap.width(), bitmap.height()),
                     Some(dst_size) => dst_size.map(|v| v.get().as_()),
                 };
@@ -249,10 +248,10 @@ fn draw(canvas: &HtmlCanvasElement, ctx: &CanvasRenderingContext2d, res: &mut Re
                     0.0,                   // source y
                     bitmap.width().as_(),  // source width
                     bitmap.height().as_(), // source height
-                    cmd.pos.x().as_(),         // dest x
-                    cmd.pos.y().as_(),         // dest y
-                    dst_size.x().as_(),  // dest width
-                    dst_size.y().as_(), // dest height
+                    cmd.pos.x().as_(),     // dest x
+                    cmd.pos.y().as_(),     // dest y
+                    dst_size.x().as_(),    // dest width
+                    dst_size.y().as_(),    // dest height
                 )
                 .expect("draw");
             }

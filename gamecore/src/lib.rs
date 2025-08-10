@@ -16,6 +16,9 @@ mod ui;
 mod c_vec;
 mod c_set;
 
+#[cfg(test)]
+mod tests;
+
 pub use control::*;
 pub use debugging::*;
 pub use drawing::*;

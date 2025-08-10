@@ -55,10 +55,11 @@ pub const TILE_ISIZE: i32 = TILE_SIZE as i32;
 pub const TILE_VSIZE: vec2i = vec2(TILE_ISIZE, TILE_ISIZE);
 
 impl G {
-    pub fn new() -> Self {
-        let pawns = MemKeep::new();
-        pawns.insert(Pawn::new(PawnTyp::Kitten, vec2(17, 7)));
-        let crab = pawns.insert(Pawn::new(PawnTyp::Crablet, vec2(10, 4)).with(|p| p.cargo = Some(ResourceTyp::Leaf).cel()));
+    pub fn test_world() -> Self {
+        let g = Self::new(vec2(48,32));
+
+        g.spawn(Pawn::new(PawnTyp::Kitten, vec2(17, 7)));
+        let crab = g.spawn(Pawn::new(PawnTyp::Crablet, vec2(10, 4)).with(|p| p.cargo = Some(ResourceTyp::Leaf).cel()));
 
         let buildings = MemKeep::new();
         let hq = buildings.insert(Building {
@@ -74,15 +75,19 @@ impl G {
         resources.insert(vec2(17, 9), ResourceTyp::Rock);
         resources.insert(vec2(15, 12), ResourceTyp::Leaf);
 
-        pawns.get(crab).unwrap().home.set(Some(hq));
+        g.pawns.get(crab).unwrap().home.set(Some(hq));
 
+        g
+    }
+
+    pub fn new(size: vec2u16) -> Self {
         Self {
             contextual_action: Action::None,
-            resources,
+            resources: default(),
             selected_pawn_ids: default(),
             selection_start: None,
-            buildings,
-            pawns,
+            buildings: MemKeep::new(),
+            pawns: MemKeep::new(),
             camera_pos: vec2(40, 70), // nonzero so we notice offset issues without having to pan
             commands: default(),
             now_secs: 0.0,
@@ -93,7 +98,7 @@ impl G {
             inputs: default(),
             keymap: default_keybindings(),
             speed: 1,
-            tilemap: Tilemap::testmap(vec2(64, 48)),
+            tilemap: Tilemap::new(size),
             ui: Ui::new(),
             viewport_size: vec2(0, 0), // real value will be set by webshell.
             _rng: RefCell::new(ChaCha8Rng::seed_from_u64(12345678)),
@@ -171,6 +176,10 @@ impl G {
             Tile::Water => false,
             Tile::Block => false,
         }
+    }
+
+    pub fn spawn(&self, pawn: Pawn) -> Id{
+        self.pawns.insert(pawn)
     }
 
     /// Pawn with given Id, if any.

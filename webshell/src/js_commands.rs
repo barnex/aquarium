@@ -74,5 +74,5 @@ fn save_reload(state: &G) {
 
 // reset gamestate command
 fn reset(state: &mut G) {
-    *state = G::new();
+    *state = G::test_world();
 }

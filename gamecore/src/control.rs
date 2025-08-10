@@ -119,7 +119,7 @@ fn draw_on_map(g: &mut G) {
             Tool::Tile(mat) => g.tilemap.set(g.mouse_tile(), mat),
             Tool::Pawn(typ) => {
                 if g.inputs.just_pressed(K_MOUSE1) {
-                    g.pawns.insert(Pawn::new(typ, g.mouse_tile()));
+                    g.spawn(Pawn::new(typ, g.mouse_tile()));
                 }
             }
             Tool::Building(typ) => {
