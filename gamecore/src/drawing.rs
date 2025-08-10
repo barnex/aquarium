@@ -78,6 +78,7 @@ fn cursor_sprite(g: &G) -> Sprite {
 }
 
 fn draw_selection(g: &G, out: &mut Out) -> Option<()> {
+    // 🖱️ Selection rectangle, if dragging mouse
     if let Some(start) = g.selection_start {
         let end = g.mouse_position_world();
 
@@ -85,11 +86,12 @@ fn draw_selection(g: &G, out: &mut Out) -> Option<()> {
         let max = start.zip_with(end, i32::max);
         let sel = Bounds2D::new(min, max);
 
-        out.push_rect(L_SPRITES, Rectangle::new(sel.translated(-g.camera_pos), RGBA::BLUE).with_fill(RGB::BLUE.with_alpha(64)));
+        out.push_rect(L_SPRITES+1, Rectangle::new(sel.translated(-g.camera_pos), RGBA::BLUE).with_fill(RGB::BLUE.with_alpha(64)));
     }
 
+    // 🦀 Selected pawns
     for pawn in g.selected_pawns() {
-        out.push_rect(L_SPRITES, Rectangle::new(pawn.bounds().translated(-g.camera_pos), RGBA::BLUE).with_fill(RGB::BLUE.with_alpha(64)));
+        out.push_rect(L_SPRITES+1, Rectangle::new(pawn.bounds().translated(-g.camera_pos), RGBA::BLUE).with_fill(RGB::BLUE.with_alpha(64)));
     }
     OK
 }
