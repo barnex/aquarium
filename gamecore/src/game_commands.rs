@@ -18,6 +18,7 @@ impl G {
         match cmd.trim().split_ascii_whitespace().collect_vec().as_slice() {
             &["pause"] => self.cmd_pause_or_resume(),
             &["tick"] => self.cmd_tick(),
+            &["toggle_ui"] => Ok(toggle(&mut self.ui.hidden)),
             &["show_walkable"] => Ok(toggle(&mut self.debug.show_walkable)),
             &["show_buildable"] => Ok(toggle(&mut self.debug.show_buildable)),
             &["show_home"] => Ok(toggle(&mut self.debug.show_home)),

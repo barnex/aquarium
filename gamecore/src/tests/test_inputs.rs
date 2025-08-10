@@ -2,6 +2,11 @@
 
 use crate::prelude::*;
 
+pub fn tick(g: &mut G) {
+    let mut out = Out::default();
+    g.tick(&mut out);
+}
+
 /// Synthetic click on a tile's position.
 pub fn left_click_tile(g: &mut G, tile: vec2i16) {
     let world_pos_pixels = tile.pos();

@@ -3,6 +3,7 @@ use std::iter;
 use super::internal::*;
 
 pub struct Ui {
+    pub hidden: bool,
     pub active_tool: Tool,
 }
 
@@ -17,17 +18,20 @@ pub enum Tool {
 
 impl Ui {
     pub fn new() -> Self {
-        Self { active_tool: Tool::Pointer }
+        Self { hidden: false, active_tool: Tool::Pointer }
     }
 
     pub fn update_and_draw(&mut self, inputs: &mut Inputs, out: &mut Out) {
+        if self.hidden {
+            return;
+        }
+
         self.menu_ui(inputs, out);
 
         // Right-click on map deselects and switches to pointer.
-        if inputs.just_pressed(K_MOUSE2){
+        if inputs.just_pressed(K_MOUSE2) {
             self.active_tool = Tool::Pointer;
         }
-
     }
 
     fn menu_ui(&mut self, inputs: &mut Inputs, out: &mut Out) {
@@ -35,7 +39,7 @@ impl Ui {
             .chain(Tile::all().map(|typ| (Tool::Tile(typ), typ.sprite())))
             .chain(PawnTyp::all().map(|typ| (Tool::Pawn(typ), typ.sprite())))
             .chain(BuildingTyp::all().map(|typ| (Tool::Building(typ), typ.sprite())))
-            .chain(ResourceTyp::all().map(|typ|(Tool::Resource(typ), typ.sprite())));
+            .chain(ResourceTyp::all().map(|typ| (Tool::Resource(typ), typ.sprite())));
 
         let margin = 3;
         Palette {

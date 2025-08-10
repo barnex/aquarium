@@ -1,30 +1,25 @@
 //! Testing approach.
-//! 
+//!
 //! Ui interaction (clicking menus etc) is assumed to work -- any breakage will be immediately obvious.
-//! 
-use std::sync::OnceLock;
-
+//!
 use crate::prelude::*;
 use googletest::prelude::*;
 
-mod test_setup;
 mod test_inputs;
-use test_setup::*;
+mod test_setup;
 use test_inputs::*;
-
+use test_setup::*;
 
 // Click a pawn to select it, if in Pointer mode.
 #[gtest]
-fn pointer_mode_click_selects_pawn(){
-	let mut g = small_world();
+fn pointer_mode_click_selects_pawn() {
+    let mut g = small_world();
 
-	let pos = vec2(12, 13);
-	let crab1 = g.spawn(Pawn::new(PawnTyp::Crablet, pos));
+    let pos = vec2(12, 13);
+    let crab1 = g.spawn(Pawn::new(PawnTyp::Crablet, pos));
+    let _crab2 = g.spawn(Pawn::new(PawnTyp::Crablet, pos + 3));
 
-	left_click_tile(&mut g, pos);
-	g.tick(&mut default());
-	assert_that!(g.frame, eq(1));
-
-	//verify_that!(g.selected_pawn_ids().collect_vec(), unordered_elements_are!([eq(&crab1)]));
-	expect_eq!(g.selected_pawn_ids().sorted().collect_vec(), vec![crab1]);
+    left_click_tile(&mut g, pos);
+    tick(&mut g);
+    expect_eq!(g.selected_pawn_ids().sorted().collect_vec(), vec![crab1]);
 }
