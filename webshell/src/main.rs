@@ -83,9 +83,6 @@ async fn start() -> JsResult<()> {
 
         state.tick(now_secs(), input_events.borrow_mut().drain(..), &mut out);
 
-        ctx.clear_rect(0.0, 0.0, canvas.width().as_(), canvas.height().as_());
-        res.poll();
-
         draw(&canvas, &ctx, &mut res, &out);
 
         get_element_by_id::<HtmlElement>("debug").set_inner_text(&out.debug);
@@ -175,7 +172,10 @@ fn request_animation_frame(anim_loop_clone: &Rc<RefCell<Option<Closure<dyn FnMut
 }
 
 fn draw(canvas: &HtmlCanvasElement, ctx: &CanvasRenderingContext2d, res: &mut Resources, out: &Out) {
+    res.poll(); // 👈 Allow newly loaded images to be used.
+
     ctx.set_image_smoothing_enabled(false); // crisp, pixellated sprites
+    ctx.clear_rect(0.0, 0.0, canvas.width().as_(), canvas.height().as_());
 
     // Draw layers starting from 0 for correct Z-ordering.
     for Layer { sprites, lines, rectangles } in &out.layers {
