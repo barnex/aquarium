@@ -7,8 +7,10 @@ use googletest::prelude::*;
 
 mod test_inputs;
 mod test_setup;
+mod headless_renderer;
 use test_inputs::*;
 use test_setup::*;
+use headless_renderer::*;
 
 // Click a pawn to select it, if in Pointer mode.
 #[gtest]
@@ -34,6 +36,8 @@ fn click_selects_pawn() {
     // click on other pawn
     tick(g, click_tile(pos2));
     expect_eq!(g.selected_pawn_ids().sorted().collect_vec(), vec![crab2].sorted(), "clicked pawn should be selected");
+
+    screenshot(g);
 
     // deselect by clicking elsewhere
     tick(g, click_tile(pos2 + 12));
