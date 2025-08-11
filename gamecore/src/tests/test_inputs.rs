@@ -4,7 +4,8 @@ use crate::prelude::*;
 
 pub fn tick(g: &mut G, inputs: impl IntoIterator<Item = InputEvent>) {
     let mut out = Out::default();
-    g.tick(inputs, &mut out);
+    let now = g.now_secs + 0.016;
+    g.tick(now, inputs, &mut out);
 }
 
 // /// Synthetic click on a tile's position.

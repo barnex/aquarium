@@ -78,12 +78,10 @@ async fn start() -> JsResult<()> {
 
     // 🌍 Main loop
     animation_loop(move |ctx| {
-        state.now_secs = now_secs();
-        state.viewport_size = vec2(canvas.width(), canvas.height());
-        //record_input_events(&state.keymap, &mut state.inputs, &input_events);
-
         out.clear();
-        state.tick(input_events.borrow_mut().drain(..), &mut out);
+        out.viewport_size = vec2(canvas.width(), canvas.height());
+
+        state.tick(now_secs(), input_events.borrow_mut().drain(..), &mut out);
 
         ctx.clear_rect(0.0, 0.0, canvas.width().as_(), canvas.height().as_());
         res.poll();

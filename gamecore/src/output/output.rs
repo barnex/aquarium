@@ -19,6 +19,7 @@ pub const L_UI_FG: u8 = 4;
 /// Sent to the browser who will render it.
 #[derive(Default, Debug, PartialEq, Eq)]
 pub struct Out {
+    pub viewport_size: vec2u,
     pub layers: Vec<Layer>,
     pub debug: String,
 }

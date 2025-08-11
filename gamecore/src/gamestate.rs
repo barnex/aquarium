@@ -106,9 +106,14 @@ impl G {
         }
     }
 
-    pub fn tick(&mut self, events: impl Iterator<Item=InputEvent>, out: &mut Out) {
+    /// ⏱️ Advance the game state one frame:
+    ///   * Apply given input events and new wall time `now_secs`.
+    ///   * Advance the state one tick.
+    ///   * Render state to `out` (scenegraph).
+    pub fn tick(&mut self, now_secs: f64, events: impl Iterator<Item = InputEvent>, out: &mut Out) {
+        self.now_secs = now_secs;
         self.inputs.tick(&self.keymap, events);
-        
+
         self.update_fps(); // 👈 FPS is gamespeed independent
         self.exec_commands(); // 👈 exec commands even when paused (speed 0)
 
