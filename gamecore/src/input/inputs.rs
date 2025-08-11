@@ -11,7 +11,6 @@ pub struct Inputs {
     buttons_down: HashSet<Button>,
     buttons_released: HashSet<Button>,
 
-
     mouse_position: vec2i,
     mouse_wheel: f32,
 }
@@ -69,6 +68,16 @@ impl Inputs {
     /// Useful when cursor is not grabbed.
     pub fn mouse_position(&self) -> vec2i {
         self.mouse_position
+    }
+
+    pub fn record_event(&mut self, keymap: &Keymap, event: InputEvent) {
+        match event {
+            InputEvent::Key { button, direction: KeyDir::Down } => self.record_press(keymap, button),
+            InputEvent::Key { button, direction: KeyDir::Up } => self.record_release(keymap, button),
+            InputEvent::MouseMove { position } => {
+                self.record_mouse_position(position);
+            }
+        }
     }
 
     /// Record that this button was just pressed.

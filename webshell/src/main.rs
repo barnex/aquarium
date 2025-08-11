@@ -167,46 +167,12 @@ where
 
 // take input events from queue and update Inputs state accordingly
 fn record_input_events(keymap: &Keymap, inputs: &mut Inputs, events: &Shared<VecDeque<InputEvent>>) {
+    // 🪲 TODO: fuse into single tick(events)
     inputs.start_next_frame();
-
     for event in events.borrow_mut().drain(..) {
-        use InputEvent::*;
-        match event {
-            KeyDown(event) => {
-                if let Ok(key) = Str16::from_str(&event.key()) {
-                    inputs.record_press(keymap, Button(key))
-                }
-            }
-            KeyUp(event) => {
-                if let Ok(key) = Str16::from_str(&event.key()) {
-                    inputs.record_release(keymap, Button(key))
-                }
-            }
-            MouseDown(event) => {
-                match event.button() {
-                    0 => inputs.record_press(keymap, K_MOUSE1),
-                    2 => inputs.record_press(keymap, K_MOUSE2),
-                    _ => (),
-                }
-                // ⚠️ use `offset_x` for relative position inside canvas
-                inputs.record_mouse_position(vec2(event.offset_x().as_(), event.offset_y().as_()));
-            }
-            MouseUp(event) => {
-                match event.button() {
-                    0 => inputs.record_release(keymap, K_MOUSE1),
-                    2 => inputs.record_release(keymap, K_MOUSE2),
-                    _ => (),
-                }
-
-                // ⚠️ use `offset_x` for relative position inside canvas
-                inputs.record_mouse_position(vec2(event.offset_x().as_(), event.offset_y().as_()));
-            }
-            MouseMove(event) => {
-                // ⚠️ use `offset_x` for relative position inside canvas
-                inputs.record_mouse_position(vec2(event.offset_x().as_(), event.offset_y().as_()));
-            }
-        }
+        inputs.record_event(keymap, event);
     }
+
 }
 
 fn request_animation_frame(anim_loop_clone: &Rc<RefCell<Option<Closure<dyn FnMut()>>>>) -> i32 {
