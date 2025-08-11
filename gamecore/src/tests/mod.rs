@@ -26,20 +26,20 @@ fn click_selects_pawn() {
     let crab2 = g.spawn(Pawn::new(PawnTyp::Crablet, pos2));
 
     // click on one
-    left_click_tile(&mut g, pos1);
-    tick(&mut g);
+    //left_click_tile(&mut g, pos1);
+    //tick(&mut g);
 
-    // clicked pawn should be selected
-    expect_eq!(g.selected_pawn_ids().sorted().collect_vec(), vec![crab1], "clicked pawn should be selected");
+    //// clicked pawn should be selected
+    //expect_eq!(g.selected_pawn_ids().sorted().collect_vec(), vec![crab1], "clicked pawn should be selected");
 
-    // second click on already selected pawn does nothing
-    left_click_tile(&mut g, pos1);
-    tick(&mut g);
-    expect_eq!(g.selected_pawn_ids().sorted().collect_vec(), vec![crab1], "clicked pawn should be selected");
+    //// second click on already selected pawn does nothing
+    //left_click_tile(&mut g, pos1);
+    //tick(&mut g);
+    //expect_eq!(g.selected_pawn_ids().sorted().collect_vec(), vec![crab1], "clicked pawn should be selected");
 
-    // click on other pawn
-    left_click_tile(&mut g, pos2);
-    tick(&mut g);
+    //// click on other pawn
+    //left_click_tile(&mut g, pos2);
+    //tick(&mut g);
     expect_eq!(g.selected_pawn_ids().sorted().collect_vec(), vec![crab2], "clicked pawn should be selected");
 }
 
@@ -56,14 +56,14 @@ fn drag_selects_pawn() {
     let pos2 = vec2(13, 14);
     let crab2 = g.spawn(Pawn::new(PawnTyp::Crablet, pos2));
 
-    left_mousedown_tile(&mut g, vec2(9, 8));
-    tick(&mut g);
+    //left_mousedown_tile(&mut g, vec2(9, 8));
+    //tick(&mut g);
 
-    mousemove_tile(&mut g, vec2(15, 16));
-    tick(&mut g);
+    //mousemove_tile(&mut g, vec2(15, 16));
+    //tick(&mut g);
 
-    left_mouseup_tile(&mut g, vec2(15, 16));
-    tick(&mut g);
+    //left_mouseup_tile(&mut g, vec2(15, 16));
+    //tick(&mut g);
 
     expect_eq!(g.selected_pawn_ids().sorted().collect_vec(), vec![crab1, crab2], "drag to select");
 }

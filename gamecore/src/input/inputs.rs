@@ -19,7 +19,14 @@ impl Inputs {
     // To be called on each frame to advance time.
     // "just pressed" evolves to "is_down".
     // "released" gets forgotten.
-    pub fn start_next_frame(&mut self) {
+    pub fn tick(&mut self, keymap: &Keymap, events: impl Iterator<Item = InputEvent>) {
+        self.start_next_frame();
+        for event in events {
+            self.record_event(keymap, event);
+        }
+    }
+
+    fn start_next_frame(&mut self) {
         // Note: NOT clearing bottons_down.
         self.buttons_pressed.clear();
         self.buttons_released.clear();
@@ -58,6 +65,7 @@ impl Inputs {
         self.buttons_released.iter().cloned()
     }
 
+    /// Consume a button: it no longer counts as pressed.
     pub fn consume(&mut self, but: Button) {
         self.buttons_down.remove(&but);
         self.buttons_pressed.remove(&but);
@@ -70,7 +78,7 @@ impl Inputs {
         self.mouse_position
     }
 
-    pub fn record_event(&mut self, keymap: &Keymap, event: InputEvent) {
+    fn record_event(&mut self, keymap: &Keymap, event: InputEvent) {
         match event {
             InputEvent::Key { button, direction: KeyDir::Down } => self.record_press(keymap, button),
             InputEvent::Key { button, direction: KeyDir::Up } => self.record_release(keymap, button),
@@ -81,7 +89,7 @@ impl Inputs {
     }
 
     /// Record that this button was just pressed.
-    pub fn record_press(&mut self, keymap: &Keymap, button: Button) {
+    fn record_press(&mut self, keymap: &Keymap, button: Button) {
         let button = keymap.map(button);
         if !self.buttons_down.contains(&button) {
             self.buttons_pressed.insert(button);
@@ -90,20 +98,14 @@ impl Inputs {
     }
 
     /// Record that this button was just released.
-    pub fn record_release(&mut self, keymap: &Keymap, button: Button) {
+    fn record_release(&mut self, keymap: &Keymap, button: Button) {
         let button = keymap.map(button);
         self.buttons_released.insert(button);
         self.buttons_down.remove(&button);
     }
 
-    pub fn record_mouse_position(&mut self, pos: vec2i) {
+    fn record_mouse_position(&mut self, pos: vec2i) {
         self.mouse_position = pos
-    }
-
-    fn make_button(&mut self, key: impl Debug) -> Button {
-        let mut buf = Str16::default();
-        write!(&mut buf, "{key:?}").inspect_err(|_| log::error!("input too long: {key:?}")).swallow_err();
-        Button(buf)
     }
 
     // The relative mouse wheel movement since last tick.

@@ -80,13 +80,10 @@ async fn start() -> JsResult<()> {
     animation_loop(move |ctx| {
         state.now_secs = now_secs();
         state.viewport_size = vec2(canvas.width(), canvas.height());
-        record_input_events(&state.keymap, &mut state.inputs, &input_events);
+        //record_input_events(&state.keymap, &mut state.inputs, &input_events);
 
         out.clear();
-        state.tick(&mut out);
-
-        //out.clear();
-        //state.render();
+        state.tick(input_events.borrow_mut().drain(..), &mut out);
 
         ctx.clear_rect(0.0, 0.0, canvas.width().as_(), canvas.height().as_());
         res.poll();
@@ -166,14 +163,14 @@ where
 }
 
 // take input events from queue and update Inputs state accordingly
-fn record_input_events(keymap: &Keymap, inputs: &mut Inputs, events: &Shared<VecDeque<InputEvent>>) {
-    // 🪲 TODO: fuse into single tick(events)
-    inputs.start_next_frame();
-    for event in events.borrow_mut().drain(..) {
-        inputs.record_event(keymap, event);
-    }
-
-}
+// fn record_input_events(keymap: &Keymap, inputs: &mut Inputs, events: &Shared<VecDeque<InputEvent>>) {
+//     // 🪲 TODO: fuse into single tick(events)
+//     inputs.start_next_frame();
+//     for event in events.borrow_mut().drain(..) {
+//         inputs.record_event(keymap, event);
+//     }
+//
+// }
 
 fn request_animation_frame(anim_loop_clone: &Rc<RefCell<Option<Closure<dyn FnMut()>>>>) -> i32 {
     window().request_animation_frame(anim_loop_clone.borrow().as_ref().unwrap().as_ref().unchecked_ref()).unwrap()

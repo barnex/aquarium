@@ -106,7 +106,9 @@ impl G {
         }
     }
 
-    pub fn tick(&mut self, out: &mut Out) {
+    pub fn tick(&mut self, events: impl Iterator<Item=InputEvent>, out: &mut Out) {
+        self.inputs.tick(&self.keymap, events);
+        
         self.update_fps(); // 👈 FPS is gamespeed independent
         self.exec_commands(); // 👈 exec commands even when paused (speed 0)
 
