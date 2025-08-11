@@ -14,7 +14,7 @@ use test_setup::*;
 #[gtest]
 fn click_selects_pawn() {
     // given:
-    let mut g = small_world();
+    let g = &mut small_world();
     g.ui.active_tool = Tool::Pointer;
 
     // add two pawns
@@ -24,24 +24,26 @@ fn click_selects_pawn() {
     let pos2 = vec2(14, 15);
     let crab2 = g.spawn(Pawn::new(PawnTyp::Crablet, pos2));
 
-    tick(&mut g, click_tile(pos1));
+    tick(g, click_tile(pos1));
     expect_eq!(g.selected_pawn_ids().sorted().collect_vec(), vec![crab1] /*TODO: .sorted()*/, "clicked pawn should be selected");
 
-    //// second click on already selected pawn does nothing
-    //left_click_tile(&mut g, pos1);
-    //tick(&mut g);
-    //expect_eq!(g.selected_pawn_ids().sorted().collect_vec(), vec![crab1], "clicked pawn should be selected");
+    // second click on already selected pawn does nothing
+    tick(g, click_tile(pos1));
+    expect_eq!(g.selected_pawn_ids().sorted().collect_vec(), vec![crab1], "clicked pawn should be selected");
 
-    //// click on other pawn
-    //left_click_tile(&mut g, pos2);
-    //tick(&mut g);
+    // click on other pawn
+    tick(g, click_tile(pos2));
     expect_eq!(g.selected_pawn_ids().sorted().collect_vec(), vec![crab2], "clicked pawn should be selected");
+
+    // deselect by clicking elsewhere
+    tick(g, click_tile(pos2 + 12));
+    expect_eq!(g.selected_pawn_ids().sorted().collect_vec(), vec![], "should de-select");
 }
 
 #[gtest]
+/// Select pawns by dragging a rectangle.
 fn drag_selects_pawn() {
-    let mut g = small_world();
-    g.ui.hidden = true; // don't accidentally click on UI
+    let g = &mut small_world();
     g.ui.active_tool = Tool::Pointer;
 
     // add two pawns
@@ -51,14 +53,9 @@ fn drag_selects_pawn() {
     let pos2 = vec2(13, 14);
     let crab2 = g.spawn(Pawn::new(PawnTyp::Crablet, pos2));
 
-    //left_mousedown_tile(&mut g, vec2(9, 8));
-    //tick(&mut g);
-
-    //mousemove_tile(&mut g, vec2(15, 16));
-    //tick(&mut g);
-
-    //left_mouseup_tile(&mut g, vec2(15, 16));
-    //tick(&mut g);
+    tick(g, [mouse_move_tile((9, 9))]);
+    tick(g, [mouse_down()]);
+    tick(g, [mouse_move_tile((15, 16)), mouse_up()]);
 
     expect_eq!(g.selected_pawn_ids().sorted().collect_vec(), vec![crab1, crab2], "drag to select");
 }
