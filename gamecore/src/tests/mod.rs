@@ -25,19 +25,19 @@ fn click_selects_pawn() {
     let crab2 = g.spawn(Pawn::new(PawnTyp::Crablet, pos2));
 
     tick(g, click_tile(pos1));
-    expect_eq!(g.selected_pawn_ids().sorted().collect_vec(), vec![crab1] /*TODO: .sorted()*/, "clicked pawn should be selected");
+    expect_eq!(g.selected_pawn_ids().sorted().collect_vec(), vec![crab1].sorted(), "clicked pawn should be selected");
 
     // second click on already selected pawn does nothing
     tick(g, click_tile(pos1));
-    expect_eq!(g.selected_pawn_ids().sorted().collect_vec(), vec![crab1], "clicked pawn should be selected");
+    expect_eq!(g.selected_pawn_ids().sorted().collect_vec(), vec![crab1].sorted(), "clicked pawn should be selected");
 
     // click on other pawn
     tick(g, click_tile(pos2));
-    expect_eq!(g.selected_pawn_ids().sorted().collect_vec(), vec![crab2], "clicked pawn should be selected");
+    expect_eq!(g.selected_pawn_ids().sorted().collect_vec(), vec![crab2].sorted(), "clicked pawn should be selected");
 
     // deselect by clicking elsewhere
     tick(g, click_tile(pos2 + 12));
-    expect_eq!(g.selected_pawn_ids().sorted().collect_vec(), vec![], "should de-select");
+    expect_eq!(g.selected_pawn_ids().sorted().collect_vec(), vec![].sorted(), "should de-select");
 }
 
 #[gtest]
@@ -57,5 +57,5 @@ fn drag_selects_pawn() {
     tick(g, [mouse_down()]);
     tick(g, [mouse_move_tile((15, 16)), mouse_up()]);
 
-    expect_eq!(g.selected_pawn_ids().sorted().collect_vec(), vec![crab1, crab2], "drag to select");
+    expect_eq!(g.selected_pawn_ids().sorted().collect_vec(), vec![crab1, crab2].sorted(), "drag to select");
 }
