@@ -21,8 +21,8 @@ pub(crate) fn init_test_logging() {
 }
 
 /// A small test world with some features.
-pub(crate) fn small_world() -> G {
-    let g = test_world(vec2(64, 32));
+pub(crate) fn small_world(name: &str) -> G {
+    let g = test_world(vec2(64, 32), name);
 
     for (x, y) in cross(2..5, 3..7) {
         g.tilemap.set(vec2(x, y), Tile::Water);
@@ -36,9 +36,10 @@ pub(crate) fn small_world() -> G {
 
 /// Base test world.
 /// Test settings enabled. No features.
-fn test_world(size: vec2u16) -> G {
+fn test_world(size: vec2u16, name: &str) -> G {
     init_test_logging();
     let mut g = G::new(size);
+    g.name = name.into();
     g.ui.hidden = true;
     g
 }

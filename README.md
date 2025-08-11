@@ -35,6 +35,9 @@ miniserve --port 8001 webshell/dist
 
 ## Test
 
+
+ cargo ltest -p gamecore -- --nocapture
+
  cargo +nightly miri test -p memkeep
 
 ### Trunk tweaks

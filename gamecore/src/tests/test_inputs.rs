@@ -1,6 +1,7 @@
 //! Synthetic input events for driving tests.
 
 use crate::prelude::*;
+use super::headless_renderer::screenshot;
 
 /// Synthetically advance game state one tick, with given fake inputs happening right before the tick.
 /// Time advances 16ms (~60 FPS)
@@ -20,6 +21,9 @@ pub fn tick(g: &mut G, inputs: impl IntoIterator<Item = InputEvent>) {
     out.viewport_size = vec2(480, 320);
     let now = g.now_secs + 0.016;
     g.tick(now, inputs.into_iter(), &mut out);
+
+    screenshot(g, &out)
+
 }
 
 pub fn click_tile(tile: vec2i16) -> impl IntoIterator<Item = InputEvent> {

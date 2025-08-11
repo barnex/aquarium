@@ -5,6 +5,7 @@ use crate::prelude::*;
 #[derive(Serialize, Deserialize)]
 pub struct G {
     // 🌍 game world
+    pub name: String,
     pub tilemap: Tilemap,
     pub resources: ResourceMap,
     pub buildings: MemKeep<Building>,
@@ -80,6 +81,7 @@ impl G {
 
     pub fn new(size: vec2u16) -> Self {
         Self {
+            name: "".into(),
             contextual_action: Action::None,
             resources: default(),
             selected_pawn_ids: default(),
