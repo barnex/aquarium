@@ -39,8 +39,6 @@ pub struct G {
     pub keymap: Keymap,
 
     // 📺 output/rendering
-    /// Screen/canvas size in pixels.
-    pub viewport_size: vec2u,
     /// Camera position in world coordinates.
     pub camera_pos: vec2i,
 
@@ -100,7 +98,6 @@ impl G {
             speed: 1,
             tilemap: Tilemap::new(size),
             ui: Ui::new(),
-            viewport_size: vec2(0, 0), // real value will be set by webshell.
             _rng: RefCell::new(ChaCha8Rng::seed_from_u64(12345678)),
             debug: default(),
         }
@@ -251,7 +248,6 @@ impl G {
     fn output_debug(&mut self, debug: &mut String) {
         writeln!(debug, "frame: {}, now: {:.04}s, FPS: {:.01}", self.frame, self.now_secs, 1.0 / self.dt_smooth).unwrap();
         writeln!(debug, "camera {:?}", self.camera_pos).unwrap();
-        writeln!(debug, "viewport_size {:?}", self.viewport_size).unwrap();
         //writelnt.debug, "buildings: {}, pawns: {}", self.buildings.len(), self.pawns.len()).unwrap();
         //writeln!(debug, "sprites {:?}", self.out.layers.iter().map(|l| l.sprites.len()).sum::<usize>()).unwrap();
         writeln!(debug, "down {:?}", self.inputs.iter_is_down().sorted().collect_vec()).unwrap();

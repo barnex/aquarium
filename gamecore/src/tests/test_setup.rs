@@ -22,7 +22,7 @@ pub(crate) fn init_test_logging() {
 
 /// A small test world with some features.
 pub(crate) fn small_world() -> G {
-    let mut g = test_world(vec2(64, 32));
+    let g = test_world(vec2(64, 32));
 
     for (x, y) in cross(2..5, 3..7) {
         g.tilemap.set(vec2(x, y), Tile::Water);
@@ -31,7 +31,6 @@ pub(crate) fn small_world() -> G {
         g.tilemap.set(vec2(x, y), Tile::Block);
     }
     g.tilemap.set(vec2(4, 4), Tile::Sand);
-    g.viewport_size = vec2(480, 320);
     g
 }
 

@@ -15,7 +15,6 @@ use test_setup::*;
 fn click_selects_pawn() {
     // given:
     let mut g = small_world();
-    g.ui.hidden = true; // don't accidentally click on UI
     g.ui.active_tool = Tool::Pointer;
 
     // add two pawns
@@ -25,12 +24,8 @@ fn click_selects_pawn() {
     let pos2 = vec2(14, 15);
     let crab2 = g.spawn(Pawn::new(PawnTyp::Crablet, pos2));
 
-    // click on one
-    //left_click_tile(&mut g, pos1);
-    //tick(&mut g);
-
-    //// clicked pawn should be selected
-    //expect_eq!(g.selected_pawn_ids().sorted().collect_vec(), vec![crab1], "clicked pawn should be selected");
+    tick(&mut g, click_tile(pos1));
+    expect_eq!(g.selected_pawn_ids().sorted().collect_vec(), vec![crab1] /*TODO: .sorted()*/, "clicked pawn should be selected");
 
     //// second click on already selected pawn does nothing
     //left_click_tile(&mut g, pos1);

@@ -3,7 +3,7 @@ use crate::prelude::*;
 
 impl G {
     pub fn draw_world(&self, out: &mut Out) {
-        debug_assert!(self.viewport_size != vec2::ZERO);
+        debug_assert!(out.viewport_size != vec2::ZERO);
         // Note: ⚠️ UI already rendered (may consume input events)
 
         let g = self;
