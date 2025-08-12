@@ -68,7 +68,8 @@ fn drag_selects_pawn() {
 
     tick(g, [mouse_move_tile((9, 9))]);
     tick(g, [mouse_down()]);
-    tick(g, [mouse_move_tile((15, 16)), mouse_up()]);
+    tick(g, [mouse_move_tile((15, 16))]);
+    tick(g, [mouse_up()]);
 
     expect_eq!(g.selected_pawn_ids().sorted().collect_vec(), vec![crab1, crab2].sorted(), "drag to select");
 }

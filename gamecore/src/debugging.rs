@@ -5,6 +5,7 @@ pub struct DebugOpts {
     pub show_walkable: bool,
     pub show_buildable: bool,
     pub show_home: bool,
+    pub draw_mouse: bool,
 }
 
 pub(super) fn draw_debug_overlay(g: &G, out: &mut Out) {
@@ -16,6 +17,9 @@ pub(super) fn draw_debug_overlay(g: &G, out: &mut Out) {
     }
     if g.debug.show_home {
         draw_home_overlay(g, out);
+    }
+    if g.debug.draw_mouse {
+        out.draw_sprite(g, L_UI_FG + 1, sprite!("pointer"), g.mouse_position_world());
     }
 }
 

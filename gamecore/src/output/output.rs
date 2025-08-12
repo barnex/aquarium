@@ -65,8 +65,14 @@ impl Out {
         self.debug.clear();
     }
 
-    pub fn push_sprite(&mut self, layer: u8, sprite: Sprite, pos: vec2i) {
-        self.layer(layer).sprites.push(DrawSprite::at_pos(sprite, pos));
+    /// Draw sprite in world coordinates (i.e. taking into account camera).
+    pub fn draw_sprite(&mut self, g: &G, layer: u8, sprite: Sprite, world_pos: vec2i) {
+        self.layer(layer).sprites.push(DrawSprite::at_pos(sprite, world_pos - g.camera_pos));
+    }
+
+    /// Draw sprite in screen coordinates (i.e. ignoring camera).
+    pub fn draw_sprite_screen(&mut self, layer: u8, sprite: Sprite, screen_pos: vec2i) {
+        self.layer(layer).sprites.push(DrawSprite::at_pos(sprite, screen_pos));
     }
 
     pub fn push_sprite_with_size(&mut self, layer: u8, sprite: Sprite, pos: vec2i, dst_size: vec2u8) {

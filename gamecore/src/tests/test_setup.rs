@@ -61,5 +61,6 @@ fn test_world(size: vec2u16, name: &str) -> G {
     let mut g = G::new(size);
     g.name = name.into();
     g.ui.hidden = true;
+    g.debug.draw_mouse = true;
     g
 }
