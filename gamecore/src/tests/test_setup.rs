@@ -1,23 +1,39 @@
+use crate::prelude::*;
+use crate::tests::headless_renderer::render_headless;
+use std::env;
 use std::io::Write as _;
+use std::path::PathBuf;
 use std::sync::OnceLock;
 
-use env_logger::fmt::style::{AnsiColor, Color};
-
-use crate::prelude::*;
-
-static LOGGER_INIT: OnceLock<()> = OnceLock::new();
+static TEST_INIT: OnceLock<()> = OnceLock::new();
 
 /// Initialize `env_logger` for testing.
 /// Idempotent.
 pub(crate) fn init_test_logging() {
-    LOGGER_INIT.get_or_init(|| {
+    TEST_INIT.get_or_init(|| {
         env_logger::builder()
             .is_test(true) // nicer formatting for `cargo test`
             .filter_level(log::LevelFilter::Trace)
             .write_style(env_logger::WriteStyle::Always)
             .format(|f, record| writeln!(f, "[{}] {}", record.level(), record.args()))
             .init();
+        log::info!("wd: {:?}", env::current_dir());
     });
+}
+
+/// Test Output directory for given `test_name!()`
+pub(crate) fn test_output_dir(test_name: &str) -> PathBuf {
+    PathBuf::from(format!("../test_output/{test_name}/",))
+}
+
+/// Render gamestate (headless), save under `test_output/<test_name>/frame_1234.png`.
+pub fn screenshot(g: &mut G, out: &Out) {
+    let fname = test_output_dir(&g.name).join(format!("frame_{:04}.png", g.frame));
+    if let Some(dir) = fname.parent() {
+        std::fs::create_dir_all(dir).log_err().swallow_err();
+    }
+    render_headless(&out, &fname).expect("save png");
+    log::info!("wrote {fname:?}");
 }
 
 /// A small test world with some features.

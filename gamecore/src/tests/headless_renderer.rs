@@ -9,18 +9,6 @@ use std::{
 use tiny_skia::{Color, Pixmap, PixmapPaint, Transform};
 use vector::*;
 
-pub fn screenshot(g: &mut G, out: &Out) {
-    //log::info!("{:?}", env::current_dir());
-    //let mut out = Out::default();
-    //out.viewport_size = vec2(480, 320);
-    //g.tick(g.now_secs, [].into_iter(), &mut out);
-    let fname = PathBuf::from(format!("../test_output/{}/{:04}.png", g.name, g.frame));
-    if let Some(dir) = fname.parent() {
-        std::fs::create_dir_all(dir).log_err().swallow_err();
-    }
-    render_headless(&out, &fname).expect("save png");
-    log::info!("wrote {fname:?}");
-}
 
 fn res_get(sprite: &Sprite) -> Pixmap {
     let file = format!("../assets/{}.png", sprite.file.as_str());

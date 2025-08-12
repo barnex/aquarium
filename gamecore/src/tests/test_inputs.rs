@@ -1,7 +1,6 @@
 //! Synthetic input events for driving tests.
-
+use super::screenshot;
 use crate::prelude::*;
-use super::headless_renderer::screenshot;
 
 /// Synthetically advance game state one tick, with given fake inputs happening right before the tick.
 /// Time advances 16ms (~60 FPS)
