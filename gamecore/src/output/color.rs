@@ -36,6 +36,12 @@ impl RGB {
     }
 }
 
+impl Into<[u8; 3]> for RGB {
+    fn into(self) -> [u8; 3] {
+        self.0
+    }
+}
+
 impl RGBA {
     pub const BLACK: Self = Self([0, 0, 0, 255]);
     pub const RED: Self = Self([255, 0, 0, 255]);
@@ -67,5 +73,11 @@ impl RGBA {
     pub fn with_alpha(&self, a: u8) -> RGBA {
         let RGBA([r, g, b, _]) = *self;
         RGBA([r, g, b, a])
+    }
+}
+
+impl Into<[u8; 4]> for RGBA {
+    fn into(self) -> [u8; 4] {
+        self.0
     }
 }
