@@ -1,9 +1,9 @@
 use crate::prelude::*;
 use crate::tests::headless_renderer::render_headless;
-use std::env;
 use std::io::Write as _;
 use std::path::PathBuf;
 use std::sync::OnceLock;
+use std::{env, fs};
 
 static TEST_INIT: OnceLock<()> = OnceLock::new();
 
@@ -27,7 +27,8 @@ pub(crate) fn test_output_dir(test_name: &str) -> PathBuf {
 }
 
 /// Render gamestate (headless), save under `test_output/<test_name>/frame_1234.png`.
-pub fn screenshot(g: &mut G, out: &Out) {
+/// Automatically called on `tick`.
+pub(crate) fn screenshot(g: &mut G, out: &Out) {
     let fname = test_output_dir(&g.name).join(format!("frame_{:04}.png", g.frame));
     if let Some(dir) = fname.parent() {
         std::fs::create_dir_all(dir).log_err().swallow_err();
@@ -54,6 +55,9 @@ pub(crate) fn small_world(name: &str) -> G {
 /// Test settings enabled. No features.
 fn test_world(size: vec2u16, name: &str) -> G {
     init_test_logging();
+    let output_dir = test_output_dir(name);
+    log::info!("rm {output_dir:?}"); // cleanup output from previous run.
+    fs::remove_dir_all(output_dir).log_err().swallow_err();
     let mut g = G::new(size);
     g.name = name.into();
     g.ui.hidden = true;
