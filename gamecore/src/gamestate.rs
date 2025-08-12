@@ -26,11 +26,12 @@ pub struct G {
 
     // 🕣 timekeeping
     pub frame: u64,
+    pub tick: u64,
     pub now_secs: f64,
     _prev_secs: f64, // to compute dt
     pub dt: f64,
     pub dt_smooth: f64,
-    pub speed: u32,
+    pub frames_per_tick: u32,
 
     // 🕹️ input events
     #[serde(skip)]
@@ -95,9 +96,10 @@ impl G {
             dt: 1.0 / 60.0, // initial fps guess
             dt_smooth: 1.0 / 60.0,
             frame: 0,
+            tick: 0,
             inputs: default(),
             keymap: default_keybindings(),
-            speed: 1,
+            frames_per_tick: 8,
             tilemap: Tilemap::new(size),
             ui: Ui::new(),
             _rng: RefCell::new(ChaCha8Rng::seed_from_u64(12345678)),
@@ -120,12 +122,10 @@ impl G {
 
         self.control();
 
-        for _ in 0..self.speed {
-            self.frame += 1;
-            if self.frame % 8 == 0 {
-                // 🪲 TODO: time major tick
-                self.tick_once();
-            }
+        self.frame += 1;
+        if self.frame % (self.frames_per_tick as u64) == 0 {
+            // 🪲 TODO: time major tick
+            self.tick_once();
         }
 
         self.draw_world(out);
@@ -136,6 +136,7 @@ impl G {
     }
 
     pub(crate) fn tick_once(&mut self) {
+        self.tick += 1;
         self.tick_pawns();
     }
 

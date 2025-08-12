@@ -73,14 +73,21 @@ fn drag_selects_pawn() {
     expect_eq!(g.selected_pawn_ids().sorted().collect_vec(), vec![crab1, crab2].sorted(), "drag to select");
 }
 
+/// Right-click moves selected pawn to destination.
 #[gtest]
 fn command_pawn_move() {
     let g = &mut small_world(test_name!());
-    let crab = g.spawn(Pawn::new(PawnTyp::Crablet, vec2(6, 7)));
-    g.select_pawn(crab.id);
 
-    tick(g, [mouse_move_tile(crab.tile.get() + 2)]);
+    let start = vec2(6, 7);
+    let crab = g.spawn(Pawn::new(PawnTyp::Crablet, start)).id;
+    g.select_pawn(crab);
+
+    let dst = start + vec2(2, 2);
+    tick(g, [mouse_move_tile(dst)]);
     tick(g, [key_down(K_MOUSE2)]);
     tick(g, [key_up(K_MOUSE2)]);
-    tick_n(g, 20);
+    tick_n(g, 4);
+
+    let pos = g.pawn(crab).unwrap().tile.get();
+    expect_eq!(pos, dst, "pawn moved to destination");
 }

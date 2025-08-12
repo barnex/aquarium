@@ -29,7 +29,7 @@ impl G {
 
     /// pause button: pause or resume (if already paused)
     fn cmd_pause_or_resume(&mut self) -> Result<()> {
-        self.speed = match self.speed {
+        self.frames_per_tick = match self.frames_per_tick {
             0 => 1,
             _ => 0,
         };

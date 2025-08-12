@@ -29,7 +29,7 @@ pub(crate) fn test_output_dir(test_name: &str) -> PathBuf {
 /// Render gamestate (headless), save under `test_output/<test_name>/frame_1234.png`.
 /// Automatically called on `tick`.
 pub(crate) fn screenshot(g: &mut G, out: &Out) {
-    let fname = test_output_dir(&g.name).join(format!("frame_{:04}.png", g.frame));
+    let fname = test_output_dir(&g.name).join(format!("tick_{:04}.png", g.tick));
     if let Some(dir) = fname.parent() {
         std::fs::create_dir_all(dir).log_err().swallow_err();
     }
@@ -62,5 +62,6 @@ fn test_world(size: vec2u16, name: &str) -> G {
     g.name = name.into();
     g.ui.hidden = true;
     g.debug.draw_mouse = true;
+    g.frames_per_tick = 1;
     g
 }

@@ -2,11 +2,8 @@ use crate::*;
 use anyhow::Result;
 use core_util::*;
 use num_traits::AsPrimitive as _;
-use std::{
-    env,
-    path::{Path, PathBuf},
-};
-use tiny_skia::{Color, FillRule, LineCap, LineJoin, Paint, PathBuilder, Pixmap, PixmapPaint, Rect, Stroke, Transform};
+use std::path::Path;
+use tiny_skia::{Color, FillRule, Paint, PathBuilder, Pixmap, PixmapPaint, Rect, Stroke, Transform};
 use vector::*;
 
 fn res_get(sprite: &Sprite) -> Pixmap {
@@ -32,7 +29,7 @@ pub fn render_headless(out: &Out, file: impl AsRef<Path>) -> Result<()> {
             let path = PathBuilder::from_rect(rect);
 
             // --- Fill paint ---
-            let mut fill_paint = Paint::default().with(|fill_paint| {
+            let fill_paint = Paint::default().with(|fill_paint| {
                 let [r, g, b, a] = r.fill.into();
                 fill_paint.set_color_rgba8(r, g, b, a);
                 fill_paint.anti_alias = true;
