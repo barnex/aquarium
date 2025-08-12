@@ -65,7 +65,7 @@ impl G {
             id: default(),
             typ: BuildingTyp::HQ,
             tile: vec2(12, 8),
-            workers: CSet::from_iter([crab]),
+            workers: CSet::from_iter([crab.id]),
         });
 
         let resources = ResourceMap::default();
@@ -74,7 +74,7 @@ impl G {
         resources.insert(vec2(17, 9), ResourceTyp::Rock);
         resources.insert(vec2(15, 12), ResourceTyp::Leaf);
 
-        g.pawns.get(crab).unwrap().home.set(Some(hq));
+        crab.home.set(Some(hq.id));
 
         g
     }
@@ -184,7 +184,7 @@ impl G {
         }
     }
 
-    pub fn spawn(&self, pawn: Pawn) -> Id {
+    pub fn spawn(&self, pawn: Pawn) -> &Pawn {
         log::trace!("spawn {:?} @ tile {}", pawn.typ, pawn.tile);
         self.pawns.insert(pawn)
     }

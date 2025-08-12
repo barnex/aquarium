@@ -70,17 +70,9 @@ impl<T> MemKeep<T> {
         id.and_then(|id| self.get(id))
     }
 
-    pub fn insert_raw(&self, v: T) -> Id {
+    fn insert_without_setting_id(&self, v: T) -> Id {
         let (id, slot) = self._prepare_slot();
         unsafe { slot.insert(v) };
-        //{
-        //    // SAFETY: We just check that the slot is free, so no other pointers exist.
-        //    // debug_assert double-checks this.
-        //    let ptr = unsafe { &mut *slot.value.get() };
-        //    debug_assert!(ptr.is_none());
-        //    *ptr = Some(v);
-        //    // drop ptr
-        //}
         id
     }
 
@@ -163,9 +155,9 @@ mod memkeep_test {
     fn unique_ids() {
         let m = MemKeep::<&'static str>::new();
 
-        let a = m.insert_raw("a");
-        let b = m.insert_raw("b");
-        let c = m.insert_raw("c");
+        let a = m.insert_without_setting_id("a");
+        let b = m.insert_without_setting_id("b");
+        let c = m.insert_without_setting_id("c");
 
         // references are unique
         expect_ne!(a, b);
@@ -177,9 +169,9 @@ mod memkeep_test {
     fn get() {
         let m = MemKeep::<&'static str>::new();
 
-        let a = m.insert_raw("a");
-        let b = m.insert_raw("b");
-        let c = m.insert_raw("c");
+        let a = m.insert_without_setting_id("a");
+        let b = m.insert_without_setting_id("b");
+        let c = m.insert_without_setting_id("c");
 
         expect_eq!(m.get(a), Some(&"a"));
         expect_eq!(m.get(b), Some(&"b"));
@@ -190,11 +182,11 @@ mod memkeep_test {
     fn enumerate() {
         let mut m = MemKeep::<&'static str>::new();
 
-        let a = m.insert_raw("a");
-        let b = m.insert_raw("b");
-        let c = m.insert_raw("c");
-        let d = m.insert_raw("d");
-        let e = m.insert_raw("e");
+        let a = m.insert_without_setting_id("a");
+        let b = m.insert_without_setting_id("b");
+        let c = m.insert_without_setting_id("c");
+        let d = m.insert_without_setting_id("d");
+        let e = m.insert_without_setting_id("e");
 
         // exercise garbage, collected and alive
         m.remove(c);
@@ -213,11 +205,11 @@ mod memkeep_test {
     #[gtest]
     fn serde() {
         let mut m = MemKeep::<String>::new();
-        let a = m.insert_raw("a".into());
-        let b = m.insert_raw("b".into());
-        let c = m.insert_raw("c".into());
-        let d = m.insert_raw("d".into());
-        let e = m.insert_raw("e".into());
+        let a = m.insert_without_setting_id("a".into());
+        let b = m.insert_without_setting_id("b".into());
+        let c = m.insert_without_setting_id("c".into());
+        let d = m.insert_without_setting_id("d".into());
+        let e = m.insert_without_setting_id("e".into());
         // exercise garbage, collected and alive
         m.remove(c);
         m.gc();
@@ -251,9 +243,9 @@ mod memkeep_test {
     fn remove() {
         let m = MemKeep::<&'static str>::new();
 
-        let a = m.insert_raw("a");
-        let b = m.insert_raw("b");
-        let c = m.insert_raw("c");
+        let a = m.insert_without_setting_id("a");
+        let b = m.insert_without_setting_id("b");
+        let c = m.insert_without_setting_id("c");
 
         expect_eq!(m.get(a), Some(&"a"));
         expect_eq!(m.get(b), Some(&"b"));
@@ -271,12 +263,12 @@ mod memkeep_test {
     fn gc() {
         let mut m = MemKeep::<&'static str>::new();
 
-        let a1 = m.insert_raw("hello, computer!");
+        let a1 = m.insert_without_setting_id("hello, computer!");
         m.remove(a1);
         m.gc();
 
         for _ in 0..20 {
-            let a = m.insert_raw("hello, computer!");
+            let a = m.insert_without_setting_id("hello, computer!");
             expect_eq!(a.index, a1.index);
             m.remove(a);
             m.gc();

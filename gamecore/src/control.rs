@@ -142,13 +142,11 @@ fn draw_on_map(g: &mut G) {
     }
 }
 
-fn try_spawn_building(g: &G, building: Building) {
+fn try_spawn_building(g: &G, building: Building) -> Option<&Building> {
     let bounds = building.tile_bounds();
     let mut footprint = cross(bounds.x_range(), bounds.y_range());
     let can_build = footprint.all(|(x, y)| g.is_buildable(vec2(x, y)));
-    if can_build {
-        g.buildings.insert(building);
-    }
+    if can_build { Some(g.buildings.insert(building)) } else { None }
 }
 
 fn control_camera(g: &mut G) {
