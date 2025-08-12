@@ -73,7 +73,7 @@ fn select_pawns(g: &mut G) {
 
             for p in g.pawns.iter() {
                 if selection.overlaps(&p.bounds()) {
-                    g.selected_pawn_ids.push(p.id) //
+                    g.select_pawn(p.id) //
                 }
             }
         }

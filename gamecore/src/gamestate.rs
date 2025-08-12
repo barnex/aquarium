@@ -22,7 +22,7 @@ pub struct G {
     pub selection_start: Option<vec2i>,
 
     /// Currently selected `Pawn`s.
-    pub selected_pawn_ids: Vec<Id>,
+    pub selected_pawn_ids: CSet<Id>,
 
     // 🕣 timekeeping
     pub frame: u64,
@@ -207,12 +207,17 @@ impl G {
 
     /// All currently selected Pawn Ids.
     pub fn selected_pawn_ids(&self) -> impl Iterator<Item = Id> {
-        self.selected_pawn_ids.iter().copied()
+        self.selected_pawn_ids.iter()
     }
 
     /// All currently selected Pawns.
     pub fn selected_pawns(&self) -> impl Iterator<Item = &Pawn> {
-        self.selected_pawn_ids.iter().filter_map(|&id| self.pawn(id))
+        self.selected_pawn_ids.iter().filter_map(|id| self.pawn(id))
+    }
+
+    ///
+    pub fn select_pawn(&self, id: Id) {
+        self.selected_pawn_ids.insert(id);
     }
 
     /// Current mouse position in world coordinates.
