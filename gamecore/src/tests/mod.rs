@@ -36,19 +36,19 @@ fn click_selects_pawn() {
     let pos2 = vec2(14, 15);
     let crab2 = g.spawn(Pawn::new(PawnTyp::Crablet, pos2)).id;
 
-    tick(g, click_tile(pos1));
+    tick(g, mouse_click_tile(pos1));
     expect_eq!(g.selected_pawn_ids().sorted().collect_vec(), vec![crab1].sorted(), "clicked pawn should be selected");
 
     // second click on already selected pawn does nothing
-    tick(g, click_tile(pos1));
+    tick(g, mouse_click_tile(pos1));
     expect_eq!(g.selected_pawn_ids().sorted().collect_vec(), vec![crab1].sorted(), "clicked pawn should be selected");
 
     // click on other pawn
-    tick(g, click_tile(pos2));
+    tick(g, mouse_click_tile(pos2));
     expect_eq!(g.selected_pawn_ids().sorted().collect_vec(), vec![crab2].sorted(), "clicked pawn should be selected");
 
     // deselect by clicking elsewhere
-    tick(g, click_tile(pos2 + 12));
+    tick(g, mouse_click_tile(pos2 + 12));
     expect_eq!(g.selected_pawn_ids().sorted().collect_vec(), vec![].sorted(), "should de-select");
 }
 
@@ -78,6 +78,9 @@ fn command_pawn_move() {
     let g = &mut small_world(test_name!());
     let crab = g.spawn(Pawn::new(PawnTyp::Crablet, vec2(6, 7)));
     g.select_pawn(crab.id);
+
     tick(g, [mouse_move_tile(crab.tile.get() + 2)]);
-    tick(g, [mouse_down()]);
+    tick(g, [key_down(K_MOUSE2)]);
+    tick(g, [key_up(K_MOUSE2)]);
+    tick_n(g, 20);
 }

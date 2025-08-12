@@ -4,29 +4,47 @@ use crate::prelude::*;
 
 /// Synthetically advance game state one tick, with given fake inputs happening right before the tick.
 /// Time advances 16ms (~60 FPS)
-pub fn tick(g: &mut G, inputs: impl IntoIterator<Item = InputEvent>) {
-    // HACK to make input events relative to camera
-    // Will not work when camera is moved in the same frame as mouse motion.
-    let camera = g.camera_pos;
-    let inputs = inputs
-        .into_iter()
-        .map(|event| match event {
-            InputEvent::MouseMove { position } => InputEvent::MouseMove { position: position - camera },
-            InputEvent::Key { button, direction } => InputEvent::Key { button, direction },
-        })
-        .collect_vec();
+pub fn tick(g: &mut G, inputs: impl IntoIterator<Item = InputEvent> + 'static) {
+    fn tick(g: &mut G, inputs: Box<dyn Iterator<Item = InputEvent>>) {
+        // HACK to make input events relative to camera
+        // Will not work when camera is moved in the same frame as mouse motion.
+        let camera = g.camera_pos;
+        let inputs = inputs
+            .into_iter()
+            .inspect(|event| log::trace!("{event:?}"))
+            .map(|event| match event {
+                InputEvent::MouseMove { position } => InputEvent::MouseMove { position: position - camera },
+                InputEvent::Key { button, direction } => InputEvent::Key { button, direction },
+            })
+            .collect_vec();
 
-    let mut out = Out::default();
-    out.viewport_size = vec2(480, 320);
-    let now = g.now_secs + 0.016;
-    g.tick(now, inputs.into_iter(), &mut out);
+        let mut out = Out::default();
+        out.viewport_size = vec2(480, 320);
+        let now = g.now_secs + 0.016;
+        g.tick(now, inputs.into_iter(), &mut out);
 
-    screenshot(g, &out)
+        screenshot(g, &out)
+    }
 
+    tick(g, Box::new(inputs.into_iter()))
 }
 
-pub fn click_tile(tile: vec2i16) -> impl IntoIterator<Item = InputEvent> {
+pub fn tick_n(g: &mut G, n: usize) {
+    for _ in 0..n {
+        tick(g, []);
+    }
+}
+
+pub fn mouse_click_tile(tile: vec2i16) -> impl IntoIterator<Item = InputEvent> {
     [mouse_move_tile(tile), mouse_down(), mouse_up()]
+}
+
+pub fn left_click() -> impl IntoIterator<Item = InputEvent> {
+    [mouse_down(), mouse_up()]
+}
+
+pub fn right_click() -> impl IntoIterator<Item = InputEvent> {
+    [key_down(K_MOUSE2), key_up(K_MOUSE2)]
 }
 
 pub fn mouse_move_tile(tile: impl Into<vec2i16>) -> InputEvent {
@@ -35,9 +53,17 @@ pub fn mouse_move_tile(tile: impl Into<vec2i16>) -> InputEvent {
 }
 
 pub fn mouse_down() -> InputEvent {
-    InputEvent::Key { button: K_MOUSE1, direction: KeyDir::Down }
+    key_down(K_MOUSE1)
 }
 
 pub fn mouse_up() -> InputEvent {
-    InputEvent::Key { button: K_MOUSE1, direction: KeyDir::Up }
+    key_up(K_MOUSE1)
+}
+
+pub fn key_down(button: Button) -> InputEvent {
+    InputEvent::Key { button, direction: KeyDir::Down }
+}
+
+pub fn key_up(button: Button) -> InputEvent {
+    InputEvent::Key { button, direction: KeyDir::Up }
 }
