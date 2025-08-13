@@ -54,7 +54,7 @@ fn draw_tile_overlay(g: &G, out: &mut Out, color: RGBA, f: impl Fn(vec2i16) -> b
 }
 
 fn draw_destinations(g: &G, out: &mut Out) {
-    for pawn in g.selected_pawns() {
+    for pawn in g.pawns() {
         if let Some(destination) = pawn.route.destination()
             && !pawn.is_at_destination()
         {
