@@ -1,5 +1,5 @@
+//! Utilities for setting up test game states.
 use crate::prelude::*;
-use crate::tests::headless_renderer::render_headless;
 use std::io::Write as _;
 use std::path::PathBuf;
 use std::sync::OnceLock;
@@ -9,7 +9,8 @@ static TEST_INIT: OnceLock<()> = OnceLock::new();
 
 /// Initialize `env_logger` for testing.
 /// Idempotent.
-pub(crate) fn init_test_logging() {
+/// Called each time a test world is created.
+fn init_test_logging() {
     TEST_INIT.get_or_init(|| {
         env_logger::builder()
             .is_test(true) // nicer formatting for `cargo test`
@@ -19,22 +20,6 @@ pub(crate) fn init_test_logging() {
             .init();
         log::info!("wd: {:?}", env::current_dir());
     });
-}
-
-/// Test Output directory for given `test_name!()`
-pub(crate) fn test_output_dir(test_name: &str) -> PathBuf {
-    PathBuf::from(format!("../test_output/{test_name}/",))
-}
-
-/// Render gamestate (headless), save under `test_output/<test_name>/frame_1234.png`.
-/// Automatically called on `tick`.
-pub(crate) fn screenshot(g: &mut G, out: &Out) {
-    let fname = test_output_dir(&g.name).join(format!("tick_{:04}.png", g.tick));
-    if let Some(dir) = fname.parent() {
-        std::fs::create_dir_all(dir).log_err().swallow_err();
-    }
-    render_headless(&out, &fname).expect("save png");
-    log::info!("wrote {fname:?}");
 }
 
 /// A small test world with some features.
@@ -55,13 +40,25 @@ pub(crate) fn small_world(name: &str) -> G {
 /// Test settings enabled. No features.
 fn test_world(size: vec2u16, name: &str) -> G {
     init_test_logging();
+
+    clean_output_dir(name);
+
+    G::new(size).with(|g| {
+        g.name = name.into(); // name used as output dir
+        g.ui.hidden = true; // don't accidentally click on UI
+        g.debug.draw_mouse = true; // see mouse position in screenshots
+        g.frames_per_tick = 1; // time moves fast, don't spend screenshots on pure animation
+    })
+}
+
+/// Cleanup output from previous run.
+fn clean_output_dir(name: &str) {
     let output_dir = test_output_dir(name);
-    log::info!("rm {output_dir:?}"); // cleanup output from previous run.
+    log::info!("rm {output_dir:?}");
     fs::remove_dir_all(output_dir).log_err().swallow_err();
-    let mut g = G::new(size);
-    g.name = name.into();
-    g.ui.hidden = true;
-    g.debug.draw_mouse = true;
-    g.frames_per_tick = 1;
-    g
+}
+
+/// Test Output directory for given `test_name!()`
+pub(crate) fn test_output_dir(test_name: &str) -> PathBuf {
+    PathBuf::from(format!("../test_output/{test_name}/",))
 }

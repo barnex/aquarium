@@ -1,3 +1,5 @@
+//! Render the game state to an image file.
+
 use crate::*;
 use anyhow::Result;
 use core_util::*;
@@ -6,11 +8,15 @@ use std::path::Path;
 use tiny_skia::{Color, FillRule, Paint, PathBuilder, Pixmap, PixmapPaint, Rect, Stroke, Transform};
 use vector::*;
 
-fn res_get(sprite: &Sprite) -> Pixmap {
+/// Load sprite from assets/ directory.
+/// Panics if not found, to fail the test.
+/// TODO: cache.
+fn load_sprite(sprite: &Sprite) -> Pixmap {
     let file = format!("../assets/{}.png", sprite.file.as_str());
     Pixmap::load_png(&file).expect(&format!("load pixmap {file}"))
 }
 
+/// Render scenegraph to file.
 pub fn render_headless(out: &Out, file: impl AsRef<Path>) -> Result<()> {
     let file = file.as_ref();
     let (w, h) = out.viewport_size.into();
@@ -54,7 +60,7 @@ pub fn render_headless(out: &Out, file: impl AsRef<Path>) -> Result<()> {
 
         // 🦀 sprites
         for cmd in sprites {
-            let bitmap = res_get(&cmd.sprite);
+            let bitmap = load_sprite(&cmd.sprite);
             // 🪲 TODO: scale
             let dst_size = match cmd.dst_size {
                 None => vec2(bitmap.width(), bitmap.height()),

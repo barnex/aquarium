@@ -6,9 +6,9 @@ use crate::prelude::*;
 use googletest::prelude::*;
 
 mod headless_renderer;
-mod test_inputs;
+mod test_utils;
 mod test_setup;
-use test_inputs::*;
+use test_utils::*;
 use test_setup::*;
 
 /// Name of current test function.
