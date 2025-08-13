@@ -154,6 +154,10 @@ impl Pawn {
         }
     }
 
+    pub fn destination(&self) -> Option<vec2i16>{
+        self.route.destination()
+    }
+
     pub fn bounds(&self) -> Bounds2Di {
         Bounds2D::with_size(self.tile.pos(), vec2::splat(TILE_ISIZE))
     }
