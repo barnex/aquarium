@@ -13,7 +13,6 @@ impl G {
         draw_pawns(g, out);
         draw_cursor(g, out);
         draw_selection(g, out);
-        
 
         draw_debug_overlay(g, out);
     }
@@ -21,7 +20,12 @@ impl G {
 
 pub(super) fn visible_tiles(g: &G) -> impl Iterator<Item = (vec2i16, Tile)> {
     // 🪲 TODO: restrict to viewport
-    g.tilemap.enumerate_all()
+    //g.tilemap.enumerate_all()
+
+    let min = g.camera_pos.to_tile() - 1;
+    let max = (g.camera_pos + g.viewport_size.as_i32()).to_tile() + 1;
+
+    g.tilemap.enumerate_range(Bounds2D::new(min, max))
 }
 
 pub(super) fn visible_pawns(g: &G) -> impl Iterator<Item = &Pawn> {
@@ -95,4 +99,3 @@ fn draw_selection(g: &G, out: &mut Out) -> Status {
     }
     OK
 }
-
