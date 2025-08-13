@@ -64,22 +64,18 @@ impl Pawn {
             // 🏭 home? deliver
             if self.tile == home.tile {
                 self.deliver_cargo(home);
-
-                // find new target
-                if let Some(new_dest) = g.resources.iter().min_by_key(|(tile, res)| tile.distance_squared(self.tile.get())).map(|(tile, res)| tile) {
-                    self.set_destination(g, new_dest);
-                }
+                self.go_to_near_resource(g);
             } else {
                 // ✋☘️ at resource with hands free: take
                 if self.cargo.is_none() {
                     // TODO: only suitable resources
                     self.cargo.set(g.resources.remove(self.tile.get()));
                 }
-                if self.cargo.is_none() {
-                    // wtf, someone stole it.
-                    // find nearby or go home?
+                if self.cargo.is_some() {
+                    self.go_home(g);
+                } else {
+                    self.go_to_near_resource(g).or_else(|| self.go_home(g));
                 }
-                self.set_destination(g, home.tile);
             }
         }
 
@@ -87,10 +83,22 @@ impl Pawn {
         self.take_personal_space(g);
     }
 
-    pub fn deliver_cargo(&self, home: &Building) {
+    fn go_to_near_resource(&self, g: &G) -> Status {
+        let new_dest = g.resources.iter().min_by_key(|(tile, res)| tile.distance_squared(self.tile.get())).map(|(tile, res)| tile)?;
+        self.set_destination(g, new_dest);
+        OK
+    }
+
+    fn go_home(&self, g: &G) -> Status {
+        self.set_destination(g, g.building(self.home.get()?)?.entrance());
+        OK
+    }
+
+    pub fn deliver_cargo(&self, home: &Building) -> Status {
         // 🪲 TODO: add to factory.
         log::error!("TODO: add to factory");
-        self.cargo.take();
+        self.cargo.take()?;
+        OK
     }
 
     pub fn home<'a>(&self, g: &'a G) -> Option<&'a Building> {
@@ -143,7 +151,6 @@ impl Pawn {
             return;
         }
         self.start_route_to(g, dest);
-        //TODO: self.route.clear();
     }
 
     fn start_route_to(&self, g: &G, dest: vec2i16) {

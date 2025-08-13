@@ -77,7 +77,7 @@ fn cursor_sprite(g: &G) -> Sprite {
     }
 }
 
-fn draw_selection(g: &G, out: &mut Out) -> Option<()> {
+fn draw_selection(g: &G, out: &mut Out) -> Status {
     // 🖱️ Selection rectangle, if dragging mouse
     if let Some(start) = g.selection_start {
         let end = g.mouse_position_world();
