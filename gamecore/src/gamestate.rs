@@ -25,6 +25,7 @@ pub struct G {
     pub selected_pawn_ids: CSet<Id>,
 
     // 🕣 timekeeping
+    pub paused: bool,
     pub frame: u64,
     pub tick: u64,
     pub now_secs: f64,
@@ -47,7 +48,9 @@ pub struct G {
     /// Use methods `random_XYZ()`.
     pub(super) _rng: RefCell<ChaCha8Rng>,
 
+    // 🪲 debug
     pub debug: DebugOpts,
+    pub last_sanity_error: Option<String>,
 }
 
 pub const TILE_SIZE: u32 = 24;
@@ -97,6 +100,7 @@ impl G {
             dt_smooth: 1.0 / 60.0,
             frame: 0,
             tick: 0,
+            paused: false,
             inputs: default(),
             keymap: default_keybindings(),
             frames_per_tick: 8,
@@ -104,6 +108,7 @@ impl G {
             ui: Ui::new(),
             _rng: RefCell::new(ChaCha8Rng::seed_from_u64(12345678)),
             debug: default(),
+            last_sanity_error: None,
         }
     }
 
@@ -122,10 +127,21 @@ impl G {
 
         self.control();
 
-        self.frame += 1;
-        if self.frame % (self.frames_per_tick as u64) == 0 {
-            // 🪲 TODO: time major tick
-            self.tick_once();
+        if !self.paused {
+            self.frame += 1;
+            if self.frame % (self.frames_per_tick as u64) == 0 {
+                // 🪲 TODO: time major tick
+                self.tick_once();
+            }
+
+            #[cfg(debug_assertions)]
+            if self.debug.pause_on_sanity_failure {
+                if let Err(e) = sanity_check(self) {
+                    self.paused = true;
+                    log::error!("sanity check failed, game paused: {e}");
+                    self.last_sanity_error = Some(e.to_string());
+                }
+            }
         }
 
         self.draw_world(out);
@@ -144,6 +160,13 @@ impl G {
         for p in self.pawns.iter() {
             p.tick(self);
         }
+    }
+
+    // -------------------------------- Tilemap
+
+    /// Tile (e.g. Sand, Water, ...) at given index.
+    pub fn tile_at(&self, idx: vec2i16) -> Tile {
+        self.tilemap.at(idx)
     }
 
     /// 🥾 Can one generally walk on tile?
@@ -275,10 +298,12 @@ impl G {
     }
 
     fn output_debug(&mut self, debug: &mut String) {
-        writeln!(debug, "frame: {}, now: {:.04}s, FPS: {:.01}", self.frame, self.now_secs, 1.0 / self.dt_smooth).unwrap();
+        if let Some(e) = self.last_sanity_error.as_ref() {
+            writeln!(debug, "SANITY CHECK FAILED: {e}");
+        }
+
+        writeln!(debug, "now: {:.04}s, frame: {}, tick: {}, FPS: {:.01}", self.now_secs, self.frame, self.tick, 1.0 / self.dt_smooth).unwrap();
         writeln!(debug, "camera {:?}", self.camera_pos).unwrap();
-        //writelnt.debug, "buildings: {}, pawns: {}", self.buildings.len(), self.pawns.len()).unwrap();
-        //writeln!(debug, "sprites {:?}", self.out.layers.iter().map(|l| l.sprites.len()).sum::<usize>()).unwrap();
         writeln!(debug, "down {:?}", self.inputs.iter_is_down().sorted().collect_vec()).unwrap();
         writeln!(debug, "tile_picker {:?}", self.ui.active_tool).unwrap();
         writeln!(debug, "selected: {:?}", self.selected_pawn_ids.len()).unwrap();

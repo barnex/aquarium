@@ -23,8 +23,8 @@ pub use std::num::NonZeroU8;
 pub use std::collections::VecDeque;
 
 pub use std::cell::Cell;
-pub use std::fmt::Debug;
 pub use std::fmt::Write as _;
+pub use std::fmt::{Debug, Display};
 pub use std::ops::{Range, RangeInclusive};
 
 pub type HashSet<T> = fnv::FnvHashSet<T>;

@@ -162,6 +162,10 @@ impl Pawn {
         Bounds2D::with_size(self.tile.pos(), vec2::splat(TILE_ISIZE))
     }
 
+    pub fn tile(&self) -> vec2i16 {
+        self.tile.get()
+    }
+
     pub fn center(&self) -> vec2i {
         self.bounds().center()
     }

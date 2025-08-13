@@ -16,7 +16,7 @@ impl G {
     /// execute a single command
     fn exec_command(&mut self, cmd: &str) -> Result<()> {
         match cmd.trim().split_ascii_whitespace().collect_vec().as_slice() {
-            &["pause"] => self.cmd_pause_or_resume(),
+            &["pause"] => Ok(toggle(&mut self.paused)),
             &["tick"] => self.cmd_tick(),
             &["toggle_ui"] => Ok(toggle(&mut self.ui.hidden)),
             &["show_walkable"] => Ok(toggle(&mut self.debug.show_walkable)),
@@ -27,14 +27,6 @@ impl G {
         }
     }
 
-    /// pause button: pause or resume (if already paused)
-    fn cmd_pause_or_resume(&mut self) -> Result<()> {
-        self.frames_per_tick = match self.frames_per_tick {
-            0 => 1,
-            _ => 0,
-        };
-        Ok(())
-    }
 
     fn cmd_tick(&mut self) -> Result<()> {
         self.tick_once();

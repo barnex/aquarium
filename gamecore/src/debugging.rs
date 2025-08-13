@@ -6,6 +6,7 @@ pub struct DebugOpts {
     pub show_buildable: bool,
     pub show_home: bool,
     pub draw_mouse: bool,
+    pub pause_on_sanity_failure: bool,
 }
 
 pub(super) fn draw_debug_overlay(g: &G, out: &mut Out) {

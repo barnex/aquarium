@@ -49,6 +49,10 @@ fn main() {
     web_sys::console::log_1(&"WASM main started. Hello from Rust.".into());
     console_error_panic_hook::set_once();
     console_log::init_with_level(log::Level::Info).expect("error initializing logger");
+    #[cfg(debug_assertions)]
+    {
+        log::warn!("debug_assertions enabled, performance will suffer");
+    }
     wasm_bindgen_futures::spawn_local(async { start().await.expect("main") })
 }
 
@@ -64,7 +68,13 @@ async fn start() -> JsResult<()> {
         }
         None => {
             log::error!("game not loaded, starting fresh");
-            G::test_world()
+            let mut g = G::test_world();
+            #[cfg(debug_assertions)]
+            {
+                log::info!("enabling pause_on_sanity_failure (because debug_assertions)");
+                g.debug.pause_on_sanity_failure = true;
+            }
+            g
         }
     };
 

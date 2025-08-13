@@ -15,11 +15,13 @@ mod tilemap;
 mod ui;
 mod c_vec;
 mod c_set;
+mod sanity_check;
 
 #[cfg(test)]
 mod tests;
 
 pub use control::*;
+pub use sanity_check::*;
 pub use debugging::*;
 pub use drawing::*;
 pub use entities::*;

@@ -27,7 +27,9 @@ pub fn tick(g: &mut G, inputs: impl IntoIterator<Item = InputEvent> + 'static) {
         let now = g.now_secs + 0.016;
         g.tick(now, inputs.into_iter(), &mut out);
 
-        screenshot(g, &out)
+        screenshot(g, &out);
+
+        sanity_check(g).expect("sanity check");
     }
 
     tick(g, Box::new(inputs.into_iter()))
