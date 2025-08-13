@@ -14,9 +14,8 @@ pub struct Pawn {
 #[repr(u8)]
 pub enum PawnTyp {
     Kitten = 1,
-    Pollen = 2,
-    Cat = 3,
-    Crablet = 4,
+    Cat = 2,
+    Crablet = 3,
     // ⚠️👇 update `all()` below!
 }
 impl PawnTyp {
@@ -31,7 +30,6 @@ impl PawnTyp {
     pub fn sprite(&self) -> Sprite {
         match self {
             PawnTyp::Kitten => sprite!("kit7"),
-            PawnTyp::Pollen => sprite!("pollen"),
             PawnTyp::Cat => sprite!("kit4"),
             PawnTyp::Crablet => sprite!("ferris"),
         }
@@ -58,6 +56,8 @@ impl Pawn {
             return;
         }
 
+        const NEAR_HOME: i16 = 3 * 3;
+
         // we are at some destination
 
         if let Some(home) = self.home(g) {
@@ -74,7 +74,12 @@ impl Pawn {
                 if self.cargo.is_some() {
                     self.go_home(g);
                 } else {
-                    self.go_to_near_resource(g).or_else(|| self.go_home(g));
+                    self.go_to_near_resource(g).or_else(|| {
+                        if home.tile.distance_squared(self.tile()) > NEAR_HOME {
+                            self.go_home(g);
+                        };
+                        OK
+                    });
                 }
             }
         }
