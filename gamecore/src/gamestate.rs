@@ -44,6 +44,7 @@ pub struct G {
     // 📺 output/rendering
     /// Camera position in world coordinates.
     pub camera_pos: vec2i,
+    pub viewport_size: vec2u,
 
     /// Use methods `random_XYZ()`.
     pub(super) _rng: RefCell<ChaCha8Rng>,
@@ -59,7 +60,7 @@ pub const TILE_VSIZE: vec2i = vec2(TILE_ISIZE, TILE_ISIZE);
 
 impl G {
     pub fn test_world() -> Self {
-        let mut g = Self::new(vec2(48, 32));
+        let mut g = Self::new(vec2(480, 320));
 
         let hq = g.spawn_building(Building::new(BuildingTyp::HQ, (12, 8))).unwrap();
 
@@ -107,6 +108,7 @@ impl G {
             dt_smooth: 1.0 / 60.0,
             frame: 0,
             tick: 0,
+            viewport_size: vec2(0, 0),
             paused: false,
             inputs: default(),
             keymap: default_keybindings(),
@@ -126,6 +128,7 @@ impl G {
     pub fn tick(&mut self, now_secs: f64, events: impl Iterator<Item = InputEvent>, out: &mut Out) {
         self.now_secs = now_secs;
         self.inputs.tick(&self.keymap, events);
+        self.viewport_size = out.viewport_size;
 
         self.update_fps(); // 👈 FPS is gamespeed independent
         self.exec_commands(); // 👈 exec commands even when paused (speed 0)
@@ -152,7 +155,7 @@ impl G {
         }
 
         self.draw_world(out);
-        self.output_debug(&mut out.debug);
+        self.output_debug(out);
 
         self.pawns.gc();
         self.buildings.gc();
@@ -313,7 +316,8 @@ impl G {
         self.dt_smooth = lerp(self.dt_smooth, self.dt, 0.02);
     }
 
-    fn output_debug(&mut self, debug: &mut String) {
+    fn output_debug(&mut self, out: &mut Out) {
+        let debug = &mut out.debug;
         if let Some(e) = self.last_sanity_error.as_ref() {
             writeln!(debug, "SANITY CHECK FAILED: {e}");
         }
@@ -324,5 +328,6 @@ impl G {
         writeln!(debug, "tile_picker {:?}", self.ui.active_tool).unwrap();
         writeln!(debug, "selected: {:?}", self.selected_pawn_ids.len()).unwrap();
         writeln!(debug, "contextual_action: {:?}", self.contextual_action).unwrap();
+        writeln!(debug, "draw commands: {}", out.layers.iter().map(|l| l.lines.len() + l.rectangles.len() + l.sprites.len()).sum::<usize>()).unwrap();
     }
 }
