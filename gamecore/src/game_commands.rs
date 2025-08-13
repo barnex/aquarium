@@ -22,6 +22,7 @@ impl G {
             &["show_walkable"] => Ok(toggle(&mut self.debug.show_walkable)),
             &["show_buildable"] => Ok(toggle(&mut self.debug.show_buildable)),
             &["show_home"] => Ok(toggle(&mut self.debug.show_home)),
+            &["show_destination"] => Ok(toggle(&mut self.debug.show_destination)),
             &[cmd, ..] => Err(anyhow!("unknown command: {cmd:?}")),
             &[] => Ok(()),
         }

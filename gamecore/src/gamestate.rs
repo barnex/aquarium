@@ -272,11 +272,20 @@ impl G {
     }
 
     /// Add a building, if the location is suitable.
-    pub fn try_spawn_building(&self, building: Building) -> Option<&Building> {
+    pub fn spawn_building(&self, building: Building) -> Option<&Building> {
         let bounds = building.tile_bounds();
         let mut footprint = cross(bounds.x_range(), bounds.y_range());
         let can_build = footprint.all(|(x, y)| self.is_buildable(vec2(x, y)));
         if can_build { Some(self.buildings.insert(building)) } else { None }
+    }
+
+    /// 🏠 Assign pawn to work at building.
+    pub fn assign_to(&self, pawn: &Pawn, building: &Building) {
+        if let Some(home) = pawn.home(self) {
+            home.workers.remove(&pawn.id);
+        }
+        building.workers.insert(pawn.id);
+        pawn.home.set(Some(building.id));
     }
 
     // -------------------------------- Mouse

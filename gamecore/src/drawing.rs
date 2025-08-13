@@ -13,7 +13,7 @@ impl G {
         draw_pawns(g, out);
         draw_cursor(g, out);
         draw_selection(g, out);
-        draw_destinations(g, out);
+        
 
         draw_debug_overlay(g, out);
     }
@@ -96,12 +96,3 @@ fn draw_selection(g: &G, out: &mut Out) -> Option<()> {
     OK
 }
 
-fn draw_destinations(g: &G, out: &mut Out) {
-    for pawn in g.selected_pawns() {
-        if let Some(destination) = pawn.route.destination()
-            && !pawn.is_at_destination()
-        {
-            out.push_line(L_SPRITES, Line::new(pawn.center(), destination.pos() + TILE_ISIZE / 2).with_color(RGB::WHITE.with_alpha(128)).translated(-g.camera_pos));
-        }
-    }
-}

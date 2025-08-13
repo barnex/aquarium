@@ -45,14 +45,17 @@ pub fn render_headless(out: &Out, file: impl AsRef<Path>) -> Result<()> {
             canvas.fill_path(&path, &fill_paint, FillRule::Winding, Transform::identity(), None);
 
             // --- Stroke paint & stroke settings ---
-            let mut stroke_paint = Paint::default();
-            stroke_paint.set_color_rgba8(10, 50, 120, 255); // dark blue border
-            stroke_paint.anti_alias = true;
+            let stroke_paint = Paint::default().with(|stroke_paint| {
+                let [r, g, b, a] = r.stroke.into();
+                stroke_paint.set_color_rgba8(r, g, b, a);
+                stroke_paint.anti_alias = true;
+            });
 
-            let stroke = Stroke::default();
-            //stroke.width = r.stroke_width; // border thickness in device pixels
-            //stroke.line_join = LineJoin::Round;
-            //stroke.line_cap = LineCap::Round;
+            let stroke = Stroke::default().with(|stroke| {
+                //stroke.width = r.stroke_width; // border thickness in device pixels
+                //stroke.line_join = LineJoin::Round;
+                //stroke.line_cap = LineCap::Round;
+            });
 
             // Stroke the path (draw the border)
             canvas.stroke_path(&path, &stroke_paint, &stroke, Transform::identity(), None);

@@ -90,7 +90,7 @@ fn command_pawns(g: &mut G) {
                 Action::Move => g.selected_pawns().for_each(|p| p.set_destination(g, mouse)),
                 Action::Assign => {
                     if let Some(building) = g.building_at(mouse) {
-                        g.selected_pawns().for_each(|pawn| assign_to(g, pawn, building));
+                        g.selected_pawns().for_each(|pawn| g.assign_to(pawn, building));
                     }
                 }
             }
@@ -100,14 +100,6 @@ fn command_pawns(g: &mut G) {
             }
         }
     }
-}
-
-fn assign_to(g: &G, pawn: &Pawn, building: &Building) {
-    if let Some(home) = pawn.home(g) {
-        home.workers.remove(&pawn.id);
-    }
-    building.workers.insert(pawn.id);
-    pawn.home.set(Some(building.id));
 }
 
 fn draw_on_map(g: &mut G) {
@@ -124,7 +116,7 @@ fn draw_on_map(g: &mut G) {
             }
             Tool::Building(typ) => {
                 if g.inputs.just_pressed(K_MOUSE1) {
-                    g.try_spawn_building(Building::new(typ, g.mouse_tile()));
+                    g.spawn_building(Building::new(typ, g.mouse_tile()));
                 }
             }
             Tool::Resource(typ) => {
