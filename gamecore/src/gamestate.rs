@@ -59,26 +59,25 @@ pub const TILE_VSIZE: vec2i = vec2(TILE_ISIZE, TILE_ISIZE);
 
 impl G {
     pub fn test_world() -> Self {
-        let g = Self::new(vec2(48, 32));
+        let mut g = Self::new(vec2(48, 32));
 
         g.spawn(Pawn::new(PawnTyp::Kitten, vec2(17, 7)));
         let crab = g.spawn(Pawn::new(PawnTyp::Crablet, vec2(10, 4)).with(|p| p.cargo = Some(ResourceTyp::Leaf).cel()));
+        let hq = g.spawn_building(Building::new(BuildingTyp::HQ, (12, 8))).unwrap();
 
-        let buildings = MemKeep::new();
-        let hq = buildings.insert(Building {
-            id: default(),
-            typ: BuildingTyp::HQ,
-            tile: vec2(12, 8),
-            workers: CSet::from_iter([crab.id]),
-        });
+        g.assign_to(crab, hq);
 
-        let resources = ResourceMap::default();
-        resources.insert(vec2(3, 9), ResourceTyp::Leaf);
-        resources.insert(vec2(7, 19), ResourceTyp::Rock);
-        resources.insert(vec2(17, 9), ResourceTyp::Rock);
-        resources.insert(vec2(15, 12), ResourceTyp::Leaf);
+        g.spawn_resource((3, 9), ResourceTyp::Leaf);
+        g.spawn_resource((7, 19), ResourceTyp::Rock);
+        g.spawn_resource((17, 9), ResourceTyp::Rock);
+        g.spawn_resource((15, 12), ResourceTyp::Leaf);
 
-        crab.home.set(Some(hq.id));
+        #[cfg(debug_assertions)]
+        {
+            g.debug.show_home = true;
+            g.debug.show_destination = true;
+            g.debug.inspect_under_cursor = true;
+        }
 
         g
     }
@@ -249,8 +248,8 @@ impl G {
 
     // -------------------------------- Resources
 
-    pub fn spawn_resource(&self, tile: vec2i16, resource: ResourceTyp) {
-        self.resources.insert(tile, resource);
+    pub fn spawn_resource(&self, tile: impl Into<vec2i16>, resource: ResourceTyp) {
+        self.resources.insert(tile.into(), resource);
     }
 
     // -------------------------------- Buildings

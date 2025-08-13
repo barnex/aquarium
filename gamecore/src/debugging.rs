@@ -8,6 +8,7 @@ pub struct DebugOpts {
     pub show_home: bool,
     pub draw_mouse: bool,
     pub pause_on_sanity_failure: bool,
+    pub inspect_under_cursor: bool,
 }
 
 pub(super) fn draw_debug_overlay(g: &G, out: &mut Out) {
@@ -25,6 +26,19 @@ pub(super) fn draw_debug_overlay(g: &G, out: &mut Out) {
     }
     if g.debug.draw_mouse {
         out.draw_sprite(g, L_UI_FG + 1, sprite!("pointer"), g.mouse_position_world());
+    }
+    if g.debug.inspect_under_cursor {
+        inspect_under_cursor(g, out);
+    }
+}
+
+fn inspect_under_cursor(g: &G, out: &mut Out) {
+    if let Some(pawn) = g.pawn_at(g.mouse_tile()) {
+        writeln!(&mut out.debug, "{pawn:?}").ignore_err();
+    }
+
+    if let Some(building) = g.building_at(g.mouse_tile()) {
+        writeln!(&mut out.debug, "{building:?}").ignore_err();
     }
 }
 

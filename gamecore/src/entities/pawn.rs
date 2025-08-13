@@ -179,6 +179,12 @@ impl Pawn {
     }
 }
 
+impl Display for Pawn {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        write!(f, "{:?}{}@{}", self.typ, self.id, self.tile())
+    }
+}
+
 // For MemKeep::insert.
 impl SetId for Pawn {
     fn set_id(&mut self, id: Id) {

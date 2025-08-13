@@ -1,6 +1,6 @@
 use crate::prelude::*;
 
-#[derive(Serialize, Deserialize)]
+#[derive(Serialize, Deserialize, Debug)]
 pub struct Building {
     pub id: Id,
     pub typ: BuildingTyp,
@@ -48,13 +48,25 @@ impl Building {
         self.tile // TODO
     }
 
-    pub(crate) fn new(typ: BuildingTyp, tile: Vector<i16, 2>) -> Self {
-        Self { id: default(), typ, tile, workers: default() }
+    pub fn new(typ: BuildingTyp, tile: impl Into<Vector<i16, 2>>) -> Self {
+        Self {
+            id: default(),
+            typ,
+            tile: tile.into(),
+            workers: default(),
+        }
     }
 }
 
+/// For Memkeep::insert().
 impl SetId for Building {
     fn set_id(&mut self, id: Id) {
         self.id = id;
+    }
+}
+
+impl Display for Building {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        write!(f, "{:?}{}@{}", self.typ, self.id, self.tile)
     }
 }

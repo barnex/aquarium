@@ -23,11 +23,11 @@ impl G {
             &["show_buildable"] => Ok(toggle(&mut self.debug.show_buildable)),
             &["show_home"] => Ok(toggle(&mut self.debug.show_home)),
             &["show_destination"] => Ok(toggle(&mut self.debug.show_destination)),
+            &["inspect_under_cursor"] => Ok(toggle(&mut self.debug.inspect_under_cursor)),
             &[cmd, ..] => Err(anyhow!("unknown command: {cmd:?}")),
             &[] => Ok(()),
         }
     }
-
 
     fn cmd_tick(&mut self) -> Result<()> {
         self.tick_once();
