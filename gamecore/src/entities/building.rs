@@ -47,6 +47,10 @@ impl Building {
     pub fn entrance(&self) -> vec2i16 {
         self.tile // TODO
     }
+
+    pub(crate) fn new(typ: BuildingTyp, tile: Vector<i16, 2>) -> Self {
+        Self { id: default(), typ, tile, workers: default() }
+    }
 }
 
 impl SetId for Building {

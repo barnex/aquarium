@@ -90,7 +90,7 @@ fn command_pawns(g: &mut G) {
                 Action::Move => g.selected_pawns().for_each(|p| p.set_destination(g, mouse)),
                 Action::Assign => {
                     if let Some(building) = g.building_at(mouse) {
-                        g.building_at(mouse).map(|building| g.selected_pawns().for_each(|pawn| assign_to(g, pawn, building)));
+                        g.selected_pawns().for_each(|pawn| assign_to(g, pawn, building));
                     }
                 }
             }
@@ -124,29 +124,16 @@ fn draw_on_map(g: &mut G) {
             }
             Tool::Building(typ) => {
                 if g.inputs.just_pressed(K_MOUSE1) {
-                    let building = Building {
-                        id: default(),
-                        typ,
-                        tile: g.mouse_tile(),
-                        workers: default(),
-                    };
-                    try_spawn_building(g, building);
+                    g.try_spawn_building(Building::new(typ, g.mouse_tile()));
                 }
             }
             Tool::Resource(typ) => {
                 if g.inputs.just_pressed(K_MOUSE1) {
-                    g.resources.insert(g.mouse_tile(), typ);
+                    g.spawn_resource(g.mouse_tile(), typ);
                 }
             }
         }
     }
-}
-
-fn try_spawn_building(g: &G, building: Building) -> Option<&Building> {
-    let bounds = building.tile_bounds();
-    let mut footprint = cross(bounds.x_range(), bounds.y_range());
-    let can_build = footprint.all(|(x, y)| g.is_buildable(vec2(x, y)));
-    if can_build { Some(g.buildings.insert(building)) } else { None }
 }
 
 fn control_camera(g: &mut G) {

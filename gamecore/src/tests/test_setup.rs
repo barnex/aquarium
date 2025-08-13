@@ -1,5 +1,6 @@
 //! Utilities for setting up test game states.
 use crate::prelude::*;
+use crate::tests::test_utils::*;
 use std::io::Write as _;
 use std::path::PathBuf;
 use std::sync::OnceLock;
@@ -20,6 +21,19 @@ fn init_test_logging() {
             .init();
         log::info!("wd: {:?}", env::current_dir());
     });
+}
+
+/// Test world with Headquarters, some resources and features.
+pub(crate) fn world_with_hq(name: &str) -> G {
+    let g = small_world(name);
+
+    let hq = g.try_spawn_building(Building::new(BuildingTyp::HQ, vec2(5, 6))).unwrap();
+
+    g.spawn_resource(vec2(11, 7), ResourceTyp::Rock);
+    g.spawn_resource(vec2(11, 8), ResourceTyp::Rock);
+    g.spawn_resource(vec2(11, 9), ResourceTyp::Rock);
+
+    g
 }
 
 /// A small test world with some features.
@@ -55,7 +69,7 @@ fn test_world(size: vec2u16, name: &str) -> G {
 fn clean_output_dir(name: &str) {
     let output_dir = test_output_dir(name);
     log::info!("rm {output_dir:?}");
-    fs::remove_dir_all(output_dir).log_err().swallow_err();
+    fs::remove_dir_all(output_dir).ignore_err();
 }
 
 /// Test Output directory for given `test_name!()`

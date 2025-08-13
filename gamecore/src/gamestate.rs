@@ -185,6 +185,9 @@ impl G {
         }
     }
 
+    // -------------------------------- Pawns
+
+    /// Add a pawn to the game and return it (now with `id` set).
     pub fn spawn(&self, pawn: Pawn) -> &Pawn {
         log::trace!("spawn {:?} @ tile {}", pawn.typ, pawn.tile);
         self.pawns.insert(pawn)
@@ -216,15 +219,18 @@ impl G {
         self.selected_pawn_ids.iter().filter_map(|id| self.pawn(id))
     }
 
-    ///
+    /// Add pawn to selection.
     pub fn select_pawn(&self, id: Id) {
         self.selected_pawn_ids.insert(id);
     }
 
-    /// Current mouse position in world coordinates.
-    pub fn mouse_position_world(&self) -> vec2i {
-        self.inputs.mouse_position() + self.camera_pos
+    // -------------------------------- Resources
+
+    pub fn spawn_resource(&self, tile: vec2i16, resource: ResourceTyp) {
+        self.resources.insert(tile, resource);
     }
+
+    // -------------------------------- Buildings
 
     /// Building with given Id, if any.
     pub fn building(&self, id: Id) -> Option<&Building> {
@@ -240,6 +246,21 @@ impl G {
     /// TODO: make faster via a hierarchy.
     pub fn building_at(&self, tile: vec2i16) -> Option<&Building> {
         self.buildings.iter().find(|v| v.tile_bounds().contains_incl(tile))
+    }
+
+    /// Add a building, if the location is suitable.
+    pub fn try_spawn_building(&self, building: Building) -> Option<&Building> {
+        let bounds = building.tile_bounds();
+        let mut footprint = cross(bounds.x_range(), bounds.y_range());
+        let can_build = footprint.all(|(x, y)| self.is_buildable(vec2(x, y)));
+        if can_build { Some(self.buildings.insert(building)) } else { None }
+    }
+
+    // -------------------------------- Mouse
+
+    /// Current mouse position in world coordinates.
+    pub fn mouse_position_world(&self) -> vec2i {
+        self.inputs.mouse_position() + self.camera_pos
     }
 
     /// Tile the mouse currently hovers over.

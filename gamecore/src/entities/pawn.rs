@@ -154,7 +154,7 @@ impl Pawn {
         }
     }
 
-    pub fn destination(&self) -> Option<vec2i16>{
+    pub fn destination(&self) -> Option<vec2i16> {
         self.route.destination()
     }
 
@@ -168,6 +168,10 @@ impl Pawn {
 
     pub fn is_at_destination(&self) -> bool {
         self.route.is_finished()
+    }
+
+    pub fn crab(tile: impl Into<vec2i16>) -> Self {
+        Self::new(PawnTyp::Crablet, tile.into())
     }
 }
 

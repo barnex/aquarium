@@ -1,3 +1,4 @@
+//! Tests that require UI interaction (clicking etc).
 use super::*;
 use crate::*;
 use googletest::prelude::*;

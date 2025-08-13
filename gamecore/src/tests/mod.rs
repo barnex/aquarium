@@ -9,6 +9,7 @@ mod headless_renderer;
 mod test_utils;
 mod test_setup;
 mod ui_tests;
+mod functional_tests;
 
 use test_utils::*;
 use test_setup::*;
