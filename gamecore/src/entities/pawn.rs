@@ -56,7 +56,7 @@ impl Pawn {
             return;
         }
 
-        const NEAR_HOME: i16 = 3 * 3;
+        const NEAR_HOME: i32 = 4;
 
         // we are at some destination
 
@@ -75,7 +75,7 @@ impl Pawn {
                     self.go_home(g);
                 } else {
                     self.go_to_near_resource(g).or_else(|| {
-                        if home.tile.distance_squared(self.tile()) > NEAR_HOME {
+                        if home.tile.as_i32().distance_squared(self.tile().as_i32()) > NEAR_HOME*NEAR_HOME {
                             self.go_home(g);
                         };
                         OK

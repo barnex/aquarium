@@ -60,38 +60,18 @@ pub const TILE_VSIZE: vec2i = vec2(TILE_ISIZE, TILE_ISIZE);
 
 impl G {
     pub fn test_world() -> Self {
-        let mut g = Self::new(vec2(480, 320));
-
-        let hq = g.spawn_building(Building::new(BuildingTyp::HQ, (12, 8))).unwrap();
-
-        g.spawn(Pawn::new(PawnTyp::Kitten, vec2(17, 7)));
-        let crab = g.spawn(Pawn::new(PawnTyp::Crablet, vec2(10, 4)).with(|p| p.cargo = Some(ResourceTyp::Leaf).cel()));
-        g.assign_to(crab, hq);
-
-        let crab2 = g.spawn(Pawn::new(PawnTyp::Crablet, vec2(11, 5)).with(|p| p.cargo = Some(ResourceTyp::Leaf).cel()));
-        g.assign_to(crab2, hq);
-
-        g.spawn_resource((3, 9), ResourceTyp::Leaf);
-        g.spawn_resource((7, 19), ResourceTyp::Rock);
-        g.spawn_resource((17, 9), ResourceTyp::Rock);
-        g.spawn_resource((15, 12), ResourceTyp::Leaf);
-        g.spawn_resource((15, 13), ResourceTyp::Leaf);
-        g.spawn_resource((16, 13), ResourceTyp::Leaf);
-        g.spawn_resource((16, 12), ResourceTyp::Leaf);
-        g.spawn_resource((17, 12), ResourceTyp::Leaf);
-        g.spawn_resource((17, 18), ResourceTyp::Leaf);
-
-        #[cfg(debug_assertions)]
-        {
-            g.debug.show_home = true;
-            g.debug.show_destination = true;
-            g.debug.inspect_under_cursor = true;
-        }
-
-        g
+        map_gen::inception()
     }
 
     pub fn new(size: vec2u16) -> Self {
+        let mut debug = DebugOpts::default();
+        #[cfg(debug_assertions)]
+        {
+            debug.show_home = true;
+            debug.show_destination = true;
+            debug.inspect_under_cursor = true;
+        }
+
         Self {
             name: "".into(),
             contextual_action: Action::None,
@@ -116,7 +96,7 @@ impl G {
             tilemap: Tilemap::new(size),
             ui: Ui::new(),
             _rng: RefCell::new(ChaCha8Rng::seed_from_u64(12345678)),
-            debug: default(),
+            debug,
             last_sanity_error: None,
         }
     }

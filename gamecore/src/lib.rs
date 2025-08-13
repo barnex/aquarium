@@ -1,27 +1,29 @@
 pub(crate) mod prelude;
 
+mod c_set;
+mod c_vec;
 mod control;
 mod debugging;
 mod drawing;
 mod entities;
+mod extension_traits;
 mod game_commands;
 mod gamestate;
 mod input;
+mod map_gen;
 mod output;
 mod random;
 mod resources;
-mod tile_to_pos;
+mod sanity_check;
 mod tilemap;
 mod ui;
-mod c_vec;
-mod c_set;
-mod sanity_check;
 
 #[cfg(test)]
 mod tests;
 
+pub use c_set::*;
+pub use c_vec::*;
 pub use control::*;
-pub use sanity_check::*;
 pub use debugging::*;
 pub use drawing::*;
 pub use entities::*;
@@ -31,12 +33,8 @@ pub use input::*;
 pub use output::*;
 pub use random::*;
 pub use resources::*;
+pub use sanity_check::*;
 pub use tilemap::*;
 pub use ui::*;
-pub use c_vec::*;
-pub use c_set::*;
 
-pub(crate) use tile_to_pos::ToPos as _;
-pub(crate) use tile_to_pos::ToTile as _;
-
-
+pub(crate) use extension_traits::*;
