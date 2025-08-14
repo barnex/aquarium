@@ -3,17 +3,19 @@ use crate::prelude::*;
 /// The layer we draw the tilemap to.
 pub const L_TILES: u8 = 0;
 
+pub const L_WATER: u8 = 1;
+
 /// The layer we draw the sprites to.
-pub const L_SPRITES: u8 = 1;
+pub const L_SPRITES: u8 = 2;
 
 /// UI background layer (window fill etc).
-pub const L_UI_BG: u8 = 2;
+pub const L_UI_BG: u8 = 3;
 
 /// UI mid layer (text, buttons, ...).
-pub const L_UI: u8 = 3;
+pub const L_UI: u8 = 4;
 
 /// UI foreground layer (selection markers etc).
-pub const L_UI_FG: u8 = 4;
+pub const L_UI_FG: u8 = 5;
 
 /// Scenegraph, sounds, etc. to output after a tick.
 /// Sent to the browser who will render it.
@@ -83,7 +85,13 @@ impl Out {
         self.layer(layer).lines.push(line);
     }
 
-    pub fn push_rect(&mut self, layer: u8, rect: Rectangle) {
+    /// Draw rectangle in world coordinates (i.e. taking into account camera).
+    pub fn draw_rect(&mut self, g: &G, layer: u8, rect: Rectangle) {
+        self.layer(layer).rectangles.push(rect.translated(- g.camera_pos));
+    }
+
+    /// Draw rectangle in screen coordinates (i.e. ignoring camera).
+    pub fn push_rect_screen(&mut self, layer: u8, rect: Rectangle) {
         self.layer(layer).rectangles.push(rect);
     }
 

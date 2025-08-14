@@ -158,7 +158,7 @@ impl G {
 
     pub fn water_level_at(&self, tile: vec2i16) -> f32 {
         match self.tile_at(tile) {
-            Tile::Canal => 100.0, // TODO,
+            Tile::Canal => 20.0, // TODO,
             _ => 0.0,
         }
     }

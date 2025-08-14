@@ -41,9 +41,8 @@ fn inspect_under_cursor(g: &G, out: &mut Out) {
         writeln!(&mut out.debug, "{building:?}").ignore_err();
     }
 
-
-    let level = g.water_level_at(g.mouse_tile()); 
-    if level != 0.0{
+    let level = g.water_level_at(g.mouse_tile());
+    if level != 0.0 {
         writeln!(&mut out.debug, "water level: {level}").ignore_err();
     }
 }
@@ -54,7 +53,7 @@ fn draw_tile_overlay(g: &G, out: &mut Out, color: RGBA, f: impl Fn(vec2i16) -> b
     for (idx, _) in visible_tiles(g) {
         if f(idx) {
             let bounds = Bounds2D::from_pos_size(idx.pos(), TILE_VSIZE).translated(-g.camera_pos);
-            out.push_rect(L_SPRITES + 1, Rectangle::new(bounds, color).with_fill(color));
+            out.push_rect_screen(L_SPRITES + 1, Rectangle::new(bounds, color).with_fill(color));
         }
     }
 }
