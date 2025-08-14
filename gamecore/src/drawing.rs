@@ -39,8 +39,9 @@ fn draw_water(g: &G, out: &mut Out) {
         if mat == Tile::Canal {
             let level = g.water_level_at(tile);
             if level != 0.0 {
-                let a = linterp(0.0, 0.0, 100.0, 255.0, level).clamp(0.0, 255.0) as u8;
-                let color = RGBA([0, 0, 255, a]);
+                let (r, b) = if level > 0.0 { (0, 255) } else { (255, 0) };
+                let a = linterp(0.0, 0.0, 100.0, 255.0, level.abs()).clamp(0.0, 255.0) as u8;
+                let color = RGBA([r, 0, b, a]);
                 let bounds = Bounds2D::with_size(tile.pos(), TILE_VSIZE);
                 out.draw_rect(g, L_WATER, Rectangle::new(bounds, RGBA::TRANSPARENT).with_fill(color));
             }

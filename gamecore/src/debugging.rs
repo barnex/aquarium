@@ -33,18 +33,17 @@ pub(super) fn draw_debug_overlay(g: &G, out: &mut Out) {
 }
 
 fn inspect_under_cursor(g: &G, out: &mut Out) {
-    if let Some(pawn) = g.pawn_at(g.mouse_tile()) {
+    let mouse = g.mouse_tile();
+    if let Some(pawn) = g.pawn_at(mouse) {
         writeln!(&mut out.debug, "{pawn:?}").ignore_err();
     }
 
-    if let Some(building) = g.building_at(g.mouse_tile()) {
+    if let Some(building) = g.building_at(mouse) {
         writeln!(&mut out.debug, "{building:?}").ignore_err();
     }
 
-    let level = g.water_level_at(g.mouse_tile());
-    if level != 0.0 {
-        writeln!(&mut out.debug, "water level: {level}").ignore_err();
-    }
+    writeln!(&mut out.debug, "water level: {}", g.water_level_at(mouse)).ignore_err();
+    writeln!(&mut out.debug, "water v left: {:?}", g.water.velocity_left_of.get(&mouse)).ignore_err();
 }
 
 /// ❎ Draw a patch over all tiles where `f()` is `true`.

@@ -1,7 +1,7 @@
 use crate::prelude::*;
 
 pub fn inception() -> G {
-    let size = 512;
+    let size = 256;
     let mut g = G::new(vec2(size, size));
     g.camera_pos = (vec2(size, size) / 2).as_i16().pos();
 
