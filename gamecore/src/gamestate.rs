@@ -145,6 +145,7 @@ impl G {
 
     pub(crate) fn tick_once(&mut self) {
         self.tick += 1;
+        self.water.tick(&self.tilemap);
         self.tick_pawns();
     }
 
@@ -157,10 +158,7 @@ impl G {
     // -------------------------------- Water
 
     pub fn water_level_at(&self, tile: vec2i16) -> f32 {
-        match self.tile_at(tile) {
-            Tile::Canal => 20.0, // TODO,
-            _ => 0.0,
-        }
+        self.water.water_level_at(&self.tilemap, tile)
     }
 
     // -------------------------------- Tilemap
@@ -311,7 +309,7 @@ impl G {
     fn output_debug(&mut self, out: &mut Out) {
         let debug = &mut out.debug;
         if let Some(e) = self.last_sanity_error.as_ref() {
-            writeln!(debug, "SANITY CHECK FAILED: {e}");
+            writeln!(debug, "SANITY CHECK FAILED: {e}").ignore_err();
         }
 
         writeln!(debug, "now: {:.04}s, frame: {}, tick: {}, FPS: {:.01}", self.now_secs, self.frame, self.tick, 1.0 / self.dt_smooth).unwrap();
