@@ -40,6 +40,12 @@ fn inspect_under_cursor(g: &G, out: &mut Out) {
     if let Some(building) = g.building_at(g.mouse_tile()) {
         writeln!(&mut out.debug, "{building:?}").ignore_err();
     }
+
+
+    let level = g.water_level_at(g.mouse_tile()); 
+    if level != 0.0{
+        writeln!(&mut out.debug, "water level: {level}").ignore_err();
+    }
 }
 
 /// ❎ Draw a patch over all tiles where `f()` is `true`.

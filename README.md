@@ -34,10 +34,11 @@ git push origin HEAD:main
 
   - [x] God/sandbox mode
   - [ ] Crop dynamics
-    - [ ] Canal block
-    - [ ] Water source
-    - [ ] Land Irrigation
+    - [x] Canal block
     - [ ] Canal dynamics
+      - [ ] Water source
+      - [ ] Water level
+      - [ ] Land Irrigation
     - [ ] Farm
 
 ## Architecture

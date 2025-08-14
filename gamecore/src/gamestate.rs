@@ -10,6 +10,7 @@ pub struct G {
     pub resources: ResourceMap,
     pub buildings: MemKeep<Building>,
     pub pawns: MemKeep<Pawn>,
+    pub water: WaterSim,
 
     // ⏯️ UI
     #[serde(skip)]
@@ -73,31 +74,32 @@ impl G {
         }
 
         Self {
-            name: "".into(),
-            contextual_action: Action::None,
-            resources: default(),
-            selected_pawn_ids: default(),
-            selection_start: None,
+            _prev_secs: 0.0,
+            _rng: RefCell::new(ChaCha8Rng::seed_from_u64(12345678)),
             buildings: MemKeep::new(),
-            pawns: MemKeep::new(),
             camera_pos: vec2(40, 70), // nonzero so we notice offset issues without having to pan
             commands: default(),
-            now_secs: 0.0,
-            _prev_secs: 0.0,
+            contextual_action: Action::None,
+            debug,
             dt: 1.0 / 60.0, // initial fps guess
             dt_smooth: 1.0 / 60.0,
             frame: 0,
-            tick: 0,
-            viewport_size: vec2(0, 0),
-            paused: false,
+            frames_per_tick: 8,
             inputs: default(),
             keymap: default_keybindings(),
-            frames_per_tick: 8,
+            last_sanity_error: None,
+            name: "".into(),
+            now_secs: 0.0,
+            paused: false,
+            pawns: MemKeep::new(),
+            resources: default(),
+            selected_pawn_ids: default(),
+            selection_start: None,
+            tick: 0,
             tilemap: Tilemap::new(size),
             ui: Ui::new(),
-            _rng: RefCell::new(ChaCha8Rng::seed_from_u64(12345678)),
-            debug,
-            last_sanity_error: None,
+            viewport_size: vec2(0, 0),
+            water: default(),
         }
     }
 
@@ -149,6 +151,15 @@ impl G {
     pub(crate) fn tick_pawns(&mut self) {
         for p in self.pawns.iter() {
             p.tick(self);
+        }
+    }
+
+    // -------------------------------- Water
+
+    pub fn water_level_at(&self, tile: vec2i16) -> f32 {
+        match self.tile_at(tile) {
+            Tile::Canal => 100.0, // TODO,
+            _ => 0.0,
         }
     }
 
