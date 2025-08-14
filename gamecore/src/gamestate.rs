@@ -195,6 +195,7 @@ impl G {
             Tile::Snow => true,
             Tile::Water => false,
             Tile::Block => false,
+            Tile::Canal => false,
         }
     }
 
