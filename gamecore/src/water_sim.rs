@@ -10,13 +10,13 @@ pub struct WaterSim {
 impl WaterSim {
     pub fn tick(&mut self, tilemap: &Tilemap) {
         self.tick_flow(tilemap);
-        //self.tick_DIFFUSION(tilemap);
+		//self.tick_DIFFUSION(tilemap);
     }
 
     pub fn tick_flow(&mut self, tilemap: &Tilemap) {
         // d v left = d p left = p - pleft
 
-        const MU: f32 = 0.01;
+        const MU: f32 = 0.03;
 
         // 🪲 TODO: velocity misses sources to the right (water tile)
         for pos in canal_tiles(tilemap) {
@@ -50,7 +50,7 @@ impl WaterSim {
 			level += self.velocity_left_of(pos) - self.velocity_right_of(pos);
 			level += self.velocity_under_of(pos) - self.velocity_upper_of(pos);
 
-			let level = level.clamp(0.0, 100.0);
+			//let level = level.clamp(0.0, 100.0);
             self.level_at.insert(pos, level);
         }
     }
