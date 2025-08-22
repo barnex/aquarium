@@ -10,23 +10,22 @@ fn main() {
 fn run(f: impl Fn(&mut [f32], &mut [f32], f32)) {
     let l = 20;
     let mut q = vec![0.0; l];
-    let mut v = vec![0.0; l];
+    let mut v = vec![1.0; l];
 
     for i in 2..3 {
         q[i] = 1.0;
-        v[i] = 1.0;
     }
 
-    let ticks = 10;
+    let ticks = 20;
     let output_every = 1;
-    let dt = 0.1;
+    let dt = 0.3;
 
     let ticks = (ticks as f32 / dt) as usize;
     for t in 0..ticks {
+        let time = (t as f32) * dt;
         let want_output = t % output_every as usize == 0;
-        //let want_output = t == 30;
         if want_output {
-            zip(&q, &v).enumerate().for_each(|(i, (q, v))| println!("{i} {t} {q} {v}"));
+            zip(&q, &v).enumerate().for_each(|(x, (q, v))| println!("{x} {time} {q} {v}"));
             println!();
         }
 
@@ -34,36 +33,12 @@ fn run(f: impl Fn(&mut [f32], &mut [f32], f32)) {
     }
 }
 
-fn lwave(u: &mut [f32], v: &mut [f32], dt: f32) {
-    assert_eq!(u.len(), v.len());
-    let n = u.len();
-    let mut u2 = vec![0.0; u.len()];
-    let c = 1.0;
-    let dx = 1.0;
-
-    // Update velocity (leapfrog)
-    for i in 1..(n - 1) {
-        let laplacian = (u[i - 1] - 2.0 * u[i] + u[i + 1]) / (dx * dx);
-        v[i] += dt * c * c * laplacian;
-    }
-
-    // Free-end boundary conditions (Neumann: zero derivative)
-    v[0] += dt * c * c * (u[1] - u[0]) / (dx * dx);
-    v[n - 1] += dt * c * c * (u[n - 2] - u[n - 1]) / (dx * dx);
-
-    // Update displacement
-    for i in 0..n {
-        u2[i] = u[i] + dt * v[i];
-    }
-    u.clone_from_slice(&u2);
-}
-
-fn borewave(h: &mut [f32], f: &mut [f32], dt: f32) {
+fn borewave(h: &mut [f32], v: &mut [f32], dt: f32) {
     let n = h.len();
-    let mut h2 = vec![0.0; h.len()];
-    let mut f2 = vec![0.0; f.len()];
+    let mut delta_h = vec![0.0; h.len()];
+    let mut v2 = v.to_vec(); // 👈 🪲 REMOVE !!!!
 
-    // propagate flux
+    // propagate velocity
     //
     //          h
     //        +----+
@@ -79,27 +54,49 @@ fn borewave(h: &mut [f32], f: &mut [f32], dt: f32) {
         // water flows into cell index `sink` (left or right neighbor)
         // cannot flow out of bounds
         // velocity stops dead at boundaries.
-        let sink = if f[i] > 0.0 && i < (n - 1) {
-            i + 1 // right
-        } else if f[i] < 0.0 && i > 0 {
-            i - 1 //left
-        } else {
-            f[i] = 0.0; // stop velocity at boundary
-            continue;
-        };
+
+         let sink = if v[i] > 0.0 && i < (n - 1) {
+             i + 1 // right
+         } else if v[i] < 0.0 && i > 0 {
+             i - 1 //left
+         } else {
+             //v2[i] = 0.0; // stop velocity at boundary
+             continue;
+         };
+
+
 
         // amount of water that flows into neighbor
         // cannot be more than all water in cell.
-        let bucket = (dt * h[i] * f[i].abs()).clamp(0.0, h[i]);
+        let bucket = (dt * h[i] * v[i].abs()).clamp(0.0, h[i]);
 
-        h2[i] = h[i] - bucket;
-        h2[sink] = h[sink] + bucket;
+        // propagate matter
+        delta_h[i] -= bucket;
+        delta_h[sink] += bucket;
+
+        // remove velocity if cell is empty.
+        // not really needed but nicer for visualization/debug
+        //if h2[i] == 0.0 {
+        //    v2[i] = 0.0;
+        //}
+
+        // propagate momentum
+        // source cell has already lost momentum: velocity stays constant while mass has moved out
+
+        // add momentum to sink cell.
+        //let momentum_xfer = bucket * v[i];
+        //let p_sink_orig = h[sink] * v[sink];
+        //let p_sink_new = p_sink_orig + momentum_xfer;
+        //let v_sink_new = if delta_h[sink] != 0.0 { p_sink_new / delta_h[sink] } else { v[sink] };
+        //v2[sink] = v_sink_new;
+        v2[sink] = 1.0; // 👈 🪲 REMOVE !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
     }
 
-    f2.clone_from_slice(&f);
+    for (h, delta_h) in zip(h, delta_h) {
+        *h += delta_h;
+    }
 
-    h.clone_from_slice(&h2);
-    f.clone_from_slice(&f2);
+    v.clone_from_slice(&v2);
 }
 
 fn diffuse_inertia(q: &mut [f32], v: &mut [f32], dt: f32) {
