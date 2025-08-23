@@ -13,6 +13,7 @@ fn run(f: impl Fn(&mut [f32], &mut [f32], f32)) {
     let mut q = vec![0.0; l];
     let mut ve = vec![0.0; l];
 
+    // should probably stay well below lightspeed
     for i in 0..5 {
         q[i] = 0.5;
         ve[i] = 1.0;
@@ -65,12 +66,12 @@ fn borewave2(h: &mut [f32], p: &mut [f32], dt: f32) {
         };
 
         // transfer mass
-        let dh = (p[i].abs() * dt).clamp(0.0, h[i]);
+        let dh = (p[i].abs() * dt).clamp(0.0, h[i]); // clamp to h[i] *dt?
         delta_h[i] -= dh;
         delta_h[sink] += dh;
 
-        // transfer momentum
-        let dp = if h[i] != 0.0 { p[i].signum() * p[i] * p[i] * dt / h[i] } else { 0.0 };
+        // transfer momentum: TODO: clamp?
+        let dp = if h[i] != 0.0 { p[i].signum() * p[i] * dh / h[i] } else { 0.0 };
         delta_p[i] -= dp;
         delta_p[sink] += dp;
     }
@@ -78,6 +79,15 @@ fn borewave2(h: &mut [f32], p: &mut [f32], dt: f32) {
     for i in 0..n {
         h[i] = (h[i] + delta_h[i]).clamp(0.0, 1.0);
         p[i] = (p[i] + delta_p[i]).clamp(-h[i].abs(), h[i].abs()); // 👈 clamps v to -1..1
+
+        debug_assert!(h[i].is_finite());
+        debug_assert!(p[i].is_finite());
+        if !h[i].is_finite() {
+            h[i] = 0.0; // last resort
+        }
+        if !p[i].is_finite() {
+            p[i] = 0.0; // last resort
+        }
     }
 }
 
