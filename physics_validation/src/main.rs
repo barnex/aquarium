@@ -4,39 +4,87 @@ fn main() {
     //run(diffuse_nonlinear)
     //run(diffuse_inertia);
     //run(lwave);
-    run(borewave);
+    //run(borewave);
+    run(borewave2);
 }
 
 fn run(f: impl Fn(&mut [f32], &mut [f32], f32)) {
-    let l = 20;
+    let l = 100;
     let mut q = vec![0.0; l];
-    let mut v = vec![1.0; l];
+    let mut ve = vec![0.0; l];
 
-    for i in 2..3 {
-        q[i] = 1.0;
+    for i in 0..5 {
+        q[i] = 0.5;
+        ve[i] = 1.0;
     }
 
-    let ticks = 20;
+    for i in 45..50 {
+        q[i] = 0.5;
+        ve[i] = -0.5;
+    }
+
+    // ⚠️ velocities and momenta must be < 1.0
+    let mut p = zip(&q, ve).map(|(&q, ve)| (q * ve)).collect::<Vec<_>>();
+
+    let ticks = 100;
     let output_every = 1;
-    let dt = 0.3;
+    let dt = 0.1;
 
     let ticks = (ticks as f32 / dt) as usize;
     for t in 0..ticks {
         let time = (t as f32) * dt;
         let want_output = t % output_every as usize == 0;
         if want_output {
-            zip(&q, &v).enumerate().for_each(|(x, (q, v))| println!("{x} {time} {q} {v}"));
+            zip(&q, &p).enumerate().for_each(|(x, (q, v))| println!("{x} {time} {q} {v}"));
             println!();
         }
 
-        f(&mut q, &mut v, dt);
+        f(&mut q, &mut p, dt);
+    }
+}
+
+fn borewave2(h: &mut [f32], p: &mut [f32], dt: f32) {
+    let n = h.len();
+    let mut delta_h = vec![0.0; n];
+    let mut delta_p = vec![0.0; n];
+
+    for i in 0..n {
+        debug_assert!(h[i] >= 0.0);
+        debug_assert!(p[i].abs() <= 1.0);
+        //debug_assert!(p[i].abs() <= h[i].abs());
+
+        // water flows into cell index `sink` (left or right neighbor)
+        // cannot flow out of bounds
+        let sink = if p[i] > 0.0 && i < (n - 1) {
+            i + 1 // right
+        } else if p[i] < 0.0 && i > 0 {
+            i - 1 //left
+        } else {
+            //delta_p[i] -= p[i] * 0.1 * dt; // dampen out impulse at boundary
+            continue;
+        };
+
+        // transfer mass
+        let dh = (p[i].abs() * dt).clamp(0.0, h[i]);
+        delta_h[i] -= dh;
+        delta_h[sink] += dh;
+
+        // transfer momentum
+        let dp = if h[i] != 0.0 { p[i].signum() * p[i] * p[i] * dt / h[i] } else { 0.0 };
+        delta_p[i] -= dp;
+        delta_p[sink] += dp;
+    }
+
+    for i in 0..n {
+        h[i] = (h[i] + delta_h[i]);
+        p[i] = (p[i] + delta_p[i]);
     }
 }
 
 fn borewave(h: &mut [f32], v: &mut [f32], dt: f32) {
     let n = h.len();
-    let mut delta_h = vec![0.0; h.len()];
-    let mut v2 = v.to_vec(); // 👈 🪲 REMOVE !!!!
+    let mut delta_h = vec![0.0; n];
+    let mut delta_p = vec![0.0; n];
 
     // propagate velocity
     //
@@ -55,16 +103,14 @@ fn borewave(h: &mut [f32], v: &mut [f32], dt: f32) {
         // cannot flow out of bounds
         // velocity stops dead at boundaries.
 
-         let sink = if v[i] > 0.0 && i < (n - 1) {
-             i + 1 // right
-         } else if v[i] < 0.0 && i > 0 {
-             i - 1 //left
-         } else {
-             //v2[i] = 0.0; // stop velocity at boundary
-             continue;
-         };
-
-
+        let sink = if v[i] > 0.0 && i < (n - 1) {
+            i + 1 // right
+        } else if v[i] < 0.0 && i > 0 {
+            i - 1 //left
+        } else {
+            //v2[i] = 0.0; // stop velocity at boundary
+            continue;
+        };
 
         // amount of water that flows into neighbor
         // cannot be more than all water in cell.
@@ -74,29 +120,19 @@ fn borewave(h: &mut [f32], v: &mut [f32], dt: f32) {
         delta_h[i] -= bucket;
         delta_h[sink] += bucket;
 
-        // remove velocity if cell is empty.
-        // not really needed but nicer for visualization/debug
-        //if h2[i] == 0.0 {
-        //    v2[i] = 0.0;
-        //}
-
         // propagate momentum
         // source cell has already lost momentum: velocity stays constant while mass has moved out
 
         // add momentum to sink cell.
-        //let momentum_xfer = bucket * v[i];
-        //let p_sink_orig = h[sink] * v[sink];
-        //let p_sink_new = p_sink_orig + momentum_xfer;
-        //let v_sink_new = if delta_h[sink] != 0.0 { p_sink_new / delta_h[sink] } else { v[sink] };
-        //v2[sink] = v_sink_new;
-        v2[sink] = 1.0; // 👈 🪲 REMOVE !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+        delta_p[sink] += bucket * v[i];
     }
 
-    for (h, delta_h) in zip(h, delta_h) {
+    for ((h, v), (delta_h, delta_p)) in zip(zip(h, v), zip(delta_h, delta_p)) {
+        let new_momentum = (*h) * (*v) + delta_p;
+
         *h += delta_h;
+        *v = if (*h) != 0.0 { new_momentum / (*h) } else { 0.0 };
     }
-
-    v.clone_from_slice(&v2);
 }
 
 fn diffuse_inertia(q: &mut [f32], v: &mut [f32], dt: f32) {

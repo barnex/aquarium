@@ -30,6 +30,9 @@ watch = ..
 git push origin HEAD:main
 ```
 
+## Bugs
+  - [ ] Resource (rock) inside HQ entrance = inf. loop
+
 ## Gameplay
 
   - [x] God/sandbox mode
