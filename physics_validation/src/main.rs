@@ -13,23 +13,29 @@ fn run(f: impl Fn(&mut [f32], &mut [f32], f32)) {
     let mut q = vec![0.0; l];
     let mut ve = vec![0.0; l];
 
+    // propagator test:
     // should probably stay well below lightspeed
-    for i in 0..5 {
-        q[i] = 0.5;
-        ve[i] = 1.0;
-    }
+    // for i in 0..5 {
+    //     q[i] = 0.5;
+    //     ve[i] = 1.0;
+    // }
+    // for i in 25..30 {
+    //     q[i] = 0.5;
+    //     ve[i] = 0.25;
+    // }
 
-    for i in 25..30 {
+    // gravity test:
+    for i in 30..35 {
         q[i] = 0.5;
-        ve[i] = 0.25;
+        ve[i] = 0.0;
     }
 
     // ⚠️ velocities and momenta must be < 1.0
     let mut p = zip(&q, ve).map(|(&q, ve)| (q * ve)).collect::<Vec<_>>();
 
-    let ticks = 100;
+    let ticks = 50;
     let output_every = 1;
-    let dt = 0.25;
+    let dt = 0.1;
 
     let ticks = (ticks as f32 / dt) as usize;
     for t in 0..ticks {
@@ -46,47 +52,91 @@ fn run(f: impl Fn(&mut [f32], &mut [f32], f32)) {
 
 fn borewave2(h: &mut [f32], p: &mut [f32], dt: f32) {
     let n = h.len();
-    let mut delta_h = vec![0.0; n];
-    let mut delta_p = vec![0.0; n];
+    assert!(n > 1);
 
-    for i in 0..n {
-        debug_assert!(h[i] >= 0.0);
-        debug_assert!(p[i].abs() <= 1.0);
-        //debug_assert!(p[i].abs() <= h[i].abs());
+    // gravity
+    {
+        // calc deltas
+        let mut delta_h = vec![0.0; n];
+        let mut delta_p = vec![0.0; n];
+        for i in 0..(n - 1) {
+            let h1 = h[i];
+            let h2 = h[i + 1];
 
-        // water flows into cell index `sink` (left or right neighbor)
-        // cannot flow out of bounds
-        let sink = if p[i] > 0.0 && i < (n - 1) {
-            i + 1 // right
-        } else if p[i] < 0.0 && i > 0 {
-            i - 1 //left
-        } else {
-            //delta_p[i] -= p[i] * 0.1 * dt; // dampen out impulse at boundary
-            continue;
-        };
+            let dh = (h2 - h1).abs().powf(1.0) * dt;
+            let dh = dh.clamp(0.0, f32::max(h1, h2));
+            let (src, dst) = if h1 > h2 { (i, i + 1) } else { (i + 1, i) };
+            let dp = dh * (h1 - h2).signum();
+            delta_h[src] -= dh;
+            delta_h[dst] += dh;
 
-        // transfer mass
-        let dh = (p[i].abs() * dt).clamp(0.0, h[i]); // clamp to h[i] *dt?
-        delta_h[i] -= dh;
-        delta_h[sink] += dh;
+            delta_p[src] -= dp;
+            delta_p[dst] += dp;
+        }
 
-        // transfer momentum: TODO: clamp?
-        let dp = if h[i] != 0.0 { p[i].signum() * p[i] * dh / h[i] } else { 0.0 };
-        delta_p[i] -= dp;
-        delta_p[sink] += dp;
+        // apply deltas
+        for i in (0..n).rev() {
+            h[i] = (h[i] + delta_h[i]).clamp(0.0, 1.0);
+            p[i] = (p[i] + delta_p[i]); //.clamp(-h[i].abs(), h[i].abs()); // 👈 clamps v to -1..1
+
+            debug_assert!(h[i].is_finite());
+            debug_assert!(p[i].is_finite());
+            if !h[i].is_finite() {
+                h[i] = 0.0; // last resort
+            }
+            if !p[i].is_finite() {
+                p[i] = 0.0; // last resort
+            }
+        }
     }
 
-    for i in 0..n {
-        h[i] = (h[i] + delta_h[i]).clamp(0.0, 1.0);
-        p[i] = (p[i] + delta_p[i]).clamp(-h[i].abs(), h[i].abs()); // 👈 clamps v to -1..1
+    // propagator
 
-        debug_assert!(h[i].is_finite());
-        debug_assert!(p[i].is_finite());
-        if !h[i].is_finite() {
-            h[i] = 0.0; // last resort
+    {
+        // calc deltas
+        let mut delta_h = vec![0.0; n];
+        let mut delta_p = vec![0.0; n];
+
+        for i in 0..n {
+            debug_assert!(h[i] >= 0.0);
+            //debug_assert!(p[i].abs() <= 1.0);
+            //debug_assert!(p[i].abs() <= h[i].abs());
+
+            // water flows into cell index `sink` (left or right neighbor)
+            // cannot flow out of bounds
+            let sink = if p[i] > 0.0 && i < (n - 1) {
+                i + 1 // right
+            } else if p[i] < 0.0 && i > 0 {
+                i - 1 //left
+            } else {
+                //delta_p[i] -= p[i] * 0.1 * dt; // dampen out impulse at boundary
+                continue;
+            };
+
+            // transfer mass
+            let dh = (p[i].abs() * dt).clamp(0.0, h[i]); // clamp to h[i] *dt?
+            delta_h[i] -= dh;
+            delta_h[sink] += dh;
+
+            // transfer momentum: TODO: clamp?
+            let dp = if h[i] != 0.0 { p[i].signum() * p[i].abs() * dh / h[i] } else { 0.0 };
+            delta_p[i] -= dp;
+            delta_p[sink] += dp;
         }
-        if !p[i].is_finite() {
-            p[i] = 0.0; // last resort
+
+        // apply deltas
+        for i in (0..n) {
+            h[i] = (h[i] + delta_h[i]).clamp(0.0, 1.0);
+            p[i] = (p[i] + delta_p[i]); //.clamp(-h[i].abs(), h[i].abs()); // 👈 clamps v to -1..1
+
+            debug_assert!(h[i].is_finite());
+            debug_assert!(p[i].is_finite());
+            if !h[i].is_finite() {
+                h[i] = 0.0; // last resort
+            }
+            if !p[i].is_finite() {
+                p[i] = 0.0; // last resort
+            }
         }
     }
 }
