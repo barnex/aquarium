@@ -18,9 +18,9 @@ fn run(f: impl Fn(&mut [f32], &mut [f32], f32)) {
         ve[i] = 1.0;
     }
 
-    for i in 45..50 {
+    for i in 25..30 {
         q[i] = 0.5;
-        ve[i] = -0.5;
+        ve[i] = 0.25;
     }
 
     // ⚠️ velocities and momenta must be < 1.0
@@ -28,7 +28,7 @@ fn run(f: impl Fn(&mut [f32], &mut [f32], f32)) {
 
     let ticks = 100;
     let output_every = 1;
-    let dt = 0.1;
+    let dt = 0.25;
 
     let ticks = (ticks as f32 / dt) as usize;
     for t in 0..ticks {
@@ -76,8 +76,8 @@ fn borewave2(h: &mut [f32], p: &mut [f32], dt: f32) {
     }
 
     for i in 0..n {
-        h[i] = (h[i] + delta_h[i]);
-        p[i] = (p[i] + delta_p[i]);
+        h[i] = (h[i] + delta_h[i]).clamp(0.0, 1.0);
+        p[i] = (p[i] + delta_p[i]).clamp(-h[i].abs(), h[i].abs()); // 👈 clamps v to -1..1
     }
 }
 
