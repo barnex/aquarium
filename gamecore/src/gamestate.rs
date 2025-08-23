@@ -158,7 +158,7 @@ impl G {
     // -------------------------------- Water
 
     pub fn water_level_at(&self, tile: vec2i16) -> f32 {
-        self.water.water_level_at(&self.tilemap, tile)
+        self.water.water_level_at(tile)
     }
 
     // -------------------------------- Tilemap

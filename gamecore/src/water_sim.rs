@@ -2,109 +2,64 @@ use crate::prelude::*;
 
 #[derive(Serialize, Deserialize)]
 pub struct WaterSim {
-    level_at: HashMap<vec2i16, f32>,
-    pub velocity_left_of: HashMap<vec2i16, f32>,
-    pub velocity_under_of: HashMap<vec2i16, f32>,
+    h: HashMap<vec2i16, f32>,
+    p: HashMap<vec2i16, vec2f>,
 }
 
 impl WaterSim {
     pub fn tick(&mut self, tilemap: &Tilemap) {
-        self.tick_flow(tilemap);
-		//self.tick_DIFFUSION(tilemap);
-    }
-
-    pub fn tick_flow(&mut self, tilemap: &Tilemap) {
-        // d v left = d p left = p - pleft
-
-        const MU: f32 = 0.03;
-
-        // 🪲 TODO: velocity misses sources to the right (water tile)
-        for pos in canal_tiles(tilemap) {
-            let level_here = self.water_level_at(tilemap, pos);
-            // left/under
-            {
-                let left = pos + vec2(-1, 0);
-                let level_left = self.water_level_at(tilemap, left);
-                // TODO: clamp if neighbor empty
-                let dvx = if can_flow(tilemap, left) { -MU * (level_here - level_left) } else { 0.0 };
-                let v_old = self.velocity_left_of.get(&pos).copied().unwrap_or_default();
-                let v_new = v_old + dvx;
-                self.velocity_left_of.insert(pos, v_new);
-            }
-
-            {
-                let under = pos + vec2(0, -1);
-                let level_under = self.water_level_at(tilemap, under);
-                // TODO: clamp if neighbor empty
-                let dvy = if can_flow(tilemap, under) { -MU * (level_here - level_under) } else { 0.0 };
-                let v_old = self.velocity_under_of.get(&pos).copied().unwrap_or_default();
-                let v_new = v_old + dvy;
-                self.velocity_under_of.insert(pos, v_new);
-            }
-
-        }
+        let dt = 0.1;
+        let mut delta_h = HashMap::<vec2i16, f32>::default();
+        let delta_p = HashMap::<vec2i16, vec2f>::default();
 
         for pos in canal_tiles(tilemap) {
-            let mut level = self.level_at.get(&pos).copied().unwrap_or_default();
+            let sourced = [[-1, 0], [1, 0], [0, -1], [0, 1]] //_
+                .into_iter()
+                .map(|[x, y]| pos + vec2(x, y))
+                .any(|pos2| tilemap.at(pos2) == Tile::Water);
 
-			level += self.velocity_left_of(pos) - self.velocity_right_of(pos);
-			level += self.velocity_under_of(pos) - self.velocity_upper_of(pos);
+            if sourced {
+                self.h.insert(pos, 1.0);
+            }
 
-			//let level = level.clamp(0.0, 100.0);
-            self.level_at.insert(pos, level);
-        }
-    }
+            let h1 = self.h.get(&pos).copied().unwrap_or_default();
 
-	fn velocity_left_of(&self, pos: vec2i16) -> f32{
-		self.velocity_left_of.get(&pos).copied().unwrap_or_default()
-	}
+            let neighbors = [[-1, 0], [1, 0], [0, -1], [0, 1]] //_
+                .into_iter()
+                .map(|[x, y]| pos + vec2(x, y))
+                .filter(|pos2| tilemap.at(*pos2) == Tile::Canal);
 
-	fn velocity_under_of(&self, pos: vec2i16) -> f32{
-		self.velocity_under_of.get(&pos).copied().unwrap_or_default()
-	}
-
-	fn velocity_right_of(&self, pos: vec2i16) -> f32{
-		self.velocity_left_of.get(&(pos + vec2::EX)).copied().unwrap_or_default()
-	}
-
-	fn velocity_upper_of(&self, pos: vec2i16) -> f32{
-		self.velocity_under_of.get(&(pos + vec2::EY)).copied().unwrap_or_default()
-	}
-
-    pub fn tick_DIFFUSION(&mut self, tilemap: &Tilemap) {
-        let mut next = HashMap::default();
-
-        for idx in canal_tiles(tilemap) {
-            let mut level = self.water_level_at(tilemap, idx);
-            let mut n = 1;
-
-            for [dx, dy] in [[-1, 0], [0, -1], [1, 0], [0, 1]] {
-                let neigh = idx + vec2(dx, dy);
-                let neigh = tilemap.at(neigh);
-                if neigh == Tile::Canal || neigh == Tile::Water {
-                    level += self.water_level_at(tilemap, idx + vec2(dx, dy));
-                    n += 1;
+            for pos2 in neighbors {
+                let h2 = self.h.get(&pos2).copied().unwrap_or_default();
+                if h2 >= h1 {
+                    continue;
                 }
-            }
+                // 💧 Our level is higher than neighbor at pos2
+                let (src, dst) = (pos, pos2);
+                let dh = ((h2 - h1).abs().powf(2.0) + (h2 - h1).abs() * f32::min(h1, h2)) * dt;
+                let dh = dh.clamp(0.0, f32::max(h1, h2));
 
-            next.insert(idx, level / (n as f32));
+                let dp = dh * (h1 - h2).signum();
+                let dp = dp.abs().powi(2) * dp.signum() / dt;
+                *delta_h.entry(src).or_default() -= dh;
+                *delta_h.entry(dst).or_default() += dh;
+            }
         }
 
-        self.level_at = next;
+        // apply deltas
+        for (&pos, &delta_h) in &delta_h {
+            *self.h.entry(pos).or_default() += delta_h;
+        }
     }
 
-    pub fn water_level_at(&self, tilemap: &Tilemap, tile: vec2i16) -> f32 {
-        if tilemap.at(tile) == Tile::Water { 100.0 } else { self.level_at.get(&tile).copied().unwrap_or(0.0) }
+    pub fn water_level_at(&self, tile: vec2i16) -> f32 {
+        self.h.get(&tile).copied().unwrap_or_default()
     }
 }
 
 impl Default for WaterSim {
     fn default() -> Self {
-        Self {
-            level_at: default(),
-            velocity_left_of: default(),
-            velocity_under_of: default(),
-        }
+        Self { h: default(), p: default() }
     }
 }
 

@@ -43,7 +43,7 @@ fn inspect_under_cursor(g: &G, out: &mut Out) {
     }
 
     writeln!(&mut out.debug, "water level: {}", g.water_level_at(mouse)).ignore_err();
-    writeln!(&mut out.debug, "water v left: {:?}", g.water.velocity_left_of.get(&mouse)).ignore_err();
+    //writeln!(&mut out.debug, "water v left: {:?}", g.water.velocity_left_of.get(&mouse)).ignore_err();
 }
 
 /// ❎ Draw a patch over all tiles where `f()` is `true`.
