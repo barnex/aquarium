@@ -25,7 +25,7 @@ fn run(f: impl Fn(&mut [f32], &mut [f32], f32)) {
     // }
 
     // gravity test:
-    for i in 30..35 {
+    for i in 0..20 {
         q[i] = 0.5;
         ve[i] = 0.0;
     }
@@ -70,7 +70,7 @@ fn borewave2(h: &mut [f32], p: &mut [f32], dt: f32) {
             delta_h[src] -= dh;
             delta_h[dst] += dh;
 
-            delta_p[src] -= dp;
+            //delta_p[src] -= dp; // nicer without?
             delta_p[dst] += dp;
         }
 
