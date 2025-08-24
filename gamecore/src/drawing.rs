@@ -47,8 +47,9 @@ fn draw_water(g: &G, out: &mut Out) {
 
             // speed arrow
             let speed = g.water.water_speed_at(tile);
-            let start = (tile.pos() + TILE_VSIZE / 2).as_f32();
-            let end = start + speed * (TILE_SIZE as f32);
+            let mid = (tile.pos() + TILE_VSIZE / 2).as_f32();
+            let start = mid - speed * (TILE_SIZE/2) as f32;
+            let end = mid + speed * (TILE_SIZE/2) as f32;
             let arrow = Line::new(start.as_i32(), end.as_i32()).with_color(RGBA::RED).with_width(2);
             out.draw_line(g, L_WATER+1, arrow);
             let bud = Rectangle::new(Bounds2D::new(start.as_i32()-2, start.as_i32()+2), RGBA::RED);
