@@ -37,20 +37,19 @@ impl WaterSim {
                 .filter(|pos2| tilemap.at(*pos2) == Tile::Canal);
 
             for pos2 in neighbors {
-                // 💧 Our level is higher than neighbor at pos2
+                // 💧 
                 let h2 = self.h.get(&pos2).copied().unwrap_or_default();
-                if h2 >= h1 {
-                    continue;
-                }
 
                 // gravity
                 let (src, dst) = (pos, pos2);
                 let to_neighbor = (pos2 - pos).as_f32(); // unit vector
 
-                //let dh = ((h2 - h1).abs().powf(2.0) + (h2 - h1).abs() * f32::min(h1, h2)) * dt;
-                let dh = (h1 - h2) * dt;
+                let dh = ((h2 - h1).abs().powf(2.0) + (h2 - h1).abs() * f32::min(h1, h2)) * dt;
+                //let dh = (h1 - h2) * dt;
                 let dh = dh.clamp(0.0, f32::max(h1, h2));
+                let dh = if h2 > h1{0.0}else{dh};
                 debug_assert!(dh >= 0.0);
+
                 *delta_h.entry(src).or_default() -= dh;
                 *delta_h.entry(dst).or_default() += dh;
 
