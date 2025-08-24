@@ -314,6 +314,14 @@ impl G {
         }
 
         writeln!(debug, "now: {:.04}s, frame: {}, tick: {}, FPS: {:.01}", self.now_secs, self.frame, self.tick, 1.0 / self.dt_smooth).unwrap();
+
+        let total_water = self.water.h.values().sum::<f32>();
+        let max_water = self.water.h.values().copied().max_by(|a, b| a.total_cmp(b)).unwrap_or_default();
+        let total_momentum = self.water.p.values().copied().sum::<vec2f>();
+        let max_momentum = self.water.p.values().copied().max_by(|a, b| a.len2().total_cmp(&b.len2())).unwrap_or_default();
+
+        writeln!(debug, "total water: {total_water:.6} (max {max_water:.6}), momentum: {:.6},{:.6} (max {max_momentum})", total_momentum.x(), total_momentum.y()).unwrap();
+
         writeln!(debug, "camera {:?}", self.camera_pos).unwrap();
         writeln!(debug, "down {:?}", self.inputs.iter_is_down().sorted().collect_vec()).unwrap();
         writeln!(debug, "tile_picker {:?}", self.ui.active_tool).unwrap();
