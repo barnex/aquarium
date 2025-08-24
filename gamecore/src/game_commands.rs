@@ -30,7 +30,7 @@ impl G {
     }
 
     fn cmd_tick(&mut self) -> Result<()> {
-        self.tick_once();
+        self.major_tick();
         Ok(())
     }
 }

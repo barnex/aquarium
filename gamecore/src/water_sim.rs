@@ -8,11 +8,19 @@ pub struct WaterSim {
 
 impl WaterSim {
     pub fn tick(&mut self, tilemap: &Tilemap) {
+        for i in 0..1{
+            self.tick_once(tilemap);
+        }
+    }
+
+    pub fn tick_once(&mut self, tilemap: &Tilemap) {
         let dt = 0.1;
         let mut delta_h = HashMap::<vec2i16, f32>::default();
         let mut delta_p = HashMap::<vec2i16, vec2f>::default();
 
         for pos in canal_tiles(tilemap) {
+            // 💧 If directly connected to source (Water tile),
+            // set level to maximum.
             let is_source = [[-1, 0], [1, 0], [0, -1], [0, 1]] //_
                 .into_iter()
                 .map(|[x, y]| pos + vec2(x, y))
@@ -38,15 +46,16 @@ impl WaterSim {
                 // gravity
                 let (src, dst) = (pos, pos2);
                 let to_neighbor = (pos2 - pos).as_f32(); // unit vector
-                
-                let dh = ((h2 - h1).abs().powf(2.0) + (h2 - h1).abs() * f32::min(h1, h2)) * dt;
-                let dh = dh.clamp(0.0, f32::max(h1, h2));
 
-                let dp = dh * (h1 - h2).signum();
-                let dp = dp.abs().powi(2) * dp.signum() / dt;
-                *delta_p.entry(dst).or_default() += dp * to_neighbor;
+                //let dh = ((h2 - h1).abs().powf(2.0) + (h2 - h1).abs() * f32::min(h1, h2)) * dt;
+                let dh = (h1 - h2) * dt;
+                let dh = dh.clamp(0.0, f32::max(h1, h2));
+                debug_assert!(dh >= 0.0);
                 *delta_h.entry(src).or_default() -= dh;
                 *delta_h.entry(dst).or_default() += dh;
+
+                let dp = dt * dh * to_neighbor;
+                *delta_p.entry(dst).or_default() += dp;
 
                 // propagator
                 // transfer mass
@@ -66,6 +75,9 @@ impl WaterSim {
         // apply deltas
         for (&pos, &delta_h) in &delta_h {
             *self.h.entry(pos).or_default() += delta_h;
+        }
+        for (&pos, &delta_p) in &delta_p {
+            *self.p.entry(pos).or_default() += delta_p;
         }
     }
 

@@ -121,10 +121,12 @@ impl G {
 
         if !self.paused {
             self.frame += 1;
+
             if self.frame % (self.frames_per_tick as u64) == 0 {
                 // 🪲 TODO: time major tick
-                self.tick_once();
+                self.major_tick();
             }
+            self.water.tick(&self.tilemap);
 
             #[cfg(debug_assertions)]
             if self.debug.pause_on_sanity_failure {
@@ -143,9 +145,8 @@ impl G {
         self.buildings.gc();
     }
 
-    pub(crate) fn tick_once(&mut self) {
+    pub(crate) fn major_tick(&mut self) {
         self.tick += 1;
-        self.water.tick(&self.tilemap);
         self.tick_pawns();
     }
 
