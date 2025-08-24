@@ -103,6 +103,7 @@ fn cursor_sprite(g: &G) -> Sprite {
             Action::Assign => sprite!("assign"),
             Action::None => sprite!("grid24"),
         },
+        Tool::WaterBucket => sprite!("droplet"),
     }
 }
 

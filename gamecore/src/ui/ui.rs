@@ -14,6 +14,7 @@ pub enum Tool {
     Pawn(PawnTyp),
     Building(BuildingTyp),
     Resource(ResourceTyp),
+    WaterBucket,
 }
 
 impl Ui {
@@ -35,7 +36,10 @@ impl Ui {
     }
 
     fn menu_ui(&mut self, inputs: &mut Inputs, out: &mut Out) {
-        let buttons = iter::once((Tool::Pointer, sprite!("pointer"))) //_
+        use iter::once;
+
+        let buttons = once((Tool::Pointer, sprite!("pointer"))) //_
+            .chain(once((Tool::WaterBucket, sprite!("droplet"))))
             .chain(Tile::all().map(|typ| (Tool::Tile(typ), typ.sprite())))
             .chain(PawnTyp::all().map(|typ| (Tool::Pawn(typ), typ.sprite())))
             .chain(BuildingTyp::all().map(|typ| (Tool::Building(typ), typ.sprite())))

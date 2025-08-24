@@ -2,8 +2,8 @@ use crate::prelude::*;
 
 #[derive(Serialize, Deserialize)]
 pub struct WaterSim {
-    h: HashMap<vec2i16, f32>,
-    p: HashMap<vec2i16, vec2f>,
+    pub h: HashMap<vec2i16, f32>,
+    pub p: HashMap<vec2i16, vec2f>,
 }
 
 impl WaterSim {
@@ -19,7 +19,7 @@ impl WaterSim {
         let mut delta_p = HashMap::<vec2i16, vec2f>::default();
 
         for pos in canal_tiles(tilemap) {
-            // 💧 If directly connected to source (Water tile),
+            // 🚰 If directly connected to source (Water tile),
             // set level to maximum.
             let is_source = [[-1, 0], [1, 0], [0, -1], [0, 1]] //_
                 .into_iter()
@@ -29,7 +29,9 @@ impl WaterSim {
                 self.h.insert(pos, 1.0);
             }
 
+            // 📏 my water height
             let h1 = self.h.get(&pos).copied().unwrap_or_default();
+            let p1 = self.p.get(&pos).copied().unwrap_or_default();
 
             let neighbors = [[-1, 0], [1, 0], [0, -1], [0, 1]] //_
                 .into_iter()
@@ -37,37 +39,53 @@ impl WaterSim {
                 .filter(|pos2| tilemap.at(*pos2) == Tile::Canal);
 
             for pos2 in neighbors {
-                // 💧
+                // 📏 neighbor water height
                 let h2 = self.h.get(&pos2).copied().unwrap_or_default();
 
-                // gravity
                 let (src, dst) = (pos, pos2);
                 let to_neighbor = (pos2 - pos).as_f32(); // unit vector
 
-                let dh = ((h2 - h1).abs().powf(2.0) + (h2 - h1).abs() * f32::min(h1, h2)) * dt;
-                //let dh = (h1 - h2) * dt;
-                let dh = dh.clamp(0.0, f32::max(h1, h2));
-                let dh = if h2 > h1 { 0.0 } else { dh };
-                debug_assert!(dh >= 0.0);
+                if h1 > h2 && h1 > 0.0 {
+                    let dh = (h1 - h2) * dt; // 💧 transferred amount
 
-                *delta_h.entry(src).or_default() -= dh;
-                *delta_h.entry(dst).or_default() += dh;
+                    // transfer matter
+                    *delta_h.entry(src).or_default() -= dh;
+                    *delta_h.entry(dst).or_default() += dh;
 
-                let dp = dt * dh * to_neighbor;
-                *delta_p.entry(dst).or_default() += dp;
+                    // transfer corresponding momentum
+                    let fraction = dh / h1; // 💧/💧💧 transferred fraction
+                    let momentum_xfer = fraction * p1;
+                    *delta_p.entry(src).or_default() -= momentum_xfer;
+                    *delta_p.entry(dst).or_default() += momentum_xfer;
 
-                // propagator
-                // transfer mass
-                let p1 = self.p.get(&pos).copied().unwrap_or_default().dot(to_neighbor);
+                    // generated momentum in destination
+                    //*delta_p.entry(dst).or_default() += dh * to_neighbor;
+                }
 
-                let dh = (p1.abs() * dt).clamp(0.0, h1); // clamp to h[i] *dt?
-                *delta_h.entry(src).or_default() -= dh;
-                *delta_h.entry(dst).or_default() += dh;
+                // let dh = ((h2 - h1).abs().powf(2.0) + (h2 - h1).abs() * f32::min(h1, h2)) * dt;
+                // //let dh = (h1 - h2) * dt;
+                // let dh = dh.clamp(0.0, f32::max(h1, h2));
+                // let dh = if h2 > h1 { 0.0 } else { dh };
+                // debug_assert!(dh >= 0.0);
 
-                // transfer momentum: TODO: clamp?
-                let dp = if h1 != 0.0 { p1.signum() * p1.abs() * dh / h1 } else { 0.0 };
-                *delta_p.entry(src).or_default() -= dp * to_neighbor;
-                *delta_p.entry(dst).or_default() += dp * to_neighbor;
+                // *delta_h.entry(src).or_default() -= dh;
+                // *delta_h.entry(dst).or_default() += dh;
+
+                // let dp = dt * dh * to_neighbor;
+                // *delta_p.entry(dst).or_default() += dp;
+
+                // // propagator
+                // // transfer mass
+                // let p1 = self.p.get(&pos).copied().unwrap_or_default().dot(to_neighbor);
+
+                // let dh = (p1.abs() * dt).clamp(0.0, h1); // clamp to h[i] *dt?
+                // *delta_h.entry(src).or_default() -= dh;
+                // *delta_h.entry(dst).or_default() += dh;
+
+                // // transfer momentum: TODO: clamp?
+                // let dp = if h1 != 0.0 { p1.signum() * p1.abs() * dh / h1 } else { 0.0 };
+                // *delta_p.entry(src).or_default() -= dp * to_neighbor;
+                // *delta_p.entry(dst).or_default() += dp * to_neighbor;
             }
         }
 
@@ -76,7 +94,9 @@ impl WaterSim {
             *self.h.entry(pos).or_default() += delta_h;
         }
         for (&pos, &delta_p) in &delta_p {
-            *self.p.entry(pos).or_default() += delta_p;
+            let p = self.p.entry(pos).or_default();
+            *p += delta_p;
+            //*p = (*p).map(|v|v.clamp(-1.0, 1.0));
         }
     }
 

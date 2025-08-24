@@ -104,24 +104,30 @@ fn command_pawns(g: &mut G) {
 
 fn draw_on_map(g: &mut G) {
     if g.inputs.is_down(K_MOUSE1) {
-        if let Tool::Tile(mat) = g.ui.active_tool {}
+        let mouse = g.mouse_tile();
 
         match g.ui.active_tool {
             Tool::Pointer => (),
-            Tool::Tile(mat) => g.tilemap.set(g.mouse_tile(), mat),
+            Tool::Tile(mat) => g.tilemap.set(mouse, mat),
             Tool::Pawn(typ) => {
                 if g.inputs.just_pressed(K_MOUSE1) {
-                    g.spawn(Pawn::new(typ, g.mouse_tile()));
+                    g.spawn(Pawn::new(typ, mouse));
                 }
             }
             Tool::Building(typ) => {
                 if g.inputs.just_pressed(K_MOUSE1) {
-                    g.spawn_building(Building::new(typ, g.mouse_tile()));
+                    g.spawn_building(Building::new(typ, mouse));
                 }
             }
             Tool::Resource(typ) => {
                 if g.inputs.just_pressed(K_MOUSE1) {
                     g.spawn_resource(g.mouse_tile(), typ);
+                }
+            }
+            Tool::WaterBucket => {
+                if g.inputs.is_down(K_MOUSE1) && g.tilemap.at(mouse) == Tile::Canal {
+                    g.water.h.insert(mouse, 1.0);
+                    g.water.p.insert(mouse, vec2::EX); // DEBUG HACK !!!! REMOVE!!!!
                 }
             }
         }
