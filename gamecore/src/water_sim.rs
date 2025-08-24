@@ -38,6 +38,72 @@ impl WaterSim {
                 .map(|[x, y]| pos + vec2(x, y))
                 .filter(|pos2| tilemap.at(*pos2) == Tile::Canal);
 
+
+            // propagator
+            if h1 > 0.0 {
+                let p = p1.x();
+                if p > 0.0 {
+                    let dst = pos + vec2::EX;
+                    if tilemap.at(dst) == Tile::Canal {
+                        let dh = p * dt;
+
+                        let fraction = dh / h1; // 💧/💧💧 transferred fraction
+                        let momentum_xfer = fraction * p1;
+                        *delta_p.entry(pos).or_default() -= momentum_xfer;
+                        *delta_p.entry(dst).or_default() += momentum_xfer;
+
+                        *delta_h.entry(pos).or_default() -= dh;
+                        *delta_h.entry(dst).or_default() += dh;
+                    }
+                }
+
+                if p < 0.0 {
+                    let dst = pos - vec2::EX;
+                    if tilemap.at(dst) == Tile::Canal {
+                        let dh = p.abs() * dt;
+
+                        let fraction = dh / h1; // 💧/💧💧 transferred fraction
+                        let momentum_xfer = fraction * p1;
+                        *delta_p.entry(pos).or_default() -= momentum_xfer;
+                        *delta_p.entry(dst).or_default() += momentum_xfer;
+
+                        *delta_h.entry(pos).or_default() -= dh;
+                        *delta_h.entry(dst).or_default() += dh;
+                    }
+                }
+
+                let p = p1.y();
+                if p > 0.0 {
+                    let dst = pos + vec2::EY;
+                    if tilemap.at(dst) == Tile::Canal {
+                        let dh = p * dt;
+
+                        let fraction = dh / h1; // 💧/💧💧 transferred fraction
+                        let momentum_xfer = fraction * p1;
+                        *delta_p.entry(pos).or_default() -= momentum_xfer;
+                        *delta_p.entry(dst).or_default() += momentum_xfer;
+
+                        *delta_h.entry(pos).or_default() -= dh;
+                        *delta_h.entry(dst).or_default() += dh;
+                    }
+                }
+
+                if p < 0.0 {
+                    let dst = pos - vec2::EY;
+                    if tilemap.at(dst) == Tile::Canal {
+                        let dh = p.abs() * dt;
+
+                        let fraction = dh / h1; // 💧/💧💧 transferred fraction
+                        let momentum_xfer = fraction * p1;
+                        *delta_p.entry(pos).or_default() -= momentum_xfer;
+                        *delta_p.entry(dst).or_default() += momentum_xfer;
+
+                        *delta_h.entry(pos).or_default() -= dh;
+                        *delta_h.entry(dst).or_default() += dh;
+                    }
+                }
+            }
+
             for pos2 in neighbors {
                 // 📏 neighbor water height
                 let h2 = self.h.get(&pos2).copied().unwrap_or_default();
@@ -46,9 +112,10 @@ impl WaterSim {
                 let to_neighbor = (pos2 - pos).as_f32(); // unit vector
 
                 if h1 > h2 && h1 > 0.0 {
-                    let dh = (h1 - h2) * dt; // 💧 transferred amount
 
-                    // transfer matter
+                    // TODO ENABLE !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+                    // diffuse matter
+                    let dh = (h1 - h2) * dt; // 💧 transferred amount
                     *delta_h.entry(src).or_default() -= dh;
                     *delta_h.entry(dst).or_default() += dh;
 
@@ -59,7 +126,7 @@ impl WaterSim {
                     *delta_p.entry(dst).or_default() += momentum_xfer;
 
                     // generated momentum in destination
-                    //*delta_p.entry(dst).or_default() += dh * to_neighbor;
+                    *delta_p.entry(dst).or_default() += dh * to_neighbor;
                 }
 
                 // let dh = ((h2 - h1).abs().powf(2.0) + (h2 - h1).abs() * f32::min(h1, h2)) * dt;
