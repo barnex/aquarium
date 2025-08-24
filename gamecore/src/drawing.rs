@@ -38,13 +38,21 @@ fn draw_water(g: &G, out: &mut Out) {
     for (tile, mat) in visible_tiles(g) {
         if mat == Tile::Canal {
             let level = g.water_level_at(tile);
-            if level != 0.0 {
-                let (r, b) = if level > 0.0 { (0, 255) } else { (255, 0) };
-                let a = (level * 255.0).clamp(0.0, 255.0) as u8;
-                let color = RGBA([r, 0, b, a]);
-                let bounds = Bounds2D::with_size(tile.pos(), TILE_VSIZE);
-                out.draw_rect(g, L_WATER, Rectangle::new(bounds, RGBA::TRANSPARENT).with_fill(color));
-            }
+            // level
+            let (r, b) = if level > 0.0 { (0, 255) } else { (255, 0) };
+            let a = (level * 255.0).clamp(0.0, 255.0) as u8;
+            let color = RGBA([r, 0, b, a]);
+            let bounds = Bounds2D::with_size(tile.pos(), TILE_VSIZE);
+            out.draw_rect(g, L_WATER, Rectangle::new(bounds, RGBA::TRANSPARENT).with_fill(color));
+
+            // speed arrow
+            let speed = g.water.water_speed_at(tile);
+            let start = (tile.pos() + TILE_VSIZE / 2).as_f32();
+            let end = start + speed * (TILE_SIZE as f32);
+            let arrow = Line::new(start.as_i32(), end.as_i32()).with_color(RGBA::RED).with_width(2);
+            out.draw_line(g, L_WATER+1, arrow);
+            let bud = Rectangle::new(Bounds2D::new(start.as_i32()-2, start.as_i32()+2), RGBA::RED);
+            out.draw_rect(g, L_WATER+1, bud);
         }
     }
 }

@@ -8,7 +8,7 @@ pub struct WaterSim {
 
 impl WaterSim {
     pub fn tick(&mut self, tilemap: &Tilemap) {
-        for i in 0..1{
+        for i in 0..1 {
             self.tick_once(tilemap);
         }
     }
@@ -37,7 +37,7 @@ impl WaterSim {
                 .filter(|pos2| tilemap.at(*pos2) == Tile::Canal);
 
             for pos2 in neighbors {
-                // 💧 
+                // 💧
                 let h2 = self.h.get(&pos2).copied().unwrap_or_default();
 
                 // gravity
@@ -47,7 +47,7 @@ impl WaterSim {
                 let dh = ((h2 - h1).abs().powf(2.0) + (h2 - h1).abs() * f32::min(h1, h2)) * dt;
                 //let dh = (h1 - h2) * dt;
                 let dh = dh.clamp(0.0, f32::max(h1, h2));
-                let dh = if h2 > h1{0.0}else{dh};
+                let dh = if h2 > h1 { 0.0 } else { dh };
                 debug_assert!(dh >= 0.0);
 
                 *delta_h.entry(src).or_default() -= dh;
@@ -82,6 +82,10 @@ impl WaterSim {
 
     pub fn water_level_at(&self, tile: vec2i16) -> f32 {
         self.h.get(&tile).copied().unwrap_or_default()
+    }
+
+    pub fn water_speed_at(&self, tile: vec2i16) -> vec2f {
+        self.p.get(&tile).copied().unwrap_or_default()
     }
 }
 

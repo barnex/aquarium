@@ -81,13 +81,18 @@ impl Out {
         self.layer(layer).sprites.push(DrawSprite::at_pos(sprite, pos).with_size(dst_size));
     }
 
+    /// Draw line in world coordinates (i.e. taking into account camera).
+    pub fn draw_line(&mut self, g: &G, layer: u8, line: Line) {
+        self.layer(layer).lines.push(line.translated(-g.camera_pos));
+    }
+
     pub fn push_line(&mut self, layer: u8, line: Line) {
         self.layer(layer).lines.push(line);
     }
 
     /// Draw rectangle in world coordinates (i.e. taking into account camera).
     pub fn draw_rect(&mut self, g: &G, layer: u8, rect: Rectangle) {
-        self.layer(layer).rectangles.push(rect.translated(- g.camera_pos));
+        self.layer(layer).rectangles.push(rect.translated(-g.camera_pos));
     }
 
     /// Draw rectangle in screen coordinates (i.e. ignoring camera).
