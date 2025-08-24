@@ -38,7 +38,6 @@ impl WaterSim {
                 .map(|[x, y]| pos + vec2(x, y))
                 .filter(|pos2| tilemap.at(*pos2) == Tile::Canal);
 
-
             // propagator
             if h1 > 0.0 {
                 let p = p1.x();
@@ -54,6 +53,8 @@ impl WaterSim {
 
                         *delta_h.entry(pos).or_default() -= dh;
                         *delta_h.entry(dst).or_default() += dh;
+                    } else {
+                        self.p.get_mut(&pos).unwrap()[0] *= 0.5;
                     }
                 }
 
@@ -69,6 +70,8 @@ impl WaterSim {
 
                         *delta_h.entry(pos).or_default() -= dh;
                         *delta_h.entry(dst).or_default() += dh;
+                    } else {
+                        self.p.get_mut(&pos).unwrap()[0] *= 0.5;
                     }
                 }
 
@@ -85,6 +88,8 @@ impl WaterSim {
 
                         *delta_h.entry(pos).or_default() -= dh;
                         *delta_h.entry(dst).or_default() += dh;
+                    } else {
+                        self.p.get_mut(&pos).unwrap()[1] *= 0.5;
                     }
                 }
 
@@ -100,6 +105,8 @@ impl WaterSim {
 
                         *delta_h.entry(pos).or_default() -= dh;
                         *delta_h.entry(dst).or_default() += dh;
+                    } else {
+                        self.p.get_mut(&pos).unwrap()[1] *= 0.5;
                     }
                 }
             }
@@ -112,7 +119,6 @@ impl WaterSim {
                 let to_neighbor = (pos2 - pos).as_f32(); // unit vector
 
                 if h1 > h2 && h1 > 0.0 {
-
                     // TODO ENABLE !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
                     // diffuse matter
                     let dh = (h1 - h2) * dt; // 💧 transferred amount
