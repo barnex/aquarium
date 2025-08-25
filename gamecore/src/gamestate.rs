@@ -159,7 +159,18 @@ impl G {
     }
 
     pub(crate) fn tick_farmland(&mut self) {
-        
+        let growth_rate = 0.05;
+        let farmland_tiles = self.tilemap.enumerate_all().filter_map(|(tile, mat)| (mat == Tile::Farmland).then_some(tile));
+        for tile in farmland_tiles {
+
+            if self.water_level_at(tile) > 0.01{
+                if self.resources.at(tile).is_none() && self.random::<f32>() < growth_rate * self.water_level_at(tile){
+                    self.spawn_resource(tile, ResourceTyp::Leaf);
+                    *self.water.h.get_mut(&tile).unwrap() = 0.0;
+                }
+            }
+
+        }
     }
 
     // -------------------------------- Water
