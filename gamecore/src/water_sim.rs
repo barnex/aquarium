@@ -31,6 +31,11 @@ impl WaterSim {
                 {
                     if let Some(h2) = self.h.get(&neigbor) {
                         let dh = (h - h2) * dt * 0.1;
+
+                        // 🪲 TODO: also take away momentum
+                        //let fraction = dh / h; // 💧/💧💧 transferred fraction
+                        //let momentum_xfer = fraction * p1;
+
                         *delta_h.entry(neigbor).or_default() += dh;
                         *delta_h.entry(pos).or_default() -= dh;
                     }
