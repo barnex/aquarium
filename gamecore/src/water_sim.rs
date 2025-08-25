@@ -22,7 +22,8 @@ impl WaterSim {
         for pos in farmland_tiles(tilemap) {
             const MAX_WETNESS: f32 = 0.2;
             let h = self.h.entry(pos).or_default();
-            *h *= 0.995;
+            let p = *self.p.entry(pos).or_default();
+            *h *= 0.995; // slowly dry out
             let h = *h;
             if h < MAX_WETNESS {
                 for neigbor in [[-1, 0], [1, 0], [0, -1], [0, 1]] //_
@@ -32,9 +33,12 @@ impl WaterSim {
                     if let Some(h2) = self.h.get(&neigbor) {
                         let dh = (h - h2) * dt * 0.1;
 
-                        // 🪲 TODO: also take away momentum
-                        //let fraction = dh / h; // 💧/💧💧 transferred fraction
-                        //let momentum_xfer = fraction * p1;
+                        // also take away momentum
+                        if h > 0.0 {
+                            let fraction = dh / h; // 💧/💧💧 transferred fraction
+                            let momentum_xfer = fraction * p;
+                            *delta_p.entry(pos).or_default() -= momentum_xfer;
+                        }
 
                         *delta_h.entry(neigbor).or_default() += dh;
                         *delta_h.entry(pos).or_default() -= dh;
