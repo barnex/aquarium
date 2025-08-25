@@ -134,31 +134,6 @@ impl WaterSim {
                     // generated momentum in destination
                     *delta_p.entry(dst).or_default() += dh * to_neighbor;
                 }
-
-                // let dh = ((h2 - h1).abs().powf(2.0) + (h2 - h1).abs() * f32::min(h1, h2)) * dt;
-                // //let dh = (h1 - h2) * dt;
-                // let dh = dh.clamp(0.0, f32::max(h1, h2));
-                // let dh = if h2 > h1 { 0.0 } else { dh };
-                // debug_assert!(dh >= 0.0);
-
-                // *delta_h.entry(src).or_default() -= dh;
-                // *delta_h.entry(dst).or_default() += dh;
-
-                // let dp = dt * dh * to_neighbor;
-                // *delta_p.entry(dst).or_default() += dp;
-
-                // // propagator
-                // // transfer mass
-                // let p1 = self.p.get(&pos).copied().unwrap_or_default().dot(to_neighbor);
-
-                // let dh = (p1.abs() * dt).clamp(0.0, h1); // clamp to h[i] *dt?
-                // *delta_h.entry(src).or_default() -= dh;
-                // *delta_h.entry(dst).or_default() += dh;
-
-                // // transfer momentum: TODO: clamp?
-                // let dp = if h1 != 0.0 { p1.signum() * p1.abs() * dh / h1 } else { 0.0 };
-                // *delta_p.entry(src).or_default() -= dp * to_neighbor;
-                // *delta_p.entry(dst).or_default() += dp * to_neighbor;
             }
         }
 
@@ -170,6 +145,13 @@ impl WaterSim {
             let p = self.p.entry(pos).or_default();
             *p += delta_p;
             //*p = (*p).map(|v|v.clamp(-1.0, 1.0));
+        }
+
+        // remove orphan water
+        let orphans = self.h.keys().chain(self.p.keys()).copied().filter(|&tile| tilemap.at(tile) != Tile::Canal).collect_vec();
+        for tile in orphans{
+            self.h.remove(&tile);
+            self.p.remove(&tile);
         }
     }
 
