@@ -35,7 +35,7 @@ impl Tile {
             Tile::Snow => sprite!("snow"),
             Tile::Water => sprite!("water2"),
             Tile::Block => sprite!("block24"),
-            Tile::Canal => sprite!("frame24"), // TODO
+            Tile::Canal => sprite!("canal"),
         }
     }
 }
