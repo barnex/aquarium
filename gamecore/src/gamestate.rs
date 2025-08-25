@@ -140,7 +140,7 @@ impl G {
         }
 
         self.draw_world(out);
-        self.output_debug(out);
+        print_debug_output(self, out);
 
         self.pawns.gc();
         self.buildings.gc();
@@ -162,14 +162,12 @@ impl G {
         let growth_rate = 0.05;
         let farmland_tiles = self.tilemap.enumerate_all().filter_map(|(tile, mat)| (mat == Tile::Farmland).then_some(tile));
         for tile in farmland_tiles {
-
-            if self.water_level_at(tile) > 0.01{
-                if self.resources.at(tile).is_none() && self.random::<f32>() < growth_rate * self.water_level_at(tile){
+            if self.water_level_at(tile) > 0.01 {
+                if self.resources.at(tile).is_none() && self.random::<f32>() < growth_rate * self.water_level_at(tile) {
                     self.spawn_resource(tile, ResourceTyp::Leaf);
                     *self.water.h.get_mut(&tile).unwrap() = 0.0;
                 }
             }
-
         }
     }
 
@@ -323,28 +321,5 @@ impl G {
         self.dt = (self.now_secs - self._prev_secs).clamp(0.001, 0.1); // clamp dt to 1-100ms to avoid craziness on clock suspend etc.
         self._prev_secs = self.now_secs;
         self.dt_smooth = lerp(self.dt_smooth, self.dt, 0.02);
-    }
-
-    fn output_debug(&mut self, out: &mut Out) {
-        let debug = &mut out.debug;
-        if let Some(e) = self.last_sanity_error.as_ref() {
-            writeln!(debug, "SANITY CHECK FAILED: {e}").ignore_err();
-        }
-
-        writeln!(debug, "now: {:.04}s, frame: {}, tick: {}, FPS: {:.01}", self.now_secs, self.frame, self.tick, 1.0 / self.dt_smooth).unwrap();
-
-        let total_water = self.water.h.values().sum::<f32>();
-        let max_water = self.water.h.values().copied().max_by(|a, b| a.total_cmp(b)).unwrap_or_default();
-        let total_momentum = self.water.p.values().copied().sum::<vec2f>();
-        let max_momentum = self.water.p.values().copied().max_by(|a, b| a.len2().total_cmp(&b.len2())).unwrap_or_default();
-
-        writeln!(debug, "total water: {total_water:.6} (max {max_water:.6}), momentum: {:.6},{:.6} (max {max_momentum})", total_momentum.x(), total_momentum.y()).unwrap();
-
-        writeln!(debug, "camera {:?}", self.camera_pos).unwrap();
-        writeln!(debug, "down {:?}", self.inputs.iter_is_down().sorted().collect_vec()).unwrap();
-        writeln!(debug, "tile_picker {:?}", self.ui.active_tool).unwrap();
-        writeln!(debug, "selected: {:?}", self.selected_pawn_ids.len()).unwrap();
-        writeln!(debug, "contextual_action: {:?}", self.contextual_action).unwrap();
-        writeln!(debug, "draw commands: {}", out.layers.iter().map(|l| l.lines.len() + l.rectangles.len() + l.sprites.len()).sum::<usize>()).unwrap();
     }
 }

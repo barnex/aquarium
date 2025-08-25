@@ -75,3 +75,27 @@ fn draw_home_overlay(g: &G, out: &mut Out) {
         }
     }
 }
+
+pub(crate) fn print_debug_output(g: &G, out: &mut Out) {
+    let debug = &mut out.debug;
+    if let Some(e) = g.last_sanity_error.as_ref() {
+        writeln!(debug, "SANITY CHECK FAILED: {e}").ignore_err();
+    }
+
+    writeln!(debug, "now: {:.04}s, frame: {}, tick: {}, FPS: {:.01}", g.now_secs, g.frame, g.tick, 1.0 / g.dt_smooth).unwrap();
+
+    let total_water = g.water.h.values().sum::<f32>();
+    let max_water = g.water.h.values().copied().max_by(|a, b| a.total_cmp(b)).unwrap_or_default();
+    let total_momentum = g.water.p.values().copied().sum::<vec2f>();
+    let max_momentum = g.water.p.values().copied().max_by(|a, b| a.len2().total_cmp(&b.len2())).unwrap_or_default();
+
+    writeln!(debug, "total water: {total_water:.6} (max {max_water:.6}), momentum: {:.6},{:.6} (max {max_momentum})", total_momentum.x(), total_momentum.y()).unwrap();
+
+    writeln!(debug, "camera {:?}", g.camera_pos).unwrap();
+    writeln!(debug, "down {:?}", g.inputs.iter_is_down().sorted().collect_vec()).unwrap();
+    writeln!(debug, "tile_picker {:?}", g.ui.active_tool).unwrap();
+    writeln!(debug, "selected: {:?}", g.selected_pawn_ids.len()).unwrap();
+    writeln!(debug, "contextual_action: {:?}", g.contextual_action).unwrap();
+    writeln!(debug, "draw commands: {}", out.layers.iter().map(|l| l.lines.len() + l.rectangles.len() + l.sprites.len()).sum::<usize>()).unwrap();
+    writeln!(debug, "map size: {} ({} tiles)", g.tilemap.size(), g.tilemap.size().as_u32().product()).unwrap();
+}
