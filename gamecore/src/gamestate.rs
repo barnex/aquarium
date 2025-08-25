@@ -126,6 +126,7 @@ impl G {
                 // 🪲 TODO: time major tick
                 self.major_tick();
             }
+            // 🪲 TODO: properly pace, make testable
             self.water.tick(&self.tilemap);
 
             #[cfg(debug_assertions)]
@@ -148,12 +149,17 @@ impl G {
     pub(crate) fn major_tick(&mut self) {
         self.tick += 1;
         self.tick_pawns();
+        self.tick_farmland();
     }
 
     pub(crate) fn tick_pawns(&mut self) {
         for p in self.pawns.iter() {
             p.tick(self);
         }
+    }
+
+    pub(crate) fn tick_farmland(&mut self) {
+        
     }
 
     // -------------------------------- Water

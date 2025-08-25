@@ -40,6 +40,13 @@ impl Tile {
             Tile::Farmland => sprite!("farmland"),
         }
     }
+
+    pub(crate) fn can_have_water(&self) -> bool {
+        match self {
+            Tile::Canal | Tile::Farmland => true,
+            _ => false,
+        }
+    }
 }
 
 impl Display for Tile {

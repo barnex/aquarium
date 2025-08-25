@@ -18,6 +18,26 @@ impl WaterSim {
         let mut delta_h = HashMap::<vec2i16, f32>::default();
         let mut delta_p = HashMap::<vec2i16, vec2f>::default();
 
+        // ☘️ irrigate farm land
+        for pos in farmland_tiles(tilemap) {
+            const MAX_WETNESS: f32 = 0.2;
+            let h = self.h.entry(pos).or_default();
+            *h *= 0.995;
+            let h = *h;
+            if h < MAX_WETNESS {
+                for neigbor in [[-1, 0], [1, 0], [0, -1], [0, 1]] //_
+                    .into_iter()
+                    .map(|[x, y]| pos + vec2(x, y))
+                {
+                    if let Some(h2) = self.h.get(&neigbor) {
+                        let dh = (h - h2) * dt * 0.1;
+                        *delta_h.entry(neigbor).or_default() += dh;
+                        *delta_h.entry(pos).or_default() -= dh;
+                    }
+                }
+            }
+        }
+
         for pos in canal_tiles(tilemap) {
             // 🚰 If directly connected to source (Water tile),
             // set level to maximum.
@@ -148,8 +168,8 @@ impl WaterSim {
         }
 
         // remove orphan water
-        let orphans = self.h.keys().chain(self.p.keys()).copied().filter(|&tile| tilemap.at(tile) != Tile::Canal).collect_vec();
-        for tile in orphans{
+        let orphans = self.h.keys().chain(self.p.keys()).copied().filter(|&tile| !tilemap.at(tile).can_have_water()).collect_vec();
+        for tile in orphans {
             self.h.remove(&tile);
             self.p.remove(&tile);
         }
@@ -179,4 +199,8 @@ fn can_flow(tilemap: &Tilemap, pos: vec2i16) -> bool {
 
 fn canal_tiles(tilemap: &Tilemap) -> impl Iterator<Item = vec2i16> {
     tilemap.enumerate_all().filter_map(|(tile, mat)| (mat == Tile::Canal).then_some(tile))
+}
+
+fn farmland_tiles(tilemap: &Tilemap) -> impl Iterator<Item = vec2i16> {
+    tilemap.enumerate_all().filter_map(|(tile, mat)| (mat == Tile::Farmland).then_some(tile))
 }
