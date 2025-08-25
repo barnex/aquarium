@@ -12,7 +12,7 @@ members = [
 	"corelibs/memkeep",
 	"corelibs/pathfinder",
 	"corelibs/vector",
-	"gamecore", "physics_validation",
+	"gamecore",
 	"proc_macros",
 	"proc_macros_impl",
 	"webshell",
