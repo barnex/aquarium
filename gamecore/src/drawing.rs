@@ -35,8 +35,9 @@ pub(super) fn visible_pawns(g: &G) -> impl Iterator<Item = &Pawn> {
 }
 
 fn draw_water(g: &G, out: &mut Out) {
-    for (tile, mat) in visible_tiles(g) {
-        if mat == Tile::Canal {
+    for (tile, _) in visible_tiles(g) {
+        // draw water even if not on canal, so we see it in case of issues.
+        if g.water.h.contains_key(&tile) || g.water.p.contains_key(&tile) {
             let level = g.water_level_at(tile);
             // level
             let (r, b) = if level > 0.0 { (0, 255) } else { (255, 0) };
@@ -48,12 +49,12 @@ fn draw_water(g: &G, out: &mut Out) {
             // speed arrow
             let speed = g.water.water_speed_at(tile);
             let mid = (tile.pos() + TILE_VSIZE / 2).as_f32();
-            let start = mid - speed * (TILE_SIZE/2) as f32;
-            let end = mid + speed * (TILE_SIZE/2) as f32;
+            let start = mid - speed * (TILE_SIZE / 2) as f32;
+            let end = mid + speed * (TILE_SIZE / 2) as f32;
             let arrow = Line::new(start.as_i32(), end.as_i32()).with_color(RGBA::RED).with_width(2);
-            out.draw_line(g, L_WATER+1, arrow);
-            let bud = Rectangle::new(Bounds2D::new(start.as_i32()-2, start.as_i32()+2), RGBA::RED);
-            out.draw_rect(g, L_WATER+1, bud);
+            out.draw_line(g, L_WATER + 1, arrow);
+            let bud = Rectangle::new(Bounds2D::new(start.as_i32() - 2, start.as_i32() + 2), RGBA::RED);
+            out.draw_rect(g, L_WATER + 1, bud);
         }
     }
 }
