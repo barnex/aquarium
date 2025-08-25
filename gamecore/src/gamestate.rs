@@ -206,6 +206,7 @@ impl G {
             Tile::Water => false,
             Tile::Block => false,
             Tile::Canal => false,
+            Tile::Farmland => true,
         }
     }
 
