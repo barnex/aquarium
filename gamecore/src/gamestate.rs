@@ -159,7 +159,7 @@ impl G {
     }
 
     pub(crate) fn tick_farmland(&mut self) {
-        let growth_rate = 0.05;
+        let growth_rate = 0.01;
         let farmland_tiles = self.tilemap.enumerate_all().filter_map(|(tile, mat)| (mat == Tile::Farmland).then_some(tile));
         for tile in farmland_tiles {
             if self.water_level_at(tile) > 0.01 {
@@ -321,5 +321,18 @@ impl G {
         self.dt = (self.now_secs - self._prev_secs).clamp(0.001, 0.1); // clamp dt to 1-100ms to avoid craziness on clock suspend etc.
         self._prev_secs = self.now_secs;
         self.dt_smooth = lerp(self.dt_smooth, self.dt, 0.02);
+    }
+
+    pub(crate) fn set_tile(&mut self, idx: Vector<i16, 2>, v: Tile) {
+        self.tilemap.set(idx, v);
+
+        // 💧 add 0 water to canal, to kickstart water sim
+        if v == Tile::Canal {
+            self.water.h.entry(idx).or_default();
+        }
+        // ☘️ resource becomes unreachable, remove it.
+        if !self.is_walkable(idx) {
+            self.resources.remove(idx);
+        }
     }
 }

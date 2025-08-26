@@ -20,10 +20,10 @@ impl WaterSim {
 
         // ☘️ irrigate farm land
         for pos in farmland_tiles(tilemap) {
-            const MAX_WETNESS: f32 = 0.2;
+            const MAX_WETNESS: f32 = 0.3;
             let h = self.h.entry(pos).or_default();
             let p = *self.p.entry(pos).or_default();
-            *h *= 0.995; // slowly dry out
+            *h *= 0.997; // slowly dry out
             let h = *h;
             if h < MAX_WETNESS {
                 for neigbor in [[-1, 0], [1, 0], [0, -1], [0, 1]] //_
@@ -31,7 +31,7 @@ impl WaterSim {
                     .map(|[x, y]| pos + vec2(x, y))
                 {
                     if let Some(h2) = self.h.get(&neigbor) {
-                        let dh = (h - h2) * dt * 0.1;
+                        let dh = (h - h2) * dt * 0.05; // 👈 spill rate
 
                         // also take away momentum
                         if h > 0.0 {

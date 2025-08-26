@@ -36,15 +36,15 @@ pub(crate) fn world_with_resources(name: &str) -> G {
 
 /// A small test world with some features.
 pub(crate) fn small_world(name: &str) -> G {
-    let g = test_world(vec2(64, 32), name);
+    let mut g = test_world(vec2(64, 32), name);
 
     for (x, y) in cross(2..5, 3..7) {
-        g.tilemap.set(vec2(x, y), Tile::Water);
+        g.set_tile(vec2(x, y), Tile::Water);
     }
     for (x, y) in cross(6..9, 2..5) {
-        g.tilemap.set(vec2(x, y), Tile::Block);
+        g.set_tile(vec2(x, y), Tile::Block);
     }
-    g.tilemap.set(vec2(4, 4), Tile::Sand);
+    g.set_tile(vec2(4, 4), Tile::Sand);
     g
 }
 
@@ -59,7 +59,7 @@ fn test_world(size: vec2u16, name: &str) -> G {
         g.name = name.into(); // name used as output dir
         g.ui.hidden = true; // don't accidentally click on UI
         g.debug.draw_mouse = true; // see mouse position in screenshots
-	    g.debug.show_home = true;
+        g.debug.show_home = true;
         g.frames_per_tick = 1; // time moves fast, don't spend screenshots on pure animation
     })
 }

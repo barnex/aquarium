@@ -108,7 +108,7 @@ fn draw_on_map(g: &mut G) {
 
         match g.ui.active_tool {
             Tool::Pointer => (),
-            Tool::Tile(mat) => g.tilemap.set(mouse, mat),
+            Tool::Tile(mat) => g.set_tile(mouse, mat),
             Tool::Pawn(typ) => {
                 if g.inputs.just_pressed(K_MOUSE1) {
                     g.spawn(Pawn::new(typ, mouse));
