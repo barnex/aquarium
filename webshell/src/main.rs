@@ -62,7 +62,7 @@ async fn start() -> JsResult<()> {
     test_resource_loading().await;
 
     let mut res = Resources::new(fallback_bitmap((0, 0, 255), TILE_SIZE).await.unwrap());
-    let mut state = match load_game() {
+    let mut g = match load_game() {
         Some(state) => {
             log::info!("game loaded");
             state
@@ -94,13 +94,13 @@ async fn start() -> JsResult<()> {
         out.clear();
         out.viewport_size = vec2(canvas.width(), canvas.height());
 
-        state.tick(now_secs(), input_events.borrow_mut().drain(..), &mut out);
+        g.tick(now_secs(), input_events.borrow_mut().drain(..), &mut out);
 
         draw(&canvas, &ctx, &mut res, &out);
 
         get_element_by_id::<HtmlElement>("debug").set_inner_text(&out.debug);
 
-        exec_pending_commands(&mut state);
+        exec_pending_commands(&mut g);
     });
 
     Ok(())

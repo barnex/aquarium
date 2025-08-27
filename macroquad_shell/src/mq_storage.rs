@@ -8,7 +8,7 @@ use std::fs;
 const APP_KEY: &'static str = "savegame";
 
 pub fn save_game(state: &G) {
-    log::info!("autosave... {APP_KEY}");
+    log::info!("save {APP_KEY}");
     serialize(APP_KEY, state).expect("autosave");
 }
 

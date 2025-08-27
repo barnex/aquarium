@@ -33,7 +33,7 @@ async fn main() {
     let mut res = Resources::new(fallback);
     let mut input_events = VecDeque::new();
 
-    let mut state = match load_game() {
+    let mut g = match load_game() {
         Some(state) => {
             log::info!("game loaded");
             state
@@ -53,17 +53,24 @@ async fn main() {
     let mut out = Out::default();
     let start = Instant::now();
 
+    mq::prevent_quit();
     loop {
+        if mq::is_quit_requested() {
+            log::info!("quitting...");
+            save_game(&g);
+            return; // 👈 exit
+        }
+
         let now_secs = Instant::now().duration_since(start).as_secs_f64();
         out.clear();
 
         out.viewport_size = vec2(mq::screen_width(), mq::screen_height()).as_u32();
         capture_input_events(&mut input_events);
 
-        state.tick(now_secs, input_events.drain(..), &mut out);
+        g.tick(now_secs, input_events.drain(..), &mut out);
         draw(&mut res, &out);
 
-        println!("{ANSI_CLEAR}{}", &out.debug);
+        //println!("{ANSI_CLEAR}{}", &out.debug);
 
         mq::next_frame().await
     }
