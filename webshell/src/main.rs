@@ -3,8 +3,8 @@ mod graphics_postprocessing;
 mod http_get;
 mod js_commands;
 mod js_renderer;
-mod load_bitmap;
 mod js_resources;
+mod load_bitmap;
 mod storage;
 mod time;
 
@@ -12,11 +12,11 @@ use event_listeners::*;
 use http_get::*;
 use js_commands::*;
 use js_renderer::*;
-use load_bitmap::*;
 use js_resources::*;
+use load_bitmap::*;
+use shell_api::*;
 use storage::*;
 use time::*;
-use shell_api::*;
 
 use fixed_str::*;
 use gamecore::*;
@@ -169,16 +169,6 @@ where
     // Start animation loop
     request_animation_frame(&anim_loop_clone);
 }
-
-// take input events from queue and update Inputs state accordingly
-// fn record_input_events(keymap: &Keymap, inputs: &mut Inputs, events: &Shared<VecDeque<InputEvent>>) {
-//     // 🪲 TODO: fuse into single tick(events)
-//     inputs.start_next_frame();
-//     for event in events.borrow_mut().drain(..) {
-//         inputs.record_event(keymap, event);
-//     }
-//
-// }
 
 fn request_animation_frame(anim_loop_clone: &Rc<RefCell<Option<Closure<dyn FnMut()>>>>) -> i32 {
     window().request_animation_frame(anim_loop_clone.borrow().as_ref().unwrap().as_ref().unchecked_ref()).unwrap()

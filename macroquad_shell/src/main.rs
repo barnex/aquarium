@@ -1,17 +1,35 @@
-use macroquad::prelude::*;
+use macroquad::prelude as mq;
+use shell_api::*;
+
+mod mq_resources;
+use mq_resources::*;
+use vector::*;
+
+type HashMap<K, V> = fnv::FnvHashMap<K, V>;
+type HashSet<T> = fnv::FnvHashSet<T>;
 
 #[macroquad::main("Texture")]
 async fn main() {
+    env_logger::init();
+
+    log::info!("Using macroquad shell");
     #[cfg(debug_assertions)]
     {
         log::warn!("debug_assertions enabled, performance will suffer");
     }
 
-    let texture: Texture2D = load_texture("assets/ferris.png").await.unwrap();
+    let fallback = mq::Texture2D::from_image(&fallback_bitmap((0, 0, 255), vec2(24, 24) /*TODO*/));
+    let mut res = Resources::new(fallback);
 
     loop {
-        clear_background(LIGHTGRAY);
-        draw_texture(&texture, 0., 0., WHITE);
-        next_frame().await
+        res.poll(); // 👈 !
+
+        mq::clear_background(mq::LIGHTGRAY);
+
+        if let Some(texture) = res.get(&sprite!("kit6")) {
+            mq::draw_texture(&texture, 0., 0., mq::WHITE);
+        }
+
+        mq::next_frame().await
     }
 }

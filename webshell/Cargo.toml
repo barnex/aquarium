@@ -19,7 +19,7 @@ vector = { workspace = true }
 console_error_panic_hook = "0.1.7"
 console_log = "1.0"
 futures-channel = "0.3.31"
-futures = "0.3"
+futures = {workspace = true}
 futures-util = "0.3"
 js-sys = "0.3.77"
 wasm-bindgen = "0.2.100"

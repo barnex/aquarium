@@ -7,3 +7,11 @@ default-run = "macroquad_shell"
 [dependencies]
 macroquad = "0.4.14"
 log = { workspace = true }
+fnv = { workspace = true }
+futures = { workspace = true }
+shell_api = { workspace = true }
+proc_macros = { workspace = true }
+fixed_str = { workspace = true }
+#image = { workspace = true }
+vector = { workspace = true }
+env_logger = { workspace = true }
