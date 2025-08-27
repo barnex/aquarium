@@ -905,6 +905,13 @@ dependencies = [
 [[package]]
 name = "shell_api"
 version = "0.1.0"
+dependencies = [
+ "fixed_str",
+ "fnv",
+ "proc_macros",
+ "serde",
+ "vector",
+]
 
 [[package]]
 name = "simd-adler32"
