@@ -25,7 +25,7 @@ pub(super) fn draw_debug_overlay(g: &G, out: &mut Out) {
         draw_destinations(g, out);
     }
     if g.debug.draw_mouse {
-        out.draw_sprite(g, L_UI_FG + 1, sprite!("pointer"), g.mouse_position_world());
+        g.draw_sprite(out, L_UI_FG + 1, sprite!("pointer"), g.mouse_position_world());
     }
     if g.debug.inspect_under_cursor {
         inspect_under_cursor(g, out);
@@ -52,7 +52,7 @@ fn draw_tile_overlay(g: &G, out: &mut Out, color: RGBA, f: impl Fn(vec2i16) -> b
     for (idx, _) in visible_tiles(g) {
         if f(idx) {
             let bounds = Bounds2D::from_pos_size(idx.pos(), TILE_VSIZE).translated(-g.camera_pos);
-            out.push_rect_screen(L_SPRITES + 1, Rectangle::new(bounds, color).with_fill(color));
+            out.draw_rect_screen(L_SPRITES + 1, Rectangle::new(bounds, color).with_fill(color));
         }
     }
 }
@@ -62,7 +62,7 @@ fn draw_destinations(g: &G, out: &mut Out) {
         if let Some(destination) = pawn.route.destination()
             && !pawn.is_at_destination()
         {
-            out.push_line(L_SPRITES, Line::new(pawn.center(), destination.pos() + TILE_ISIZE / 2).with_color(RGB::WHITE.with_alpha(128)).translated(-g.camera_pos));
+            out.draw_line_screen(L_SPRITES, Line::new(pawn.center(), destination.pos() + TILE_ISIZE / 2).with_color(RGB::WHITE.with_alpha(128)).translated(-g.camera_pos));
         }
     }
 }
@@ -71,7 +71,7 @@ fn draw_home_overlay(g: &G, out: &mut Out) {
     let color = RGBA::new(0, 0, 255, 100);
     for pawn in visible_pawns(g) {
         if let Some(home) = g.buildings.get_maybe(pawn.home.get()) {
-            out.push_line(L_SPRITES + 1, Line::new(pawn.center(), home.tile.pos()).with_color(color).with_width(2).translated(-g.camera_pos));
+            out.draw_line_screen(L_SPRITES + 1, Line::new(pawn.center(), home.tile.pos()).with_color(color).with_width(2).translated(-g.camera_pos));
         }
     }
 }

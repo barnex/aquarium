@@ -17,7 +17,7 @@ impl Palette {
         let size = vec2(self.cols, self.rows) * (self.button_size + self.margin) + self.margin;
         let rect = Bounds2D::with_size(self.pos, size.as_i32());
 
-        out.push_rect_screen(L_UI_BG, Rectangle::new(rect, RGBA([128, 128, 128, 128])).with_fill(RGBA::WHITE));
+        out.draw_rect_screen(L_UI_BG, Rectangle::new(rect, RGBA([128, 128, 128, 128])).with_fill(RGBA::WHITE));
 
         let (mut row, mut col) = (0, 0);
         for (option, sprite) in options {
@@ -33,7 +33,7 @@ impl Palette {
             if selection == &option {
                 let min = pos - (self.margin as i32) + 1;
                 let max = pos + self.button_size.as_i32() + (self.margin as i32) - 1;
-                out.push_rect_screen(L_UI, Rectangle::new(Bounds2D::new(min, max), RGBA::TRANSPARENT).with_fill(RGBA::RED));
+                out.draw_rect_screen(L_UI, Rectangle::new(Bounds2D::new(min, max), RGBA::TRANSPARENT).with_fill(RGBA::RED));
             }
 
             col += 1;

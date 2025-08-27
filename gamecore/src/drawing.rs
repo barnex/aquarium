@@ -17,6 +17,21 @@ impl G {
 
         draw_debug_overlay(g, out);
     }
+
+    /// Draw sprite in world coordinates (i.e. taking into account camera).
+    pub fn draw_sprite(&self, out: &mut Out, layer: u8, sprite: Sprite, world_pos: vec2i) {
+        out.draw_sprite_screen(layer, sprite, world_pos - self.camera_pos);
+    }
+
+    /// Draw line in world coordinates (i.e. taking into account camera).
+    pub fn draw_line(&self, out: &mut Out, layer: u8, line: Line) {
+        out.draw_line_screen(layer, line.translated(-self.camera_pos));
+    }
+
+    /// Draw rectangle in world coordinates (i.e. taking into account camera).
+    pub fn draw_rect(&self, out: &mut Out, layer: u8, rect: Rectangle) {
+        out.draw_rect_screen(layer, rect.translated(-self.camera_pos));
+    }
 }
 
 pub(super) fn visible_tiles(g: &G) -> impl Iterator<Item = (vec2i16, Tile)> {
@@ -44,7 +59,7 @@ fn draw_water(g: &G, out: &mut Out) {
             let a = (level * 255.0).clamp(0.0, 255.0) as u8;
             let color = RGBA([r, 0, b, a]);
             let bounds = Bounds2D::with_size(tile.pos(), TILE_VSIZE);
-            out.draw_rect(g, L_WATER, Rectangle::new(bounds, RGBA::TRANSPARENT).with_fill(color));
+            g.draw_rect(out, L_WATER, Rectangle::new(bounds, RGBA::TRANSPARENT).with_fill(color));
 
             // speed arrow
             let speed = g.water.water_speed_at(tile);
@@ -52,9 +67,9 @@ fn draw_water(g: &G, out: &mut Out) {
             let start = mid - speed * (TILE_SIZE / 2) as f32;
             let end = mid + speed * (TILE_SIZE / 2) as f32;
             let arrow = Line::new(start.as_i32(), end.as_i32()).with_color(RGBA::RED).with_width(2);
-            out.draw_line(g, L_WATER + 1, arrow);
+            g.draw_line(out, L_WATER + 1, arrow);
             let bud = Rectangle::new(Bounds2D::new(start.as_i32() - 2, start.as_i32() + 2), RGBA::RED);
-            out.draw_rect(g, L_WATER + 1, bud);
+            g.draw_rect(out, L_WATER + 1, bud);
         }
     }
 }
@@ -117,12 +132,12 @@ fn draw_selection(g: &G, out: &mut Out) -> Status {
         let max = start.zip_with(end, i32::max);
         let sel = Bounds2D::new(min, max);
 
-        out.push_rect_screen(L_SPRITES + 1, Rectangle::new(sel.translated(-g.camera_pos), RGBA::BLUE).with_fill(RGB::BLUE.with_alpha(64)));
+        out.draw_rect_screen(L_SPRITES + 1, Rectangle::new(sel.translated(-g.camera_pos), RGBA::BLUE).with_fill(RGB::BLUE.with_alpha(64)));
     }
 
     // 🦀 Selected pawns
     for pawn in g.selected_pawns() {
-        out.push_rect_screen(L_SPRITES + 1, Rectangle::new(pawn.bounds().translated(-g.camera_pos), RGBA::BLUE).with_fill(RGB::BLUE.with_alpha(64)));
+        out.draw_rect_screen(L_SPRITES + 1, Rectangle::new(pawn.bounds().translated(-g.camera_pos), RGBA::BLUE).with_fill(RGB::BLUE.with_alpha(64)));
     }
     OK
 }

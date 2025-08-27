@@ -906,8 +906,11 @@ dependencies = [
 name = "shell_api"
 version = "0.1.0"
 dependencies = [
+ "core_util",
  "fixed_str",
  "fnv",
+ "geometry",
+ "num-traits",
  "proc_macros",
  "serde",
  "vector",

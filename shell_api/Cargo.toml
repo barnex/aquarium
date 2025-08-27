@@ -4,8 +4,11 @@ version = "0.1.0"
 edition = "2024"
 
 [dependencies]
-serde = { workspace = true }
+core_util = { workspace = true }
 fixed_str = { workspace = true }
-vector = { workspace = true }
 fnv = { workspace = true }
+num-traits = { workspace = true }
 proc_macros = { workspace = true }
+serde = { workspace = true }
+vector = { workspace = true }
+geometry = { workspace = true }
