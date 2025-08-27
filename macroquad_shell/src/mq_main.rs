@@ -1,7 +1,9 @@
 mod mq_draw;
+mod mq_inputs;
 mod mq_resources;
 mod mq_storage;
 use mq_draw::*;
+use mq_inputs::*;
 use mq_resources::*;
 use mq_storage::*;
 
@@ -29,8 +31,7 @@ async fn main() {
 
     let fallback = mq::Texture2D::from_image(&fallback_bitmap((0, 0, 255), vec2(24, 24) /*TODO*/));
     let mut res = Resources::new(fallback);
-
-    let mut input_events = VecDeque::<InputEvent>::default();
+    let mut input_events = VecDeque::new();
 
     let mut state = match load_game() {
         Some(state) => {
@@ -53,16 +54,16 @@ async fn main() {
     let start = Instant::now();
 
     loop {
+        let now_secs = Instant::now().duration_since(start).as_secs_f64();
         out.clear();
 
         out.viewport_size = vec2(mq::screen_width(), mq::screen_height()).as_u32();
-        let now_secs = Instant::now().duration_since(start).as_secs_f64();
+        capture_input_events(&mut input_events);
 
         state.tick(now_secs, input_events.drain(..), &mut out);
         draw(&mut res, &out);
 
         println!("{ANSI_CLEAR}{}", &out.debug);
-
 
         mq::next_frame().await
     }
