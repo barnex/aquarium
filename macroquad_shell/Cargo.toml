@@ -1,0 +1,9 @@
+[package]
+name = "macroquad_shell"
+version = "1.0.0"
+edition = "2024"
+default-run = "macroquad_shell"
+
+[dependencies]
+macroquad = "0.4.14"
+log = { workspace = true }

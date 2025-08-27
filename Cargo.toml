@@ -13,6 +13,7 @@ members = [
 	"corelibs/pathfinder",
 	"corelibs/vector",
 	"gamecore",
+	"macroquad_shell",
 	"proc_macros",
 	"proc_macros_impl",
 	"webshell",
