@@ -19,6 +19,7 @@ impl WaterSim {
         let mut delta_p = HashMap::<vec2i16, vec2f>::default();
 
         // ☘️ irrigate farm land
+        /*
         for pos in farmland_tiles(tilemap) {
             const MAX_WETNESS: f32 = 0.3;
             let h = self.h.entry(pos).or_default();
@@ -49,8 +50,9 @@ impl WaterSim {
                 }
             }
         }
+        */
 
-        for pos in canal_tiles(tilemap) {
+        for pos in self.h.keys().copied().collect_vec() {
             // 🚰 If directly connected to source (Water tile),
             // set level to maximum.
             let is_source = [[-1, 0], [1, 0], [0, -1], [0, 1]] //_
@@ -209,10 +211,10 @@ fn can_flow(tilemap: &Tilemap, pos: vec2i16) -> bool {
     }
 }
 
-fn canal_tiles(tilemap: &Tilemap) -> impl Iterator<Item = vec2i16> {
-    tilemap.enumerate_all().filter_map(|(tile, mat)| (mat == Tile::Canal).then_some(tile))
-}
-
-fn farmland_tiles(tilemap: &Tilemap) -> impl Iterator<Item = vec2i16> {
-    tilemap.enumerate_all().filter_map(|(tile, mat)| (mat == Tile::Farmland).then_some(tile))
-}
+// fn canal_tiles(tilemap: &Tilemap) -> impl Iterator<Item = vec2i16> {
+//     tilemap.enumerate_all().filter_map(|(tile, mat)| (mat == Tile::Canal).then_some(tile))
+// }
+//
+// fn farmland_tiles(tilemap: &Tilemap) -> impl Iterator<Item = vec2i16> {
+//     tilemap.enumerate_all().filter_map(|(tile, mat)| (mat == Tile::Farmland).then_some(tile))
+// }
