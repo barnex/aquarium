@@ -26,7 +26,7 @@ pub(crate) fn draw(res: &mut Resources, out: &Out) {
             }
 
             if rect.stroke != RGBA::TRANSPARENT {
-                let line_width = 1.0;
+                let line_width = 2.0; // 👈 macroquad seems buggy with width 1.0 (draws only half the lines).
                 mq::draw_rectangle_lines(
                     //_
                     rect.bounds.min.x().as_(),

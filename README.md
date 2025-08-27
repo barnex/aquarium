@@ -39,6 +39,7 @@ git push origin HEAD:main
 
 ## Bugs
   - [ ] Resource (rock) inside HQ entrance = inf. loop
+  - [ ] Crab follows breadcrumb resources until too far away from base, can't get home anymore.
 
 ## Gameplay
 

@@ -17,7 +17,6 @@ use shell_api::*;
 use vector::*;
 
 type HashMap<K, V> = fnv::FnvHashMap<K, V>;
-type HashSet<T> = fnv::FnvHashSet<T>;
 
 #[macroquad::main("Texture")]
 async fn main() {
