@@ -4,7 +4,7 @@ mod http_get;
 mod js_commands;
 mod js_renderer;
 mod load_bitmap;
-mod resources;
+mod js_resources;
 mod storage;
 mod time;
 
@@ -13,7 +13,7 @@ use http_get::*;
 use js_commands::*;
 use js_renderer::*;
 use load_bitmap::*;
-use resources::*;
+use js_resources::*;
 use storage::*;
 use time::*;
 use shell_api::*;

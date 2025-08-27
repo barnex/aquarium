@@ -7,7 +7,7 @@ async fn main() {
         log::warn!("debug_assertions enabled, performance will suffer");
     }
 
-    let texture: Texture2D = load_texture("../assets/ferris.png").await.unwrap();
+    let texture: Texture2D = load_texture("assets/ferris.png").await.unwrap();
 
     loop {
         clear_background(LIGHTGRAY);
