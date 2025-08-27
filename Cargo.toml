@@ -16,6 +16,7 @@ members = [
 	"macroquad_shell",
 	"proc_macros",
 	"proc_macros_impl",
+	"shell_api",
 	"webshell",
 ]
 
@@ -30,6 +31,7 @@ matrix = { path = "corelibs/matrix" }
 memkeep = { path = "corelibs/memkeep" }
 proc_macros = { path = "proc_macros" }
 vector = { path = "corelibs/vector" }
+shell_api = { path = "shell_api" }
 
 anyhow = "1"
 base64 = "0.22"

@@ -418,6 +418,7 @@ dependencies = [
  "rand",
  "rand_chacha",
  "serde",
+ "shell_api",
  "tiny-skia",
  "vector",
 ]
@@ -900,6 +901,10 @@ dependencies = [
  "quote",
  "syn 2.0.104",
 ]
+
+[[package]]
+name = "shell_api"
+version = "0.1.0"
 
 [[package]]
 name = "simd-adler32"
