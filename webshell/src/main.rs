@@ -5,7 +5,7 @@ mod js_commands;
 mod js_renderer;
 mod js_resources;
 mod load_bitmap;
-mod storage;
+mod js_storage;
 mod time;
 
 use event_listeners::*;
@@ -15,7 +15,7 @@ use js_renderer::*;
 use js_resources::*;
 use load_bitmap::*;
 use shell_api::*;
-use storage::*;
+use js_storage::*;
 use time::*;
 
 use fixed_str::*;
