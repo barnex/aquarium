@@ -4,6 +4,7 @@ use crate::*;
 use anyhow::Result;
 use core_util::*;
 use num_traits::AsPrimitive as _;
+use shell_api::*;
 use std::path::Path;
 use tiny_skia::{Color, FillRule, Paint, PathBuilder, Pixmap, PixmapPaint, Rect, Stroke, Transform};
 use vector::*;

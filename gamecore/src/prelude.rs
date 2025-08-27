@@ -5,6 +5,7 @@ pub use memkeep::*;
 pub use num_traits::AsPrimitive;
 pub use pathfinder::*;
 pub use vector::*;
+pub use shell_api::*;
 
 pub use fixed_str::*;
 pub use proc_macros::*;

@@ -67,7 +67,6 @@ impl Out {
         self.debug.clear();
     }
 
-
     /// Draw sprite in screen coordinates (i.e. ignoring camera).
     pub fn draw_sprite_screen(&mut self, layer: u8, sprite: Sprite, screen_pos: vec2i) {
         self.layer(layer).sprites.push(DrawSprite::at_pos(sprite, screen_pos));
@@ -77,13 +76,12 @@ impl Out {
         self.layer(layer).sprites.push(DrawSprite::at_pos(sprite, pos).with_size(dst_size));
     }
 
-
-    pub fn push_line(&mut self, layer: u8, line: Line) {
+    pub fn draw_line_screen(&mut self, layer: u8, line: Line) {
         self.layer(layer).lines.push(line);
     }
 
     /// Draw rectangle in screen coordinates (i.e. ignoring camera).
-    pub fn push_rect_screen(&mut self, layer: u8, rect: Rectangle) {
+    pub fn draw_rect_screen(&mut self, layer: u8, rect: Rectangle) {
         self.layer(layer).rectangles.push(rect);
     }
 

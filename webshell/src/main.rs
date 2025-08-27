@@ -16,6 +16,7 @@ use load_bitmap::*;
 use resources::*;
 use storage::*;
 use time::*;
+use shell_api::*;
 
 use fixed_str::*;
 use gamecore::*;

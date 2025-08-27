@@ -1138,6 +1138,7 @@ dependencies = [
  "log",
  "num-traits",
  "serde",
+ "shell_api",
  "vector",
  "wasm-bindgen",
  "wasm-bindgen-futures",

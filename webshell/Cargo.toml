@@ -13,6 +13,7 @@ itertools = { workspace = true }
 log = { workspace = true }
 num-traits = { workspace = true }
 serde = { workspace = true }
+shell_api = { workspace = true }
 vector = { workspace = true }
 
 console_error_panic_hook = "0.1.7"
