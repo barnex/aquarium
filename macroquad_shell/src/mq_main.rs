@@ -1,13 +1,14 @@
+mod mq_draw;
 mod mq_resources;
-use std::{
-    collections::VecDeque,
-    time::{self, Instant},
-};
-
-use mq_resources::*;
 mod mq_storage;
-use gamecore::*;
+use mq_draw::*;
+use mq_resources::*;
 use mq_storage::*;
+
+use gamecore::*;
+
+use std::collections::VecDeque;
+use std::time::Instant;
 
 use macroquad::prelude as mq;
 use shell_api::*;
@@ -53,19 +54,15 @@ async fn main() {
 
     loop {
         out.clear();
-        res.poll(); // 👈 !
 
         out.viewport_size = vec2(mq::screen_width(), mq::screen_height()).as_u32();
         let now_secs = Instant::now().duration_since(start).as_secs_f64();
+
         state.tick(now_secs, input_events.drain(..), &mut out);
+        draw(&mut res, &out);
 
         println!("{ANSI_CLEAR}{}", &out.debug);
 
-        mq::clear_background(mq::LIGHTGRAY);
-
-        if let Some(texture) = res.get(&sprite!("kit6")) {
-            mq::draw_texture(&texture, 0., 0., mq::WHITE);
-        }
 
         mq::next_frame().await
     }

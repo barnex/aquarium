@@ -15,7 +15,13 @@ pub(crate) fn draw(canvas: &HtmlCanvasElement, ctx: &CanvasRenderingContext2d, r
         for rect in rectangles {
             if rect.fill != RGBA::TRANSPARENT {
                 ctx.set_fill_style_str(&rect.fill.hex());
-                ctx.fill_rect(rect.bounds.min.x().as_(), rect.bounds.min.y().as_(), rect.bounds.size().x().as_(), rect.bounds.size().y().as_());
+                ctx.fill_rect(
+                    //_
+                    rect.bounds.min.x().as_(),
+                    rect.bounds.min.y().as_(),
+                    rect.bounds.size().x().as_(),
+                    rect.bounds.size().y().as_(),
+                );
             }
 
             if rect.stroke != RGBA::TRANSPARENT {
@@ -23,7 +29,13 @@ pub(crate) fn draw(canvas: &HtmlCanvasElement, ctx: &CanvasRenderingContext2d, r
                 ctx.set_line_width(1.0);
                 // 👇 HTML Canvas aligns strokes (but not fills) to the edges of pixels instead of to the center.
                 // Offset by half a pixel to align pixel-perfect.
-                ctx.stroke_rect((rect.bounds.min.x() as f64) + 0.5, (rect.bounds.min.y() as f64) + 0.5, (rect.bounds.size().x() as f64) - 1.0, (rect.bounds.size().y() as f64) - 1.0);
+                ctx.stroke_rect(
+                    //_
+                    (rect.bounds.min.x() as f64) + 0.5,
+                    (rect.bounds.min.y() as f64) + 0.5,
+                    (rect.bounds.size().x() as f64) - 1.0,
+                    (rect.bounds.size().y() as f64) - 1.0,
+                );
             }
         }
 

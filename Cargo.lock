@@ -592,6 +592,7 @@ dependencies = [
  "gamecore",
  "log",
  "macroquad",
+ "num-traits",
  "proc_macros",
  "serde",
  "shell_api",
