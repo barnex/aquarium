@@ -108,15 +108,6 @@ async fn start() -> JsResult<()> {
 
 const APP_KEY: &str = "a_strategy_game_data_v01";
 
-fn save_game(state: &G) {
-    log::info!("autosave... {APP_KEY}");
-    serialize(APP_KEY, state).expect("autosave");
-}
-
-fn load_game() -> Option<G> {
-    log::info!("loading... {APP_KEY}");
-    deserialize(APP_KEY).map_err(|e| log::error!("load_game {APP_KEY}: {e:?}")).ok()
-}
 
 pub async fn fallback_bitmap((r, g, b): (u8, u8, u8), size: u32) -> Result<ImageBitmap, JsValue> {
     let width = size as usize;

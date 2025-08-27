@@ -2,6 +2,16 @@
 use crate::*;
 use base64::Engine as _;
 
+pub fn save_game(state: &G) {
+    log::info!("save... {APP_KEY}");
+    serialize(APP_KEY, state).expect("autosave");
+}
+
+pub fn load_game() -> Option<G> {
+    log::info!("loading... {APP_KEY}");
+    deserialize(APP_KEY).map_err(|e| log::error!("load_game {APP_KEY}: {e:?}")).ok()
+}
+
 /// Serialize value to browser storage under given key.
 pub fn serialize<T>(key: &str, v: &T) -> JsResult<()>
 where
