@@ -12,6 +12,12 @@ or
 miniserve --port 8001 webshell/dist
 ```
 
+## Profile
+
+```
+cargo instruments --release --open --bin mq_main -t "Time Profiler" 
+```
+
 ## Test
 
 ```
