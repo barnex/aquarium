@@ -190,11 +190,12 @@ impl G {
         if !Self::tile_is_walkable(self.tilemap.at(tile)) {
             return false;
         }
-        for b in self.buildings.iter() {
-            if b.tile_bounds().contains(tile) && b.entrance() != tile {
-                return false;
-            }
-        }
+        // 🪲 TODO: very inefficient
+        //for b in self.buildings.iter() {
+        //    if b.tile_bounds().contains(tile) && b.entrance() != tile {
+        //        return false;
+        //    }
+        //}
         true
     }
 

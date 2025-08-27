@@ -60,5 +60,3 @@ overflow-checks = false
 package.gamecore.opt-level = 1
 package.gamecore.debug-assertions = true
 package.gamecore.overflow-checks = true
-
-
