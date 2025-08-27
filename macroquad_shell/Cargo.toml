@@ -2,7 +2,11 @@
 name = "macroquad_shell"
 version = "1.0.0"
 edition = "2024"
-default-run = "macroquad_shell"
+default-run = "mq_main"
+
+[[bin]]
+name = "mq_main"
+path = "src/mq_main.rs"
 
 [dependencies]
 macroquad = "0.4.14"
