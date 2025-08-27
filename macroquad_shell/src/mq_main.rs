@@ -1,9 +1,13 @@
 mod mq_resources;
+use std::{
+    collections::VecDeque,
+    time::{self, Instant},
+};
+
 use mq_resources::*;
 mod mq_storage;
-use mq_storage::*;
 use gamecore::*;
-
+use mq_storage::*;
 
 use macroquad::prelude as mq;
 use shell_api::*;
@@ -25,6 +29,8 @@ async fn main() {
     let fallback = mq::Texture2D::from_image(&fallback_bitmap((0, 0, 255), vec2(24, 24) /*TODO*/));
     let mut res = Resources::new(fallback);
 
+    let mut input_events = VecDeque::<InputEvent>::default();
+
     let mut state = match load_game() {
         Some(state) => {
             log::info!("game loaded");
@@ -42,9 +48,18 @@ async fn main() {
         }
     };
 
+    let mut out = Out::default();
+    let start = Instant::now();
 
     loop {
+        out.clear();
         res.poll(); // 👈 !
+
+        out.viewport_size = vec2(mq::screen_width(), mq::screen_height()).as_u32();
+        let now_secs = Instant::now().duration_since(start).as_secs_f64();
+        state.tick(now_secs, input_events.drain(..), &mut out);
+
+        println!("{ANSI_CLEAR}{}", &out.debug);
 
         mq::clear_background(mq::LIGHTGRAY);
 
@@ -55,3 +70,5 @@ async fn main() {
         mq::next_frame().await
     }
 }
+
+const ANSI_CLEAR: &'static str = "\x1B[2J\x1B[H";
