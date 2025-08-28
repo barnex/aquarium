@@ -12,13 +12,15 @@ pub struct Building {
 #[repr(u8)]
 pub enum BuildingTyp {
     HQ = 1,
+    Farm = 2,
+    Quarry = 3,
     // 👆 ⚠️ keep in sync!
 }
 
 impl BuildingTyp {
     pub fn all() -> impl Iterator<Item = Self> {
         let first = Self::HQ;
-        let last = Self::HQ; // 👈⚠️ keep in sync!
+        let last = Self::Quarry; // 👈⚠️ keep in sync!
         ((first as u8)..=(last as u8)).map(|i| Self::try_from_primitive(i).unwrap())
     }
 
@@ -26,6 +28,8 @@ impl BuildingTyp {
         use BuildingTyp::*;
         match self {
             HQ => sprite!("hq"),
+            Farm => sprite!("shell_big"),
+            Quarry => sprite!("quarry"),
         }
     }
 }
@@ -36,6 +40,8 @@ impl Building {
         use BuildingTyp::*;
         match self.typ {
             HQ => (3, 3),
+            Farm => (2, 2),
+            Quarry => (2, 2),
         }
         .into()
     }
