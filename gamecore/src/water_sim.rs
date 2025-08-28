@@ -4,21 +4,37 @@ use crate::prelude::*;
 pub struct WaterSim {
     pub h: HashMap<vec2i16, f32>,
     pub p: HashMap<vec2i16, vec2f>,
+    pub farm_water: HashMap<vec2i16, f32>,
 }
 
 impl WaterSim {
-    pub fn tick(&mut self, tilemap: &Tilemap) {
-        for i in 0..1 {
-            self.tick_once(tilemap);
+    pub fn major_tick(&mut self, tilemap: &Tilemap) {
+        for (&pos, h) in self.h.iter_mut() {
+            // 🚰 If directly connected to source (Water tile),
+            // set level to maximum.
+            let is_source = [[-1, 0], [1, 0], [0, -1], [0, 1]] //_
+                .into_iter()
+                .map(|[x, y]| pos + vec2(x, y))
+                .any(|pos2| tilemap.at(pos2) == Tile::Water);
+            if is_source {
+                *h = 1.0;
+            }
         }
-    }
-
-    pub fn tick_once(&mut self, tilemap: &Tilemap) {
-        let dt = 0.1;
-        let mut delta_h = HashMap::<vec2i16, f32>::default();
-        let mut delta_p = HashMap::<vec2i16, vec2f>::default();
 
         // ☘️ irrigate farm land
+        for &pos in self.h.keys() {
+            // 🚰 If directly connected to source (Water tile),
+            // set level to maximum.
+            for neigh in [[-1, 0], [1, 0], [0, -1], [0, 1]] //_
+                .into_iter()
+                .map(|[x, y]| pos + vec2(x, y))
+            {
+                if tilemap.at(neigh) == Tile::Farmland {
+                    *self.farm_water.entry(neigh).or_default() += 1.0;
+                }
+            }
+        }
+
         /*
         for pos in farmland_tiles(tilemap) {
             const MAX_WETNESS: f32 = 0.3;
@@ -51,18 +67,14 @@ impl WaterSim {
             }
         }
         */
+    }
 
-        for pos in self.h.keys().copied().collect_vec() {
-            // 🚰 If directly connected to source (Water tile),
-            // set level to maximum.
-            let is_source = [[-1, 0], [1, 0], [0, -1], [0, 1]] //_
-                .into_iter()
-                .map(|[x, y]| pos + vec2(x, y))
-                .any(|pos2| tilemap.at(pos2) == Tile::Water);
-            if is_source {
-                self.h.insert(pos, 1.0);
-            }
+    pub fn minor_tick(&mut self, tilemap: &Tilemap) {
+        let dt = 0.1;
+        let mut delta_h = HashMap::<vec2i16, f32>::default();
+        let mut delta_p = HashMap::<vec2i16, vec2f>::default();
 
+        for pos in self.h.keys().copied() {
             // 📏 my water height
             let h1 = self.h.get(&pos).copied().unwrap_or_default();
             let p1 = self.p.get(&pos).copied().unwrap_or_default();
@@ -200,7 +212,11 @@ impl WaterSim {
 
 impl Default for WaterSim {
     fn default() -> Self {
-        Self { h: default(), p: default() }
+        Self {
+            h: default(),
+            p: default(),
+            farm_water: default(),
+        }
     }
 }
 

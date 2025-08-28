@@ -24,7 +24,7 @@ impl G {
     pub fn control(&mut self) {
         update_contextual_action(self);
         control_camera(self);
-        draw_on_map(self);
+        doodle_on_map(self);
         select_pawns(self);
         command_pawns(self);
     }
@@ -102,7 +102,7 @@ fn command_pawns(g: &mut G) {
     }
 }
 
-fn draw_on_map(g: &mut G) {
+fn doodle_on_map(g: &mut G) {
     if g.inputs.is_down(K_MOUSE1) {
         let mouse = g.mouse_tile();
 

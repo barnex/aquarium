@@ -108,7 +108,6 @@ impl G {
     ///   * Advance the state one tick.
     ///   * Render state to `out` (scenegraph).
     pub fn tick(&mut self, now_secs: f64, events: impl Iterator<Item = InputEvent>, out: &mut Out) {
-
         self.now_secs = now_secs;
         self.inputs.tick(&self.keymap, events);
         self.viewport_size = out.viewport_size;
@@ -126,9 +125,11 @@ impl G {
             if self.frame % (self.frames_per_tick as u64) == 0 {
                 // 🪲 TODO: time major tick
                 self.major_tick();
+                self.water.major_tick(&self.tilemap);
+            } else {
+                // 🪲 TODO: properly pace, make testable
+                self.water.minor_tick(&self.tilemap);
             }
-            // 🪲 TODO: properly pace, make testable
-            self.water.tick(&self.tilemap);
 
             #[cfg(debug_assertions)]
             if self.debug.pause_on_sanity_failure {
@@ -160,15 +161,24 @@ impl G {
     }
 
     pub(crate) fn tick_farmland(&mut self) {
-        let growth_rate = 0.01;
-        let farmland_tiles = self.tilemap.enumerate_all().filter_map(|(tile, mat)| (mat == Tile::Farmland).then_some(tile));
-        for tile in farmland_tiles {
-            if self.water_level_at(tile) > 0.01 {
-                if self.resources.at(tile).is_none() && self.random::<f32>() < growth_rate * self.water_level_at(tile) {
-                    self.spawn_resource(tile, ResourceTyp::Leaf);
-                    *self.water.h.get_mut(&tile).unwrap() = 0.0;
-                }
+        //let growth_rate = 0.01;
+        //for tile in farmland_tiles {
+        //    if self.water_level_at(tile) > 0.01 {
+        //        if self.resources.at(tile).is_none() && self.random::<f32>() < growth_rate * self.water_level_at(tile) {
+        //            self.spawn_resource(tile, ResourceTyp::Leaf);
+        //            *self.water.h.get_mut(&tile).unwrap() = 0.0;
+        //        }
+        //    }
+        //}
+        let mut buf = Vec::new();
+        for (&pos, water) in self.water.farm_water.iter_mut() {
+            if *water >= 50.0 {
+                *water = 0.0;
+                buf.push(pos);
             }
+        }
+        for pos in buf {
+            self.spawn_resource(pos, ResourceTyp::Leaf);
         }
     }
 
@@ -325,13 +335,22 @@ impl G {
         self.dt_smooth = lerp(self.dt_smooth, self.dt, 0.02);
     }
 
-    pub(crate) fn set_tile(&mut self, idx: Vector<i16, 2>, v: Tile) {
+    pub fn set_tile(&mut self, idx: Vector<i16, 2>, v: Tile) {
         self.tilemap.set(idx, v);
 
         // 💧 add 0 water to canal, to kickstart water sim
         if v == Tile::Canal {
             self.water.h.entry(idx).or_default();
         }
+
+        if v != Tile::Canal {
+            self.water.h.remove(&idx);
+            self.water.p.remove(&idx);
+        }
+        if v != Tile::Farmland {
+            self.water.farm_water.remove(&idx);
+        }
+
         // ☘️ resource becomes unreachable, remove it.
         if !self.is_walkable(idx) {
             self.resources.remove(idx);
