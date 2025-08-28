@@ -5,10 +5,10 @@ pub fn inception() -> G {
     let mut g = G::new(vec2(size, size));
     g.camera_pos = (vec2(size, size) / 2).as_i16().pos();
 
-	noise(&mut g.tilemap, 456, 0.08, Tile::Snow);
-	noise(&mut g.tilemap, 456, 0.03, Tile::Block);
-	noise(&mut g.tilemap, 789, 0.0, Tile::Farmland);
-	noise(&mut g.tilemap, 123, 0.1, Tile::Water);
+	noise(&mut g._tilemap, 456, 0.08, Tile::Snow);
+	noise(&mut g._tilemap, 456, 0.03, Tile::Block);
+	noise(&mut g._tilemap, 789, 0.0, Tile::Farmland);
+	noise(&mut g._tilemap, 123, 0.1, Tile::Water);
 
     g
 }

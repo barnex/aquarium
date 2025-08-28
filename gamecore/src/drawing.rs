@@ -41,7 +41,7 @@ pub(super) fn visible_tiles(g: &G) -> impl Iterator<Item = (vec2i16, Tile)> {
     let min = g.camera_pos.to_tile() - 1;
     let max = (g.camera_pos + g.viewport_size.as_i32()).to_tile() + 1;
 
-    g.tilemap.enumerate_range(Bounds2D::new(min, max))
+    g._tilemap.enumerate_range(Bounds2D::new(min, max))
 }
 
 pub(super) fn visible_pawns(g: &G) -> impl Iterator<Item = &Pawn> {

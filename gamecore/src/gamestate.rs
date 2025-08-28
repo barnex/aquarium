@@ -6,7 +6,7 @@ use crate::prelude::*;
 pub struct G {
     // 🌍 game world
     pub name: String,
-    pub tilemap: Tilemap,
+    pub _tilemap: Tilemap,
     pub resources: ResourceMap,
     pub buildings: MemKeep<Building>,
     pub pawns: MemKeep<Pawn>,
@@ -96,7 +96,7 @@ impl G {
             selected_pawn_ids: default(),
             selection_start: None,
             tick: 0,
-            tilemap: Tilemap::new(size),
+            _tilemap: Tilemap::new(size),
             ui: Ui::new(),
             viewport_size: vec2(0, 0),
             water: default(),
@@ -125,10 +125,10 @@ impl G {
             if self.frame % (self.frames_per_tick as u64) == 0 {
                 // 🪲 TODO: time major tick
                 self.major_tick();
-                self.water.major_tick(&self.tilemap);
+                self.water.major_tick(&self._tilemap);
             } else {
                 // 🪲 TODO: properly pace, make testable
-                self.water.minor_tick(&self.tilemap);
+                self.water.minor_tick(&self._tilemap);
             }
 
             #[cfg(debug_assertions)]
@@ -172,8 +172,9 @@ impl G {
         //}
         let mut buf = Vec::new();
         for (&pos, water) in self.water.farm_water.iter_mut() {
-            if *water >= 50.0 {
-                *water = 0.0;
+            if *water >= 100.0 {
+                // Some randomization so all crops don't appear simultaneously.
+                *water = self._rng.borrow_mut().gen_range(0.0..20.0);
                 buf.push(pos);
             }
         }
@@ -192,13 +193,13 @@ impl G {
 
     /// Tile (e.g. Sand, Water, ...) at given index.
     pub fn tile_at(&self, idx: vec2i16) -> Tile {
-        self.tilemap.at(idx)
+        self._tilemap.at(idx)
     }
 
     /// 🥾 Can one generally walk on tile?
     /// TODO: ambiguous.
     pub(crate) fn is_walkable(&self, tile: vec2i16) -> bool {
-        if !Self::tile_is_walkable(self.tilemap.at(tile)) {
+        if !Self::tile_is_walkable(self.tile_at(tile)) {
             return false;
         }
         // 🪲 TODO: very inefficient
@@ -212,7 +213,7 @@ impl G {
 
     /// 🧱 Can one generally build something on this tile?
     pub(crate) fn is_buildable(&self, tile: vec2i16) -> bool {
-        if !Self::tile_is_walkable(self.tilemap.at(tile)) {
+        if !Self::tile_is_walkable(self.tile_at(tile)) {
             return false;
         }
         for b in self.buildings.iter() {
@@ -336,7 +337,7 @@ impl G {
     }
 
     pub fn set_tile(&mut self, idx: Vector<i16, 2>, v: Tile) {
-        self.tilemap.set(idx, v);
+        self._tilemap.set(idx, v);
 
         // 💧 add 0 water to canal, to kickstart water sim
         if v == Tile::Canal {
@@ -347,6 +348,7 @@ impl G {
             self.water.h.remove(&idx);
             self.water.p.remove(&idx);
         }
+
         if v != Tile::Farmland {
             self.water.farm_water.remove(&idx);
         }

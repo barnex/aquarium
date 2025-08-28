@@ -97,5 +97,5 @@ pub(crate) fn print_debug_output(g: &G, out: &mut Out) {
     writeln!(debug, "selected: {:?}", g.selected_pawn_ids.len()).unwrap();
     writeln!(debug, "contextual_action: {:?}", g.contextual_action).unwrap();
     writeln!(debug, "draw commands: {}", out.layers.iter().map(|l| l.lines.len() + l.rectangles.len() + l.sprites.len()).sum::<usize>()).unwrap();
-    writeln!(debug, "map size: {} ({} tiles)", g.tilemap.size(), g.tilemap.size().as_u32().product()).unwrap();
+    writeln!(debug, "map size: {} ({} tiles)", g._tilemap.size(), g._tilemap.size().as_u32().product()).unwrap();
 }

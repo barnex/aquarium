@@ -125,7 +125,7 @@ fn doodle_on_map(g: &mut G) {
                 }
             }
             Tool::WaterBucket => {
-                if g.inputs.is_down(K_MOUSE1) && g.tilemap.at(mouse) == Tile::Canal {
+                if g.inputs.is_down(K_MOUSE1) && g.tile_at(mouse) == Tile::Canal {
                     g.water.h.insert(mouse, 1.0);
                     g.water.p.insert(mouse, vec2::EX); // DEBUG HACK !!!! REMOVE!!!!
                 }
