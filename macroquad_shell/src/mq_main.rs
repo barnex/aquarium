@@ -18,14 +18,14 @@ use vector::*;
 
 type HashMap<K, V> = fnv::FnvHashMap<K, V>;
 
-#[macroquad::main("Texture")]
+#[macroquad::main("Game")]
 async fn main() {
     env_logger::init();
 
     log::info!("Using macroquad shell");
     #[cfg(debug_assertions)]
     {
-        log::warn!("debug_assertions enabled, performance will suffer");
+        log::warn!("macroquad shell: debug_assertions enabled, performance will suffer");
     }
 
     let fallback = mq::Texture2D::from_image(&fallback_bitmap((0, 0, 255), vec2(24, 24) /*TODO*/));

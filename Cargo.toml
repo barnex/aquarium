@@ -53,10 +53,11 @@ tiny-skia = "0.11"
 serde = { version = "1", features = ["derive"] }
 
 
+# ⚠️ It's easy to accidentally disable debug assertions etc.
 [profile.dev]
-opt-level = 3
-debug-assertions = false
-overflow-checks = false
+opt-level = 1
 package.gamecore.opt-level = 1
-package.gamecore.debug-assertions = true
-package.gamecore.overflow-checks = true
+
+package.macroquad.opt-level = 3
+package.macroquad.debug-assertions = false
+package.macroquad.overflow-checks = false

@@ -108,6 +108,7 @@ impl G {
     ///   * Advance the state one tick.
     ///   * Render state to `out` (scenegraph).
     pub fn tick(&mut self, now_secs: f64, events: impl Iterator<Item = InputEvent>, out: &mut Out) {
+
         self.now_secs = now_secs;
         self.inputs.tick(&self.keymap, events);
         self.viewport_size = out.viewport_size;
