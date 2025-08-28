@@ -56,7 +56,7 @@ impl Pawn {
             return;
         }
 
-        const NEAR_HOME: i32 = 4;
+        const NEAR_HOME: i64 = 4;
 
         // we are at some destination
 

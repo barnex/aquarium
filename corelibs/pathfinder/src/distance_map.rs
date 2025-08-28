@@ -13,7 +13,7 @@ impl DistanceMap {
         let mut front = VecDeque::from([center]);
 
         let visited = |dist_to: &HashMap<_, _>, pos| dist_to.contains_key(&pos);
-        let radius2 = (max_dist as i32) * (max_dist as i32);
+        let radius2 = (max_dist as i64) * (max_dist as i64);
 
         while let Some(pos) = front.pop_front() {
             let neigh_dist = dist_to[&pos] + 1;

@@ -905,33 +905,68 @@ where
     pub fn dot(self, rhs: Self) -> T {
         (self * rhs).sum()
     }
-
-    /// Length squared.
-    /// ```
-    /// # use vector::*;
-    /// assert_eq!(vec2(3, 4).len2(), 25);
-    /// ```
-    #[inline]
-    pub fn len2(self) -> T {
-        self.dot(self)
-    }
 }
 
-impl<T, const N: usize> Vector<T, N>
+// Too prone to overflow
+// impl<T, const N: usize> Vector<T, N>
+// where
+//     (): SupportedSize<N>,
+//     T: Add<Output = T> + Mul<Output = T> + Sub<Output = T> + Copy,
+// {
+//     /// Distance between two points, squared
+//     /// ```
+//     /// # use vector::*;
+//     /// assert_eq!(vec2i(3, 4).distance_squared(vec2i(2, 4)), 1);
+//     /// ```
+//     #[inline]
+//     pub fn distance_squared(self, rhs: Self) -> T {
+//         (self - rhs).len2()
+//     }
+// }
+
+impl<const N: usize> Vector<i32, N>
 where
     (): SupportedSize<N>,
-    T: Add<Output = T> + Mul<Output = T> + Sub<Output = T> + Copy,
 {
     /// Distance between two points, squared
     /// ```
     /// # use vector::*;
-    /// assert_eq!(vec2i(3, 4).distance_squared(vec2i(2, 4)), 1);
+    /// assert_eq!(vec2(3i64, 4).distance_squared(vec2(2i64, 4)), 1);
     /// ```
     #[inline]
-    pub fn distance_squared(self, rhs: Self) -> T {
-        (self - rhs).len2()
+    pub fn distance_squared(self, rhs: Self) -> i64 {
+        (self.as_i64() - rhs.as_i64()).len2()
     }
 }
+
+impl<const N: usize> Vector<i16, N>
+where
+    (): SupportedSize<N>,
+{
+    /// Distance between two points, squared
+    /// ```
+    /// # use vector::*;
+    /// assert_eq!(vec2(3i64, 4).distance_squared(vec2(2i64, 4)), 1);
+    /// ```
+    #[inline]
+    pub fn distance_squared(self, rhs: Self) -> i32 {
+        let diff = self.as_i32() - rhs.as_i32();
+        diff.dot(diff)
+    }
+}
+
+impl<const N: usize> Vector<i64, N>
+where
+    (): SupportedSize<N>,
+{
+    /// Length squared.
+    /// Prone to overflow, so not provided on smaller types (i32, i16, etc).
+    #[inline]
+    pub fn len2(self) -> i64 {
+        self.as_i64().dot(self.as_i64())
+    }
+}
+
 
 impl<T, const N: usize> Vector<T, N>
 where
@@ -946,7 +981,7 @@ where
     /// ```
     #[inline]
     pub fn len(self) -> T {
-        self.len2().sqrt()
+        self.dot(self).sqrt()
     }
 
     /// Distance between two points.
@@ -982,6 +1017,30 @@ where
     #[inline]
     pub fn is_finite(self) -> bool {
         self.all(|v| v.is_finite())
+    }
+}
+
+impl<const N: usize> Vector<f64, N>
+where
+    (): SupportedSize<N>,
+{
+    /// Length squared.
+    /// Prone to overflow, so not provided on all types (i32, i16, etc).
+    #[inline]
+    pub fn len2(self) -> f64 {
+        self.dot(self)
+    }
+}
+
+impl<const N: usize> Vector<f32, N>
+where
+    (): SupportedSize<N>,
+{
+    /// Length squared.
+    /// Prone to overflow, so not provided on all types (i32, i16, etc).
+    #[inline]
+    pub fn len2(self) -> f32 {
+        self.dot(self)
     }
 }
 

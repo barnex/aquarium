@@ -18,7 +18,7 @@ impl WaterSim {
                 .map(|[x, y]| pos + vec2(x, y))
             {
                 if tilemap.at(neigh) == Tile::Farmland {
-                    if *h > 0.01 {
+                    if *h > 0.05 {
                         *self.farm_water.entry(neigh).or_default() +=  *h;
                         *h *= 0.99;
                         *self.p.entry(pos).or_default() *= 0.99;
