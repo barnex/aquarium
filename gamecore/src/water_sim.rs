@@ -9,20 +9,8 @@ pub struct WaterSim {
 
 impl WaterSim {
     pub fn major_tick(&mut self, tilemap: &Tilemap) {
-        for (&pos, h) in self.h.iter_mut() {
-            // 🚰 If directly connected to source (Water tile),
-            // set level to maximum.
-            let is_source = [[-1, 0], [1, 0], [0, -1], [0, 1]] //_
-                .into_iter()
-                .map(|[x, y]| pos + vec2(x, y))
-                .any(|pos2| tilemap.at(pos2) == Tile::Water);
-            if is_source {
-                *h = 1.0;
-            }
-        }
-
         // ☘️ irrigate farm land
-        for &pos in self.h.keys() {
+        for (&pos, h) in self.h.iter_mut() {
             // 🚰 If directly connected to source (Water tile),
             // set level to maximum.
             for neigh in [[-1, 0], [1, 0], [0, -1], [0, 1]] //_
@@ -30,7 +18,11 @@ impl WaterSim {
                 .map(|[x, y]| pos + vec2(x, y))
             {
                 if tilemap.at(neigh) == Tile::Farmland {
-                    *self.farm_water.entry(neigh).or_default() += 1.0;
+                    if *h > 0.01 {
+                        *self.farm_water.entry(neigh).or_default() +=  *h;
+                        *h *= 0.99;
+                        *self.p.entry(pos).or_default() *= 0.99;
+                    }
                 }
             }
         }
@@ -69,7 +61,26 @@ impl WaterSim {
         */
     }
 
+    fn tick_sources(&mut self, tilemap: &Tilemap) {
+        for (&pos, h) in self.h.iter_mut() {
+            // 🚰 If directly connected to source (Water tile),
+            // set level to maximum.
+            let is_source = [[-1, 0], [1, 0], [0, -1], [0, 1]] //_
+                .into_iter()
+                .map(|[x, y]| pos + vec2(x, y))
+                .any(|pos2| tilemap.at(pos2) == Tile::Water);
+            if is_source {
+                *h = 1.0;
+            }
+        }
+    }
+
     pub fn minor_tick(&mut self, tilemap: &Tilemap) {
+        self.tick_sources(tilemap);
+        self.tick_flow(tilemap);
+    }
+
+    pub fn tick_flow(&mut self, tilemap: &Tilemap) {
         let dt = 0.1;
         let mut delta_h = HashMap::<vec2i16, f32>::default();
         let mut delta_p = HashMap::<vec2i16, vec2f>::default();
@@ -227,10 +238,3 @@ fn can_flow(tilemap: &Tilemap, pos: vec2i16) -> bool {
     }
 }
 
-// fn canal_tiles(tilemap: &Tilemap) -> impl Iterator<Item = vec2i16> {
-//     tilemap.enumerate_all().filter_map(|(tile, mat)| (mat == Tile::Canal).then_some(tile))
-// }
-//
-// fn farmland_tiles(tilemap: &Tilemap) -> impl Iterator<Item = vec2i16> {
-//     tilemap.enumerate_all().filter_map(|(tile, mat)| (mat == Tile::Farmland).then_some(tile))
-// }
