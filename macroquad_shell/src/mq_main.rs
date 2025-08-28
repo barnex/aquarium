@@ -67,7 +67,7 @@ async fn main() {
         capture_input_events(&mut input_events);
 
         g.tick(now_secs, input_events.drain(..), &mut out);
-        draw(&mut res, &out);
+        mq_draw(&mut res, &out);
 
         //println!("{ANSI_CLEAR}{}", &out.debug);
 

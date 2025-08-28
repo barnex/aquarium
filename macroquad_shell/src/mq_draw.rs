@@ -1,14 +1,11 @@
 use crate::*;
 use num_traits::AsPrimitive as _;
 
-pub(crate) fn draw(res: &mut Resources, out: &Out) {
+/// Draw scenegraph via macroquad.
+pub(crate) fn mq_draw(res: &mut Resources, out: &Out) {
     res.poll(); // 👈 Allow newly loaded images to be used.
 
-    mq::clear_background(mq::LIGHTGRAY);
-
-    if let Some(texture) = res.get(&sprite!("kit6")) {
-        mq::draw_texture(&texture, 0., 0., mq::WHITE);
-    }
+    //mq::clear_background(mq::LIGHTGRAY);
 
     // Draw layers starting from 0 for correct Z-ordering.
     for Layer { sprites, lines, rectangles } in &out.layers {
@@ -47,7 +44,16 @@ pub(crate) fn draw(res: &mut Resources, out: &Out) {
                     Some(dst_size) => dst_size.map(|v| v.get().as_()),
                 };
 
-                mq::draw_texture(bitmap, cmd.pos.x().as_(), cmd.pos.y().as_(), mq::WHITE);
+                mq::draw_texture_ex(
+                    bitmap,
+                    cmd.pos.x().as_(),
+                    cmd.pos.y().as_(),
+                    mq::WHITE,
+                    mq::DrawTextureParams {
+                        dest_size: Some(mq::Vec2::new(dst_size.x(), dst_size.y())),
+                        ..Default::default()
+                    },
+                );
 
                 //ctx.draw_image_with_image_bitmap_and_sw_and_sh_and_dx_and_dy_and_dw_and_dh(
                 //    bitmap,
