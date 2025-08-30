@@ -26,6 +26,10 @@ impl G {
         out.draw_sprite_screen(layer, sprite, world_pos - self.camera_pos);
     }
 
+    pub fn draw_text(&self, out: &mut Out, layer: u8, text: &str, world_pos: vec2i) {
+        layout_text(out, layer, world_pos - self.camera_pos, text);
+    }
+
     /// Draw line in world coordinates (i.e. taking into account camera).
     pub fn draw_line(&self, out: &mut Out, layer: u8, line: Line) {
         out.draw_line_screen(layer, line.translated(-self.camera_pos));
@@ -38,18 +42,18 @@ impl G {
 }
 
 pub(super) fn visible_tiles(g: &G) -> impl Iterator<Item = (vec2i16, Tile)> {
-    // 🪲 TODO: restrict to viewport
-    //g.tilemap.enumerate_all()
+    g._tilemap.enumerate_range(visible_tile_range(g))
+}
 
+pub(super) fn visible_tile_range(g: &G) -> Bounds2D<i16> {
     let min = g.camera_pos.to_tile() - 1;
     let max = (g.camera_pos + g.viewport_size.as_i32()).to_tile() + 1;
-
-    g._tilemap.enumerate_range(Bounds2D::new(min, max))
+    Bounds2D::new(min, max)
 }
 
 pub(super) fn visible_pawns(g: &G) -> impl Iterator<Item = &Pawn> {
-    // 🪲 TODO: restrict to viewport
-    g.pawns.iter()
+    let viewport = visible_tile_range(g);
+    g.pawns.iter().filter(move |p| viewport.contains(p.tile.get()))
 }
 
 fn draw_water(g: &G, out: &mut Out) {
@@ -84,8 +88,24 @@ fn draw_tilemap(g: &G, out: &mut Out) {
 }
 
 fn draw_buildings(g: &G, out: &mut Out) {
-    for building in g.buildings.iter() {
-        g.draw_sprite(out, L_SPRITES, building.typ.sprite(), building.tile.pos());
+    let viewport = visible_tile_range(g);
+    let visible_buildings = g.buildings.iter().filter(|b| b.tile_bounds().overlaps(&viewport));
+    for building in visible_buildings {
+        draw_building(g, out, building);
+    }
+}
+
+fn draw_building(g: &G, out: &mut Out, building: &Building) {
+    // 🏭 Building sprite
+    g.draw_sprite(out, L_SPRITES, building.typ.sprite(), building.tile.pos());
+
+    // ☘️ Resource amounts
+    let vstride = 18; // some fiddly offsets to make it look better
+    let mut cursor = building.tile.pos() - vec2(4, 4);
+    for (typ, count) in building.iter_resources() {
+        g.draw_sprite(out, L_SPRITES + 1, typ.sprite(), cursor - vec2(0, 4));
+        g.draw_text(out, L_SPRITES + 1, &format!("{count}"), cursor + vec2::EX * TILE_ISIZE);
+        cursor[1] += vstride;
     }
 }
 
@@ -96,8 +116,8 @@ fn draw_resources(g: &G, out: &mut Out) {
 }
 
 fn draw_pawns(g: &G, out: &mut Out) {
-    for pawn in g.pawns.iter() {
-        g.draw_sprite(out, L_SPRITES, pawn.typ.sprite(), pawn.tile.pos() );
+    for pawn in visible_pawns(g) {
+        g.draw_sprite(out, L_SPRITES, pawn.typ.sprite(), pawn.tile.pos());
         if let Some(res) = pawn.cargo.get() {
             g.draw_sprite(out, L_SPRITES + 1, res.sprite(), pawn.tile.pos() + vec2(0, 8));
         }
