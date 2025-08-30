@@ -1,5 +1,6 @@
 use crate::*;
 
+// TODO: Nonzero
 #[derive(Clone, Copy, PartialEq, Eq, Hash, PartialOrd, Ord)]
 pub struct Id {
     pub(super) index: u32,

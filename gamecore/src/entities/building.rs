@@ -8,6 +8,7 @@ pub struct Building {
     pub typ: BuildingTyp,
     pub tile: vec2i16,
     pub workers: CSet<Id>,
+    pub downstream: CSet<Id>,
     resources: [Cel<u16>; MAX_RES_SLOTS],
 }
 
@@ -45,10 +46,11 @@ impl Building {
             tile: tile.into(),
             workers: default(),
             resources: default(),
+            downstream: default(),
         }
     }
 
-    pub fn accepts_resource(&self, res: ResourceTyp) -> bool {
+    pub fn processes_resource(&self, res: ResourceTyp) -> bool {
         Self::resource_indices(self.typ)[res as usize].is_some()
     }
 

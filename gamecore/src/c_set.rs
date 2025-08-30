@@ -46,6 +46,11 @@ impl<T: Eq + Hash + Copy> CSet<T> {
         self.0.borrow_mut().clear();
     }
 
+    /// Like HashSet::extend.
+    pub fn extend(&self, iter: impl IntoIterator<Item = T>) {
+        self.0.borrow_mut().extend(iter);
+    }
+
     /// Like HashSet::contains.
     pub fn contains(&self, v: T) -> bool {
         self.0.borrow().contains(&v)

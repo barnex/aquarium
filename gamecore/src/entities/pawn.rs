@@ -50,47 +50,78 @@ impl Pawn {
 
     // ⏱️
     pub(crate) fn tick(&self, g: &G) {
-        // 🥾
+        // 🥾 always first go where you were going
         if !self.is_at_destination() {
             self.walk_to_destination(g);
             return;
         }
 
-        const NEAR_HOME: i64 = 4;
+        // 📍 now you are at destination
 
-        // we are at some destination
-
+        // 🏭 for worker pawns
         if let Some(home) = self.home(g) {
-            // 🏭 home? deliver
-            if self.tile == home.tile {
-                self.deliver_cargo(home);
-                self.go_to_near_resource(g);
+            if self.cargo.is_some() {
+                self.tick_with_cargo(g, home);
             } else {
-                // ✋☘️ at resource with hands free: take
-                if self.cargo.is_none() {
-                    // TODO: only suitable resources
-                    self.cargo.set(g.resources.remove(self.tile.get()));
-                }
-                if self.cargo.is_some() {
-                    self.go_home(g);
-                } else {
-                    self.go_to_near_resource(g).or_else(|| {
-                        if home.tile.as_i32().distance_squared(self.tile().as_i32()) > NEAR_HOME * NEAR_HOME {
-                            self.go_home(g);
-                        };
-                        OK
-                    });
-                }
+                self.tick_without_cargo(g, home);
             }
         }
+
+        // const NEAR_HOME: i64 = 4;
 
         // 😴
         self.take_personal_space(g);
     }
 
+    /// 📦 Carrying something
+    fn tick_with_cargo(&self, g: &G, home: &Building) {
+        // 🏭 We are home: try to drop off
+
+        if let Some(building) = g.building_at(self.tile()) {
+            self.deliver_cargo(building);
+            // 📦 drop-off failed because destination is full:
+            // deliver downstream
+            if let Some(res) = self.cargo.get() {
+                if let Some(downstream) = home //_
+                    .downstream
+                    .iter()
+                    .filter_map(|id| g.building(id))
+                    .filter(|b| b.processes_resource(res))
+                    // TODO: nearest, should have actual free slot
+                    // TODO: chain home
+                    .next()
+                {
+                    self.set_destination(g, downstream.tile);
+                }
+            }
+        }else{
+            self.go_home(g);
+        }
+    }
+
+    /// ✋ Hands free
+    fn tick_without_cargo(&self, g: &G, home: &Building) {
+        const NEAR_HOME: i64 = 4;
+
+        // Try picking up resource
+        if let Some(res) = g.resources.at(self.tile()) {
+            if home.processes_resource(res) {
+                self.cargo.set(g.resources.remove(self.tile.get()));
+                return;
+            }
+        }
+
+        self.go_to_near_resource(g).or_else(|| {
+            if home.tile.as_i32().distance_squared(self.tile().as_i32()) > NEAR_HOME * NEAR_HOME {
+                self.go_home(g);
+            };
+            OK
+        });
+    }
+
     fn go_to_near_resource(&self, g: &G) -> Status {
         let home = self.home(g)?;
-        let new_dest = g.resources.iter().filter(|(_, res)| home.accepts_resource(*res)).min_by_key(|(tile, _)| tile.distance_squared(self.tile.get())).map(|(tile, _)| tile)?;
+        let new_dest = g.resources.iter().filter(|(_, res)| home.processes_resource(*res)).min_by_key(|(tile, _)| tile.distance_squared(self.tile.get())).map(|(tile, _)| tile)?;
         self.set_destination(g, new_dest);
         OK
     }
