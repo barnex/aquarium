@@ -11,6 +11,7 @@ pub struct G {
     pub buildings: MemKeep<Building>,
     pub pawns: MemKeep<Pawn>,
     pub water: WaterSim,
+    pub header_text: String,
 
     // ⏯️ UI
     #[serde(skip)]
@@ -76,6 +77,7 @@ impl G {
         Self {
             _prev_secs: 0.0,
             _rng: RefCell::new(ChaCha8Rng::seed_from_u64(12345678)),
+            _tilemap: Tilemap::new(size),
             buildings: MemKeep::new(),
             camera_pos: vec2(40, 70), // nonzero so we notice offset issues without having to pan
             commands: default(),
@@ -85,6 +87,7 @@ impl G {
             dt_smooth: 1.0 / 60.0,
             frame: 0,
             frames_per_tick: 8,
+            header_text: default(),
             inputs: default(),
             keymap: default_keybindings(),
             last_sanity_error: None,
@@ -96,7 +99,6 @@ impl G {
             selected_pawn_ids: default(),
             selection_start: None,
             tick: 0,
-            _tilemap: Tilemap::new(size),
             ui: Ui::new(),
             viewport_size: vec2(0, 0),
             water: default(),
@@ -152,6 +154,12 @@ impl G {
         self.tick += 1;
         self.tick_pawns();
         self.tick_farmland();
+
+        // tick text
+        {
+            self.header_text.clear();
+            write!(&mut self.header_text, "{}", self.name).swallow_err();
+        }
     }
 
     pub(crate) fn tick_pawns(&mut self) {

@@ -5,8 +5,7 @@ impl G {
     pub fn draw_world(&self, out: &mut Out) {
         debug_assert!(out.viewport_size != vec2::ZERO);
 
-        layout_text(out, L_TEXT, vec2(150, 50), "Hello world!\n0 Greetings, human.");
-        layout_text(out, L_TEXT, vec2(150, 20), FONT_PLUS);
+        layout_text(out, L_TEXT, vec2(0, 0), &self.header_text);
 
         // Note: ⚠️ UI already rendered (may consume input events)
 
