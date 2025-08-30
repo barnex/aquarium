@@ -50,23 +50,50 @@ impl Building {
         }
     }
 
-    pub fn processes_resource(&self, res: ResourceTyp) -> bool {
-        Self::resource_indices(self.typ)[res as usize].is_some()
+    /// Depots accept resources transferred from other buildings.
+    /// E.g. a Farm is *not* a depot as it only harvests fresh food,
+    /// whereas headquarters is a huge depot that receives only from others.
+    pub fn is_depot(&self) -> bool {
+        match self.typ {
+            BuildingTyp::HQ => true,
+            BuildingTyp::Farm => false,
+            BuildingTyp::Quarry => false,
+        }
+    }
+
+    /// Is building interested in this resource (pending capacity)?
+    pub fn has_resource_slot(&self, res: ResourceTyp) -> bool {
+        self.resource_slot(res).is_some()
+    }
+
+    /// Is there capacity to receive one resource of given type (e.g. one rock)?
+    pub fn can_accept_resource(&self, res: ResourceTyp) -> bool {
+        match self.resource_slot(res) {
+            None => false,
+            Some((count, cap)) => count.get() < cap,
+        }
     }
 
     pub fn add_resource(&self, res: ResourceTyp) -> Status {
-        let (i, cap) = Self::resource_indices(self.typ)[res as usize]?;
-        if self.resources[i].get() < cap {
-            self.resources[i].inc(1);
+        let (slot, cap) = self.resource_slot(res)?;
+        if slot.get() < cap {
+            debug_assert!(self.can_accept_resource(res));
+            slot.inc(1);
             OK
         } else {
             FAIL
         }
     }
 
+    /// Current number and maximum capacity for given resource.
+    fn resource_slot(&self, res: ResourceTyp) -> Option<(&Cel<u16>, u16)> {
+        let (i, cap) = Self::_resource_metadata(self.typ)[res as usize]?;
+        Some((&self.resources[i], cap))
+    }
+
     pub fn iter_resources(&self) -> impl Iterator<Item = (ResourceTyp, u16)> {
         // TODO: reverse index instead of linear search
-        Self::resource_indices(self.typ)
+        Self::_resource_metadata(self.typ)
             .into_iter()
             .enumerate()
             .filter_map(|(r, v)| v.map(|(i, _cap)| (r, i)))
@@ -75,10 +102,11 @@ impl Building {
     }
 
     /// Index in Building.resrouces and max capacity.
-    fn resource_indices(typ: BuildingTyp) -> [Option<(usize, u16)>; ResourceTyp::COUNT] {
+    /// 0 unused :(
+    fn _resource_metadata(typ: BuildingTyp) -> [Option<(usize, u16)>; ResourceTyp::COUNT] {
         match typ {
             BuildingTyp::HQ => [None, Some((0, 1000)), Some((1, 1000))],
-            BuildingTyp::Farm => [None, Some((0, 20)), None],
+            BuildingTyp::Farm => [None, Some((0, 2)), None],
             BuildingTyp::Quarry => [None, None, Some((0, 30))],
         }
     }

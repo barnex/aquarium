@@ -88,9 +88,7 @@ fn draw_tilemap(g: &G, out: &mut Out) {
 }
 
 fn draw_buildings(g: &G, out: &mut Out) {
-    let viewport = visible_tile_range(g);
-    let visible_buildings = g.buildings.iter().filter(|b| b.tile_bounds().overlaps(&viewport));
-    for building in visible_buildings {
+    for building in visible_buildings(g) {
         draw_building(g, out, building);
     }
 }
@@ -107,6 +105,11 @@ fn draw_building(g: &G, out: &mut Out, building: &Building) {
         g.draw_text(out, L_SPRITES + 1, &format!("{count}"), cursor + vec2::EX * TILE_ISIZE);
         cursor[1] += vstride;
     }
+}
+
+pub(super) fn visible_buildings(g: &G) -> impl Iterator<Item = &Building> {
+    let viewport = visible_tile_range(g);
+    g.buildings.iter().filter(move |b| b.tile_bounds().overlaps(&viewport))
 }
 
 fn draw_resources(g: &G, out: &mut Out) {

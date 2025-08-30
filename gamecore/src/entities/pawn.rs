@@ -57,6 +57,7 @@ impl Pawn {
         }
 
         // 📍 now you are at destination
+        log::trace!("🦀 at destination");
 
         // 🏭 for worker pawns
         if let Some(home) = self.home(g) {
@@ -77,56 +78,76 @@ impl Pawn {
     fn tick_with_cargo(&self, g: &G, home: &Building) {
         // 🏭 We are home: try to drop off
 
+        log::trace!("🦀 have cargo");
+
         if let Some(building) = g.building_at(self.tile()) {
+            log::trace!("🦀 at building: try deliver");
+
             self.deliver_cargo(building);
             // 📦 drop-off failed because destination is full:
             // deliver downstream
             if let Some(res) = self.cargo.get() {
+                log::trace!("🦀 deliver failed, look for downstream");
                 if let Some(downstream) = home //_
                     .downstream
                     .iter()
                     .filter_map(|id| g.building(id))
-                    .filter(|b| b.processes_resource(res))
+                    .filter(|b| b.has_resource_slot(res))
                     // TODO: nearest, should have actual free slot
                     // TODO: chain home
                     .next()
                 {
+                    log::trace!("🦀 moving to downstream {:?}@{}", downstream.typ, downstream.id);
                     self.set_destination(g, downstream.tile);
                 }
+            } else {
+                // successful home delivery :)
+                log::trace!("🦀 successful home delivery, thinking");
             }
-        }else{
+        } else {
+            log::trace!("🦀 not at building: going home");
             self.go_home(g);
         }
     }
 
     /// ✋ Hands free
     fn tick_without_cargo(&self, g: &G, home: &Building) {
+        log::trace!("🦀 no cargo");
         const NEAR_HOME: i64 = 4;
 
         // Try picking up resource
         if let Some(res) = g.resources.at(self.tile()) {
-            if home.processes_resource(res) {
-                self.cargo.set(g.resources.remove(self.tile.get()));
-                return;
+            log::trace!("🦀 standing on {res:?}");
+            if home.has_resource_slot(res) {
+                return self.cargo.set(g.resources.remove(self.tile.get()));
+            } else {
+                // ...
             }
-        }
+        } else {
+            log::trace!("🦀 no resource here");
 
-        self.go_to_near_resource(g).or_else(|| {
+            if self.go_to_near_resource(g).is_some() {
+                return;
+            };
+
+            // pick up?
+
             if home.tile.as_i32().distance_squared(self.tile().as_i32()) > NEAR_HOME * NEAR_HOME {
                 self.go_home(g);
-            };
-            OK
-        });
+            }
+        }
     }
 
     fn go_to_near_resource(&self, g: &G) -> Status {
+        log::trace!("🦀 go to near resource?");
         let home = self.home(g)?;
-        let new_dest = g.resources.iter().filter(|(_, res)| home.processes_resource(*res)).min_by_key(|(tile, _)| tile.distance_squared(self.tile.get())).map(|(tile, _)| tile)?;
+        let new_dest = g.resources.iter().filter(|(_, res)| home.can_accept_resource(*res)).min_by_key(|(tile, _)| tile.distance_squared(self.tile.get())).map(|(tile, _)| tile)?;
         self.set_destination(g, new_dest);
         OK
     }
 
     fn go_home(&self, g: &G) -> Status {
+        log::trace!("🦀 going home");
         self.set_destination(g, g.building(self.home.get()?)?.entrance());
         OK
     }

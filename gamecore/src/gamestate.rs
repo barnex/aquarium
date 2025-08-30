@@ -337,12 +337,14 @@ impl G {
     fn update_downstream_buildings(&self) {
         let Some(hq) = self.buildings().find(|b| b.typ == BuildingTyp::HQ) else { return log::error!("No HQ") };
 
+        // 🪲 TODO: quadratic in #buildings. Use spatial queries instead.
         const MAX_DIST2: i32 = 30 * 30; // TODO
         for building in self.buildings().filter(|b| b.id != hq.id) {
             let my_resources = building.iter_resources().map(|(r, _)| r).collect::<HashSet<_>>();
             let neighbors = self
                 .buildings() //_
                 .filter(|b| b.id != building.id)
+                .filter(|b| b.is_depot())
                 .filter(|b| b.tile.distance_squared(building.tile) < MAX_DIST2)
                 .filter(|b| b.tile.distance_squared(hq.tile) < building.tile.distance_squared(hq.tile))
                 .filter(|b| b.iter_resources().map(|(r, _)| r).any(|r| my_resources.contains(&r)))

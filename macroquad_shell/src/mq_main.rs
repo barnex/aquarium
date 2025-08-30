@@ -57,7 +57,7 @@ async fn main() {
     loop {
         if mq::is_quit_requested() {
             log::info!("quitting...");
-            save_game(&g);
+            // save_game(&g); <<< TODO
             return; // 👈 exit
         }
 
@@ -70,7 +70,16 @@ async fn main() {
         g.tick(now_secs, input_events.drain(..), &mut out);
         mq_draw(&mut res, &out);
 
-        //println!("{ANSI_CLEAR}{}", &out.debug);
+        if !g.paused {
+            println!("{ANSI_CLEAR}{}", &out.debug);
+        }
+        if mq::is_key_pressed(mq::KeyCode::S) && mq::is_key_down(mq::KeyCode::LeftSuper) {
+            save_game(&g);
+        }
+        if mq::is_key_pressed(mq::KeyCode::Space) {
+            g.paused = true;
+            g.commands.push_back("tick".into());
+        }
 
         mq::next_frame().await
     }

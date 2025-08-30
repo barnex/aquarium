@@ -6,6 +6,7 @@ pub struct DebugOpts {
     pub show_buildable: bool,
     pub show_destination: bool,
     pub show_home: bool,
+    pub show_downstream: bool,
     pub draw_mouse: bool,
     pub pause_on_sanity_failure: bool,
     pub inspect_under_cursor: bool,
@@ -20,6 +21,9 @@ pub(super) fn draw_debug_overlay(g: &G, out: &mut Out) {
     }
     if g.debug.show_home {
         draw_home_overlay(g, out);
+    }
+    if g.debug.show_downstream {
+        draw_downstream_overlay(g, out);
     }
     if g.debug.show_destination {
         draw_destinations(g, out);
@@ -72,6 +76,14 @@ fn draw_home_overlay(g: &G, out: &mut Out) {
     for pawn in visible_pawns(g) {
         if let Some(home) = g.buildings.get_maybe(pawn.home.get()) {
             out.draw_line_screen(L_SPRITES + 1, Line::new(pawn.center(), home.tile.pos()).with_color(color).with_width(2).translated(-g.camera_pos));
+        }
+    }
+}
+
+fn draw_downstream_overlay(g: &G, out: &mut Out) {
+    for src in visible_buildings(g) {
+        for dst in src.downstream.iter().filter_map(|id| g.building(id)) {
+            g.draw_line(out, L_SPRITES + 1, Line::new(src.tile_bounds().max.pos(), dst.entrance().pos()));
         }
     }
 }
