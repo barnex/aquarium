@@ -79,27 +79,27 @@ fn draw_water(g: &G, out: &mut Out) {
 
 fn draw_tilemap(g: &G, out: &mut Out) {
     for (idx, mat) in visible_tiles(g) {
-        out.draw_sprite_screen(L_TILES, mat.sprite(), idx.pos() - g.camera_pos);
+        g.draw_sprite(out, L_TILES, mat.sprite(), idx.pos());
     }
 }
 
 fn draw_buildings(g: &G, out: &mut Out) {
     for building in g.buildings.iter() {
-        out.draw_sprite_screen(L_SPRITES, building.typ.sprite(), building.tile.pos() - g.camera_pos);
+        g.draw_sprite(out, L_SPRITES, building.typ.sprite(), building.tile.pos());
     }
 }
 
 fn draw_resources(g: &G, out: &mut Out) {
     for (tile, res) in g.resources.iter() {
-        out.draw_sprite_screen(L_SPRITES, res.sprite(), tile.pos() - g.camera_pos);
+        g.draw_sprite(out, L_SPRITES, res.sprite(), tile.pos());
     }
 }
 
 fn draw_pawns(g: &G, out: &mut Out) {
     for pawn in g.pawns.iter() {
-        out.draw_sprite_screen(L_SPRITES, pawn.typ.sprite(), pawn.tile.pos() - g.camera_pos);
+        g.draw_sprite(out, L_SPRITES, pawn.typ.sprite(), pawn.tile.pos() );
         if let Some(res) = pawn.cargo.get() {
-            out.draw_sprite_screen(L_SPRITES + 1, res.sprite(), pawn.tile.pos() - g.camera_pos + vec2(0, 8));
+            g.draw_sprite(out, L_SPRITES + 1, res.sprite(), pawn.tile.pos() + vec2(0, 8));
         }
     }
 }
@@ -107,8 +107,8 @@ fn draw_pawns(g: &G, out: &mut Out) {
 // ↑
 fn draw_cursor(g: &G, out: &mut Out) {
     let sprite = cursor_sprite(g);
-    out.draw_sprite_screen(L_SPRITES, sprite, g.mouse_tile().pos() - g.camera_pos);
-    out.draw_sprite_screen(L_SPRITES, sprite!("grid24"), g.mouse_tile().pos() - g.camera_pos);
+    g.draw_sprite(out, L_SPRITES, sprite, g.mouse_tile().pos());
+    g.draw_sprite(out, L_SPRITES, sprite!("grid24"), g.mouse_tile().pos());
 }
 
 fn cursor_sprite(g: &G) -> Sprite {
@@ -135,12 +135,12 @@ fn draw_selection(g: &G, out: &mut Out) -> Status {
         let max = start.zip_with(end, i32::max);
         let sel = Bounds2D::new(min, max);
 
-        out.draw_rect_screen(L_SPRITES + 1, Rectangle::new(sel.translated(-g.camera_pos), RGBA::BLUE).with_fill(RGB::BLUE.with_alpha(64)));
+        g.draw_rect(out, L_SPRITES + 1, Rectangle::new(sel, RGBA::BLUE).with_fill(RGB::BLUE.with_alpha(64)));
     }
 
     // 🦀 Selected pawns
     for pawn in g.selected_pawns() {
-        out.draw_rect_screen(L_SPRITES + 1, Rectangle::new(pawn.bounds().translated(-g.camera_pos), RGBA::BLUE).with_fill(RGB::BLUE.with_alpha(64)));
+        g.draw_rect(out, L_SPRITES + 1, Rectangle::new(pawn.bounds(), RGBA::BLUE).with_fill(RGB::BLUE.with_alpha(64)));
     }
     OK
 }
