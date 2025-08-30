@@ -9,6 +9,7 @@ mod replace_with;
 mod saturating_add_assign;
 mod with;
 mod sorted;
+mod ignore;
 
 pub use cartesian_product::*;
 pub use collect_grouped::*;
@@ -17,3 +18,4 @@ pub use replace_with::*;
 pub use saturating_add_assign::*;
 pub use with::*;
 pub use sorted::*;
+pub use ignore::*;

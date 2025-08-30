@@ -132,8 +132,8 @@ impl Building {
     /// 0 unused :(
     fn _resource_metadata(typ: BuildingTyp) -> [Option<(usize, u16)>; ResourceTyp::COUNT] {
         match typ {
-            BuildingTyp::HQ => [None, Some((0, 1000)), Some((1, 1000))],
-            BuildingTyp::Farm => [None, Some((0, 2)), None],
+            BuildingTyp::HQ => [None, Some((0, 100)), Some((1, 100))],
+            BuildingTyp::Farm => [None, Some((0, 20)), None],
             BuildingTyp::Quarry => [None, None, Some((0, 30))],
         }
     }
@@ -155,6 +155,10 @@ impl Building {
 
     pub fn entrance(&self) -> vec2i16 {
         self.tile // TODO
+    }
+
+    pub fn id(&self) -> Id{
+        self.id
     }
 }
 

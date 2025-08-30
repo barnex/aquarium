@@ -57,15 +57,10 @@ impl Pawn {
         }
 
         // 📍 now you are at destination
-        log::trace!("🦀 at destination");
 
         // 🏭 for worker pawns
         if let Some(home) = self.home(g) {
-            if self.cargo.is_some() {
-                self.tick_with_cargo(g, home);
-            } else {
-                self.tick_without_cargo(g, home);
-            }
+            self.tick_delivery_work(g, home)
         }
 
         // const NEAR_HOME: i64 = 4;
@@ -74,84 +69,55 @@ impl Pawn {
         self.take_personal_space(g);
     }
 
-    /// 📦 Carrying something
-    fn tick_with_cargo(&self, g: &G, home: &Building) {
-        // 🏭 We are home: try to drop off
+    fn tick_delivery_work(&self, g: &G, home: &Building) {
+        let on_building = g.building_at(self.tile());
+        let on_home = on_building.map(Building::id) == Some(home.id);
 
-        log::trace!("🦀 have cargo");
-
-        if let Some(building) = g.building_at(self.tile()) {
-            log::trace!("🦀 at building: try deliver");
-
-            self.deliver_cargo(building);
-            // 📦 drop-off failed because destination is full:
-            // deliver downstream
-            if let Some(res) = self.cargo.get() {
-                log::trace!("🦀 deliver failed, look for downstream");
-                if let Some(downstream) = home //_
-                    .downstream_buildings(g)
-                    .filter(|b| b.has_resource_slot(res))
-                    // TODO: nearest, should have actual free slot
-                    // TODO: chain home
-                    .next()
-                {
-                    log::trace!("🦀 moving to downstream {:?}@{}", downstream.typ, downstream.id);
-                    self.set_destination(g, downstream.tile);
-                }
-            } else {
-                // successful home delivery :)
-                log::trace!("🦀 successful home delivery, thinking");
-
-                if home.is_full() {
-                    log::trace!("🦀 home is full");
-                    for downstream in home
-                        .downstream_buildings(g) //_
-                        .sorted_by_key(|d| d.tile.distance_squared(home.tile))
-                    {
-                        for (res, slot, _) in home.resource_slots(){
-                            if downstream.can_accept_resource(res){
-                                self.cargo.set(home.take_resource(res));
-                                self.set_destination(g, downstream.entrance());
-                            }
-                        }
-                    }
-                }
-            }
-        } else {
-            log::trace!("🦀 not at building: going home");
-            self.go_home(g);
+        match on_building {
+            _ if on_home => self.tick_on_home(g, home),
+            Some(building) => self.tick_on_other_building(g, home, building),
+            None => self.tick_away_from_building(g, home),
         }
     }
 
-    /// ✋ Hands free
-    fn tick_without_cargo(&self, g: &G, home: &Building) {
-        log::trace!("🦀 no cargo");
-        const NEAR_HOME: i64 = 4;
-
-        // Try picking up resource
-        if let Some(res) = g.resources.at(self.tile()) {
-            log::trace!("🦀 standing on {res:?}");
-            if home.has_resource_slot(res) {
-                return self.cargo.set(g.resources.remove(self.tile.get()));
-            } else {
-                // ...
-            }
-        } else {
-            log::trace!("🦀 no resource here");
-
-            if self.go_to_near_resource(g).is_some() {
-                return;
-            };
-
-            if home.tile.as_i32().distance_squared(self.tile().as_i32()) > NEAR_HOME * NEAR_HOME {
-                self.go_home(g);
-            }
-        }
+    ///   +home+
+    ///   | 🦀 |    ☘️️️ ☘️️
+    ///   +----+
+    fn tick_on_home(&self, g: &G, home: &Building) {
+        log::trace!("🦀 on home");
+        self.try_deliver_cargo(home);
+        match self.cargo() {
+            None => self.go_to_near_resource(g, home).or_else(|| self.take_any_resource_downstream(g, home)),
+            Some(_) => self.go_downstream(g, home),
+        };
     }
 
-    fn go_to_near_resource(&self, g: &G) -> Status {
+    /// +-HQ-+   +home+
+    /// | 🦀 |   |    |    ☘️️️ ☘️️
+    /// +----+   +----+
+    fn tick_on_other_building(&self, g: &G, home: &Building, building: &Building) {
+        log::trace!("🦀 on other building: {:?}", building.typ);
+        self.try_deliver_cargo(building);
+        match self.cargo() {
+            None => self.go_to_near_resource(g, home).or_else(|| self.go_home(g)),
+            Some(_) => self.go_home(g),
+        };
+    }
+
+    ///   +home+
+    ///   |    |    🦀 ☘️️
+    ///   +----+
+    fn tick_away_from_building(&self, g: &G, home: &Building) {
+        log::trace!("🦀 away from any building");
+        self.try_pick_up_cargo(g, home);
+        match self.cargo() {
+            Some(_) => self.go_home(g),
+            None => self.go_to_near_resource(g, home).or_else(|| self.go_home(g)),
+        };
+    }
+
+    fn go_to_near_resource(&self, g: &G, home: &Building) -> Status {
         log::trace!("🦀 go to near resource?");
-        let home = self.home(g)?;
         let new_dest = g.resources.iter().filter(|(_, res)| home.can_accept_resource(*res)).min_by_key(|(tile, _)| tile.distance_squared(self.tile.get())).map(|(tile, _)| tile)?;
         self.set_destination(g, new_dest);
         OK
@@ -163,15 +129,66 @@ impl Pawn {
         OK
     }
 
-    pub fn deliver_cargo(&self, home: &Building) -> Status {
-        // 🪲 TODO: add to factory.
-        if let Some(resource) = self.cargo.take() {
-            match home.add_resource(resource) {
-                OK => (),
-                FAIL => self.cargo.set(Some(resource)), // TODO: go sleep a bit or so
+    fn go_downstream(&self, g: &G, home: &Building) -> Status {
+        log::trace!("🦀 going downstream");
+        debug_assert!(self.cargo.is_some());
+
+        let cargo = self.cargo()?;
+
+        for downstream in home
+            .downstream_buildings(g) //_
+            .sorted_by_key(|d| d.tile.distance_squared(self.tile()))
+        {
+            if downstream.can_accept_resource(cargo) {
+                self.set_destination(g, downstream.entrance());
+                return OK;
             }
         }
-        OK
+        FAIL
+    }
+
+    fn take_any_resource_downstream(&self, g: &G, home: &Building) -> Status {
+        log::trace!("🦀 take any resource downstream");
+        for downstream in home
+            .downstream_buildings(g) //_
+            .sorted_by_key(|d| d.tile.distance_squared(home.tile))
+        {
+            for (res, slot, _) in home.resource_slots() {
+                if slot.get() > 0 && downstream.can_accept_resource(res) {
+                    self.cargo.set(home.take_resource(res));
+                    if self.set_destination(g, downstream.entrance()).is_some() {
+                        log::trace!("🦀 take {:?} downstream to {:?}", self.cargo(), downstream.typ);
+                        return OK;
+                    }
+                }
+            }
+        }
+        FAIL
+    }
+
+    pub fn try_deliver_cargo(&self, building: &Building) -> Status {
+        log::trace!("🦀 try deliver cargo {:?} to {:?}", self.cargo, building.typ);
+        debug_assert!(building.tile_bounds().contains(self.tile()), "should be on building");
+
+        let resource = self.cargo.take()?;
+        match building.add_resource(resource) {
+            OK => OK,
+            FAIL => {
+                // TODO: go sleep a bit or so
+                self.cargo.set(Some(resource));
+                FAIL
+            }
+        }
+    }
+
+    pub fn try_pick_up_cargo(&self, g: &G, home: &Building) -> Status {
+        let res = g.resources.at(self.tile())?;
+        if home.can_accept_resource(res) {
+            self.cargo.set(g.resources.remove(self.tile()));
+            OK
+        } else {
+            FAIL
+        }
     }
 
     pub fn home<'a>(&self, g: &'a G) -> Option<&'a Building> {
@@ -219,19 +236,19 @@ impl Pawn {
         }
     }
 
-    pub fn set_destination(&self, g: &G, dest: vec2i16) {
+    pub fn set_destination(&self, g: &G, dest: vec2i16) -> Status {
         if !self.can_move() {
-            return;
+            return FAIL;
         }
-        self.start_route_to(g, dest);
+        self.start_route_to(g, dest)
     }
 
-    fn start_route_to(&self, g: &G, dest: vec2i16) {
+    fn start_route_to(&self, g: &G, dest: vec2i16) -> Status {
         let max_dist = 42;
         let distance_map = DistanceMap::new(dest, max_dist, |p| g.is_walkable(p));
-        if let Some(path) = distance_map.path_to_center(self.tile.get()) {
-            self.route.set(path);
-        }
+        let path = distance_map.path_to_center(self.tile())?;
+        self.route.set(path);
+        OK
     }
 
     pub fn destination(&self) -> Option<vec2i16> {
@@ -244,6 +261,10 @@ impl Pawn {
 
     pub fn tile(&self) -> vec2i16 {
         self.tile.get()
+    }
+
+    pub fn cargo(&self) -> Option<ResourceTyp> {
+        self.cargo.get()
     }
 
     pub fn center(&self) -> vec2i {

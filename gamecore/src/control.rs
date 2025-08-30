@@ -87,16 +87,14 @@ fn command_pawns(g: &mut G) {
             let mouse = g.mouse_tile();
             match g.contextual_action {
                 Action::None => (),
-                Action::Move => g.selected_pawns().for_each(|p| p.set_destination(g, mouse)),
+                Action::Move => g.selected_pawns().for_each(|p| {
+                    p.set_destination(g, mouse);
+                }),
                 Action::Assign => {
                     if let Some(building) = g.building_at(mouse) {
                         g.selected_pawns().for_each(|pawn| g.assign_to(pawn, building));
                     }
                 }
-            }
-
-            for pawn in g.selected_pawns() {
-                pawn.set_destination(g, g.mouse_tile())
             }
         }
     }
