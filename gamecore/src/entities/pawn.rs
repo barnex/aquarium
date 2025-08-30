@@ -89,9 +89,7 @@ impl Pawn {
             if let Some(res) = self.cargo.get() {
                 log::trace!("🦀 deliver failed, look for downstream");
                 if let Some(downstream) = home //_
-                    .downstream
-                    .iter()
-                    .filter_map(|id| g.building(id))
+                    .downstream_buildings(g)
                     .filter(|b| b.has_resource_slot(res))
                     // TODO: nearest, should have actual free slot
                     // TODO: chain home
@@ -103,6 +101,21 @@ impl Pawn {
             } else {
                 // successful home delivery :)
                 log::trace!("🦀 successful home delivery, thinking");
+
+                if home.is_full() {
+                    log::trace!("🦀 home is full");
+                    for downstream in home
+                        .downstream_buildings(g) //_
+                        .sorted_by_key(|d| d.tile.distance_squared(home.tile))
+                    {
+                        for (res, slot, _) in home.resource_slots(){
+                            if downstream.can_accept_resource(res){
+                                self.cargo.set(home.take_resource(res));
+                                self.set_destination(g, downstream.entrance());
+                            }
+                        }
+                    }
+                }
             }
         } else {
             log::trace!("🦀 not at building: going home");
@@ -129,8 +142,6 @@ impl Pawn {
             if self.go_to_near_resource(g).is_some() {
                 return;
             };
-
-            // pick up?
 
             if home.tile.as_i32().distance_squared(self.tile().as_i32()) > NEAR_HOME * NEAR_HOME {
                 self.go_home(g);

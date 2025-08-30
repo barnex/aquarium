@@ -3,7 +3,7 @@ use crate::*;
 use num_traits::Num;
 use std::cell::Cell;
 use std::fmt::{Debug, Display};
-use std::ops::Add;
+use std::ops::{Add, Sub};
 
 #[derive(Default)]
 pub struct Cel<T: Copy>(Cell<T>);
@@ -103,6 +103,14 @@ impl<T: Copy + Add<Output = T>> CelAdd<&Cel<T>> for Cel<T> {
     #[inline(always)]
     fn inc(&self, rhs: &Cel<T>) {
         self.set(self.get() + rhs.get());
+    }
+}
+
+impl<T: Copy + Sub<Output = T>> Cel<T> {
+    /// Increment value by `rhs`.
+    #[inline(always)]
+    pub fn sub(&self, rhs: T) {
+        self.set(self.get() - rhs);
     }
 }
 

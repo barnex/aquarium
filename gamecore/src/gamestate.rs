@@ -349,8 +349,8 @@ impl G {
                 .filter(|b| b.tile.distance_squared(hq.tile) < building.tile.distance_squared(hq.tile))
                 .filter(|b| b.iter_resources().map(|(r, _)| r).any(|r| my_resources.contains(&r)))
                 .map(|b| b.id);
-            building.downstream.clear();
-            building.downstream.extend(neighbors);
+            building._downstream.clear();
+            building._downstream.extend(neighbors);
         }
     }
 

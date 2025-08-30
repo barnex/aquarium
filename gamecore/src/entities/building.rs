@@ -8,7 +8,7 @@ pub struct Building {
     pub typ: BuildingTyp,
     pub tile: vec2i16,
     pub workers: CSet<Id>,
-    pub downstream: CSet<Id>,
+    pub _downstream: CSet<Id>,
     resources: [Cel<u16>; MAX_RES_SLOTS],
 }
 
@@ -46,8 +46,16 @@ impl Building {
             tile: tile.into(),
             workers: default(),
             resources: default(),
-            downstream: default(),
+            _downstream: default(),
         }
+    }
+
+    pub fn is_full(&self) -> bool {
+        self.resource_slots().all(|(_, slot, cap)| slot.get() >= cap)
+    }
+
+    pub fn downstream_buildings<'g>(&self, g: &'g G) -> impl Iterator<Item = &'g Building> {
+        self._downstream.iter().filter_map(|id| g.building(id))
     }
 
     /// Depots accept resources transferred from other buildings.
@@ -85,10 +93,29 @@ impl Building {
         }
     }
 
+    pub fn take_resource(&self, res: ResourceTyp) -> Option<ResourceTyp> {
+        let (slot, _) = self.resource_slot(res)?;
+        if slot.get() > 0 {
+            slot.sub(1);
+            Some(res)
+        } else {
+            None
+        }
+    }
+
     /// Current number and maximum capacity for given resource.
-    fn resource_slot(&self, res: ResourceTyp) -> Option<(&Cel<u16>, u16)> {
+    pub fn resource_slot(&self, res: ResourceTyp) -> Option<(&Cel<u16>, u16)> {
         let (i, cap) = Self::_resource_metadata(self.typ)[res as usize]?;
         Some((&self.resources[i], cap))
+    }
+
+    /// Iterate Resource type, current amount, and maximum capacity.
+    pub fn resource_slots(&self) -> impl Iterator<Item = (ResourceTyp, &Cel<u16>, u16)> {
+        Self::_resource_metadata(self.typ)
+            .into_iter()
+            .enumerate()
+            .filter_map(|(r, v)| v.map(|(i, cap)| (r, i, cap)))
+            .map(|(r, i, cap)| (ResourceTyp::try_from_primitive(r as u8).unwrap(), &self.resources[i], cap))
     }
 
     pub fn iter_resources(&self) -> impl Iterator<Item = (ResourceTyp, u16)> {
