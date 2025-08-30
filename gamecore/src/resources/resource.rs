@@ -9,9 +9,12 @@ pub enum ResourceTyp {
 }
 
 impl ResourceTyp {
+    pub const MAX: Self = Self::Rock; // 👈⚠️ keep in sync! Use variant_count <https://github.com/rust-lang/rust/issues/73662> when stable
+    pub const COUNT: usize = Self::MAX as usize + 1;
+
     pub fn all() -> impl Iterator<Item = Self> {
         let first = Self::Leaf;
-        let last = Self::Rock; // 👈⚠️ keep in sync!
+        let last = Self::MAX;
         ((first as u8)..=(last as u8)).map(|i| Self::try_from_primitive(i).unwrap())
     }
 

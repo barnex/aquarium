@@ -89,7 +89,8 @@ impl Pawn {
     }
 
     fn go_to_near_resource(&self, g: &G) -> Status {
-        let new_dest = g.resources.iter().min_by_key(|(tile, res)| tile.distance_squared(self.tile.get())).map(|(tile, res)| tile)?;
+        let home = self.home(g)?;
+        let new_dest = g.resources.iter().filter(|(_, res)| home.accepts_resource(*res)).min_by_key(|(tile, _)| tile.distance_squared(self.tile.get())).map(|(tile, _)| tile)?;
         self.set_destination(g, new_dest);
         OK
     }
@@ -102,7 +103,10 @@ impl Pawn {
     pub fn deliver_cargo(&self, home: &Building) -> Status {
         // 🪲 TODO: add to factory.
         if let Some(resource) = self.cargo.take() {
-            log::error!("TODO: add to factory");
+            match home.add_resource(resource) {
+                OK => (),
+                FAIL => self.cargo.set(Some(resource)), // TODO: go sleep a bit or so
+            }
         }
         OK
     }

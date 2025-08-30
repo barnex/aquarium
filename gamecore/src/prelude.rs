@@ -40,5 +40,6 @@ pub fn default<T: Default>() -> T {
 }
 
 /// Shorthand for returning `Some(())` from functions that return `Option<()>`  to support `?`.
-pub const OK: Option<()> = Some(());
 pub type Status = Option<()>;
+pub const OK: Option<()> = Some(());
+pub const FAIL: Option<()> = None;

@@ -159,6 +159,18 @@ impl G {
         {
             self.header_text.clear();
             write!(&mut self.header_text, "{}", self.name).swallow_err();
+
+            // print total resources
+            let mut total_resources = [0u32; ResourceTyp::COUNT];
+            for b in self.buildings.iter() {
+                for (res, count) in b.iter_resources() {
+                    total_resources[res as usize] += count as u32
+                }
+            }
+            for res in ResourceTyp::all() {
+                let count = total_resources[res as usize];
+                write!(&mut self.header_text, " | {res:?}:{count}").swallow_err();
+            }
         }
     }
 
