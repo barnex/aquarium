@@ -17,6 +17,9 @@ pub const L_UI: u8 = 4;
 /// UI foreground layer (selection markers etc).
 pub const L_UI_FG: u8 = 5;
 
+/// Text layer
+pub const L_TEXT: u8 = 6;
+
 /// Scenegraph, sounds, etc. to output after a tick.
 /// Sent to the browser who will render it.
 #[derive(Default, Debug, PartialEq, Eq)]
@@ -32,21 +35,26 @@ pub struct DrawSprite {
     pub sprite: Sprite,
     pub pos: vec2i,
     pub dst_size: Option<vec2<NonZeroU8>>,
+    pub src_pos: Option<vec2u8>,
 }
 
 impl DrawSprite {
     /// Draw sprite at position. Natural size.
     pub fn at_pos(sprite: Sprite, pos: vec2i) -> Self {
-        Self { sprite, pos, dst_size: None }
+        Self { sprite, pos, dst_size: None, src_pos: None }
     }
 
     pub fn with_size(self, dst_size: vec2u8) -> Self {
         if let (Some(x), Some(y)) = (NonZeroU8::new(dst_size.x()), NonZeroU8::new(dst_size.y())) {
             self.with(|s| s.dst_size = Some(vec2(x, y)))
         } else {
-            debug_assert!(dst_size != vec2::ZERO, "zero dst_size");
+            debug_assert!(dst_size.x() != 0 && dst_size.y() != 0, "zero dst_size");
             self
         }
+    }
+
+    pub fn with_src_pos(self, src_pos: vec2u8) -> Self {
+        self.with(|s| s.src_pos = Some(src_pos))
     }
 }
 
@@ -72,8 +80,20 @@ impl Out {
         self.layer(layer).sprites.push(DrawSprite::at_pos(sprite, screen_pos));
     }
 
-    pub fn push_sprite_with_size(&mut self, layer: u8, sprite: Sprite, pos: vec2i, dst_size: vec2u8) {
+    pub fn draw_sprite_screen_with_size(&mut self, layer: u8, sprite: Sprite, pos: vec2i, dst_size: vec2u8) {
         self.layer(layer).sprites.push(DrawSprite::at_pos(sprite, pos).with_size(dst_size));
+    }
+
+    /// Draw a portion of sprite (E.g. sprite from atlas).
+    /// +-------------------+
+    /// |src_pos            |
+    /// |     *----+        |
+    /// |     |size|        |
+    /// |     +----+        |
+    /// |                   |
+    /// +-------------------+
+    pub fn draw_sprite_screen_with_source(&mut self, layer: u8, sprite: Sprite, src_pos: vec2u8, size: vec2u8, dst_pos: vec2i) {
+        self.layer(layer).sprites.push(DrawSprite::at_pos(sprite, dst_pos).with_src_pos(src_pos).with_size(size));
     }
 
     pub fn draw_line_screen(&mut self, layer: u8, line: Line) {

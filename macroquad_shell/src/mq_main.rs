@@ -27,6 +27,7 @@ async fn main() {
     {
         log::warn!("macroquad shell: debug_assertions enabled, performance will suffer");
     }
+    gamecore::init();
 
     let fallback = mq::Texture2D::from_image(&fallback_bitmap((0, 0, 255), vec2(24, 24) /*TODO*/));
     let mut res = Resources::new(fallback);

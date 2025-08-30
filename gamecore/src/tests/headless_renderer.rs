@@ -71,21 +71,9 @@ pub fn render_headless(out: &Out, file: impl AsRef<Path>) -> Result<()> {
                 Some(dst_size) => dst_size.map(|v| v.get().as_()),
             };
 
+            // 🪲 TODO: scale and source location (for text)
             canvas.draw_pixmap(cmd.pos.x(), cmd.pos.y(), bitmap.as_ref(), &PixmapPaint::default(), Transform::identity(), None);
 
-            // 🪲 TODO: scale
-            // ctx.draw_image_with_image_bitmap_and_sw_and_sh_and_dx_and_dy_and_dw_and_dh(
-            //     bitmap,
-            //     0.0,                   // source x
-            //     0.0,                   // source y
-            //     bitmap.width().as_(),  // source width
-            //     bitmap.height().as_(), // source height
-            //     cmd.pos.x().as_(),     // dest x
-            //     cmd.pos.y().as_(),     // dest y
-            //     dst_size.x().as_(),    // dest width
-            //     dst_size.y().as_(),    // dest height
-            // )
-            // .expect("draw");
         }
 
         // ╱ lines

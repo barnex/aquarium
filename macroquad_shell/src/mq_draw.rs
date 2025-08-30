@@ -44,6 +44,11 @@ pub(crate) fn mq_draw(res: &mut Resources, out: &Out) {
                     Some(dst_size) => dst_size.map(|v| v.get().as_()),
                 };
 
+                let source = match cmd.src_pos{
+                    None => None,
+                    Some(src) => Some(mq::Rect::new(src.x().as_(), src.y().as_(), dst_size.x(), dst_size.y()))
+                };
+
                 mq::draw_texture_ex(
                     bitmap,
                     cmd.pos.x().as_(),
@@ -51,6 +56,7 @@ pub(crate) fn mq_draw(res: &mut Resources, out: &Out) {
                     mq::WHITE,
                     mq::DrawTextureParams {
                         dest_size: Some(mq::Vec2::new(dst_size.x(), dst_size.y())),
+                        source,
                         ..Default::default()
                     },
                 );

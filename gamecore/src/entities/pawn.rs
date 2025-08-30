@@ -75,7 +75,7 @@ impl Pawn {
                     self.go_home(g);
                 } else {
                     self.go_to_near_resource(g).or_else(|| {
-                        if home.tile.as_i32().distance_squared(self.tile().as_i32()) > NEAR_HOME*NEAR_HOME {
+                        if home.tile.as_i32().distance_squared(self.tile().as_i32()) > NEAR_HOME * NEAR_HOME {
                             self.go_home(g);
                         };
                         OK
@@ -101,8 +101,9 @@ impl Pawn {
 
     pub fn deliver_cargo(&self, home: &Building) -> Status {
         // 🪲 TODO: add to factory.
-        log::error!("TODO: add to factory");
-        self.cargo.take()?;
+        if let Some(resource) = self.cargo.take() {
+            log::error!("TODO: add to factory");
+        }
         OK
     }
 

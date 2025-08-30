@@ -47,16 +47,26 @@ pub(crate) fn draw(canvas: &HtmlCanvasElement, ctx: &CanvasRenderingContext2d, r
                     Some(dst_size) => dst_size.map(|v| v.get().as_()),
                 };
 
+                let src_size = match cmd.src_pos {
+                    None => vec2(bitmap.width(), bitmap.height()),
+                    Some(_) => dst_size,
+                };
+
+                let source = match cmd.src_pos {
+                    None => vec2d(0.0, 0.0),
+                    Some(src) => src.as_f64(),
+                };
+
                 ctx.draw_image_with_image_bitmap_and_sw_and_sh_and_dx_and_dy_and_dw_and_dh(
                     bitmap,
-                    0.0,                   // source x
-                    0.0,                   // source y
-                    bitmap.width().as_(),  // source width
-                    bitmap.height().as_(), // source height
-                    cmd.pos.x().as_(),     // dest x
-                    cmd.pos.y().as_(),     // dest y
-                    dst_size.x().as_(),    // dest width
-                    dst_size.y().as_(),    // dest height
+                    source.x(),         // source x
+                    source.y(),         // source y
+                    src_size.x().as_(), // source width
+                    src_size.y().as_(), // source height
+                    cmd.pos.x().as_(),  // dest x
+                    cmd.pos.y().as_(),  // dest y
+                    dst_size.x().as_(), // dest width
+                    dst_size.y().as_(), // dest height
                 )
                 .expect("draw");
             }

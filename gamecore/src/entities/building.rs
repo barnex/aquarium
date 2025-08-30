@@ -32,6 +32,7 @@ impl BuildingTyp {
             Quarry => sprite!("quarry"),
         }
     }
+
 }
 
 impl Building {

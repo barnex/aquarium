@@ -68,8 +68,8 @@ impl G {
         let mut debug = DebugOpts::default();
         #[cfg(debug_assertions)]
         {
-            debug.show_home = true;
-            debug.show_destination = true;
+            //debug.show_home = true;
+            //debug.show_destination = true;
             debug.inspect_under_cursor = true;
         }
 

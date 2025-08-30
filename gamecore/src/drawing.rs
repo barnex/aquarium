@@ -4,6 +4,10 @@ use crate::prelude::*;
 impl G {
     pub fn draw_world(&self, out: &mut Out) {
         debug_assert!(out.viewport_size != vec2::ZERO);
+
+        layout_text(out, L_TEXT, vec2(150, 50), "Hello world!\n0 Greetings, human.");
+        layout_text(out, L_TEXT, vec2(150, 20), FONT_PLUS);
+
         // Note: ⚠️ UI already rendered (may consume input events)
 
         let g = self;
