@@ -63,8 +63,6 @@ impl Pawn {
             self.tick_delivery_work(g, home)
         }
 
-        // const NEAR_HOME: i64 = 4;
-
         // 😴
         self.take_personal_space(g);
     }
@@ -87,7 +85,7 @@ impl Pawn {
         log::trace!("🦀 on home");
         self.try_deliver_cargo(home);
         match self.cargo() {
-            None => self.go_to_near_resource(g, home).or_else(|| self.take_any_resource_downstream(g, home)),
+            None => self.go_to_near_resource(g, home).or_else(|| self.move_resource_downstream(g, home)),
             Some(_) => self.go_downstream(g, home),
         };
     }
@@ -147,8 +145,14 @@ impl Pawn {
         FAIL
     }
 
-    fn take_any_resource_downstream(&self, g: &G, home: &Building) -> Status {
+    fn move_resource_downstream(&self, g: &G, home: &Building) -> Status {
         log::trace!("🦀 take any resource downstream");
+        debug_assert!(self.cargo.is_none());
+
+        if self.cargo.is_some() {
+            return FAIL;
+        }
+
         for downstream in home
             .downstream_buildings(g) //_
             .sorted_by_key(|d| d.tile.distance_squared(home.tile))
@@ -189,6 +193,21 @@ impl Pawn {
         } else {
             FAIL
         }
+    }
+
+    fn steal_any_resource(&self, g: &G, home: &Building, building: &Building) -> Status {
+        debug_assert!(self.home.get() == Some(home.id));
+
+        for (res, slot, _) in building.resource_slots() {
+            if slot.get() > 0 && home.can_accept_resource(res) {
+                self.cargo.set(building.take_resource(res));
+                if self.set_destination(g, home.entrance()).is_some() {
+                    log::trace!("🦀 take {:?} home to {:?}", self.cargo(), home.typ);
+                    return OK;
+                }
+            }
+        }
+        FAIL
     }
 
     pub fn home<'a>(&self, g: &'a G) -> Option<&'a Building> {

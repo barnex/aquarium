@@ -255,6 +255,7 @@ impl G {
             Tile::Block => false,
             Tile::Canal => false,
             Tile::Farmland => true,
+            Tile::Road => true,
         }
     }
 
@@ -352,6 +353,20 @@ impl G {
             building._downstream.clear();
             building._downstream.extend(neighbors);
         }
+
+        // upstream
+        // for building in self.buildings() {
+        //     let my_resources = building.iter_resources().map(|(r, _)| r).collect::<HashSet<_>>();
+        //     let neighbors = self
+        //         .buildings() //_
+        //         .filter(|b| b.id != building.id)
+        //         .filter(|b| b.tile.distance_squared(building.tile) < MAX_DIST2)
+        //         .filter(|b| b.tile.distance_squared(hq.tile) >= building.tile.distance_squared(hq.tile))
+        //         .filter(|b| b.iter_resources().map(|(r, _)| r).any(|r| my_resources.contains(&r)))
+        //         .map(|b| b.id);
+        //     building._downstream.clear();
+        //     building._downstream.extend(neighbors);
+        // }
     }
 
     /// 🏠 Assign pawn to work at building.

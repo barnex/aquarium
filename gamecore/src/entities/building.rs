@@ -9,6 +9,7 @@ pub struct Building {
     pub tile: vec2i16,
     pub workers: CSet<Id>,
     pub _downstream: CSet<Id>,
+    pub _upstream: CSet<Id>,
     resources: [Cel<u16>; MAX_RES_SLOTS],
 }
 
@@ -47,6 +48,7 @@ impl Building {
             workers: default(),
             resources: default(),
             _downstream: default(),
+            _upstream: default(),
         }
     }
 
