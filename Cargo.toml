@@ -55,6 +55,8 @@ serde = { version = "1", features = ["derive"] }
 
 # ⚠️ It's easy to accidentally disable debug assertions etc.
 [profile.dev]
+debug = "line-tables-only"
+split-debuginfo = "unpacked"
 opt-level = 1
 package.gamecore.opt-level = 1
 
