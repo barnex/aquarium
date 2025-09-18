@@ -12,6 +12,7 @@ pub enum Tile {
     Block = 6,
     Canal = 7,
     Farmland = 8,
+    Road = 9,
     // WARNING: ‼️ keep in sync with `all`
 }
 
@@ -20,7 +21,7 @@ impl Tile {
     pub fn all() -> impl Iterator<Item = Self> {
         debug_assert_eq!(size_of::<Option<Self>>(), size_of::<Self>());
 
-        ((Self::Dunes as u8)..=(Self::Farmland as u8)).map(|i| Self::try_from_primitive(i).unwrap())
+        ((Self::Dunes as u8)..=(Self::Road as u8)).map(|i| Self::try_from_primitive(i).unwrap())
     }
 
     #[inline]
@@ -38,6 +39,7 @@ impl Tile {
             Tile::Block => sprite!("block24"),
             Tile::Canal => sprite!("canal"),
             Tile::Farmland => sprite!("farmland"),
+            Tile::Road => sprite!("road"),
         }
     }
 
