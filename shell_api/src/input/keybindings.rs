@@ -8,6 +8,8 @@ pub const K_CAM_DOWN: Button = button!("cam_down");
 pub const K_CAM_LEFT: Button = button!("cam_left");
 pub const K_CAM_RIGHT: Button = button!("cam_right");
 
+pub const K_CLI: Button = button!("cli");
+
 pub fn default_keybindings() -> Keymap {
     Keymap(
         [
@@ -21,6 +23,9 @@ pub fn default_keybindings() -> Keymap {
             (button!("ArrowUp"), K_CAM_UP),       //_
             (button!("ArrowDown"), K_CAM_DOWN),   //_
             (button!("ArrowRight"), K_CAM_RIGHT), //_
+            //
+            (button!("tab"), K_CLI), // macroquad
+            (button!("Tab"), K_CLI), // JS
         ]
         .into_iter()
         .collect(),

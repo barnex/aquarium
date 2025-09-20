@@ -54,6 +54,7 @@ pub struct G {
     // 🪲 debug
     pub debug: DebugOpts,
     pub last_sanity_error: Option<String>,
+    pub cli_mode: bool,
 }
 
 pub const TILE_SIZE: u32 = 24;
@@ -102,6 +103,7 @@ impl G {
             ui: Ui::new(),
             viewport_size: vec2(0, 0),
             water: default(),
+            cli_mode: false,
         }
     }
 
@@ -119,7 +121,13 @@ impl G {
 
         self.ui.update_and_draw(&mut self.inputs, out); // 👈 may consume inputs
 
-        self.control();
+        if self.inputs.just_pressed(K_CLI){
+            toggle(&mut self.cli_mode)
+        }
+        match self.cli_mode {
+            false => self.control(),
+            true => self.handle_cli_mode(),
+        }
 
         if !self.paused {
             self.frame += 1;
@@ -144,6 +152,7 @@ impl G {
         }
 
         self.draw_world(out);
+        self.draw_cli_mode(out);
         print_debug_output(self, out);
 
         self.pawns.gc();

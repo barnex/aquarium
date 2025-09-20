@@ -20,6 +20,9 @@ pub const L_UI_FG: u8 = 5;
 /// Text layer
 pub const L_TEXT: u8 = 6;
 
+/// Command-line interface
+pub const L_CLI: u8 = 7;
+
 /// Scenegraph, sounds, etc. to output after a tick.
 /// Sent to the browser who will render it.
 #[derive(Default, Debug, PartialEq, Eq)]

@@ -2,6 +2,7 @@ pub(crate) mod prelude;
 
 mod c_set;
 mod c_vec;
+mod cli_mode;
 mod control;
 mod debugging;
 mod drawing;
@@ -23,6 +24,7 @@ mod tests;
 
 pub use c_set::*;
 pub use c_vec::*;
+pub use cli_mode::*;
 pub use control::*;
 pub use debugging::*;
 pub use drawing::*;

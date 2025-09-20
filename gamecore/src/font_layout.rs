@@ -33,7 +33,7 @@ pub const FONT_SHIELD: &str = "\x08\x09";
 ///  |                |
 ///  +----------------+
 ///
-pub fn layout_text(out: &mut Out, layer: u8, pos: vec2i, text: &str) {
+pub fn draw_text(out: &mut Out, layer: u8, pos: vec2i, text: &str) {
     let viewport_size = out.viewport_size.as_i32();
     //let char_stride = (UI_SCALE as i32) * _EMBEDDED_CHAR_SIZE.as_i32();
     let char_stride = _EMBEDDED_CHAR_SIZE.as_i32();

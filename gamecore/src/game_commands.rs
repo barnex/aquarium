@@ -36,6 +36,6 @@ impl G {
     }
 }
 
-fn toggle(v: &mut bool) {
+pub(crate) fn toggle(v: &mut bool) {
     *v = !*v
 }
