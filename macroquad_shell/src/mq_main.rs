@@ -20,7 +20,7 @@ type HashMap<K, V> = fnv::FnvHashMap<K, V>;
 
 #[macroquad::main("Game")]
 async fn main() {
-    env_logger::init();
+    init_logging();
 
     log::info!("Using macroquad shell");
     #[cfg(debug_assertions)]
@@ -71,7 +71,10 @@ async fn main() {
         mq_draw(&mut res, &out);
 
         if !g.paused {
-            println!("{ANSI_CLEAR}{}", &out.debug);
+            //println!("{ANSI_CLEAR}{}", &out.debug);
+            if !out.debug.is_empty() {
+                println!("{}", &out.debug);
+            }
         }
         if mq::is_key_pressed(mq::KeyCode::S) && mq::is_key_down(mq::KeyCode::LeftSuper) {
             save_game(&g);
@@ -83,6 +86,22 @@ async fn main() {
 
         mq::next_frame().await
     }
+}
+
+fn init_logging() {
+    use env_logger::*;
+    use log::*;
+    use std::io::Write;
+    env_logger::Builder::from_env(Env::default().default_filter_or("trace"))
+        .format(|buf, record: &Record| {
+            let file = record.file().unwrap_or("unknown");
+            let line = record.line().map(|l| l.to_string()).unwrap_or("?".to_string());
+            let module = record.module_path().unwrap_or("?");
+
+            writeln!(buf, "[{} {}:{}] {}", record.level(), file, line, record.args())
+        })
+        .filter(None, LevelFilter::Trace)
+        .init();
 }
 
 const ANSI_CLEAR: &'static str = "\x1B[2J\x1B[H";
