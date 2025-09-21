@@ -16,6 +16,7 @@ mod random;
 mod resources;
 mod sanity_check;
 mod tilemap;
+mod tracing;
 mod ui;
 mod water_sim;
 
@@ -36,6 +37,7 @@ pub use random::*;
 pub use resources::*;
 pub use sanity_check::*;
 pub use tilemap::*;
+pub use tracing::*;
 pub use ui::*;
 pub use water_sim::*;
 
@@ -44,4 +46,16 @@ pub(crate) use extension_traits::*;
 pub fn init() {
     #[cfg(debug_assertions)]
     log::warn!("gamecore: debug_assertions enabled, performance will suffer");
+}
+
+#[macro_export]
+macro_rules! debug_println {
+    // With level + format string + optional args
+    ($lvl:expr, $($arg:tt)*) => {
+        #[cfg(debug_assertions)]
+        {
+            let _ = $lvl; // ignored for now
+            ::std::println!($($arg)*);
+        }
+    };
 }

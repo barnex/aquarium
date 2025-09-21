@@ -163,6 +163,7 @@ impl G {
         self.draw_world(out);
         self.draw_console_mode(out);
         print_debug_output(self, out);
+        //debug_println!(3, "hi");
 
         self.pawns.gc();
         self.buildings.gc();
