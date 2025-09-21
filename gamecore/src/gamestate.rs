@@ -73,7 +73,7 @@ impl G {
         {
             //debug.show_home = true;
             //debug.show_destination = true;
-            debug.inspect_under_cursor = true;
+            //debug.inspect_under_cursor = true;
         }
 
         Self {

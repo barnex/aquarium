@@ -1,5 +1,6 @@
 pub(crate) mod prelude;
 
+mod c_deque;
 mod c_set;
 mod c_vec;
 mod console;
@@ -10,7 +11,6 @@ mod entities;
 mod extension_traits;
 mod font_layout;
 mod game_commands;
-mod c_deque;
 mod gamestate;
 mod map_gen;
 mod random;
@@ -24,12 +24,12 @@ mod water_sim;
 #[cfg(test)]
 mod tests;
 
+pub use c_deque::*;
 pub use c_set::*;
 pub use c_vec::*;
 pub use console::*;
 pub use control::*;
 pub use debugging::*;
-pub use c_deque::*;
 pub use drawing::*;
 pub use entities::*;
 pub use font_layout::*;
@@ -51,13 +51,15 @@ pub fn init() {
 }
 
 #[macro_export]
-macro_rules! debug_println {
+macro_rules! trace {
     // With level + format string + optional args
-    ($lvl:expr, $($arg:tt)*) => {
+    ($slf:expr, $($arg:tt)*) => {
         #[cfg(debug_assertions)]
         {
-            let _ = $lvl; // ignored for now
-            ::std::println!($($arg)*);
+            let slf = $slf;
+            if slf.traced.get(){
+                log::trace!("{slf}: {}", format!($($arg)*));
+            }
         }
     };
 }

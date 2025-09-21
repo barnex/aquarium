@@ -8,6 +8,7 @@ pub struct Pawn {
     pub route: Route,
     pub home: Cel<Option<Id>>,
     pub cargo: Cel<Option<ResourceTyp>>,
+    pub traced: Cel<bool>,
 }
 
 #[derive(Serialize, Deserialize, Clone, Copy, PartialEq, Eq, Hash, TryFromPrimitive, Debug)]
@@ -45,6 +46,7 @@ impl Pawn {
             route: default(),
             home: None.cel(),
             cargo: None.cel(),
+            traced: false.cel(),
         }
     }
 
@@ -82,7 +84,7 @@ impl Pawn {
     ///   | 🦀 |    ☘️️️ ☘️️
     ///   +----+
     fn tick_on_home(&self, g: &G, home: &Building) {
-        log::trace!("🦀 on home");
+        trace!(self, "on home");
         self.try_deliver_cargo(home);
         match self.cargo() {
             None => self.go_to_near_resource(g, home).or_else(|| self.move_resource_downstream(g, home)),
@@ -94,7 +96,7 @@ impl Pawn {
     /// | 🦀 |   |    |    ☘️️️ ☘️️
     /// +----+   +----+
     fn tick_on_other_building(&self, g: &G, home: &Building, building: &Building) {
-        log::trace!("🦀 on other building: {:?}", building.typ);
+        trace!(self, "on other building: {:?}", building.typ);
         self.try_deliver_cargo(building);
         match self.cargo() {
             None => self.go_to_near_resource(g, home).or_else(|| self.go_home(g)),
@@ -106,7 +108,7 @@ impl Pawn {
     ///   |    |    🦀 ☘️️
     ///   +----+
     fn tick_away_from_building(&self, g: &G, home: &Building) {
-        log::trace!("🦀 away from any building");
+        trace!(self, "away from any building");
         self.try_pick_up_cargo(g, home);
         match self.cargo() {
             Some(_) => self.go_home(g),
@@ -115,20 +117,20 @@ impl Pawn {
     }
 
     fn go_to_near_resource(&self, g: &G, home: &Building) -> Status {
-        log::trace!("🦀 go to near resource?");
+        trace!(self, "go to near resource?");
         let new_dest = g.resources.iter().filter(|(_, res)| home.can_accept_resource(*res)).min_by_key(|(tile, _)| tile.distance_squared(self.tile.get())).map(|(tile, _)| tile)?;
         self.set_destination(g, new_dest);
         OK
     }
 
     fn go_home(&self, g: &G) -> Status {
-        log::trace!("🦀 going home");
+        trace!(self, "going home");
         self.set_destination(g, g.building(self.home.get()?)?.entrance());
         OK
     }
 
     fn go_downstream(&self, g: &G, home: &Building) -> Status {
-        log::trace!("🦀 going downstream");
+        trace!(self, "going downstream");
         debug_assert!(self.cargo.is_some());
 
         let cargo = self.cargo()?;
@@ -146,7 +148,7 @@ impl Pawn {
     }
 
     fn move_resource_downstream(&self, g: &G, home: &Building) -> Status {
-        log::trace!("🦀 take any resource downstream");
+        trace!(self, "take any resource downstream");
         debug_assert!(self.cargo.is_none());
 
         if self.cargo.is_some() {
@@ -161,7 +163,7 @@ impl Pawn {
                 if slot.get() > 0 && downstream.can_accept_resource(res) {
                     self.cargo.set(home.take_resource(res));
                     if self.set_destination(g, downstream.entrance()).is_some() {
-                        log::trace!("🦀 take {:?} downstream to {:?}", self.cargo(), downstream.typ);
+                        trace!(self, "take {:?} downstream to {:?}", self.cargo(), downstream.typ);
                         return OK;
                     }
                 }
@@ -171,8 +173,7 @@ impl Pawn {
     }
 
     pub fn try_deliver_cargo(&self, building: &Building) -> Status {
-        log::trace!("🦀 try deliver cargo {:?} to {:?}", self.cargo, building.typ);
-        //debug_assert!(building.tile_bounds().contains(self.tile()), "should be on building");
+        trace!(self, "try deliver cargo {:?} to {:?}", self.cargo, building.typ);
 
         let resource = self.cargo.take()?;
         match building.add_resource(resource) {
@@ -187,6 +188,7 @@ impl Pawn {
 
     pub fn try_pick_up_cargo(&self, g: &G, home: &Building) -> Status {
         let res = g.resources.at(self.tile())?;
+        //trace!(self, "try_pick_up_cargo", self.cargo, building.typ);
         if home.can_accept_resource(res) {
             self.cargo.set(g.resources.remove(self.tile()));
             OK
@@ -202,7 +204,7 @@ impl Pawn {
             if slot.get() > 0 && home.can_accept_resource(res) {
                 self.cargo.set(building.take_resource(res));
                 if self.set_destination(g, home.entrance()).is_some() {
-                    log::trace!("🦀 take {:?} home to {:?}", self.cargo(), home.typ);
+                    trace!(self, "take {:?} home to {:?}", self.cargo(), home.typ);
                     return OK;
                 }
             }
