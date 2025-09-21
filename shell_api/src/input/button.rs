@@ -1,3 +1,5 @@
+use std::ops::Deref;
+
 use crate::prelude::*;
 
 /// Key code or mouse button. Backed by short string (`Str16`), copyable.
@@ -13,5 +15,10 @@ macro_rules! button {
     };
 }
 
-impl Button {
+impl Deref for Button {
+    type Target = Str16;
+
+    fn deref(&self) -> &Self::Target {
+        &self.0
+    }
 }

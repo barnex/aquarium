@@ -9,6 +9,9 @@ pub const K_CAM_LEFT: Button = button!("cam_left");
 pub const K_CAM_RIGHT: Button = button!("cam_right");
 
 pub const K_CLI: Button = button!("cli");
+pub const K_BACKSPACE: Button = button!("backspace");
+pub const K_ESC: Button = button!("escape");
+pub const K_ENTER: Button = button!("enter");
 
 pub fn default_keybindings() -> Keymap {
     Keymap(

@@ -54,7 +54,10 @@ pub struct G {
     // 🪲 debug
     pub debug: DebugOpts,
     pub last_sanity_error: Option<String>,
-    pub cli_mode: bool,
+    // 📺 currently entering text in console ?
+    pub console_mode: bool,
+    // 📺 line of text currently being typed into console.
+    pub console_linebuffer: String,
 }
 
 pub const TILE_SIZE: u32 = 24;
@@ -77,6 +80,7 @@ impl G {
 
         Self {
             _prev_secs: 0.0,
+            console_linebuffer: default(),
             _rng: RefCell::new(ChaCha8Rng::seed_from_u64(12345678)),
             _tilemap: Tilemap::new(size),
             buildings: MemKeep::new(),
@@ -103,7 +107,7 @@ impl G {
             ui: Ui::new(),
             viewport_size: vec2(0, 0),
             water: default(),
-            cli_mode: false,
+            console_mode: false,
         }
     }
 
@@ -121,12 +125,12 @@ impl G {
 
         self.ui.update_and_draw(&mut self.inputs, out); // 👈 may consume inputs
 
-        if self.inputs.just_pressed(K_CLI){
-            toggle(&mut self.cli_mode)
+        if self.inputs.just_pressed(K_CLI) {
+            toggle(&mut self.console_mode)
         }
-        match self.cli_mode {
+        match self.console_mode {
             false => self.control(),
-            true => self.handle_cli_mode(),
+            true => self.handle_console_mode(),
         }
 
         if !self.paused {
@@ -152,7 +156,7 @@ impl G {
         }
 
         self.draw_world(out);
-        self.draw_cli_mode(out);
+        self.draw_console_mode(out);
         print_debug_output(self, out);
 
         self.pawns.gc();

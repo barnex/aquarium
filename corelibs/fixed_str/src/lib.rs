@@ -3,7 +3,7 @@ use serde::{
     Deserialize, Serialize,
     de::{self, Unexpected, Visitor},
 };
-use std::{fmt, marker::PhantomData, str::FromStr};
+use std::{fmt, marker::PhantomData, ops::Index, str::FromStr};
 
 /// Short string value ,Copy type.
 #[derive(Eq, PartialEq, Clone, Copy, Hash, PartialOrd, Ord)]
@@ -108,6 +108,14 @@ impl<const N: usize> FromStr for FixedStr<N> {
 impl<const N: usize> AsRef<str> for FixedStr<N> {
     fn as_ref(&self) -> &str {
         self.as_str()
+    }
+}
+
+impl<const N: usize> Index<usize> for FixedStr<N> {
+    type Output = u8;
+
+    fn index(&self, index: usize) -> &Self::Output {
+        &self.0[0]
     }
 }
 

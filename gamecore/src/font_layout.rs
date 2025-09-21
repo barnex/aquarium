@@ -33,30 +33,34 @@ pub const FONT_SHIELD: &str = "\x08\x09";
 ///  |                |
 ///  +----------------+
 ///
-pub fn draw_text(out: &mut Out, layer: u8, pos: vec2i, text: &str) {
-    let viewport_size = out.viewport_size.as_i32();
-    //let char_stride = (UI_SCALE as i32) * _EMBEDDED_CHAR_SIZE.as_i32();
-    let char_stride = _EMBEDDED_CHAR_SIZE.as_i32();
+pub fn draw_text(out: &mut Out, layer: u8, pos: vec2i, text: impl AsRef<str>) {
+    draw_text(out, layer, pos, text.as_ref());
 
-    let mut char_pos = pos;
-    for &char in text.as_bytes() {
-        // newline
-        if char == b'\n' {
-            char_pos[0] = pos.x();
-            char_pos[1] += char_stride.y();
-            continue;
+    fn draw_text(out: &mut Out, layer: u8, pos: vec2i, text: &str) {
+        let viewport_size = out.viewport_size.as_i32();
+        //let char_stride = (UI_SCALE as i32) * _EMBEDDED_CHAR_SIZE.as_i32();
+        let char_stride = _EMBEDDED_CHAR_SIZE.as_i32();
+
+        let mut char_pos = pos;
+        for &char in text.as_bytes() {
+            // newline
+            if char == b'\n' {
+                char_pos[0] = pos.x();
+                char_pos[1] += char_stride.y();
+                continue;
+            }
+
+            // wrap long lines
+            if char_pos.x() > viewport_size.x() - char_stride.x() {
+                char_pos[0] = pos.x();
+                char_pos[1] += char_stride.y();
+            }
+
+            let src_pos = chr_tex_pos_16x8(char, _EMBEDDED_CHAR_SIZE);
+            out.draw_sprite_screen_with_source(layer, sprite!("font"), src_pos, _EMBEDDED_CHAR_SIZE, char_pos);
+
+            char_pos[0] += char_stride.x();
         }
-
-        // wrap long lines
-        if char_pos.x() > viewport_size.x() - char_stride.x() {
-            char_pos[0] = pos.x();
-            char_pos[1] += char_stride.y();
-        }
-
-        let src_pos = chr_tex_pos_16x8(char, _EMBEDDED_CHAR_SIZE);
-        out.draw_sprite_screen_with_source(layer, sprite!("font"), src_pos, _EMBEDDED_CHAR_SIZE, char_pos);
-
-        char_pos[0] += char_stride.x();
     }
 }
 
