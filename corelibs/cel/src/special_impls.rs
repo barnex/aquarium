@@ -151,6 +151,13 @@ impl<T: Copy> Cel<Vector<T, 4>> {
     }
 }
 
+impl Cel<bool> {
+    #[inline(always)]
+    pub fn clear(&self) {
+        self.set(false);
+    }
+}
+
 #[cfg(test)]
 mod test {
     use super::*;
