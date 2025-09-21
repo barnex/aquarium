@@ -173,6 +173,6 @@ impl SetId for Building {
 
 impl Display for Building {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        write!(f, "{:?}{}@{}", self.typ, self.id, self.tile)
+        write!(f, "{:?}{}", self.typ, self.id)
     }
 }

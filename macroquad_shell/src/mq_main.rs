@@ -98,7 +98,7 @@ fn init_logging() {
             let line = record.line().map(|l| l.to_string()).unwrap_or("?".to_string());
             let module = record.module_path().unwrap_or("?");
 
-            writeln!(buf, "[{} {}:{}] {}", record.level(), file, line, record.args())
+            writeln!(buf, "[{} {}:{:4}] {}", record.level(), file, line, record.args())
         })
         .filter(None, LevelFilter::Trace)
         .init();

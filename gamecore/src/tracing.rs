@@ -1,7 +1,26 @@
 use crate::prelude::*;
 
-//static TRACING_BUF: Mutex<Option<VecDeque<String>>> = Mutex::new(None);
-//const TRACING_SCROLLBACK: usize = 20;
+#[macro_export]
+macro_rules! trace {
+    ($slf:expr) => {
+        #[cfg(debug_assertions)]
+        {
+            let slf = $slf;
+            if slf.traced.get(){
+                log::trace!("{slf}: {}", caller!());
+            }
+        }
+    };
+    ($slf:expr, $($arg:tt)*) => {
+        #[cfg(debug_assertions)]
+        {
+            let slf = $slf;
+            if slf.traced.get(){
+                log::trace!("{slf}: {}: {}", caller!(), format!($($arg)*));
+            }
+        }
+    };
+}
 
 impl G {
     pub(crate) fn trace_selected(&self) -> Result<()> {
@@ -19,10 +38,3 @@ impl G {
         }
     }
 }
-
-//pub(crate) fn trace_impl<T: Display>(slf: T, msg: String){
-//	let line = format!("{slf}: {msg}");
-//	let mut buf = TRACING_BUF.lock().unwrap();
-//	let buf = buf.get_or_insert_with(VecDeque::default);
-//	buf.push_back(line);
-//}

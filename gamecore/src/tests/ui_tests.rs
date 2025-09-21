@@ -7,7 +7,7 @@ use googletest::prelude::*;
 #[gtest]
 fn click_selects_pawn() {
     // given:
-    let g = &mut small_world(test_name!());
+    let g = &mut small_world(caller!());
     g.ui.active_tool = Tool::Pointer;
 
     // add two pawns
@@ -36,7 +36,7 @@ fn click_selects_pawn() {
 #[gtest]
 /// Select pawns by dragging a rectangle.
 fn drag_selects_pawn() {
-    let g = &mut small_world(test_name!());
+    let g = &mut small_world(caller!());
     g.ui.active_tool = Tool::Pointer;
 
     // add two pawns
@@ -57,7 +57,7 @@ fn drag_selects_pawn() {
 /// Right-click moves selected pawn to destination.
 #[gtest]
 fn command_pawn_move() {
-    let g = &mut small_world(test_name!());
+    let g = &mut small_world(caller!());
 
     let start = vec2(6, 7);
     let crab = g.spawn(Pawn::new(PawnTyp::Crablet, start)).id;

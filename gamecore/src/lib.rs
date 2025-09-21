@@ -50,16 +50,13 @@ pub fn init() {
     log::warn!("gamecore: debug_assertions enabled, performance will suffer");
 }
 
+/// Name of the function this is called from.
 #[macro_export]
-macro_rules! trace {
-    // With level + format string + optional args
-    ($slf:expr, $($arg:tt)*) => {
-        #[cfg(debug_assertions)]
-        {
-            let slf = $slf;
-            if slf.traced.get(){
-                log::trace!("{slf}: {}", format!($($arg)*));
-            }
-        }
-    };
+macro_rules! caller {
+    () => {{
+        fn f() {}
+        let name = std::any::type_name_of_val(&f);
+        let name = name.strip_suffix("::f").expect("test_name");
+        name.split("::").last().expect("test_name")
+    }};
 }

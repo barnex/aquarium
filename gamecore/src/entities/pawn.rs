@@ -84,7 +84,7 @@ impl Pawn {
     ///   | 🦀 |    ☘️️️ ☘️️
     ///   +----+
     fn tick_on_home(&self, g: &G, home: &Building) {
-        trace!(self, "on home");
+        trace!(self);
         self.try_deliver_cargo(home);
         match self.cargo() {
             None => self.go_to_near_resource(g, home).or_else(|| self.move_resource_downstream(g, home)),
@@ -96,7 +96,7 @@ impl Pawn {
     /// | 🦀 |   |    |    ☘️️️ ☘️️
     /// +----+   +----+
     fn tick_on_other_building(&self, g: &G, home: &Building, building: &Building) {
-        trace!(self, "on other building: {:?}", building.typ);
+        trace!(self, "{home} {building}");
         self.try_deliver_cargo(building);
         match self.cargo() {
             None => self.go_to_near_resource(g, home).or_else(|| self.go_home(g)),
@@ -108,7 +108,7 @@ impl Pawn {
     ///   |    |    🦀 ☘️️
     ///   +----+
     fn tick_away_from_building(&self, g: &G, home: &Building) {
-        trace!(self, "away from any building");
+        trace!(self);
         self.try_pick_up_cargo(g, home);
         match self.cargo() {
             Some(_) => self.go_home(g),
@@ -117,20 +117,20 @@ impl Pawn {
     }
 
     fn go_to_near_resource(&self, g: &G, home: &Building) -> Status {
-        trace!(self, "go to near resource?");
+        trace!(self);
         let new_dest = g.resources.iter().filter(|(_, res)| home.can_accept_resource(*res)).min_by_key(|(tile, _)| tile.distance_squared(self.tile.get())).map(|(tile, _)| tile)?;
         self.set_destination(g, new_dest);
         OK
     }
 
     fn go_home(&self, g: &G) -> Status {
-        trace!(self, "going home");
+        trace!(self);
         self.set_destination(g, g.building(self.home.get()?)?.entrance());
         OK
     }
 
     fn go_downstream(&self, g: &G, home: &Building) -> Status {
-        trace!(self, "going downstream");
+        trace!(self);
         debug_assert!(self.cargo.is_some());
 
         let cargo = self.cargo()?;
@@ -148,7 +148,7 @@ impl Pawn {
     }
 
     fn move_resource_downstream(&self, g: &G, home: &Building) -> Status {
-        trace!(self, "take any resource downstream");
+        trace!(self);
         debug_assert!(self.cargo.is_none());
 
         if self.cargo.is_some() {
@@ -173,7 +173,7 @@ impl Pawn {
     }
 
     pub fn try_deliver_cargo(&self, building: &Building) -> Status {
-        trace!(self, "try deliver cargo {:?} to {:?}", self.cargo, building.typ);
+        trace!(self, "{:?} to {building}", self.cargo);
 
         let resource = self.cargo.take()?;
         match building.add_resource(resource) {
@@ -303,7 +303,7 @@ impl Pawn {
 
 impl Display for Pawn {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        write!(f, "{:?}{}@{}", self.typ, self.id, self.tile())
+        write!(f, "{:?}{}", self.typ, self.id)
     }
 }
 
