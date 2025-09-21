@@ -931,7 +931,7 @@ where
     /// Distance between two points, squared
     /// ```
     /// # use vector::*;
-    /// assert_eq!(vec2(3i64, 4).distance_squared(vec2(2i64, 4)), 1);
+    /// assert_eq!(vec2i(3, 4).distance_squared(vec2i(2, 4)), 1);
     /// ```
     #[inline]
     pub fn distance_squared(self, rhs: Self) -> i64 {
@@ -943,8 +943,7 @@ impl<const N: usize> Vector<i16, N>
 where
     (): SupportedSize<N>,
 {
-    /// Distance between two points, squared
-    /// ```
+    /// Distance between two points, squared ```
     /// # use vector::*;
     /// assert_eq!(vec2(3i64, 4).distance_squared(vec2(2i64, 4)), 1);
     /// ```

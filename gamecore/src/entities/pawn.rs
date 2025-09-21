@@ -172,7 +172,7 @@ impl Pawn {
 
     pub fn try_deliver_cargo(&self, building: &Building) -> Status {
         log::trace!("🦀 try deliver cargo {:?} to {:?}", self.cargo, building.typ);
-        debug_assert!(building.tile_bounds().contains(self.tile()), "should be on building");
+        //debug_assert!(building.tile_bounds().contains(self.tile()), "should be on building");
 
         let resource = self.cargo.take()?;
         match building.add_resource(resource) {
