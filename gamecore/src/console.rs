@@ -10,6 +10,7 @@ pub struct Console {
     /// line of text currently being typed into console.
     pub input_buffer: String,
 
+    /// output scrollback ringbuffer. Up to MAX_SCROLLBACK lines.
     pub output: CDeque<String>,
 }
 
@@ -18,24 +19,14 @@ const BACKSPACE_MAC: char = '\u{7F}';
 const ENTER: char = '\u{0D}';
 const ESCAPE: char = '\u{1B}';
 
-impl Console {
-    const MAX_SCROLLBACK: usize = 64;
-
-    pub fn push_output(&self, v: impl Into<String>) {
-        let v = v.into();
-        self.output.push_back(v);
-        while self.output.len() > Self::MAX_SCROLLBACK {
-            self.output.pop_front();
-        }
-    }
-}
+const MAX_SCROLLBACK: usize = 64;
 
 impl G {
     pub fn print_to_console(&self, v: impl AsRef<str>) {
         let v = v.as_ref();
         for line in v.lines() {
             self.console.output.push_back(line.to_owned());
-            while self.console.output.len() > Console::MAX_SCROLLBACK {
+            while self.console.output.len() > MAX_SCROLLBACK {
                 self.console.output.pop_front();
             }
         }
@@ -69,20 +60,19 @@ impl G {
         }
 
         let layer = L_CLI;
+        // clear background
         const CONSOLE_BG: RGBA = RGBA([0, 0, 0, 184]);
+        out.draw_rect_screen(layer, Rectangle::new(Bounds2D::new(vec2(0, 0), self.viewport_size.as_()), RGBA::TRANSPARENT).with_fill(CONSOLE_BG));
 
-        //let buffer_height = text_height
-
-        let text = ">".to_string() + &self.console.input_buffer + "_";
+        // draw input buffer
         let screen_size = (self.viewport_size / EMBEDDED_CHAR_SIZE.as_u32()).as_u16();
-
+        let text = ">".to_string() + &self.console.input_buffer + "_";
         let buffer_height = text_height_lines(&text, screen_size.x());
 
         let mut y = (screen_size.y() - buffer_height) * (EMBEDDED_CHAR_SIZE.y() as u16);
-
-        out.draw_rect_screen(layer, Rectangle::new(Bounds2D::new(vec2(0, 0), self.viewport_size.as_()), RGBA::TRANSPARENT).with_fill(CONSOLE_BG));
         draw_text(out, layer, vec2(0, y as i32), &text);
 
+        // draw tail of output buffer
         let mut i = self.console.output.len();
         while i > 0 && y > 0 {
             i -= 1;

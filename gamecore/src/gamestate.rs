@@ -427,4 +427,5 @@ impl G {
             self.resources.remove(idx);
         }
     }
+    
 }
