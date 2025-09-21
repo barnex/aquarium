@@ -123,14 +123,19 @@ impl G {
         self.update_fps(); // 👈 FPS is gamespeed independent
         self.exec_commands(); // 👈 exec commands even when paused (speed 0)
 
-        self.ui.update_and_draw(&mut self.inputs, out); // 👈 may consume inputs
-
-        if self.inputs.just_pressed(K_CLI) {
-            toggle(&mut self.console_mode)
-        }
-        match self.console_mode {
-            false => self.control(),
-            true => self.handle_console_mode(),
+        {
+            // handle inputs
+            if self.inputs.just_pressed(K_CLI) {
+                toggle(&mut self.console_mode)
+            }
+            match self.console_mode {
+                true => self.handle_console_mode(),
+                false => {
+                    // HACK: don't draw menu in console mode so it does not get clicked
+                    self.ui.update_and_draw(&mut self.inputs, out); // 👈 may consume inputs
+                    self.control();
+                }
+            }
         }
 
         if !self.paused {

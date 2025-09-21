@@ -22,13 +22,13 @@ impl Inputs {
     // "just pressed" evolves to "is_down".
     // "released" and input_characters gets forgotten.
     pub fn tick(&mut self, keymap: &Keymap, events: impl Iterator<Item = InputEvent>) {
-        self.start_next_frame();
+        self.clear();
         for event in events {
             self.record_event(keymap, event);
         }
     }
 
-    fn start_next_frame(&mut self) {
+    fn clear(&mut self) {
         // Note: NOT clearing bottons_down.
         self.buttons_pressed.clear();
         self.buttons_released.clear();
