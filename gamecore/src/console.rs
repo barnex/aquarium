@@ -20,6 +20,14 @@ const ESCAPE: char = '\u{1B}';
 
 impl Console {
     const MAX_SCROLLBACK: usize = 64;
+
+    pub fn push_output(&self, v: impl Into<String>) {
+        let v = v.into();
+        self.output.push_back(v);
+        while self.output.len() > Self::MAX_SCROLLBACK {
+            self.output.pop_front();
+        }
+    }
 }
 
 impl G {
@@ -47,6 +55,7 @@ impl G {
             match chr {
                 BACKSPACE | BACKSPACE_MAC => drop(self.console.input_buffer.pop()), // backspace (linux, windows | mac)
                 ENTER => self.commands.push_back(take(&mut self.console.input_buffer)),
+                //ENTER => self.console.output.push_back(take(&mut self.console.input_buffer)),
                 ESCAPE => self.console.active = false,
                 chr if !chr.is_ascii_control() => self.console.input_buffer.push(chr),
                 _ => (),
@@ -69,17 +78,19 @@ impl G {
 
         let buffer_height = text_height_lines(&text, screen_size.x());
 
-
         let mut y = (screen_size.y() - buffer_height) * (EMBEDDED_CHAR_SIZE.y() as u16);
 
         out.draw_rect_screen(layer, Rectangle::new(Bounds2D::new(vec2(0, 0), self.viewport_size.as_()), RGBA::TRANSPARENT).with_fill(CONSOLE_BG));
         draw_text(out, layer, vec2(0, y as i32), &text);
 
-        //let mut i = ;
-        //while y > 0{
-        //    let line = self.console.output.
-        //}
-
+        let mut i = self.console.output.len();
+        while i > 0 && y > 0 {
+            i -= 1;
+            if let Some(line) = self.console.output.get(i) {
+                y -= text_height_lines(&line, screen_size.x()) * (EMBEDDED_CHAR_SIZE.y() as u16);
+                draw_text(out, layer, vec2(0, y as i32), &line);
+            }
+        }
     }
 }
 
