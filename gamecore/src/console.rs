@@ -1,22 +1,20 @@
 use crate::prelude::*;
 use std::mem::take;
 
+const BACKSPACE: char = '\u{08}';
+const BACKSPACE_MAC: char = '\u{7F}';
+const ENTER: char = '\u{0D}';
+const ESCAPE: char = '\u{1B}';
+
 impl G {
     // 🪲 TODO: JS: addEventListener("input") + macroquad equivalent to get actual characters + no keymapping
     pub(crate) fn handle_console_mode(&mut self) {
-        for key in self.inputs.iter_just_pressed() {
-            match key {
-                K_BACKSPACE => drop(self.console_linebuffer.pop()), // backspace (linux, windows | mac)
-                K_ESC => self.console_mode = false,
-                K_ENTER => {
-                    self.commands.push_back(take(&mut self.console_linebuffer));
-                }
-                key if key.len() == 1 => {
-                    if let Some(chr) = char::from_u32(key[0] as u32) {
-                        self.console_linebuffer.push(chr)
-                    }
-                }
-                _ => (),
+        for chr in self.inputs.input_characters().chars() {
+            match chr {
+                BACKSPACE | BACKSPACE_MAC => drop(self.console_linebuffer.pop()), // backspace (linux, windows | mac)
+                ENTER => self.commands.push_back(take(&mut self.console_linebuffer)),
+                ESCAPE => self.console_mode = false,
+                chr => self.console_linebuffer.push(chr),
             }
         }
     }

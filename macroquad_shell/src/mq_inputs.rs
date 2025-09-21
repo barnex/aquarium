@@ -4,6 +4,9 @@ use crate::*;
 use fixed_str::*;
 
 pub fn capture_input_events(dst: &mut VecDeque<InputEvent>) {
+    while let Some(chr) = mq::get_char_pressed() {
+        dst.push_back(InputEvent::InputCharacter(chr));
+    }
     for code in mq::get_keys_pressed() {
         if let Ok(button) = Str16::from_str(&format!("{code:?}").to_ascii_lowercase()) {
             dst.push_back(InputEvent::Key { button: Button(button), direction: KeyDir::Down });

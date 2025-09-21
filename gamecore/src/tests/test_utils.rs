@@ -19,6 +19,7 @@ pub fn tick(g: &mut G, inputs: impl IntoIterator<Item = InputEvent> + 'static) {
             .map(|event| match event {
                 InputEvent::MouseMove { position } => InputEvent::MouseMove { position: position - camera },
                 InputEvent::Key { button, direction } => InputEvent::Key { button, direction },
+                InputEvent::InputCharacter(chr) => InputEvent::InputCharacter(chr),
             })
             .collect_vec();
 

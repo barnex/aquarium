@@ -13,12 +13,14 @@ pub struct Inputs {
 
     mouse_position: vec2i,
     mouse_wheel: f32,
+
+    input_characters: String,
 }
 
 impl Inputs {
     // To be called on each frame to advance time.
     // "just pressed" evolves to "is_down".
-    // "released" gets forgotten.
+    // "released" and input_characters gets forgotten.
     pub fn tick(&mut self, keymap: &Keymap, events: impl Iterator<Item = InputEvent>) {
         self.start_next_frame();
         for event in events {
@@ -30,6 +32,11 @@ impl Inputs {
         // Note: NOT clearing bottons_down.
         self.buttons_pressed.clear();
         self.buttons_released.clear();
+        self.input_characters.clear();
+    }
+
+    pub fn input_characters(&self) -> &str {
+        &self.input_characters
     }
 
     /// Is a button currently held down?
@@ -85,6 +92,7 @@ impl Inputs {
             InputEvent::MouseMove { position } => {
                 self.record_mouse_position(position);
             }
+            InputEvent::InputCharacter(chr) => self.input_characters.push(chr),
         }
     }
 

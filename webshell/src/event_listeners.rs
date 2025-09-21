@@ -9,6 +9,9 @@ pub(crate) fn listen_keys(events: Shared<VecDeque<InputEvent>>) {
         if let Ok(key) = Str16::from_str(&event.key()) {
             events_clone.borrow_mut().push_back(InputEvent::Key { button: Button(key), direction: KeyDir::Down });
         }
+        if let Some(chr) = event_to_chr(event) {
+            events_clone.borrow_mut().push_back(InputEvent::InputCharacter(chr));
+        }
     });
 
     let events_clone = events.clone();
@@ -26,6 +29,19 @@ pub(crate) fn listen_keys(events: Shared<VecDeque<InputEvent>>) {
     // Keep the closures alive
     keydown_closure.forget();
     keyup_closure.forget();
+}
+
+fn event_to_chr(event: KeyboardEvent) -> Option<char> {
+    // ⚠️ This is an approximate hack but otherwise extremely tricky in JS.
+    // Would require shenanigans like a hidden input element that steals focus from canvas.
+    log::info!("key {}", event.key());
+    match event.key().as_str() {
+        chr if chr.len() == 1 => chr.chars().next(),
+        "Backspace" => Some('\u{0008}'),
+        "Enter" => Some('\u{000D}'),
+        "Escape" => Some('\u{001B}'),
+        _ => None,
+    }
 }
 
 /// Listen for mouse events on a canvas, push them to `VecDeque` for later later consumption.
