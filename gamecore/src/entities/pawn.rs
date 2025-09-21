@@ -148,7 +148,7 @@ impl Pawn {
     }
 
     fn move_resource_downstream(&self, g: &G, home: &Building) -> Status {
-        trace!(self);
+        trace!(self, "cargo={:?}", &self.cargo);
         debug_assert!(self.cargo.is_none());
 
         if self.cargo.is_some() {
@@ -163,7 +163,7 @@ impl Pawn {
                 if slot.get() > 0 && downstream.can_accept_resource(res) {
                     self.cargo.set(home.take_resource(res));
                     if self.set_destination(g, downstream.entrance()).is_some() {
-                        trace!(self, "take {:?} downstream to {:?}", self.cargo(), downstream.typ);
+                        trace!(self, "taking {:?} to {}", self.cargo(), downstream);
                         return OK;
                     }
                 }
@@ -173,13 +173,14 @@ impl Pawn {
     }
 
     pub fn try_deliver_cargo(&self, building: &Building) -> Status {
-        trace!(self, "{:?} to {building}", self.cargo);
+        trace!(self, "cargo={:?} to {building}", self.cargo);
 
         let resource = self.cargo.take()?;
         match building.add_resource(resource) {
             OK => OK,
             FAIL => {
                 // TODO: go sleep a bit or so
+                trace!(self, "failed");
                 self.cargo.set(Some(resource));
                 FAIL
             }
@@ -187,9 +188,9 @@ impl Pawn {
     }
 
     pub fn try_pick_up_cargo(&self, g: &G, home: &Building) -> Status {
-        let res = g.resources.at(self.tile())?;
-        //trace!(self, "try_pick_up_cargo", self.cargo, building.typ);
-        if home.can_accept_resource(res) {
+        let res = g.resources.at(self.tile());
+        trace!(self, "res={res:?}");
+        if home.can_accept_resource(res?) {
             self.cargo.set(g.resources.remove(self.tile()));
             OK
         } else {
@@ -198,6 +199,7 @@ impl Pawn {
     }
 
     fn steal_any_resource(&self, g: &G, home: &Building, building: &Building) -> Status {
+        trace!(self, "building={building}");
         debug_assert!(self.home.get() == Some(home.id));
 
         for (res, slot, _) in building.resource_slots() {
@@ -267,8 +269,9 @@ impl Pawn {
     fn start_route_to(&self, g: &G, dest: vec2i16) -> Status {
         let max_dist = 42;
         let distance_map = DistanceMap::new(dest, max_dist, |p| g.is_walkable(p));
-        let path = distance_map.path_to_center(self.tile())?;
-        self.route.set(path);
+        let path = distance_map.path_to_center(self.tile());
+        trace!(self, "dest={dest} path len={:?}", path.as_ref().map(|p|p.len()));
+        self.route.set(path?);
         OK
     }
 

@@ -97,7 +97,7 @@ fn init_logging() {
             let file = record.file().unwrap_or("unknown");
             let line = record.line().map(|l| l.to_string()).unwrap_or("?".to_string());
             let tick = TICK_FOR_LOGGING.load(std::sync::atomic::Ordering::Relaxed);
-            writeln!(buf, "[{} {tick:6} {file}:{line:4}] {}", record.level(), record.args())
+            writeln!(buf, "[{:5} {tick:6} {file}:{line:4}] {}", record.level(), record.args())
         })
         .filter(None, LevelFilter::Trace)
         .init();
