@@ -88,7 +88,7 @@ fn draw_downstream_overlay(g: &G, out: &mut Out) {
     }
 }
 
-pub(crate) fn print_debug_output(g: &G, out: &mut Out) {
+pub(crate) fn write_debug_output(g: &G, out: &mut Out) {
     let debug = &mut out.debug;
     if let Some(e) = g.last_sanity_error.as_ref() {
         writeln!(debug, "SANITY CHECK FAILED: {e}").ignore_err();

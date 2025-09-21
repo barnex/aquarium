@@ -54,10 +54,8 @@ pub struct G {
     // 🪲 debug
     pub debug: DebugOpts,
     pub last_sanity_error: Option<String>,
-    // 📺 currently entering text in console ?
-    pub console_mode: bool,
-    // 📺 line of text currently being typed into console.
-    pub console_linebuffer: String,
+
+    pub console: Console,
 }
 
 pub const TILE_SIZE: u32 = 24;
@@ -80,7 +78,6 @@ impl G {
 
         Self {
             _prev_secs: 0.0,
-            console_linebuffer: default(),
             _rng: RefCell::new(ChaCha8Rng::seed_from_u64(12345678)),
             _tilemap: Tilemap::new(size),
             buildings: MemKeep::new(),
@@ -107,7 +104,7 @@ impl G {
             ui: Ui::new(),
             viewport_size: vec2(0, 0),
             water: default(),
-            console_mode: false,
+            console: default(),
         }
     }
 
@@ -123,19 +120,11 @@ impl G {
         self.update_fps(); // 👈 FPS is gamespeed independent
         self.exec_commands(); // 👈 exec commands even when paused (speed 0)
 
-        {
-            // handle inputs
-            if self.inputs.just_pressed(K_CLI) {
-                toggle(&mut self.console_mode)
-            }
-            match self.console_mode {
-                true => self.handle_console_mode(),
-                false => {
-                    // HACK: don't draw menu in console mode so it does not get clicked
-                    self.ui.update_and_draw(&mut self.inputs, out); // 👈 may consume inputs
-                    self.control();
-                }
-            }
+        self.tick_console();
+        // 👇 📺 console overlays normal game. Disables game control when active.
+        if !self.console.mode {
+            self.ui.update_and_draw(&mut self.inputs, out); // 👈 may consume inputs
+            self.control();
         }
 
         if !self.paused {
@@ -161,8 +150,9 @@ impl G {
         }
 
         self.draw_world(out);
-        self.draw_console_mode(out);
-        print_debug_output(self, out);
+        self.draw_console(out);
+
+        //write_debug_output(self, out);
         //debug_println!(3, "hi");
 
         self.pawns.gc();
