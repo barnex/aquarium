@@ -122,7 +122,7 @@ impl G {
 
         self.tick_console();
         // 👇 📺 console overlays normal game. Disables game control when active.
-        if !self.console.mode {
+        if !self.console.active {
             self.ui.update_and_draw(&mut self.inputs, out); // 👈 may consume inputs
             self.control();
         }
