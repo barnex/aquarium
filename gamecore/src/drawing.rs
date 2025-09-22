@@ -5,7 +5,7 @@ impl G {
     pub fn draw_world(&self, out: &mut Out) {
         debug_assert!(out.viewport_size != vec2::ZERO);
 
-        draw_text(out, L_TEXT, vec2(0, 0), &self.header_text);
+        out.draw_text(L_TEXT, vec2(0, 0), &self.header_text);
 
         // Note: ⚠️ UI already rendered (may consume input events)
 
@@ -27,7 +27,7 @@ impl G {
     }
 
     pub fn draw_text(&self, out: &mut Out, layer: u8, text: &str, world_pos: vec2i) {
-        draw_text(out, layer, world_pos - self.camera_pos, text);
+        out.draw_text(layer, world_pos - self.camera_pos, text);
     }
 
     /// Draw line in world coordinates (i.e. taking into account camera).

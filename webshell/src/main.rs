@@ -4,8 +4,8 @@ mod http_get;
 mod js_commands;
 mod js_renderer;
 mod js_resources;
-mod load_bitmap;
 mod js_storage;
+mod load_bitmap;
 mod time;
 
 use event_listeners::*;
@@ -13,9 +13,9 @@ use http_get::*;
 use js_commands::*;
 use js_renderer::*;
 use js_resources::*;
+use js_storage::*;
 use load_bitmap::*;
 use shell_api::*;
-use js_storage::*;
 use time::*;
 
 use fixed_str::*;
@@ -45,6 +45,7 @@ type HashMap<K, V> = fnv::FnvHashMap<K, V>;
 type HashSet<T> = fnv::FnvHashSet<T>;
 type Shared<T> = Rc<RefCell<T>>;
 
+const TILE_SIZE: u32 = 24; // TODO: don't depend on this being hard-coded.
 
 use gamecore::G; // 👈 switch games here
 
@@ -109,7 +110,6 @@ async fn start() -> JsResult<()> {
 }
 
 const APP_KEY: &str = "a_strategy_game_data_v01";
-
 
 pub async fn fallback_bitmap((r, g, b): (u8, u8, u8), size: u32) -> Result<ImageBitmap, JsValue> {
     let width = size as usize;
