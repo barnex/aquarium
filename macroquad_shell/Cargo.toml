@@ -4,9 +4,13 @@ version = "1.0.0"
 edition = "2024"
 default-run = "mq_main"
 
+[lib]
+name = "mq_libmain"
+path = "mq_libmain.rs"
+
 [[bin]]
 name = "mq_main"
-path = "src/mq_main.rs"
+path = "mq_game.rs"
 
 [dependencies]
 macroquad = "0.4.14"

@@ -19,8 +19,7 @@ use vector::*;
 
 type HashMap<K, V> = fnv::FnvHashMap<K, V>;
 
-#[macroquad::main("Game")]
-async fn main() {
+pub async fn lib_main() {
     init_logging();
 
     log::info!("Using macroquad shell");
@@ -119,5 +118,3 @@ fn init_logging() {
         .filter(None, LevelFilter::Trace)
         .init();
 }
-
-const ANSI_CLEAR: &'static str = "\x1B[2J\x1B[H";
