@@ -3,6 +3,9 @@ name = "fixed_str"
 version = "0.1.0"
 edition = "2024"
 
+[lib]
+path = "fixed_str.rs"
+
 [dependencies]
 anyhow = { workspace = true }
 serde = { workspace = true }

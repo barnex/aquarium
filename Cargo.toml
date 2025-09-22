@@ -9,7 +9,7 @@ members = [
 	"corelibs/geometry",
 	"corelibs/matrix",
 	"corelibs/memkeep",
-	"corelibs/memkeep",
+	"corelibs/binpack2d",
 	"corelibs/pathfinder",
 	"corelibs/vector",
 	"gamecore",
@@ -21,17 +21,18 @@ members = [
 ]
 
 [workspace.dependencies]
+binpack2d = { path = "corelibs/binpack2d" }
 cel = { path = "corelibs/cel" }
-pathfinder = { path = "corelibs/pathfinder" }
 core_util = { path = "corelibs/core_util" }
 fixed_str = { path = "corelibs/fixed_str" }
 gamecore = { path = "gamecore" }
 geometry = { path = "corelibs/geometry" }
 matrix = { path = "corelibs/matrix" }
 memkeep = { path = "corelibs/memkeep" }
+pathfinder = { path = "corelibs/pathfinder" }
 proc_macros = { path = "proc_macros" }
-vector = { path = "corelibs/vector" }
 shell_api = { path = "shell_api" }
+vector = { path = "corelibs/vector" }
 
 anyhow = "1"
 base64 = "0.22"
