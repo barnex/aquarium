@@ -1,5 +1,3 @@
-use std::sync::atomic::AtomicU64;
-
 use crate::prelude::*;
 
 #[macro_export]

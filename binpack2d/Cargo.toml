@@ -3,5 +3,8 @@ name = "binpack2d"
 version = "5.0.0"
 edition = "2024"
 
+[lib]
+path = "binpack2d.rs"
+
 [dependencies]
 vector = { workspace = true }
