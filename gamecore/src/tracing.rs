@@ -1,3 +1,5 @@
+use std::sync::atomic::AtomicU64;
+
 use crate::prelude::*;
 
 #[macro_export]
@@ -25,9 +27,11 @@ macro_rules! trace {
 impl G {
     pub(crate) fn trace_selected(&self) -> Result<()> {
         self.untrace_all();
-        for p in self.selected_pawns() {
+        let mut count = 0;
+        for p in self.selected_pawns().inspect(|_| count += 1) {
             p.traced.set(true);
         }
+        log::trace!("tracing {count} entities");
 
         Ok(())
     }

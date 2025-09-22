@@ -33,6 +33,7 @@ impl G {
             &["downstream" | "show_downstream"] => Ok(toggle(&mut self.debug.show_downstream)),
             &["i" | "inspect_under_cursor"] => Ok(toggle(&mut self.debug.inspect_under_cursor)),
             &["t" | "trace"] => self.trace_selected(),
+            &["ut" | "untrace"] => Ok(self.untrace_all()),
             &[cmd, ..] => Err(anyhow!("unknown command: {cmd:?}")),
             &[] => Ok(()),
         }
