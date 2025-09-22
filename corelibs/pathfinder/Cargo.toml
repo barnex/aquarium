@@ -3,6 +3,9 @@ name = "pathfinder"
 version = "2.0.0"
 edition = "2024"
 
+[lib]
+path = "pathfinder.rs"
+
 [dependencies]
 serde = { workspace = true }
 fnv = { workspace = true }

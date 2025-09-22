@@ -3,6 +3,9 @@ name = "memkeep"
 version = "1.0.0"
 edition = "2024"
 
+[lib]
+path = "memkeep.rs"
+
 [dependencies]
 serde = { workspace = true }
 
