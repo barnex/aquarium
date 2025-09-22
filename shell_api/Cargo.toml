@@ -3,6 +3,9 @@ name = "shell_api"
 version = "0.1.0"
 edition = "2024"
 
+[lib]
+path = "shell_api.rs"
+
 [dependencies]
 core_util = { workspace = true }
 fixed_str = { workspace = true }
