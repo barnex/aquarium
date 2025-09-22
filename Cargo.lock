@@ -607,7 +607,6 @@ dependencies = [
  "fixed_str",
  "fnv",
  "futures",
- "gamecore",
  "log",
  "macroquad",
  "num-traits",

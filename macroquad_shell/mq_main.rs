@@ -7,7 +7,6 @@ use mq_inputs::*;
 use mq_resources::*;
 use mq_storage::*;
 
-use gamecore::*;
 
 use std::collections::VecDeque;
 use std::sync::atomic::AtomicU64;
@@ -20,7 +19,7 @@ use vector::*;
 type HashMap<K, V> = fnv::FnvHashMap<K, V>;
 
 pub async fn mq_main<G: GameCore>() {
-    init_logging();
+    init_logging::<G>();
 
     log::info!("Using macroquad shell");
     #[cfg(debug_assertions)]
@@ -81,11 +80,12 @@ pub async fn mq_main<G: GameCore>() {
     }
 }
 
-fn init_logging() {
+fn init_logging<G:GameCore>() {
     use std::sync::atomic::Ordering::Relaxed;
 
     /// So that tracing can introduce a newline before each new tick that has logging.
     static LAST_TICK_WITH_TRACING_OUTPUT: AtomicU64 = AtomicU64::new(0);
+
 
     use env_logger::*;
     use log::*;
@@ -94,7 +94,7 @@ fn init_logging() {
         .format(|buf, record: &Record| {
             let file = record.file().unwrap_or("unknown");
             let line = record.line().map(|l| l.to_string()).unwrap_or("?".to_string());
-            let tick = TICK_FOR_LOGGING.load(Relaxed);
+            let tick = G::tick_for_logging();
 
             let maybe_newline = {
                 // print a newline before the tracing output of each new tick.
