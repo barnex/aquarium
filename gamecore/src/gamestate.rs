@@ -434,3 +434,16 @@ impl G {
         }
     }
 }
+
+
+impl GameCore for G{
+    fn tick(&mut self, now_secs: f64, events: impl Iterator<Item = InputEvent>, out: &mut Out) {
+        self.tick(now_secs, events, out)
+    }
+}
+
+impl Default for G{
+    fn default() -> Self {
+        Self::test_world()
+    }
+}

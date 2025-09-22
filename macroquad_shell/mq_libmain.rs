@@ -19,7 +19,7 @@ use vector::*;
 
 type HashMap<K, V> = fnv::FnvHashMap<K, V>;
 
-pub async fn lib_main() {
+pub async fn lib_main<G: GameCore>() {
     init_logging();
 
     log::info!("Using macroquad shell");
@@ -39,13 +39,7 @@ pub async fn lib_main() {
         }
         None => {
             log::info!("game not loaded, starting fresh");
-            let mut g = G::test_world();
-            #[cfg(debug_assertions)]
-            {
-                log::info!("enabling pause_on_sanity_failure (because debug_assertions)");
-                g.debug.pause_on_sanity_failure = true;
-            }
-            g
+            G::default()
         }
     };
 
@@ -69,19 +63,19 @@ pub async fn lib_main() {
         g.tick(now_secs, input_events.drain(..), &mut out);
         mq_draw(&mut res, &out);
 
-        if !g.paused {
-            //println!("{ANSI_CLEAR}{}", &out.debug);
-            if !out.debug.is_empty() {
-                println!("{}", &out.debug);
-            }
-        }
+        //if !g.paused {
+        //    //println!("{ANSI_CLEAR}{}", &out.debug);
+        //    if !out.debug.is_empty() {
+        //        println!("{}", &out.debug);
+        //    }
+        //}
         if mq::is_key_pressed(mq::KeyCode::S) && mq::is_key_down(mq::KeyCode::LeftSuper) {
             save_game(&g);
         }
-        if mq::is_key_pressed(mq::KeyCode::Space) {
-            g.paused = true;
-            g.commands.push_back("tick".into());
-        }
+        //if mq::is_key_pressed(mq::KeyCode::Space) {
+        //    g.paused = true;
+        //    g.commands.push_back("tick".into());
+        //}
 
         mq::next_frame().await
     }
