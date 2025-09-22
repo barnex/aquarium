@@ -19,7 +19,7 @@ use vector::*;
 
 type HashMap<K, V> = fnv::FnvHashMap<K, V>;
 
-pub async fn lib_main<G: GameCore>() {
+pub async fn mq_main<G: GameCore>() {
     init_logging();
 
     log::info!("Using macroquad shell");
