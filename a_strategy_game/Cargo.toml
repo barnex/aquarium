@@ -1,0 +1,14 @@
+[package]
+name = "a_strategy_game"
+version = "0.1.0"
+edition = "2024"
+default-run = "a_strategy_game"
+
+[[bin]]
+name = "a_strategy_game"
+path = "a_strategy_game_mq.rs"
+
+[dependencies]
+macroquad_shell = { workspace = true }
+macroquad = { workspace = true }
+gamecore = { workspace = true }

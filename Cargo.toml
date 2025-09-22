@@ -3,17 +3,18 @@
 resolver = "2"
 
 members = [
+	"a_strategy_game",
+	"corelibs/binpack2d",
 	"corelibs/cel",
 	"corelibs/core_util",
 	"corelibs/fixed_str",
 	"corelibs/geometry",
 	"corelibs/matrix",
 	"corelibs/memkeep",
-	"corelibs/binpack2d",
 	"corelibs/pathfinder",
-	"corelibs/vector",
 	"corelibs/proc_macros",
 	"corelibs/proc_macros_impl",
+	"corelibs/vector",
 	"gamecore",
 	"macroquad_shell",
 	"shell_api",
@@ -33,6 +34,7 @@ pathfinder = { path = "corelibs/pathfinder" }
 proc_macros = { path = "corelibs/proc_macros" }
 shell_api = { path = "shell_api" }
 vector = { path = "corelibs/vector" }
+macroquad_shell = { path = "macroquad_shell" }
 
 anyhow = "1"
 base64 = "0.22"
@@ -44,14 +46,14 @@ futures = "0.3"
 googletest = "0.14"
 itertools = "0.14"
 log = "0.4"
-#image = { version = "0.25", default-features = false, features = ["png"] }
+macroquad = "0.4.14"
 num-traits = "0.2"
 num_enum = "0.7"
 rand = { version = "0.8", default-features = false }
 rand_chacha = { version = "0.3", features = ["serde1"] }
 ron = "0.10"
-tiny-skia = "0.11"
 serde = { version = "1", features = ["derive"] }
+tiny-skia = "0.11"
 
 
 # ⚠️ It's easy to accidentally disable debug assertions etc.
