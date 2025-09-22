@@ -45,11 +45,6 @@ pub use water_sim::*;
 
 pub(crate) use extension_traits::*;
 
-pub fn init() {
-    #[cfg(debug_assertions)]
-    log::warn!("gamecore: debug_assertions enabled, performance will suffer");
-}
-
 /// Name of the function this is called from.
 #[macro_export]
 macro_rules! caller {
