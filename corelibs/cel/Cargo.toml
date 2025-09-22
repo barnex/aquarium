@@ -4,10 +4,12 @@ version = "2.0.0"
 edition = "2024"
 
 [dependencies]
+core_util = { workspace = true }
+itertools = { workspace = true }
+num-traits = { workspace = true }
 serde = { workspace = true }
 vector = { workspace = true }
-core_util = { workspace = true }
-num-traits = { workspace = true }
+fnv = { workspace = true }
 
 [dev-dependencies]
 googletest = { workspace = true }

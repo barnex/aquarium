@@ -1,8 +1,5 @@
 pub(crate) mod prelude;
 
-mod c_deque;
-mod c_set;
-mod c_vec;
 mod console;
 mod control;
 mod debugging;
@@ -24,9 +21,6 @@ mod water_sim;
 #[cfg(test)]
 mod tests;
 
-pub use c_deque::*;
-pub use c_set::*;
-pub use c_vec::*;
 pub use console::*;
 pub use control::*;
 pub use debugging::*;

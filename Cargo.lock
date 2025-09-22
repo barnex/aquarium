@@ -177,7 +177,9 @@ name = "cel"
 version = "2.0.0"
 dependencies = [
  "core_util",
+ "fnv",
  "googletest",
+ "itertools",
  "num-traits",
  "serde",
  "vector",

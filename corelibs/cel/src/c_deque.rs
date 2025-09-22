@@ -34,19 +34,19 @@ impl<T> CDeque<T> {
         self.0.borrow_mut().extend(iter);
     }
 
-    pub(crate) fn push_back(&self, v: T) {
+    pub fn push_back(&self, v: T) {
         self.0.borrow_mut().push_back(v);
     }
 
-    pub(crate) fn push_front(&self, v: T) {
+    pub fn push_front(&self, v: T) {
         self.0.borrow_mut().push_front(v);
     }
 
-    pub(crate) fn pop_back(&self) -> Option<T> {
+    pub fn pop_back(&self) -> Option<T> {
         self.0.borrow_mut().pop_back()
     }
 
-    pub(crate) fn pop_front(&self) -> Option<T> {
+    pub fn pop_front(&self) -> Option<T> {
         self.0.borrow_mut().pop_front()
     }
 }
@@ -58,7 +58,7 @@ impl<T: Clone> CDeque<T> {
         self.0.borrow().iter().cloned().collect_vec().into_iter()
     }
 
-    pub(crate) fn get(&self, index: usize) -> Option<T> {
+    pub fn get(&self, index: usize) -> Option<T> {
         self.0.borrow_mut().get(index).cloned()
     }
 }

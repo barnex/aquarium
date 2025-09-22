@@ -19,7 +19,6 @@ use js_storage::*;
 use time::*;
 
 use fixed_str::*;
-use gamecore::*;
 use vector::*;
 
 pub use itertools::Itertools as _;
@@ -46,6 +45,9 @@ type HashMap<K, V> = fnv::FnvHashMap<K, V>;
 type HashSet<T> = fnv::FnvHashSet<T>;
 type Shared<T> = Rc<RefCell<T>>;
 
+
+use gamecore::G; // 👈 switch games here
+
 fn main() {
     web_sys::console::log_1(&"WASM main started. Hello from Rust.".into());
     console_error_panic_hook::set_once();
@@ -69,7 +71,7 @@ async fn start() -> JsResult<()> {
         }
         None => {
             log::error!("game not loaded, starting fresh");
-            let mut g = G::test_world();
+            let mut g = G::default();
             #[cfg(debug_assertions)]
             {
                 log::info!("enabling pause_on_sanity_failure (because debug_assertions)");
