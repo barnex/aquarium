@@ -1,0 +1,15 @@
+[package]
+name = "gamelib"
+version = "1.0.0"
+edition = "2024"
+
+
+[lib]
+path = "gamelib.rs"
+
+[dependencies]
+cel = { workspace = true }
+geometry = { workspace = true }
+serde = { workspace = true }
+shell_api = { workspace = true }
+vector = { workspace = true }

@@ -20,6 +20,7 @@ members = [
 	"corelibs/proc_macros",
 	"corelibs/proc_macros_impl",
 	"corelibs/vector",
+	"gamelib",
 	"macroquad_shell",
 	"shell_api",
 	"web_shell",
