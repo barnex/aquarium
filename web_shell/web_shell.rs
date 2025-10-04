@@ -60,7 +60,6 @@ pub fn lib_main<G: GameCore>() {
 
 async fn start<G: GameCore>() -> JsResult<()> {
     log::info!("async fn start spawned. Hello from async Rust.");
-    test_resource_loading().await;
 
     let mut res = Resources::new(fallback_bitmap((0, 0, 255), TILE_SIZE).await.unwrap());
     let mut g = match load_game() {
@@ -70,8 +69,7 @@ async fn start<G: GameCore>() -> JsResult<()> {
         }
         None => {
             log::error!("game not loaded, starting fresh");
-            let mut g = G::default();
-            g
+            G::default()
         }
     };
 

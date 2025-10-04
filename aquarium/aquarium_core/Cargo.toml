@@ -1,0 +1,11 @@
+[package]
+name = "aquarium_core"
+version = "1.0.0"
+edition = "2024"
+
+[lib]
+path = "aquarium_core.rs"
+
+[dependencies]
+shell_api = { workspace = true }
+serde = { workspace = true }

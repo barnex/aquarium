@@ -6,6 +6,8 @@ members = [
 	"a_strategy_game",
 	"a_strategy_game/gamecore",
 	"a_strategy_game/a_strategy_game_web",
+	"aquarium/aquarium_web",
+	"aquarium/aquarium_core",
 	"corelibs/binpack2d",
 	"corelibs/cel",
 	"corelibs/core_util",
@@ -23,6 +25,7 @@ members = [
 ]
 
 [workspace.dependencies]
+aquarium_core = { path = "aquarium/aquarium_core" }
 binpack2d = { path = "corelibs/binpack2d" }
 cel = { path = "corelibs/cel" }
 core_util = { path = "corelibs/core_util" }
