@@ -5,6 +5,7 @@ resolver = "2"
 members = [
 	"a_strategy_game",
 	"a_strategy_game/gamecore",
+	"a_strategy_game/a_strategy_game_web",
 	"corelibs/binpack2d",
 	"corelibs/cel",
 	"corelibs/core_util",
@@ -18,7 +19,6 @@ members = [
 	"corelibs/vector",
 	"macroquad_shell",
 	"shell_api",
-	"a_strategy_game_web",
 ]
 
 [workspace.dependencies]
