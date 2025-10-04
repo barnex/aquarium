@@ -77,7 +77,7 @@ impl Resources {
 async fn load_bitmap_or_fallback(sprite: Sprite) -> mq::Texture2D {
     const TILE_SIZE: vec2u16 = vec2(24, 24); // 🪲 TODO
 
-    let path = format!("assets/{}.png", sprite.file.as_str());
+    let path = format!("a_strategy_game/assets/{}.png", sprite.file.as_str());
     log::trace!("load {path:?}");
     match mq::load_texture(&path).await {
         Ok(bitmap) => bitmap,

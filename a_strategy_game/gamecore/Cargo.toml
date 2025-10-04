@@ -4,7 +4,6 @@ version = "1.0.0"
 edition = "2024"
 
 [dependencies]
-
 anyhow = { workspace = true }
 cel = { workspace = true }
 core_util = { workspace = true }

@@ -1,5 +1,5 @@
 /target
-/test_output/
+/a_strategy_game/gamecore/test_output/*/
 .DS_Store
 /app_storage/
 /flamegraph.svg

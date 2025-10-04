@@ -73,5 +73,5 @@ fn clean_output_dir(name: &str) {
 
 /// Test Output directory for given `test_name!()`
 pub(crate) fn test_output_dir(test_name: &str) -> PathBuf {
-    PathBuf::from(format!("../test_output/{test_name}/",))
+    PathBuf::from(format!("test_output/{test_name}/",))
 }
