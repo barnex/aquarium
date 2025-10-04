@@ -19,6 +19,7 @@ members = [
 	"corelibs/vector",
 	"macroquad_shell",
 	"shell_api",
+	"web_shell",
 ]
 
 [workspace.dependencies]
@@ -28,13 +29,14 @@ core_util = { path = "corelibs/core_util" }
 fixed_str = { path = "corelibs/fixed_str" }
 gamecore = { path = "a_strategy_game/gamecore" }
 geometry = { path = "corelibs/geometry" }
+macroquad_shell = { path = "macroquad_shell" }
 matrix = { path = "corelibs/matrix" }
 memkeep = { path = "corelibs/memkeep" }
 pathfinder = { path = "corelibs/pathfinder" }
 proc_macros = { path = "corelibs/proc_macros" }
 shell_api = { path = "shell_api" }
 vector = { path = "corelibs/vector" }
-macroquad_shell = { path = "macroquad_shell" }
+web_shell = { path = "web_shell" }
 
 anyhow = "1"
 base64 = "0.22"

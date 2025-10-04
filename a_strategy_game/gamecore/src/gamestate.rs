@@ -435,19 +435,25 @@ impl G {
     }
 }
 
-
-impl GameCore for G{
+impl GameCore for G {
     fn tick(&mut self, now_secs: f64, events: impl Iterator<Item = InputEvent>, out: &mut Out) {
         self.tick(now_secs, events, out)
     }
-    
+
     fn tick_for_logging() -> u64 {
         TICK_FOR_LOGGING.load(std::sync::atomic::Ordering::Relaxed)
     }
-    
+
+    fn push_command(&mut self, cmd: String) {
+        self.commands.push_back(cmd);
+    }
+
+    fn reset(&mut self) {
+        *self = Self::test_world();
+    }
 }
 
-impl Default for G{
+impl Default for G {
     fn default() -> Self {
         Self::test_world()
     }

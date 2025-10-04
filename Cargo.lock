@@ -35,6 +35,7 @@ dependencies = [
  "wasm-bindgen",
  "wasm-bindgen-futures",
  "web-sys",
+ "web_shell",
 ]
 
 [[package]]
@@ -1174,6 +1175,32 @@ checksum = "9367c417a924a74cae129e6a2ae3b47fabb1f8995595ab474029da749a8be120"
 dependencies = [
  "js-sys",
  "wasm-bindgen",
+]
+
+[[package]]
+name = "web_shell"
+version = "1.0.0"
+dependencies = [
+ "base64",
+ "bincode",
+ "console_error_panic_hook",
+ "console_log",
+ "fixed_str",
+ "fnv",
+ "futures",
+ "futures-channel",
+ "futures-util",
+ "gamecore",
+ "itertools",
+ "js-sys",
+ "log",
+ "num-traits",
+ "serde",
+ "shell_api",
+ "vector",
+ "wasm-bindgen",
+ "wasm-bindgen-futures",
+ "web-sys",
 ]
 
 [[package]]

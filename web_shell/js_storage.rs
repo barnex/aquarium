@@ -2,12 +2,12 @@
 use crate::*;
 use base64::Engine as _;
 
-pub fn save_game(state: &G) {
+pub fn save_game<G:GameCore>(state: &G) {
     log::info!("save... {APP_KEY}");
     serialize(APP_KEY, state).expect("autosave");
 }
 
-pub fn load_game() -> Option<G> {
+pub fn load_game<G:GameCore>() -> Option<G> {
     log::info!("loading... {APP_KEY}");
     deserialize(APP_KEY).map_err(|e| log::error!("load_game {APP_KEY}: {e:?}")).ok()
 }

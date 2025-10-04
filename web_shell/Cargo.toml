@@ -1,10 +1,12 @@
 [package]
-name = "a_strategy_game_web"
+name = "web_shell"
 version = "1.0.0"
 edition = "2024"
 
+[lib]
+path = "web_shell.rs"
+
 [dependencies]
-web_shell = { workspace = true }
 base64 = { workspace = true }
 bincode = { workspace = true }
 fixed_str = { workspace = true }
