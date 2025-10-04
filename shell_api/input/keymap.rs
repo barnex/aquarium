@@ -1,6 +1,6 @@
 use crate::prelude::*;
 
-#[derive(Serialize, Deserialize, Debug)]
+#[derive(Serialize, Deserialize, Debug, Default)]
 pub struct Keymap(pub HashMap<Button, Button>);
 
 impl Keymap {
@@ -9,8 +9,11 @@ impl Keymap {
     }
 }
 
-impl Default for Keymap {
-    fn default() -> Self {
-        default_keybindings()
+impl<T> From<T> for Keymap
+where
+    T: IntoIterator<Item = (Button, Button)>,
+{
+    fn from(value: T) -> Self {
+        Self(value.into_iter().collect())
     }
 }

@@ -6,15 +6,15 @@ impl G {
     pub(crate) fn exec_commands(&mut self) {
         let commands = self.commands.drain(..).collect_vec();
         for cmd in commands {
-            self.print_to_console(cmd.to_owned());
+            self.console.print(cmd.to_owned());
             match self.exec_command(&cmd) {
                 Ok(()) => {
                     log::info!("command {cmd:?}: OK");
-                    self.print_to_console("OK");
+                    self.console.print("OK");
                 }
                 Err(e) => {
                     log::info!("command {cmd:?}: {e}");
-                    self.print_to_console(format! {"{e}"})
+                    self.console.print(format! {"{e}"})
                 }
             }
         }

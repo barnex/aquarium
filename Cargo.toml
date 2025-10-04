@@ -33,6 +33,7 @@ cel = { path = "corelibs/cel" }
 core_util = { path = "corelibs/core_util" }
 fixed_str = { path = "corelibs/fixed_str" }
 gamecore = { path = "a_strategy_game/gamecore" }
+gamelib = { path = "gamelib" }
 geometry = { path = "corelibs/geometry" }
 macroquad_shell = { path = "macroquad_shell" }
 matrix = { path = "corelibs/matrix" }

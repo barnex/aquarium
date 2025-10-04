@@ -101,14 +101,21 @@ name = "aquarium"
 version = "3.0.0"
 dependencies = [
  "aquarium_core",
+ "core_util",
  "macroquad",
  "macroquad_shell",
+ "proc_macros",
 ]
 
 [[package]]
 name = "aquarium_core"
 version = "1.0.0"
 dependencies = [
+ "anyhow",
+ "fixed_str",
+ "gamelib",
+ "itertools",
+ "proc_macros",
  "serde",
  "shell_api",
 ]
@@ -457,6 +464,7 @@ dependencies = [
  "env_logger",
  "fixed_str",
  "fnv",
+ "gamelib",
  "geometry",
  "googletest",
  "itertools",
@@ -479,6 +487,7 @@ name = "gamelib"
 version = "1.0.0"
 dependencies = [
  "cel",
+ "core_util",
  "geometry",
  "serde",
  "shell_api",

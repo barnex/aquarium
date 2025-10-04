@@ -13,6 +13,7 @@ geometry = { workspace = true }
 itertools = { workspace = true }
 log = { workspace = true }
 memkeep = { workspace = true }
+gamelib = { workspace = true }
 num-traits = { workspace = true }
 num_enum = { workspace = true }
 pathfinder = { workspace = true }

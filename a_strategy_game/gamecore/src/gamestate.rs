@@ -1,6 +1,4 @@
 use crate::prelude::*;
-use std::sync::atomic::AtomicU64;
-
 
 /// The Game State.
 /// Short name `g: &G`, because it's passed down ehhhhhhverywhere.
@@ -123,7 +121,9 @@ impl G {
         self.update_fps(); // 👈 FPS is gamespeed independent
         self.exec_commands(); // 👈 exec commands even when paused (speed 0)
 
-        self.tick_console();
+        if let Some(cmd) = self.console.tick(&self.inputs){
+            self.commands.push_back(cmd);
+        }
         // 👇 📺 console overlays normal game. Disables game control when active.
         if !self.console.active {
             self.ui.update_and_draw(&mut self.inputs, out); // 👈 may consume inputs
@@ -153,7 +153,7 @@ impl G {
         }
 
         self.draw_world(out);
-        self.draw_console(out);
+        self.console.draw(out);
 
         //write_debug_output(self, out);
         //debug_println!(3, "hi");

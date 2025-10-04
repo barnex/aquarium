@@ -12,3 +12,5 @@ path = "aquarium_mq.rs"
 macroquad_shell = { workspace = true }
 macroquad = { workspace = true }
 aquarium_core = { workspace = true }
+core_util = { workspace = true }
+proc_macros = { workspace = true }

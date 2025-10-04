@@ -2,8 +2,11 @@ use crate::prelude::*;
 use std::mem::take;
 
 /// 📺 Game text console. Type game commands & cheats.
-#[derive(Default, Serialize, Deserialize)]
+#[derive(Serialize, Deserialize, Default)]
 pub struct Console {
+    /// Activates the console
+    pub hotkey: Option<Button>,
+
     /// Is console currently shown? This diverts all input into the console, not actual game.
     pub active: bool,
 
@@ -12,8 +15,6 @@ pub struct Console {
 
     /// output scrollback ringbuffer. Up to MAX_SCROLLBACK lines.
     pub output: CDeque<String>,
-
-    pub commands: CDeque<String>,
 }
 
 const BACKSPACE: char = '\u{08}';
@@ -24,6 +25,17 @@ const ESCAPE: char = '\u{1B}';
 const MAX_SCROLLBACK: usize = 64;
 
 impl Console {
+    pub fn with_hotkey(hotkey: Button) -> Self {
+        Self::default().with(|v| v.hotkey = Some(hotkey))
+    }
+
+    #[must_use = "returns command"]
+    pub fn tick_and_draw(&mut self, inputs: &Inputs, out: &mut Out) -> Option<String> {
+        let cmd = self.tick(inputs);
+        self.draw(out);
+        cmd
+    }
+
     pub fn print(&self, v: impl AsRef<str>) {
         let v = v.as_ref();
         for line in v.lines() {
@@ -35,25 +47,29 @@ impl Console {
     }
 
     // 🪲 TODO: JS: addEventListener("input") + macroquad equivalent to get actual characters + no keymapping
-    pub fn tick(&mut self, inputs: &Inputs) {
-        if inputs.just_pressed(K_CLI) {
+    #[must_use = "returns command"]
+    pub fn tick(&mut self, inputs: &Inputs) -> Option<String> {
+        if let Some(key) = self.hotkey
+            && inputs.just_pressed(key)
+        {
             toggle(&mut self.active)
         }
 
         if !self.active {
-            return;
+            return None;
         }
 
         for chr in inputs.input_characters().chars() {
             match chr {
                 BACKSPACE | BACKSPACE_MAC => drop(self.input_buffer.pop()), // backspace (linux, windows | mac)
-                ENTER => self.commands.push_back(take(&mut self.input_buffer)),
-                //ENTER => self.console.output.push_back(take(&mut self.console.input_buffer)),
+                ENTER => return Some(take(&mut self.input_buffer)),         // 👈
                 ESCAPE => self.active = false,
                 chr if !chr.is_ascii_control() => self.input_buffer.push(chr),
                 _ => (),
             }
         }
+
+        None
     }
 
     pub fn draw(&self, out: &mut Out) {

@@ -8,7 +8,12 @@ path = "aquarium_core.rs"
 
 [dependencies]
 shell_api = { workspace = true }
+gamelib = { workspace = true }
 serde = { workspace = true }
+itertools = { workspace = true }
+anyhow = { workspace = true }
+proc_macros = { workspace = true }
+fixed_str = { workspace = true }
 
 [profile.dev]
 debug = "line-tables-only"
