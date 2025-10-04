@@ -8,8 +8,8 @@ pub struct Rectangle {
 }
 
 impl Rectangle {
-    pub fn new(bounds: Bounds, stroke: RGBA) -> Self {
-        Self { bounds, stroke, fill: RGBA::TRANSPARENT }
+    pub fn new(bounds: impl Into<Bounds>, stroke: RGBA) -> Self {
+        Self { bounds: bounds.into(), stroke, fill: RGBA::TRANSPARENT }
     }
 
     pub fn with_fill(self, fill: RGBA) -> Self {

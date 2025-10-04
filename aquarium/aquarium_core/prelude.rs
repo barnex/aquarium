@@ -1,7 +1,8 @@
 pub use crate::*;
 pub use gamelib::*;
-pub use shell_api::*;
 pub use proc_macros::*;
+pub use shell_api::*;
+pub use vector::*;
 
 pub use serde::{Deserialize, Serialize};
 pub use itertools::Itertools as _;

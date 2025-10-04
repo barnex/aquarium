@@ -24,9 +24,15 @@ where
     pub max: vec2<T>,
 }
 
+impl<T: Copy + PartialOrd + Debug> From<(vec2<T>, vec2<T>)> for Bounds2D<T> {
+    fn from((min, max): (vec2<T>, vec2<T>)) -> Self {
+        Self::new(min, max)
+    }
+}
+
 impl<T> Bounds2D<T>
 where
-    T: Copy + PartialOrd + std::fmt::Debug,
+    T: Copy + PartialOrd + Debug,
 {
     /// Bounding box containing all points with coordinates between `min` and `max`.
     /// `min`'s components must not be larger than `max`'s.
@@ -166,7 +172,6 @@ where
     fn range(&self, comp: usize) -> Range<T> {
         self.min[comp]..self.max[comp]
     }
-
 
     // Ranges have some point(s) in common?
     fn range_overlaps(a: &Range<T>, b: &Range<T>) -> bool {

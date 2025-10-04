@@ -7,13 +7,14 @@ edition = "2024"
 path = "aquarium_core.rs"
 
 [dependencies]
-shell_api = { workspace = true }
-gamelib = { workspace = true }
-serde = { workspace = true }
-itertools = { workspace = true }
 anyhow = { workspace = true }
-proc_macros = { workspace = true }
 fixed_str = { workspace = true }
+gamelib = { workspace = true }
+itertools = { workspace = true }
+proc_macros = { workspace = true }
+serde = { workspace = true }
+shell_api = { workspace = true }
+vector = { workspace = true }
 
 [profile.dev]
 debug = "line-tables-only"

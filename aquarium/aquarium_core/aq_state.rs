@@ -8,6 +8,8 @@ pub struct AqState {
     pub inputs: Inputs,
 
     pub console: Console,
+
+    pub world: World,
 }
 
 impl AqState {
@@ -19,14 +21,19 @@ impl AqState {
 
         let console = Console::with_hotkey(K_CLI);
 
-        Self { keymap, inputs: default(), console }
+        let world = World::test();
+
+        Self { keymap, inputs: default(), console, world }
     }
 
     fn tick(&mut self, now_secs: f64, events: impl Iterator<Item = shell_api::InputEvent>, out: &mut shell_api::Out) {
         self.inputs.tick(&self.keymap, events);
         self.console.tick_and_draw(&self.inputs, out).map(|cmd| self.exec_command(&cmd));
 
+        self.world.tick();
+
         out.draw_text(0, (0, 0), "hello");
+        self.world.draw(out);
     }
 
     fn exec_command(&mut self, cmd: &str) {

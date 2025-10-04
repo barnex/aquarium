@@ -118,6 +118,7 @@ dependencies = [
  "proc_macros",
  "serde",
  "shell_api",
+ "vector",
 ]
 
 [[package]]
