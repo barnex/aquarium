@@ -1,5 +1,5 @@
 [package]
-name = "aquarium"
+name = "aquarium_web"
 version = "1.0.0"
 edition = "2024"
 

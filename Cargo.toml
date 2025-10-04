@@ -4,10 +4,11 @@ resolver = "2"
 
 members = [
 	"a_strategy_game",
-	"a_strategy_game/gamecore",
 	"a_strategy_game/a_strategy_game_web",
-	"aquarium/aquarium_web",
+	"a_strategy_game/gamecore",
+	"aquarium",
 	"aquarium/aquarium_core",
+	"aquarium/aquarium_web",
 	"corelibs/binpack2d",
 	"corelibs/cel",
 	"corelibs/core_util",
