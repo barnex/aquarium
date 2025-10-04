@@ -24,7 +24,5 @@ impl shell_api::GameCore for AqState {
         self.tick(now_secs, events, out)
     }
 
-    fn push_command(&mut self, cmd: String) {}
-
     fn reset(&mut self) {}
 }

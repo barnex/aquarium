@@ -118,6 +118,7 @@ impl G {
         self.now_secs = now_secs;
         self.inputs.tick(&self.keymap, events);
         self.viewport_size = out.viewport_size;
+        self.commands.extend(&mut self.inputs.drain_commands());
 
         self.update_fps(); // 👈 FPS is gamespeed independent
         self.exec_commands(); // 👈 exec commands even when paused (speed 0)
@@ -438,9 +439,6 @@ impl GameCore for G {
     }
 
 
-    fn push_command(&mut self, cmd: String) {
-        self.commands.push_back(cmd);
-    }
 
     fn reset(&mut self) {
         *self = Self::test_world();

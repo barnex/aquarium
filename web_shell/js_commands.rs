@@ -19,7 +19,7 @@ pub fn cmd(cmd: String) {
 
 /// Execute commands consumed from COMMAND_BUFFER,
 /// forward to game state if not JS-specific.
-pub(crate) fn exec_pending_commands<G:GameCore>(state: &mut G) {
+pub(crate) fn exec_pending_commands<G: GameCore>(state: &mut G) {
     for cmd in COMMAND_BUFFER.lock().unwrap().drain(..) {
         match exec_command(state, &cmd) {
             Ok(()) => log::info!("js command {cmd:?}: OK"),
@@ -30,18 +30,14 @@ pub(crate) fn exec_pending_commands<G:GameCore>(state: &mut G) {
 
 // Execute a single command.
 // If unknown, forward to the game state.
-fn exec_command<G:GameCore>(state: &mut G, cmd: &str) -> JsResult<()> {
+fn exec_command<G: GameCore>(state: &mut G, cmd: &str) -> JsResult<()> {
     match cmd.trim().split_ascii_whitespace().collect::<Vec<_>>().as_slice() {
         &["save"] => Ok(save_game(state)),
         &["reset"] => Ok(reset(state)),
         &["save_reload"] => Ok(save_reload(state)),
         &["toggle_large"] => Ok(toggle_large()),
         &["screenshot"] => download_screenshot("screenshot.png"),
-        // 👇 unknown command: forward to gamestate
-        _ => {
-            state.push_command(cmd.to_owned());
-            Err("sent to game".into())
-        }
+        _ => Err("unknown command".into()),
     }
 }
 
@@ -67,12 +63,12 @@ fn toggle_large() {
 }
 
 // save + reload command
-fn save_reload<G:GameCore>(state: &G) {
+fn save_reload<G: GameCore>(state: &G) {
     save_game(state);
     window().location().reload().expect("reload");
 }
 
 // reset gamestate command
-fn reset<G:GameCore>(state: &mut G) {
+fn reset<G: GameCore>(state: &mut G) {
     state.reset()
 }

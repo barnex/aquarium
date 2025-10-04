@@ -1,3 +1,5 @@
+use std::collections::VecDeque;
+
 use crate::prelude::*;
 
 /// Accumulates input events since the last tick,
@@ -15,6 +17,7 @@ pub struct Inputs {
     mouse_wheel: f32,
 
     input_characters: String,
+    commands: VecDeque<String>,
 }
 
 impl Inputs {
@@ -33,10 +36,19 @@ impl Inputs {
         self.buttons_pressed.clear();
         self.buttons_released.clear();
         self.input_characters.clear();
+        self.commands.clear();
     }
 
     pub fn input_characters(&self) -> &str {
         &self.input_characters
+    }
+
+    pub fn commands(&self) -> impl Iterator<Item = &str> {
+        self.commands.iter().map(String::as_str)
+    }
+
+    pub fn drain_commands(&mut self) -> impl Iterator<Item = String> {
+        self.commands.drain(..)
     }
 
     /// Is a button currently held down?
@@ -93,6 +105,7 @@ impl Inputs {
                 self.record_mouse_position(position);
             }
             InputEvent::InputCharacter(chr) => self.input_characters.push(chr),
+            InputEvent::Command(cmd) => self.commands.push_back(cmd),
         }
     }
 
@@ -116,6 +129,7 @@ impl Inputs {
         self.mouse_position = pos
     }
 
+    
     // The relative mouse wheel movement since last tick.
     //pub fn mouse_wheel_delta(&self) -> i32 {
     //	let mut delta = 0;
