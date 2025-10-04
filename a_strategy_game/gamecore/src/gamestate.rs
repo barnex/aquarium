@@ -1,9 +1,6 @@
 use crate::prelude::*;
 use std::sync::atomic::AtomicU64;
 
-/// Only so that trace logging can print the current tick.
-/// ⚠️ For anything else, use G::tick.
-pub static TICK_FOR_LOGGING: AtomicU64 = AtomicU64::new(0);
 
 /// The Game State.
 /// Short name `g: &G`, because it's passed down ehhhhhhverywhere.
@@ -440,9 +437,6 @@ impl GameCore for G {
         self.tick(now_secs, events, out)
     }
 
-    fn tick_for_logging() -> u64 {
-        TICK_FOR_LOGGING.load(std::sync::atomic::Ordering::Relaxed)
-    }
 
     fn push_command(&mut self, cmd: String) {
         self.commands.push_back(cmd);

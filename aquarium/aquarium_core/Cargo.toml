@@ -9,3 +9,8 @@ path = "aquarium_core.rs"
 [dependencies]
 shell_api = { workspace = true }
 serde = { workspace = true }
+
+[profile.dev]
+debug = "line-tables-only"
+split-debuginfo = "unpacked"
+opt-level = 1

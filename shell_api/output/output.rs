@@ -1,4 +1,10 @@
+use std::sync::atomic::AtomicU64;
+
 use crate::prelude::*;
+
+/// Only so that trace logging can print the current tick.
+/// ⚠️ For anything else, use G::tick.
+pub static TICK_FOR_LOGGING: AtomicU64 = AtomicU64::new(0);
 
 /// The layer we draw the tilemap to.
 pub const L_TILES: u8 = 0;
