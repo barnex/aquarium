@@ -12,6 +12,32 @@ dependencies = [
 ]
 
 [[package]]
+name = "a_strategy_game_web"
+version = "1.0.0"
+dependencies = [
+ "base64",
+ "bincode",
+ "console_error_panic_hook",
+ "console_log",
+ "fixed_str",
+ "fnv",
+ "futures",
+ "futures-channel",
+ "futures-util",
+ "gamecore",
+ "itertools",
+ "js-sys",
+ "log",
+ "num-traits",
+ "serde",
+ "shell_api",
+ "vector",
+ "wasm-bindgen",
+ "wasm-bindgen-futures",
+ "web-sys",
+]
+
+[[package]]
 name = "adler2"
 version = "2.0.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -1147,32 +1173,6 @@ checksum = "33b6dd2ef9186f1f2072e409e99cd22a975331a6b3591b12c764e0e55c60d5d2"
 dependencies = [
  "js-sys",
  "wasm-bindgen",
-]
-
-[[package]]
-name = "webshell"
-version = "1.0.0"
-dependencies = [
- "base64",
- "bincode",
- "console_error_panic_hook",
- "console_log",
- "fixed_str",
- "fnv",
- "futures",
- "futures-channel",
- "futures-util",
- "gamecore",
- "itertools",
- "js-sys",
- "log",
- "num-traits",
- "serde",
- "shell_api",
- "vector",
- "wasm-bindgen",
- "wasm-bindgen-futures",
- "web-sys",
 ]
 
 [[package]]
