@@ -42,6 +42,12 @@ impl Into<[u8; 3]> for RGB {
     }
 }
 
+impl From<[u8; 3]> for RGB {
+    fn from(value: [u8; 3]) -> Self {
+        Self(value)
+    }
+}
+
 impl RGBA {
     pub const BLACK: Self = Self([0, 0, 0, 255]);
     pub const RED: Self = Self([255, 0, 0, 255]);
@@ -79,5 +85,17 @@ impl RGBA {
 impl Into<[u8; 4]> for RGBA {
     fn into(self) -> [u8; 4] {
         self.0
+    }
+}
+
+impl From<[u8; 4]> for RGBA {
+    fn from(value: [u8; 4]) -> Self {
+        Self(value)
+    }
+}
+
+impl From<[u8; 3]> for RGBA {
+    fn from([r, g, b]: [u8; 3]) -> Self {
+        Self([r, g, b, 255])
     }
 }

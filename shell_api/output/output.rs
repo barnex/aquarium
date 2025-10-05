@@ -110,8 +110,8 @@ impl Out {
     }
 
     /// Draw rectangle in screen coordinates (i.e. ignoring camera).
-    pub fn draw_rect_screen(&mut self, layer: u8, rect: Rectangle) {
-        self.layer(layer).rectangles.push(rect);
+    pub fn draw_rect_screen(&mut self, layer: u8, rect: impl Into<Rectangle>) {
+        self.layer(layer).rectangles.push(rect.into());
     }
 
     fn layer(&mut self, layer: u8) -> &mut Layer {

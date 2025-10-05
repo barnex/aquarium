@@ -8,15 +8,25 @@ pub struct Rectangle {
 }
 
 impl Rectangle {
-    pub fn new(bounds: impl Into<Bounds>, stroke: RGBA) -> Self {
-        Self { bounds: bounds.into(), stroke, fill: RGBA::TRANSPARENT }
+    pub fn new(bounds: impl Into<Bounds>, stroke: impl Into<RGBA>) -> Self {
+        Self {
+            bounds: bounds.into(),
+            stroke: stroke.into(),
+            fill: RGBA::TRANSPARENT,
+        }
     }
 
-    pub fn with_fill(self, fill: RGBA) -> Self {
-        self.with(|v| v.fill = fill)
+    pub fn with_fill(self, fill: impl Into<RGBA>) -> Self {
+        self.with(|v| v.fill = fill.into())
     }
 
     pub fn translated(self, delta: Vector<i32, 2>) -> Self {
         self.with(|v| v.bounds = v.bounds.translated(delta))
+    }
+}
+
+impl<B: Into<Bounds>, S: Into<RGBA>> From<(B, S)> for Rectangle {
+    fn from((bounds, stroke): (B, S)) -> Self {
+        Self::new(bounds.into(), stroke.into())
     }
 }

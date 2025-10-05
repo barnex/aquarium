@@ -24,9 +24,9 @@ where
     pub max: vec2<T>,
 }
 
-impl<T: Copy + PartialOrd + Debug> From<(vec2<T>, vec2<T>)> for Bounds2D<T> {
-    fn from((min, max): (vec2<T>, vec2<T>)) -> Self {
-        Self::new(min, max)
+impl<V: Into<vec2<T>>, T: Copy + PartialOrd + Debug> From<(V, V)> for Bounds2D<T> {
+    fn from((min, max): (V, V)) -> Self {
+        Self::new(min.into(), max.into())
     }
 }
 
