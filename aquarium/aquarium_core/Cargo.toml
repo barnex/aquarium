@@ -15,6 +15,7 @@ proc_macros = { workspace = true }
 serde = { workspace = true }
 shell_api = { workspace = true }
 vector = { workspace = true }
+log = { workspace = true }
 
 [profile.dev]
 debug = "line-tables-only"

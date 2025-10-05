@@ -13,4 +13,5 @@ macroquad_shell = { workspace = true }
 macroquad = { workspace = true }
 aquarium_core = { workspace = true }
 core_util = { workspace = true }
+log = { workspace = true }
 proc_macros = { workspace = true }

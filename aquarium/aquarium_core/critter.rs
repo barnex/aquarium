@@ -7,7 +7,7 @@ pub struct Critter {
 
 impl Critter {
     pub(crate) fn tick(&mut self) {
-        self.head_pos += 1.0;
+        //self.head_pos += 1.0;
     }
 
     pub(crate) fn draw(&self, out: &mut Out) {

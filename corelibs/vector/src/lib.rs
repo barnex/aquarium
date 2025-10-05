@@ -629,6 +629,23 @@ where
     }
 }
 
+/// The addition assignment operator `+=`.
+/// ```
+/// # use vector::*;
+/// let mut v = vec2(3, 4);
+/// v += (1, 2);
+/// assert_eq!(v, vec2(4,6));
+/// ```
+impl<T> AddAssign<(T, T)> for Vector<T, 2>
+where
+    T: AddAssign,
+{
+    #[inline(always)]
+    fn add_assign(&mut self, rhs: (T, T)) {
+        <()>::zip_mut_with(self, rhs.into(), T::add_assign)
+    }
+}
+
 /// The subtraction assignment operator `-=` with scalar argument.
 /// Adds `rhs` to each vector component.
 /// ```
@@ -965,7 +982,6 @@ where
         self.as_i64().dot(self.as_i64())
     }
 }
-
 
 impl<T, const N: usize> Vector<T, N>
 where

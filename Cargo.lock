@@ -102,6 +102,7 @@ version = "3.0.0"
 dependencies = [
  "aquarium_core",
  "core_util",
+ "log",
  "macroquad",
  "macroquad_shell",
  "proc_macros",
@@ -115,6 +116,7 @@ dependencies = [
  "fixed_str",
  "gamelib",
  "itertools",
+ "log",
  "proc_macros",
  "serde",
  "shell_api",
