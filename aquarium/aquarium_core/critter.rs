@@ -3,6 +3,9 @@ use crate::prelude::*;
 #[derive(Serialize, Deserialize)]
 pub struct Critter {
     pub head_pos: vec2f,
+
+	
+
 }
 
 impl Critter {

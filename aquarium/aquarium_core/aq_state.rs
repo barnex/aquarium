@@ -40,17 +40,27 @@ impl AqState {
         }
     }
 
-    fn tick(&mut self, now_secs: f64, events: impl Iterator<Item = shell_api::InputEvent>, out: &mut shell_api::Out) {
+    fn tick_and_draw(&mut self, now_secs: f64, events: impl Iterator<Item = shell_api::InputEvent>, out: &mut shell_api::Out) {
         self.tick_bookkeeping(now_secs, events, out);
 
+        self.console.tick_and_draw(&self.inputs, out).map(|cmd| self.exec_command(&cmd));
+
+        self.tick();
+
+        self.draw(out);
+    }
+
+    
+    fn tick(&mut self) {
         self.tick_manual_control();
-
         self.world.tick();
+    }
 
+    fn draw(&self, out: &mut Out) {
         out.draw_text(0, (0, 0), "hello");
         self.world.draw(out);
     }
-
+    
     fn tick_manual_control(&mut self) {
         let Some(crit0) = self.world.critters.get_mut(0) else { return };
 
@@ -74,7 +84,6 @@ impl AqState {
         TICK_FOR_LOGGING.store(self.tick, std::sync::atomic::Ordering::Relaxed);
 
         self.inputs.tick(&self.keymap, events);
-        self.console.tick_and_draw(&self.inputs, out).map(|cmd| self.exec_command(&cmd));
 
         for k in self.inputs.iter_just_pressed() {
             log::trace!("down: {k:?}");
@@ -102,7 +111,7 @@ impl Default for AqState {
 
 impl shell_api::GameCore for AqState {
     fn tick(&mut self, now_secs: f64, events: impl Iterator<Item = shell_api::InputEvent>, out: &mut shell_api::Out) {
-        self.tick(now_secs, events, out)
+        self.tick_and_draw(now_secs, events, out)
     }
 
     fn reset(&mut self) {}
