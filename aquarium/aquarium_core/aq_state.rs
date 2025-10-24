@@ -55,24 +55,28 @@ impl AqState {
 
 
     fn tick_manual_control(&mut self) {
-        let Some(crit0) = self.world.critters.get_mut(0) else { return };
 
+        let mut delta = vec2f::ZERO;
         if self.inputs.is_down(K_LEFT) {
-            crit0.head_pos += (-1.0, 0.0);
+           delta += (-1.0, 0.0);
         }
         if self.inputs.is_down(K_RIGHT) {
-            crit0.head_pos += (1.0, 0.0);
+            delta += (1.0, 0.0);
         }
         if self.inputs.is_down(K_DOWN) {
-            crit0.head_pos += (0.0, 1.0);
+            delta += (0.0, 1.0);
         }
         if self.inputs.is_down(K_UP) {
-            crit0.head_pos += (0.0, -1.0);
+            delta += (0.0, -1.0);
+        }
+
+
+        if let Some(body) = self.world.bodies.get_mut(0){
+            body.position += delta;
         }
     }
 
     fn draw(&self, out: &mut Out) {
-        out.draw_text(0, (0, 0), "hello");
         self.world.draw(out);
     }
 
