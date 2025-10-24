@@ -41,26 +41,19 @@ impl AqState {
     }
 
     fn tick_and_draw(&mut self, now_secs: f64, events: impl Iterator<Item = shell_api::InputEvent>, out: &mut shell_api::Out) {
-        self.tick_bookkeeping(now_secs, events, out);
+        self.update_inputs(now_secs, events);
 
         self.console.tick_and_draw(&self.inputs, out).map(|cmd| self.exec_command(&cmd));
+        if !self.console.active {
+            self.tick_manual_control();
+        }
 
-        self.tick();
+        self.world.tick();
 
         self.draw(out);
     }
 
-    
-    fn tick(&mut self) {
-        self.tick_manual_control();
-        self.world.tick();
-    }
 
-    fn draw(&self, out: &mut Out) {
-        out.draw_text(0, (0, 0), "hello");
-        self.world.draw(out);
-    }
-    
     fn tick_manual_control(&mut self) {
         let Some(crit0) = self.world.critters.get_mut(0) else { return };
 
@@ -78,7 +71,12 @@ impl AqState {
         }
     }
 
-    fn tick_bookkeeping(&mut self, now_secs: f64, events: impl Iterator<Item = InputEvent>, out: &mut Out) {
+    fn draw(&self, out: &mut Out) {
+        out.draw_text(0, (0, 0), "hello");
+        self.world.draw(out);
+    }
+
+    fn update_inputs(&mut self, now_secs: f64, events: impl Iterator<Item = InputEvent>) {
         self.now_secs = now_secs;
         self.tick += 1;
         TICK_FOR_LOGGING.store(self.tick, std::sync::atomic::Ordering::Relaxed);
@@ -96,6 +94,7 @@ impl AqState {
             Err(e) => self.console.print(format!("{e}")),
         }
     }
+
     fn exec_command_impl(&mut self, cmd: &str) -> Result<()> {
         match cmd.trim().split_ascii_whitespace().collect_vec().as_slice() {
             _ => Err(anyhow!("unknown command: {cmd:?}")),

@@ -113,10 +113,12 @@ name = "aquarium_core"
 version = "1.0.0"
 dependencies = [
  "anyhow",
+ "core_util",
  "fixed_str",
  "gamelib",
  "itertools",
  "log",
+ "matrix",
  "proc_macros",
  "serde",
  "shell_api",
