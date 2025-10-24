@@ -13,12 +13,11 @@ pub fn default_keybindings() -> Keymap {
         (button!("d"), K_CAM_DOWN),  //_
         (button!("f"), K_CAM_RIGHT), //_
         // Camera alt.
-        (button!("ArrowLeft"), K_CAM_LEFT),   //_
-        (button!("ArrowUp"), K_CAM_UP),       //_
-        (button!("ArrowDown"), K_CAM_DOWN),   //_
-        (button!("ArrowRight"), K_CAM_RIGHT), //_
+        (button!("arrowleft"), K_CAM_LEFT),   //_
+        (button!("arrowup"), K_CAM_UP),       //_
+        (button!("arrowdown"), K_CAM_DOWN),   //_
+        (button!("arrowright"), K_CAM_RIGHT), //_
         //
         (button!("tab"), K_CLI), // macroquad
-        (button!("Tab"), K_CLI), // JS
     ])
 }

@@ -4,6 +4,7 @@ use crate::prelude::*;
 pub struct AqState {
     pub now_secs: f64,
     pub tick: u64,
+    pub paused: bool,
 
     pub keymap: Keymap,
 
@@ -19,11 +20,11 @@ impl AqState {
     pub fn new() -> Self {
         let keymap = Keymap::from([
             (button!("tab"), K_CLI), // macroquad
-            (button!("Tab"), K_CLI), // JS
             (K_ARROW_DOWN, K_DOWN),
             (K_ARROW_LEFT, K_LEFT),
             (K_ARROW_RIGHT, K_RIGHT),
             (K_ARROW_UP, K_UP),
+            (K_SPACE, K_TICK),
         ]);
 
         let console = Console::with_hotkey(K_CLI);
@@ -33,6 +34,7 @@ impl AqState {
         Self {
             now_secs: 0.0,
             tick: 0,
+            paused: false,
             keymap,
             inputs: default(),
             console,
@@ -48,17 +50,17 @@ impl AqState {
             self.tick_manual_control();
         }
 
-        self.world.tick();
+        if !self.paused || self.inputs.is_down(K_TICK){
+            self.world.tick();
+        }
 
         self.draw(out);
     }
 
-
     fn tick_manual_control(&mut self) {
-
         let mut delta = vec2f::ZERO;
         if self.inputs.is_down(K_LEFT) {
-           delta += (-1.0, 0.0);
+            delta += (-1.0, 0.0);
         }
         if self.inputs.is_down(K_RIGHT) {
             delta += (1.0, 0.0);
@@ -70,8 +72,7 @@ impl AqState {
             delta += (0.0, -1.0);
         }
 
-
-        if let Some(body) = self.world.bodies.get_mut(0){
+        if let Some(body) = self.world.bodies.get_mut(0) {
             body.position += delta;
         }
     }
@@ -101,6 +102,7 @@ impl AqState {
 
     fn exec_command_impl(&mut self, cmd: &str) -> Result<()> {
         match cmd.trim().split_ascii_whitespace().collect_vec().as_slice() {
+            ["pause"] => Ok(toggle(&mut self.paused)),
             _ => Err(anyhow!("unknown command: {cmd:?}")),
         }
     }
@@ -120,4 +122,8 @@ impl shell_api::GameCore for AqState {
     fn reset(&mut self) {
         *self = Self::new()
     }
+}
+
+fn toggle(v: &mut bool) {
+    *v = !*v
 }

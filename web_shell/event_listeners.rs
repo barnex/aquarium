@@ -6,7 +6,9 @@ use crate::*;
 pub(crate) fn listen_keys(events: Shared<VecDeque<InputEvent>>) {
     let events_clone = events.clone();
     let keydown_closure = Closure::<dyn FnMut(_)>::new(move |event: KeyboardEvent| {
-        if let Ok(key) = Str16::from_str(&event.key()) {
+        // mapping to lowercase for consistency with macroquad.
+        let key = event.key().to_ascii_lowercase();
+        if let Ok(key) = Str16::from_str(&key) {
             events_clone.borrow_mut().push_back(InputEvent::Key { button: Button(key), direction: KeyDir::Down });
         }
         if let Some(chr) = event_to_chr(event) {

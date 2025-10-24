@@ -13,15 +13,18 @@ pub const K_BACKSPACE: Button = button!("backspace");
 pub const K_ESC: Button = button!("escape");
 pub const K_ENTER: Button = button!("enter");
 
-pub const K_ARROW_LEFT: Button = button!("ArrowLeft");
-pub const K_ARROW_UP: Button = button!("ArrowUp");
-pub const K_ARROW_DOWN: Button = button!("ArrowDown");
-pub const K_ARROW_RIGHT: Button = button!("ArrowRight");
+pub const K_ARROW_LEFT: Button = button!("arrowleft");
+pub const K_ARROW_UP: Button = button!("arrowup");
+pub const K_ARROW_DOWN: Button = button!("arrowdown");
+pub const K_ARROW_RIGHT: Button = button!("arrowright");
 
 pub const K_LEFT: Button = button!("left");
 pub const K_UP: Button = button!("up");
 pub const K_DOWN: Button = button!("down");
 pub const K_RIGHT: Button = button!("right");
+
+pub const K_SPACE: Button = button!("space");
+pub const K_TICK: Button = button!("tick");
 
 /// Constructor with compile-time size check (name fits `Str16`)
 /// E.g. `button!("Mouse1")`.
