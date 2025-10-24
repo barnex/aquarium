@@ -117,5 +117,7 @@ impl shell_api::GameCore for AqState {
         self.tick_and_draw(now_secs, events, out)
     }
 
-    fn reset(&mut self) {}
+    fn reset(&mut self) {
+        *self = Self::new()
+    }
 }

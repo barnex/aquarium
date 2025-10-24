@@ -74,6 +74,7 @@ pub(crate) fn draw(canvas: &HtmlCanvasElement, ctx: &CanvasRenderingContext2d, r
 
         // ╱ lines
         for line in lines {
+            // TODO: need 0.5 pix offset
             ctx.begin_path();
             ctx.set_stroke_style_str(&line.color.hex());
             ctx.set_line_width(line.width.as_());
