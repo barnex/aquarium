@@ -3,6 +3,7 @@ pub use gamelib::*;
 pub use proc_macros::*;
 pub use shell_api::*;
 pub use vector::*;
+pub use core_util::With as _;
 
 pub use serde::{Deserialize, Serialize};
 pub use itertools::Itertools as _;

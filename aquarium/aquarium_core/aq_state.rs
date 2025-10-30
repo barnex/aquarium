@@ -50,7 +50,7 @@ impl AqState {
             self.tick_manual_control();
         }
 
-        if !self.paused || self.inputs.is_down(K_TICK){
+        if !self.paused || self.inputs.is_down(K_TICK) {
             self.world.tick();
         }
 
@@ -72,8 +72,8 @@ impl AqState {
             delta += (0.0, -1.0);
         }
 
-        if let Some(body) = self.world.bodies.get_mut(0) {
-            body.position += delta;
+        if let Some(b) = self.world.bones.get_mut(0) {
+            b.body.position += delta;
         }
     }
 
