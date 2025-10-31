@@ -18,6 +18,7 @@ proc_macros = { workspace = true }
 serde = { workspace = true }
 shell_api = { workspace = true }
 vector = { workspace = true }
+fnv = { workspace = true }
 
 [profile.dev]
 debug = "line-tables-only"

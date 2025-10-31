@@ -89,7 +89,7 @@ impl AqState {
         self.inputs.tick(&self.keymap, events);
 
         for k in self.inputs.iter_just_pressed() {
-            log::trace!("down: {k:?}");
+            log::trace!("just pressed: {k:?}");
         }
     }
 

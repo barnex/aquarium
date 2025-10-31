@@ -115,6 +115,7 @@ dependencies = [
  "anyhow",
  "core_util",
  "fixed_str",
+ "fnv",
  "gamelib",
  "itertools",
  "log",

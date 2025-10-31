@@ -3,6 +3,7 @@ use crate::prelude::*;
 #[derive(Serialize, Deserialize)]
 pub struct World {
     pub bones: Vec<Bone>,
+    //pub springs: Vec<Spring>,
 }
 
 impl World {
@@ -10,10 +11,10 @@ impl World {
         let mass = 1.0;
         let rot_inertia = 1.0;
         let len = 60.0;
-        let leg1 = Bone::new(mass, rot_inertia, len).with(|v| v.body.position = vec2f(50.0, 50.0));
-        let leg2 = RigidBody::new(mass, rot_inertia).with(|v| v.position = vec2f(20.0, 0.0)).with(|v| v.velocity = vec2f(3.0, 0.0));
+        let leg1 = Bone::new(mass, rot_inertia, len).with(|v| v.body.position = vec2f(70.0, 50.0));
+        let leg2 = Bone::new(mass, rot_inertia, len).with(|v| v.body.position = vec2f(20.0, 40.0));
 
-        Self { bones: vec![leg1] }
+        Self { bones: vec![leg1, leg2] }
     }
 
     pub(crate) fn draw(&self, out: &mut Out) {
@@ -25,14 +26,33 @@ impl World {
     }
 
     pub(crate) fn tick(&mut self) {
+        for _i in 0..10{
+            self.minor_tick();
+        }
+    }
+
+    pub(crate) fn minor_tick(&mut self) {
         //self.critters.iter_mut().for_each(Critter::tick);
         let dt = 0.01;
-        let force = vec2f(0.0, 1.0);
+        let mut force = vec2f(0.0, 0.0);
         let torque = 0.0;
         let can_walk = |pos: vec2f| pos.y() < 200.0;
 
-        for _i in 0..10 {
-            self.bones.iter_mut().for_each(|b| b.body.tick(dt, force, torque, can_walk));
+
+        for i in 0..self.bones.len(){
+
+
+            let b = &self.bones[i];
+            if i == 1{
+                let neigh = self.bones[0].body.position;
+
+                let delta = (neigh - b.body.position).normalized();
+                force += delta;
+            }
+
+            let b = &mut self.bones[i];
+
+            b.body.tick(dt, force, torque, can_walk);
         }
     }
 }
