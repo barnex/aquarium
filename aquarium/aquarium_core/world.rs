@@ -9,12 +9,12 @@ pub struct World {
 impl World {
     pub(crate) fn test() -> Self {
         let mass = 1.0;
-        let rot_inertia = 1.0;
+        let rot_inertia = 4.0;
         let len = 60.0;
         let leg1 = Bone::new(mass, rot_inertia, len).with(|v| v.body.position = vec2f(70.0, 50.0));
-        let leg2 = Bone::new(mass, rot_inertia, len).with(|v| v.body.position = vec2f(20.0, 40.0));
+        let bones = (0..20).map(|i| Bone::new(mass, rot_inertia, len).with(|v| v.body.position = vec2f(-(i as f32) * len, 50.0))).collect();
 
-        Self { bones: vec![leg1, leg2] }
+        Self { bones }
     }
 
     pub(crate) fn draw(&self, out: &mut Out) {
@@ -26,35 +26,47 @@ impl World {
     }
 
     pub(crate) fn tick(&mut self) {
-        for _i in 0..10{
+        for _i in 0..50 {
             self.minor_tick();
         }
     }
 
     pub(crate) fn minor_tick(&mut self) {
         //self.critters.iter_mut().for_each(Critter::tick);
-        let dt = 0.01;
-        let mut force = vec2f(0.0, 0.0);
-        let torque = 0.0;
+        let dt = 0.02;
         let can_walk = |pos: vec2f| pos.y() < 200.0;
 
-
-        for i in 0..self.bones.len(){
-
+        for i in 0..self.bones.len() {
+            let mut force = vec2f(0.0, 0.0);
+            let mut torque = 0.0;
 
             let b = &self.bones[i];
-            if i == 1{
-                let neigh = self.bones[0].body.position;
 
-                let delta = (neigh - b.body.position).normalized();
-                force += delta;
+            if i > 0 {
+                let anchor1 = vec2(-b.len / 2.0, 0.0);
+                let anchor2 = vec2(b.len / 2.0, 0.0);
+                let neigh = self.bones[i - 1].body.transform_rel_pos(anchor1);
+                let k = 0.02;
+                let spring_force = k * (neigh - b.body.transform_rel_pos(anchor2));
+
+                torque += -0.03 * cross(b.body.transform_vector(anchor2), spring_force); // LEFT HANDED !!
+                //log::trace!("torque: {torque}");
+
+                force += spring_force;
             }
 
             let b = &mut self.bones[i];
 
-            b.body.tick(dt, force, torque, can_walk);
+            b.body.tick(dt, force, torque);
+
+            b.body.velocity *= 0.99;
+            b.body.rot_velocity *= 0.99;
         }
     }
+}
+
+fn cross(a: vec2f, b: vec2f) -> f32 {
+    a.x() * b.y() - a.y() * b.x()
 }
 
 fn draw_bone(out: &mut Out, bone: &Bone) {

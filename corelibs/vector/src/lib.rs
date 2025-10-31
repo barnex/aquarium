@@ -1067,10 +1067,17 @@ where
     /// ```
     /// # use vector::*;
     /// assert_eq!(vec3(1,0,0).cross(vec3(0,1,0)), vec3(0,0,1));
+    /// assert_eq!(vec3(0,1,0).cross(vec3(0,0,1)), vec3(1,0,0));
+    /// assert_eq!(vec3(0,0,1).cross(vec3(0,1,0)), vec3(-1,0,0));
     /// ```
     #[inline]
     pub fn cross(self, rhs: Self) -> Self {
-        Self([self.y() * rhs.z() - self.z() * rhs.y(), self.z() * rhs.x() - self.x() * rhs.z(), self.x() * rhs.y() - self.y() * rhs.x()])
+        Self([
+            //_
+            self.y() * rhs.z() - self.z() * rhs.y(),
+            self.z() * rhs.x() - self.x() * rhs.z(),
+            self.x() * rhs.y() - self.y() * rhs.x(),
+        ])
     }
 }
 

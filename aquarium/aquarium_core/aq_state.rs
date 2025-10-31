@@ -73,7 +73,7 @@ impl AqState {
         }
 
         if let Some(b) = self.world.bones.get_mut(0) {
-            b.body.position += delta;
+            b.body.position += 0.5*delta;
         }
     }
 

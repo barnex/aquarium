@@ -52,7 +52,28 @@ impl RigidBody {
         }
     }
 
-    pub fn tick(&mut self, dt: f32, force: vec2f, torque: f32, can_walk: impl Fn(vec2f) -> bool) {
+    pub fn tick(&mut self, dt: f32, force: vec2f, torque: f32) {
+        self.acceleration = force / self.mass;
+        self.velocity += dt * self.acceleration;
+
+        //self.set_velocity((1.0 - dt * gs.linear_damping()) * self.velocity);
+        let delta_pos = dt * self.velocity;
+        self.position += delta_pos;
+
+        // rotation
+        self.rot_accel = torque / self.rot_inertia;
+        self.rot_velocity += dt * self.rot_accel;
+        let mut theta = self.rotation;
+        theta += dt * self.rot_velocity;
+        if theta > PI {
+            theta -= 2.0 * PI;
+        } else if theta < -PI {
+            theta += 2.0 * PI;
+        }
+        self.rotation = theta;
+
+    }
+    pub fn tick_old(&mut self, dt: f32, force: vec2f, torque: f32, can_walk: impl Fn(vec2f) -> bool) {
         // translation
         self.acceleration = force / self.mass;
         self.velocity += dt * force / self.mass;
