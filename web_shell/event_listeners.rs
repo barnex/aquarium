@@ -7,8 +7,7 @@ pub(crate) fn listen_keys(events: Shared<VecDeque<InputEvent>>) {
     let events_clone = events.clone();
     let keydown_closure = Closure::<dyn FnMut(_)>::new(move |event: KeyboardEvent| {
         // mapping to lowercase for consistency with macroquad.
-        let key = event.key().to_ascii_lowercase();
-        if let Ok(key) = Str16::from_str(&key) {
+        if let Ok(key) = Str16::from_str(&event.key().to_ascii_lowercase()) {
             events_clone.borrow_mut().push_back(InputEvent::Key { button: Button(key), direction: KeyDir::Down });
         }
         if let Some(chr) = event_to_chr(event) {
@@ -18,7 +17,7 @@ pub(crate) fn listen_keys(events: Shared<VecDeque<InputEvent>>) {
 
     let events_clone = events.clone();
     let keyup_closure = Closure::<dyn FnMut(_)>::new(move |event: KeyboardEvent| {
-        if let Ok(key) = Str16::from_str(&event.key()) {
+        if let Ok(key) = Str16::from_str(&event.key().to_ascii_lowercase()) {
             events_clone.borrow_mut().push_back(InputEvent::Key { button: Button(key), direction: KeyDir::Up });
         }
     });
@@ -36,7 +35,7 @@ pub(crate) fn listen_keys(events: Shared<VecDeque<InputEvent>>) {
 fn event_to_chr(event: KeyboardEvent) -> Option<char> {
     // ⚠️ This is an approximate hack but otherwise extremely tricky in JS.
     // Would require shenanigans like a hidden input element that steals focus from canvas.
-    log::info!("key {}", event.key());
+    //log::info!("key {}", event.key());
     match event.key().as_str() {
         chr if chr.len() == 1 => chr.chars().next(),
         "Backspace" => Some('\u{0008}'),
