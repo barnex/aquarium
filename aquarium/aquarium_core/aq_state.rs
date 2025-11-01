@@ -13,7 +13,7 @@ pub struct AqState {
 
     pub console: Console,
 
-    pub world: Assembly,
+    pub contraptions: Vec<Assembly>,
 
     // filter for smooth manual control
     manual_ctl: [vec2f; 3],
@@ -32,7 +32,7 @@ impl AqState {
 
         let console = Console::with_hotkey(K_CLI);
 
-        let world = Assembly::test(60);
+        let contraptions = vec![Assembly::rope(60), Assembly::rope(20)];
 
         Self {
             now_secs: 0.0,
@@ -41,7 +41,7 @@ impl AqState {
             keymap,
             inputs: default(),
             console,
-            world,
+            contraptions,
             manual_ctl: default(),
         }
     }
@@ -55,7 +55,7 @@ impl AqState {
         }
 
         if !self.paused || self.inputs.is_down(K_TICK) {
-            self.world.tick();
+            self.contraptions.iter_mut().for_each(|v| v.tick());
         }
 
         self.draw(out);
@@ -82,17 +82,19 @@ impl AqState {
         }
 
         let speed = 1.0;
-        if let Some(b) = self.world.bones.get_mut(0) {
-            //b.body.position += speed * delta;
-            //b.body.velocity = speed * delta;
-            //b.body.position = self.inputs.mouse_position().as_();
-            b.position = self.manual_ctl.last().copied().unwrap();
+        if let Some(c) = self.contraptions.get_mut(0) {
+            if let Some(b) = c.bones.get_mut(0) {
+                //b.body.position += speed * delta;
+                //b.body.velocity = speed * delta;
+                //b.body.position = self.inputs.mouse_position().as_();
+                b.position = self.manual_ctl.last().copied().unwrap();
+            }
         }
     }
 
     fn draw(&self, out: &mut Out) {
         draw_background(out);
-        self.world.draw(out);
+        self.contraptions.iter().for_each(|v|v.draw(out));
     }
 
     fn update_inputs(&mut self, now_secs: f64, events: impl Iterator<Item = InputEvent>) {
@@ -118,12 +120,12 @@ impl AqState {
         match cmd.trim().split_ascii_whitespace().collect_vec().as_slice() {
             ["pause"] => Ok(toggle(&mut self.paused)),
             ["reset"] => Ok(self.reset()),
-            ["n", n] => Ok(self.world = Assembly::test(n.parse()?)),
-            ["g", g] => Ok(self.world.g = g.parse()?),
-            ["k", k] => Ok({
-                let k = k.parse()?;
-                self.world.springs.iter_mut().for_each(|s| s.k = k)
-            }),
+            //["n", n] => Ok(self.world = Assembly::rope(n.parse()?)),
+            //["g", g] => Ok(self.world.g = g.parse()?),
+            //["k", k] => Ok({
+            //    let k = k.parse()?;
+            //    self.world.springs.iter_mut().for_each(|s| s.k = k)
+            //}),
             _ => Err(anyhow!("unknown command: {cmd:?}")),
         }
     }

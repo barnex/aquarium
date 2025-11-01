@@ -10,18 +10,14 @@ pub struct Assembly {
 }
 
 impl Assembly {
-    pub(crate) fn test(n: usize) -> Self {
+    pub fn rope(n: usize) -> Self {
         let mass = 1.0;
         let rot_inertia = 300.0;
         let bone_len = 5.0;
-        //let leg1 = Bone::new(mass, rot_inertia, len).with(|v| v.body.position = vec2f(70.0, 50.0));
 
-        let mut bones = (0..n).map(|i| RigidBody::new(mass, rot_inertia).with(|v| v.position = vec2f(600.0 - (i as f32) * bone_len, 150.0))).collect_vec();
+        let bones = (0..n).map(|i| RigidBody::new(mass, rot_inertia).with(|v| v.position = vec2f(600.0 - (i as f32) * bone_len, 150.0))).collect_vec();
 
-        bones[0].mass = 10.0;
-
-        let mut springs = (0..(bones.len()))
-            //.circular_tuple_windows()
+        let springs = (0..(bones.len()))
             .tuple_windows()
             .map(|(ia, ib)| Spring {
                 ia,
@@ -32,9 +28,7 @@ impl Assembly {
             })
             .collect_vec();
 
-        //springs[0].anchor_a = vec2(0.0, 0.0);
-
-        Self { bone_len, bones, springs, g: 0.01 }
+        Self { bone_len, bones, springs, g: 0.0 }
     }
 
     pub fn draw(&self, out: &mut Out) {
