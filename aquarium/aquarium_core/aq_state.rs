@@ -13,7 +13,7 @@ pub struct AqState {
 
     pub console: Console,
 
-    pub contraptions: Vec<Assembly>,
+    pub contraptions: Vec<Contraption>,
 
     // filter for smooth manual control
     manual_ctl: [vec2f; 3],
@@ -32,7 +32,7 @@ impl AqState {
 
         let console = Console::with_hotkey(K_CLI);
 
-        let contraptions = vec![Assembly::rope(60), Assembly::rope(20)];
+        let contraptions = vec![Contraption::rope(60), Contraption::rope(20)];
 
         Self {
             now_secs: 0.0,
@@ -94,7 +94,7 @@ impl AqState {
 
     fn draw(&self, out: &mut Out) {
         draw_background(out);
-        self.contraptions.iter().for_each(|v|v.draw(out));
+        self.contraptions.iter().for_each(|v| v.draw(out));
     }
 
     fn update_inputs(&mut self, now_secs: f64, events: impl Iterator<Item = InputEvent>) {
@@ -120,12 +120,13 @@ impl AqState {
         match cmd.trim().split_ascii_whitespace().collect_vec().as_slice() {
             ["pause"] => Ok(toggle(&mut self.paused)),
             ["reset"] => Ok(self.reset()),
+            ["s", s] => Ok(self.contraptions.get_mut(0).ok_or_else(not_found)?.stiffness = s.parse()?),
             //["n", n] => Ok(self.world = Assembly::rope(n.parse()?)),
-            //["g", g] => Ok(self.world.g = g.parse()?),
-            //["k", k] => Ok({
-            //    let k = k.parse()?;
-            //    self.world.springs.iter_mut().for_each(|s| s.k = k)
-            //}),
+            ["g", g] => Ok(self.contraptions.get_mut(0).ok_or_else(not_found)?.g = g.parse()?),
+            ["k", k] => Ok({
+                let k = k.parse()?;
+                self.contraptions.get_mut(0).ok_or_else(not_found)?.springs.iter_mut().for_each(|s| s.k = k)
+            }),
             _ => Err(anyhow!("unknown command: {cmd:?}")),
         }
     }
@@ -171,4 +172,8 @@ fn draw_background(out: &mut Out) {
     let (w, h) = out.viewport_size.as_i32().into();
     let bg = [0, 0, 80];
     out.draw_rect_screen(0, Rectangle::from((((0, 0), (w, h)), bg)).with_fill(bg));
+}
+
+fn not_found() -> Error {
+    anyhow!("does not exist")
 }

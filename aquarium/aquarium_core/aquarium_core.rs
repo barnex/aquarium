@@ -3,9 +3,9 @@ pub(crate) mod prelude;
 mod aq_state;
 mod critter;
 mod physics2d;
-mod assembly;
+mod contraption;
 
 pub use aq_state::*;
 pub use critter::*;
 pub use physics2d::*;
-pub use assembly::*;
+pub use contraption::*;

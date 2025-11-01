@@ -2,18 +2,19 @@ use crate::prelude::*;
 
 /// A contraption made of rigid bodies connected via springs.
 #[derive(Serialize, Deserialize)]
-pub struct Assembly {
+pub struct Contraption {
     pub g: f32,
     pub bones: Vec<RigidBody>,
     pub bone_len: f32,
+    pub stiffness: f32,
     pub springs: Vec<Spring>,
 }
 
-impl Assembly {
+impl Contraption {
     pub fn rope(n: usize) -> Self {
         let mass = 1.0;
         let rot_inertia = 300.0;
-        let bone_len = 5.0;
+        let bone_len = 10.0;
 
         let bones = (0..n).map(|i| RigidBody::new(mass, rot_inertia).with(|v| v.position = vec2f(600.0 - (i as f32) * bone_len, 150.0))).collect_vec();
 
@@ -28,7 +29,7 @@ impl Assembly {
             })
             .collect_vec();
 
-        Self { bone_len, bones, springs, g: 0.0 }
+        Self { bone_len, bones, springs, g: 0.0, stiffness: 50.0 }
     }
 
     pub fn draw(&self, out: &mut Out) {
@@ -42,7 +43,7 @@ impl Assembly {
     }
 
     pub(crate) fn tick(&mut self) {
-        for _i in 0..40 {
+        for _i in 0..10 {
             self.minor_tick();
         }
     }
@@ -53,7 +54,7 @@ impl Assembly {
     }
 
     fn verlet_tick(&mut self) {
-        let dt = 0.01;
+        let dt = 0.03;
 
         //                                                      <-----<--------
         //self.bones[0].body.position = vec2(600.0, 150.0); //                   ^
@@ -97,7 +98,7 @@ impl Assembly {
 
             let dir_a = self.bones[ia].transform_vector(vec2::EX);
             let dir_b = self.bones[ib].transform_vector(vec2::EX);
-            let restore = 10.0 * cross(dir_b, dir_a).powi(3);
+            let restore = self.stiffness * cross(dir_b, dir_a);
 
             let torque_a = torque_a + restore;
             let torque_b = torque_b - restore;
