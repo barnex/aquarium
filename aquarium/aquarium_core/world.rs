@@ -62,43 +62,23 @@ impl World {
     }
 
     pub(crate) fn minor_tick(&mut self) {
+        self.update_forces();
+        self.verlet_tick();
+    }
+
+    fn verlet_tick(&mut self) {
         let dt = 0.05;
 
-        self.update_velocity_half(dt);
-        self.update_positions(dt);
-
-        self.update_forces();
-        self.update_accell();
-
-        self.update_velocity(dt);
-
-        self.dampen();
-
-        self.bones[0].body.position = vec2(600.0, 150.0);
-    }
-
-    fn update_velocity(&mut self, dt: f32) {
-        for b in &mut self.bones {
-            b.body.update_velocity(dt);
-        }
-    }
-
-    fn update_velocity_half(&mut self, dt: f32) {
-        for b in &mut self.bones {
-            b.body.update_velocity_half(dt);
-        }
-    }
-
-    fn update_accell(&mut self) {
-        for b in &mut self.bones {
-            b.body.update_accel();
-        }
-    }
-
-    fn update_positions(&mut self, dt: f32) {
-        for b in &mut self.bones {
-            b.body.update_position(dt);
-        }
+        //                                                      <-----<--------
+        self.bones[0].body.position = vec2(600.0, 150.0); //                   ^
+        self.bones.iter_mut().for_each(|b| b.body.update_accel()); //          |
+        self.bones.iter_mut().for_each(|b| b.body.update_velocity(dt)); //     |
+        self.dampen(); //                                                      |
+        //                                                                     ^
+        // logically, the cycle starts here:                                   |
+        self.bones.iter_mut().for_each(|b| b.body.update_velocity_half(dt)); //|
+        self.bones.iter_mut().for_each(|b| b.body.update_position(dt)); //     |
+        //                                                       >------>------^
     }
 
     fn dampen(&mut self) {
