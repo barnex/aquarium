@@ -72,8 +72,10 @@ impl AqState {
             delta += (0.0, -1.0);
         }
 
+        let speed = 1.0;
         if let Some(b) = self.world.bones.get_mut(0) {
-            b.body.position += 0.5*delta;
+            b.body.position += speed * delta;
+            b.body.velocity =  speed*delta;
         }
     }
 

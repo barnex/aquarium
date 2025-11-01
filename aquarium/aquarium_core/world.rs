@@ -3,18 +3,44 @@ use crate::prelude::*;
 #[derive(Serialize, Deserialize)]
 pub struct World {
     pub bones: Vec<Bone>,
-    //pub springs: Vec<Spring>,
+    pub springs: Vec<Spring>,
+}
+
+#[derive(Serialize, Deserialize)]
+pub struct Spring {
+    pub ia: usize,
+    pub ib: usize,
+    pub anchor_a: vec2f,
+    pub anchor_b: vec2f,
+    pub k: f32,
 }
 
 impl World {
     pub(crate) fn test() -> Self {
         let mass = 1.0;
-        let rot_inertia = 4.0;
+        let rot_inertia = 100.0;
         let len = 60.0;
-        let leg1 = Bone::new(mass, rot_inertia, len).with(|v| v.body.position = vec2f(70.0, 50.0));
-        let bones = (0..20).map(|i| Bone::new(mass, rot_inertia, len).with(|v| v.body.position = vec2f(-(i as f32) * len, 50.0))).collect();
+        //let leg1 = Bone::new(mass, rot_inertia, len).with(|v| v.body.position = vec2f(70.0, 50.0));
 
-        Self { bones }
+        let n = 20;
+        let mut bones = (0..n).map(|i| Bone::new(mass, rot_inertia, len).with(|v| v.body.position = vec2f(200.0 - (i as f32) * len, 50.0))).collect_vec();
+
+        bones[0].len = 0.001;
+
+        let mut springs = (0..(bones.len()))
+            .tuple_windows()
+            .map(|(ia, ib)| Spring {
+                ia,
+                ib,
+                anchor_a: vec2(-len / 2.0, 0.0),
+                anchor_b: vec2(len / 2.0, 0.0),
+                k: 0.02,
+            })
+            .collect_vec();
+
+        springs[0].anchor_a = vec2(0.0, 0.0);
+
+        Self { bones, springs }
     }
 
     pub(crate) fn draw(&self, out: &mut Out) {
@@ -23,22 +49,59 @@ impl World {
         for b in &self.bones {
             draw_bone(out, b)
         }
+
+        for s in 0..self.springs.len() {
+            self.draw_spring(out, s)
+        }
     }
 
     pub(crate) fn tick(&mut self) {
-        for _i in 0..50 {
+        for _i in 0..60 {
             self.minor_tick();
         }
     }
 
     pub(crate) fn minor_tick(&mut self) {
+        let dt = 0.05;
+
+        for bone in &mut self.bones {
+            bone.body.force = default();
+            bone.body.torque = default();
+        }
+
+        for spring in &self.springs {
+            let ia = spring.ia;
+            let ib = spring.ib;
+
+            let anchor_a = self.bones[ia].body.transform_rel_pos(spring.anchor_a);
+            let anchor_b = self.bones[ib].body.transform_rel_pos(spring.anchor_b);
+
+            let force_a = spring.k * (anchor_b - anchor_a);
+            let force_b = -force_a;
+
+            let torque_a = -cross(self.bones[ia].body.transform_vector(spring.anchor_a), force_a); // LEFT HANDED !!
+            let torque_b = -cross(self.bones[ib].body.transform_vector(spring.anchor_b), force_b); // LEFT HANDED !!
+
+            self.bones[ia].body.torque += torque_a;
+            self.bones[ib].body.torque += torque_b;
+
+            self.bones[ia].body.force += force_a;
+            self.bones[ib].body.force += force_b;
+        }
+
+        for b in &mut self.bones {
+            b.body.tick(dt);
+            b.body.velocity *= 0.996;
+            b.body.rot_velocity *= 0.996;
+        }
+    }
+
+    pub(crate) fn minor_tick_OLD(&mut self) {
         //self.critters.iter_mut().for_each(Critter::tick);
         let dt = 0.02;
         let can_walk = |pos: vec2f| pos.y() < 200.0;
 
         for i in 0..self.bones.len() {
-
-
             self.bones[i].body.force = vec2f(0.0, 0.0);
             self.bones[i].body.torque = 0.0;
 
@@ -66,6 +129,19 @@ impl World {
             b.body.velocity *= 0.99;
             b.body.rot_velocity *= 0.99;
         }
+    }
+
+    fn draw_spring(&self, out: &mut Out, i: usize) {
+        let spring = &self.springs[i];
+        let color = RGBA::RED;
+
+        let ia = spring.ia;
+        let ib = spring.ib;
+
+        let anchor_a = self.bones[ia].body.transform_rel_pos(spring.anchor_a);
+        let anchor_b = self.bones[ib].body.transform_rel_pos(spring.anchor_b);
+
+        out.draw_line_screen(L_SPRITES, Line::new(anchor_a.as_(), anchor_b.as_()).with_color(color));
     }
 }
 
