@@ -20,16 +20,17 @@ impl World {
     pub(crate) fn test() -> Self {
         let mass = 1.0;
         let rot_inertia = 300.0;
-        let len = 20.0;
+        let len = 10.0;
         //let leg1 = Bone::new(mass, rot_inertia, len).with(|v| v.body.position = vec2f(70.0, 50.0));
 
         let n = 50;
         let mut bones = (0..n).map(|i| Bone::new(mass, rot_inertia, len).with(|v| v.body.position = vec2f(600.0 - (i as f32) * len, 150.0))).collect_vec();
 
-        bones[0].len = 0.001;
-        bones[0].body.mass = 100000.0;
+        //bones[0].len = 0.001;
+        bones[0].body.mass = 10000.0;
 
         let mut springs = (0..(bones.len()))
+            //.circular_tuple_windows()
             .tuple_windows()
             .map(|(ia, ib)| Spring {
                 ia,
@@ -40,9 +41,9 @@ impl World {
             })
             .collect_vec();
 
-        springs[0].anchor_a = vec2(0.0, 0.0);
+        //springs[0].anchor_a = vec2(0.0, 0.0);
 
-        Self { bones, springs, g: 0.04 }
+        Self { bones, springs, g: 0.01 }
     }
 
     pub(crate) fn draw(&self, out: &mut Out) {
@@ -69,7 +70,7 @@ impl World {
     }
 
     fn verlet_tick(&mut self) {
-        let dt = 0.02;
+        let dt = 0.01;
 
         //                                                      <-----<--------
         //self.bones[0].body.position = vec2(600.0, 150.0); //                   ^
@@ -111,11 +112,20 @@ impl World {
             let torque_a = -cross(self.bones[ia].body.transform_vector(spring.anchor_a), force_a); // LEFT HANDED !!
             let torque_b = -cross(self.bones[ib].body.transform_vector(spring.anchor_b), force_b); // LEFT HANDED !!
 
+            let dir_a = self.bones[ia].body.transform_vector(vec2::EX);
+            let dir_b = self.bones[ib].body.transform_vector(vec2::EX);
+            let restore = 10.0*cross(dir_b, dir_a).powi(3);
+
+            let torque_a = torque_a + restore;
+            let torque_b = torque_b - restore;
+
             self.bones[ia].body.torque += torque_a;
             self.bones[ib].body.torque += torque_b;
 
             self.bones[ia].body.force += force_a;
             self.bones[ib].body.force += force_b;
+
+            // laplacian
         }
     }
 
