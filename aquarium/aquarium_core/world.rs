@@ -7,26 +7,17 @@ pub struct World {
     pub springs: Vec<Spring>,
 }
 
-#[derive(Serialize, Deserialize)]
-pub struct Spring {
-    pub ia: usize,
-    pub ib: usize,
-    pub anchor_a: vec2f,
-    pub anchor_b: vec2f,
-    pub k: f32,
-}
 
 impl World {
     pub(crate) fn test(n: usize) -> Self {
         let mass = 1.0;
         let rot_inertia = 300.0;
-        let len = 10.0;
+        let len = 5.0;
         //let leg1 = Bone::new(mass, rot_inertia, len).with(|v| v.body.position = vec2f(70.0, 50.0));
 
         let mut bones = (0..n).map(|i| Bone::new(mass, rot_inertia, len).with(|v| v.body.position = vec2f(600.0 - (i as f32) * len, 150.0))).collect_vec();
 
-        //bones[0].len = 0.001;
-        bones[0].body.mass = 10000.0;
+        bones[0].body.mass = 10.0;
 
         let mut springs = (0..(bones.len()))
             //.circular_tuple_windows()
