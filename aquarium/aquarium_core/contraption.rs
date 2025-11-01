@@ -13,8 +13,9 @@ pub struct Contraption {
 impl Contraption {
     pub fn rope(n: usize) -> Self {
         let mass = 1.0;
-        let rot_inertia = 300.0;
-        let bone_len = 10.0;
+        let bone_len = 15.0f32;
+
+        let rot_inertia = mass * bone_len.powi(2); // approx. Ideally should be chosen so that rotational and translational frequencies are equal (for most efficient time step).
 
         let bones = (0..n).map(|i| RigidBody::new(mass, rot_inertia).with(|v| v.position = vec2f(600.0 - (i as f32) * bone_len, 150.0))).collect_vec();
 
@@ -29,7 +30,13 @@ impl Contraption {
             })
             .collect_vec();
 
-        Self { bone_len, bones, springs, g: 0.0, stiffness: 50.0 }
+        Self {
+            bone_len,
+            bones,
+            springs,
+            g: 0.0,
+            stiffness: 50.0,
+        }
     }
 
     pub fn draw(&self, out: &mut Out) {
@@ -84,38 +91,40 @@ impl Contraption {
         }
 
         for spring in &self.springs {
-            let ia = spring.ia;
-            let ib = spring.ib;
+            // the two bones connected by the spring
+            let Ok([bone_a, bone_b]) = self.bones.get_disjoint_mut([spring.ia, spring.ib]) else { panic!("self-connected spring") };
 
-            let anchor_a = self.bones[ia].transform_rel_pos(spring.anchor_a);
-            let anchor_b = self.bones[ib].transform_rel_pos(spring.anchor_b);
+            // positions of spring ends
+            let anchor_a = bone_a.transform_rel_pos(spring.anchor_a);
+            let anchor_b = bone_b.transform_rel_pos(spring.anchor_b);
 
+            // spring forces on both bones (via spring constant k)
             let force_a = spring.k * (anchor_b - anchor_a);
             let force_b = -force_a;
 
-            let torque_a = -cross(self.bones[ia].transform_vector(spring.anchor_a), force_a); // LEFT HANDED !!
-            let torque_b = -cross(self.bones[ib].transform_vector(spring.anchor_b), force_b); // LEFT HANDED !!
+            // torques exerted by spring forces
+            let torque_a = -cross(bone_a.transform_vector(spring.anchor_a), force_a); // LEFT HANDED !!
+            let torque_b = -cross(bone_b.transform_vector(spring.anchor_b), force_b); // LEFT HANDED !!
 
-            let dir_a = self.bones[ia].transform_vector(vec2::EX);
-            let dir_b = self.bones[ib].transform_vector(vec2::EX);
+            // additional torque that tries to straighten out the connection (via stiffness).
+            let dir_a = bone_a.transform_vector(vec2::EX);
+            let dir_b = bone_b.transform_vector(vec2::EX);
             let restore = self.stiffness * cross(dir_b, dir_a);
-
             let torque_a = torque_a + restore;
             let torque_b = torque_b - restore;
 
-            self.bones[ia].torque += torque_a;
-            self.bones[ib].torque += torque_b;
+            // finally, add this spring's forces and torques to the bones
+            bone_a.torque += torque_a;
+            bone_b.torque += torque_b;
 
-            self.bones[ia].force += force_a;
-            self.bones[ib].force += force_b;
-
-            // laplacian
+            bone_a.force += force_a;
+            bone_b.force += force_b;
         }
     }
 
     fn draw_spring(&self, out: &mut Out, i: usize) {
         let spring = &self.springs[i];
-        let color = RGBA::YELLOW;
+        let color = RGBA::RED;
 
         let ia = spring.ia;
         let ib = spring.ib;
@@ -123,7 +132,7 @@ impl Contraption {
         let anchor_a = self.bones[ia].transform_rel_pos(spring.anchor_a);
         let anchor_b = self.bones[ib].transform_rel_pos(spring.anchor_b);
 
-        out.draw_line_screen(L_SPRITES, Line::new(anchor_a.as_(), anchor_b.as_()).with_color(color).with_width(3));
+        out.draw_line_screen(L_SPRITES, Line::new(anchor_a.as_(), anchor_b.as_()).with_color(color).with_width(2));
     }
 
     fn draw_bone(&self, out: &mut Out, bone: &RigidBody) {
