@@ -32,6 +32,21 @@ pub fn inverse_bloom(canvas: &HtmlCanvasElement, context: &CanvasRenderingContex
 	
 }
 
+pub fn bloom(canvas: &HtmlCanvasElement, context: &CanvasRenderingContext2d) {
+    if is_safari() {
+        // Safari does not allow dst == src canvas.
+        // Can't be bothered to work around this.
+        return;
+    }
+
+    context.save();
+    context.set_global_composite_operation("lighter").unwrap();
+    context.set_filter("blur(6px)");
+    context.draw_image_with_html_canvas_element(&canvas, 0.0, 0.0).unwrap();
+    context.restore();
+	
+}
+
 pub fn vignette(canvas: &HtmlCanvasElement, ctx: &CanvasRenderingContext2d) {
 
     let width = canvas.width() as f64;

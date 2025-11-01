@@ -14,6 +14,9 @@ pub struct AqState {
     pub console: Console,
 
     pub world: World,
+
+    // filter for smooth manual control
+    manual_ctl: [vec2f; 3],
 }
 
 impl AqState {
@@ -29,7 +32,7 @@ impl AqState {
 
         let console = Console::with_hotkey(K_CLI);
 
-        let world = World::test();
+        let world = World::test(60);
 
         Self {
             now_secs: 0.0,
@@ -39,6 +42,7 @@ impl AqState {
             inputs: default(),
             console,
             world,
+            manual_ctl: default(),
         }
     }
 
@@ -72,11 +76,17 @@ impl AqState {
             delta += (0.0, -1.0);
         }
 
+        self.manual_ctl[0] = self.inputs.mouse_position().as_();
+        for i in 1..self.manual_ctl.len() {
+            self.manual_ctl[i] = 0.7 * self.manual_ctl[i] + 0.3 * self.manual_ctl[i - 1];
+        }
+
         let speed = 1.0;
         if let Some(b) = self.world.bones.get_mut(0) {
             //b.body.position += speed * delta;
             //b.body.velocity = speed * delta;
-            b.body.position = self.inputs.mouse_position().as_();
+            //b.body.position = self.inputs.mouse_position().as_();
+            b.body.position = self.manual_ctl.last().copied().unwrap();
         }
     }
 
@@ -107,7 +117,12 @@ impl AqState {
         match cmd.trim().split_ascii_whitespace().collect_vec().as_slice() {
             ["pause"] => Ok(toggle(&mut self.paused)),
             ["reset"] => Ok(self.reset()),
+            ["n", n] => Ok(self.world = World::test(n.parse()?)),
             ["g", g] => Ok(self.world.g = g.parse()?),
+            ["k", k] => Ok({
+                let k = k.parse()?;
+                self.world.springs.iter_mut().for_each(|s| s.k = k)
+            }),
             _ => Err(anyhow!("unknown command: {cmd:?}")),
         }
     }

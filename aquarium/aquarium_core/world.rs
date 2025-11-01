@@ -17,13 +17,12 @@ pub struct Spring {
 }
 
 impl World {
-    pub(crate) fn test() -> Self {
+    pub(crate) fn test(n: usize) -> Self {
         let mass = 1.0;
         let rot_inertia = 300.0;
         let len = 10.0;
         //let leg1 = Bone::new(mass, rot_inertia, len).with(|v| v.body.position = vec2f(70.0, 50.0));
 
-        let n = 50;
         let mut bones = (0..n).map(|i| Bone::new(mass, rot_inertia, len).with(|v| v.body.position = vec2f(600.0 - (i as f32) * len, 150.0))).collect_vec();
 
         //bones[0].len = 0.001;
@@ -37,7 +36,7 @@ impl World {
                 ib,
                 anchor_a: vec2(-len / 2.0, 0.0),
                 anchor_b: vec2(len / 2.0, 0.0),
-                k: 0.3,
+                k: 10.0,
             })
             .collect_vec();
 
@@ -131,7 +130,7 @@ impl World {
 
     fn draw_spring(&self, out: &mut Out, i: usize) {
         let spring = &self.springs[i];
-        let color = RGBA::RED;
+        let color = RGBA::YELLOW;
 
         let ia = spring.ia;
         let ib = spring.ib;
@@ -139,7 +138,7 @@ impl World {
         let anchor_a = self.bones[ia].body.transform_rel_pos(spring.anchor_a);
         let anchor_b = self.bones[ib].body.transform_rel_pos(spring.anchor_b);
 
-        out.draw_line_screen(L_SPRITES, Line::new(anchor_a.as_(), anchor_b.as_()).with_color(color));
+        out.draw_line_screen(L_SPRITES, Line::new(anchor_a.as_(), anchor_b.as_()).with_color(color).with_width(3));
     }
 }
 
@@ -152,7 +151,7 @@ fn draw_bone(out: &mut Out, bone: &Bone) {
     let color = RGBA::YELLOW;
     let start = bone.body.transform_rel_pos(vec2(-bone.len / 2.0, 0.0)).as_i32();
     let end = bone.body.transform_rel_pos(vec2(bone.len / 2.0, 0.0)).as_i32();
-    out.draw_line_screen(L_SPRITES, Line::new(start, end).with_color(color));
+    out.draw_line_screen(L_SPRITES, Line::new(start, end).with_color(color).with_width(3));
 }
 
 fn draw_body(out: &mut Out, body: &RigidBody) {
