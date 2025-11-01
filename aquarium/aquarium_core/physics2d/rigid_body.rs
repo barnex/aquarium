@@ -8,11 +8,13 @@ pub struct RigidBody {
     pub position: vec2f,
     pub velocity: vec2f,
     pub acceleration: vec2f,
+    pub force: vec2f,
 
     pub rot_inertia: f32,
     pub rotation: f32,
     pub rot_velocity: f32,
     pub rot_accel: f32,
+    pub torque: f32,
 }
 
 impl RigidBody {
@@ -25,10 +27,12 @@ impl RigidBody {
             position: default(),
             velocity: default(),
             acceleration: default(),
+            force: default(),
             rot_inertia,
             rotation: default(),
             rot_velocity: default(),
             rot_accel: default(),
+            torque: default(),
         }
     }
 
@@ -52,8 +56,15 @@ impl RigidBody {
         }
     }
 
-    pub fn tick(&mut self, dt: f32, force: vec2f, torque: f32) {
-        self.acceleration = force / self.mass;
+    pub fn tick_with_force(&mut self, dt: f32, force: vec2f, torque: f32) {
+        self.force = force;
+        self.torque = torque;
+        self.tick(dt);
+    }
+
+    pub fn tick(&mut self, dt: f32) {
+
+        self.acceleration = self.force / self.mass;
         self.velocity += dt * self.acceleration;
 
         //self.set_velocity((1.0 - dt * gs.linear_damping()) * self.velocity);
@@ -61,7 +72,7 @@ impl RigidBody {
         self.position += delta_pos;
 
         // rotation
-        self.rot_accel = torque / self.rot_inertia;
+        self.rot_accel = self.torque / self.rot_inertia;
         self.rot_velocity += dt * self.rot_accel;
         let mut theta = self.rotation;
         theta += dt * self.rot_velocity;
@@ -71,7 +82,6 @@ impl RigidBody {
             theta += 2.0 * PI;
         }
         self.rotation = theta;
-
     }
     pub fn tick_old(&mut self, dt: f32, force: vec2f, torque: f32, can_walk: impl Fn(vec2f) -> bool) {
         // translation

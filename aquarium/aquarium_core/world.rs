@@ -37,27 +37,31 @@ impl World {
         let can_walk = |pos: vec2f| pos.y() < 200.0;
 
         for i in 0..self.bones.len() {
-            let mut force = vec2f(0.0, 0.0);
-            let mut torque = 0.0;
+
+
+            self.bones[i].body.force = vec2f(0.0, 0.0);
+            self.bones[i].body.torque = 0.0;
 
             let b = &self.bones[i];
 
             if i > 0 {
                 let anchor1 = vec2(-b.len / 2.0, 0.0);
                 let anchor2 = vec2(b.len / 2.0, 0.0);
+
                 let neigh = self.bones[i - 1].body.transform_rel_pos(anchor1);
+
                 let k = 0.02;
                 let spring_force = k * (neigh - b.body.transform_rel_pos(anchor2));
 
-                torque += -0.03 * cross(b.body.transform_vector(anchor2), spring_force); // LEFT HANDED !!
+                self.bones[i].body.torque += -0.03 * cross(b.body.transform_vector(anchor2), spring_force); // LEFT HANDED !!
                 //log::trace!("torque: {torque}");
 
-                force += spring_force;
+                self.bones[i].body.force += spring_force;
             }
 
             let b = &mut self.bones[i];
 
-            b.body.tick(dt, force, torque);
+            b.body.tick(dt);
 
             b.body.velocity *= 0.99;
             b.body.rot_velocity *= 0.99;
