@@ -2,6 +2,7 @@ use crate::prelude::*;
 
 #[derive(Serialize, Deserialize)]
 pub struct World {
+    pub g: f32,
     pub bones: Vec<Bone>,
     pub springs: Vec<Spring>,
 }
@@ -19,13 +20,14 @@ impl World {
     pub(crate) fn test() -> Self {
         let mass = 1.0;
         let rot_inertia = 300.0;
-        let len = 60.0;
+        let len = 20.0;
         //let leg1 = Bone::new(mass, rot_inertia, len).with(|v| v.body.position = vec2f(70.0, 50.0));
 
-        let n = 15;
+        let n = 50;
         let mut bones = (0..n).map(|i| Bone::new(mass, rot_inertia, len).with(|v| v.body.position = vec2f(600.0 - (i as f32) * len, 150.0))).collect_vec();
 
         bones[0].len = 0.001;
+        bones[0].body.mass = 100000.0;
 
         let mut springs = (0..(bones.len()))
             .tuple_windows()
@@ -34,13 +36,13 @@ impl World {
                 ib,
                 anchor_a: vec2(-len / 2.0, 0.0),
                 anchor_b: vec2(len / 2.0, 0.0),
-                k: 0.1,
+                k: 0.3,
             })
             .collect_vec();
 
         springs[0].anchor_a = vec2(0.0, 0.0);
 
-        Self { bones, springs }
+        Self { bones, springs, g: 0.04 }
     }
 
     pub(crate) fn draw(&self, out: &mut Out) {
@@ -56,7 +58,7 @@ impl World {
     }
 
     pub(crate) fn tick(&mut self) {
-        for _i in 0..20 {
+        for _i in 0..40 {
             self.minor_tick();
         }
     }
@@ -67,10 +69,10 @@ impl World {
     }
 
     fn verlet_tick(&mut self) {
-        let dt = 0.05;
+        let dt = 0.02;
 
         //                                                      <-----<--------
-        self.bones[0].body.position = vec2(600.0, 150.0); //                   ^
+        //self.bones[0].body.position = vec2(600.0, 150.0); //                   ^
         self.bones.iter_mut().for_each(|b| b.body.update_accel()); //          |
         self.bones.iter_mut().for_each(|b| b.body.update_velocity(dt)); //     |
         self.dampen(); //                                                      |
@@ -83,14 +85,15 @@ impl World {
 
     fn dampen(&mut self) {
         for b in &mut self.bones {
-            b.body.velocity *= 0.9999;
-            b.body.rot_velocity *= 0.9999;
+            b.body.velocity *= 0.9995;
+            b.body.rot_velocity *= 0.9995;
         }
     }
 
     fn update_forces(&mut self) {
+        let g = self.g;
         for bone in &mut self.bones {
-            bone.body.force = vec2(0.0, 0.05);
+            bone.body.force = vec2(0.0, g);
             //bone.body.force = default();
             bone.body.torque = default();
         }
@@ -135,7 +138,7 @@ fn cross(a: vec2f, b: vec2f) -> f32 {
 }
 
 fn draw_bone(out: &mut Out, bone: &Bone) {
-    draw_body(out, &bone.body);
+    //draw_body(out, &bone.body);
     let color = RGBA::YELLOW;
     let start = bone.body.transform_rel_pos(vec2(-bone.len / 2.0, 0.0)).as_i32();
     let end = bone.body.transform_rel_pos(vec2(bone.len / 2.0, 0.0)).as_i32();

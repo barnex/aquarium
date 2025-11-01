@@ -74,8 +74,9 @@ impl AqState {
 
         let speed = 1.0;
         if let Some(b) = self.world.bones.get_mut(0) {
-            b.body.position += speed * delta;
-            b.body.velocity = speed * delta;
+            //b.body.position += speed * delta;
+            //b.body.velocity = speed * delta;
+            b.body.position = self.inputs.mouse_position().as_();
         }
     }
 
@@ -106,6 +107,7 @@ impl AqState {
         match cmd.trim().split_ascii_whitespace().collect_vec().as_slice() {
             ["pause"] => Ok(toggle(&mut self.paused)),
             ["reset"] => Ok(self.reset()),
+            ["g", g] => Ok(self.world.g = g.parse()?),
             _ => Err(anyhow!("unknown command: {cmd:?}")),
         }
     }
