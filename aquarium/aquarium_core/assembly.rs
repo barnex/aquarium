@@ -4,7 +4,8 @@ use crate::prelude::*;
 #[derive(Serialize, Deserialize)]
 pub struct Assembly {
     pub g: f32,
-    pub bones: Vec<Bone>,
+    pub bones: Vec<RigidBody>,
+    pub bone_len: f32,
     pub springs: Vec<Spring>,
 }
 
@@ -12,12 +13,12 @@ impl Assembly {
     pub(crate) fn test(n: usize) -> Self {
         let mass = 1.0;
         let rot_inertia = 300.0;
-        let len = 5.0;
+        let bone_len = 5.0;
         //let leg1 = Bone::new(mass, rot_inertia, len).with(|v| v.body.position = vec2f(70.0, 50.0));
 
-        let mut bones = (0..n).map(|i| Bone::new(mass, rot_inertia, len).with(|v| v.body.position = vec2f(600.0 - (i as f32) * len, 150.0))).collect_vec();
+        let mut bones = (0..n).map(|i| RigidBody::new(mass, rot_inertia).with(|v| v.position = vec2f(600.0 - (i as f32) * bone_len, 150.0))).collect_vec();
 
-        bones[0].body.mass = 10.0;
+        bones[0].mass = 10.0;
 
         let mut springs = (0..(bones.len()))
             //.circular_tuple_windows()
@@ -25,20 +26,20 @@ impl Assembly {
             .map(|(ia, ib)| Spring {
                 ia,
                 ib,
-                anchor_a: vec2(-len / 2.0, 0.0),
-                anchor_b: vec2(len / 2.0, 0.0),
+                anchor_a: vec2(-bone_len / 2.0, 0.0),
+                anchor_b: vec2(bone_len / 2.0, 0.0),
                 k: 10.0,
             })
             .collect_vec();
 
         //springs[0].anchor_a = vec2(0.0, 0.0);
 
-        Self { bones, springs, g: 0.01 }
+        Self { bone_len, bones, springs, g: 0.01 }
     }
 
     pub fn draw(&self, out: &mut Out) {
         for b in &self.bones {
-            draw_bone(out, b)
+            self.draw_bone(out, b)
         }
 
         for s in 0..self.springs.len() {
@@ -62,56 +63,56 @@ impl Assembly {
 
         //                                                      <-----<--------
         //self.bones[0].body.position = vec2(600.0, 150.0); //                   ^
-        self.bones.iter_mut().for_each(|b| b.body.update_accel()); //          |
-        self.bones.iter_mut().for_each(|b| b.body.update_velocity(dt)); //     |
+        self.bones.iter_mut().for_each(|b| b.update_accel()); //          |
+        self.bones.iter_mut().for_each(|b| b.update_velocity(dt)); //     |
         self.dampen(); //                                                      |
         //                                                                     ^
         // logically, the cycle starts here:                                   |
-        self.bones.iter_mut().for_each(|b| b.body.update_velocity_half(dt)); //|
-        self.bones.iter_mut().for_each(|b| b.body.update_position(dt)); //     |
+        self.bones.iter_mut().for_each(|b| b.update_velocity_half(dt)); //|
+        self.bones.iter_mut().for_each(|b| b.update_position(dt)); //     |
         //                                                       >------>------^
     }
 
     fn dampen(&mut self) {
         for b in &mut self.bones {
-            b.body.velocity *= 0.9995;
-            b.body.rot_velocity *= 0.9995;
+            b.velocity *= 0.9995;
+            b.rot_velocity *= 0.9995;
         }
     }
 
     fn update_forces(&mut self) {
         let g = self.g;
         for bone in &mut self.bones {
-            bone.body.force = vec2(0.0, g);
+            bone.force = vec2(0.0, g);
             //bone.body.force = default();
-            bone.body.torque = default();
+            bone.torque = default();
         }
 
         for spring in &self.springs {
             let ia = spring.ia;
             let ib = spring.ib;
 
-            let anchor_a = self.bones[ia].body.transform_rel_pos(spring.anchor_a);
-            let anchor_b = self.bones[ib].body.transform_rel_pos(spring.anchor_b);
+            let anchor_a = self.bones[ia].transform_rel_pos(spring.anchor_a);
+            let anchor_b = self.bones[ib].transform_rel_pos(spring.anchor_b);
 
             let force_a = spring.k * (anchor_b - anchor_a);
             let force_b = -force_a;
 
-            let torque_a = -cross(self.bones[ia].body.transform_vector(spring.anchor_a), force_a); // LEFT HANDED !!
-            let torque_b = -cross(self.bones[ib].body.transform_vector(spring.anchor_b), force_b); // LEFT HANDED !!
+            let torque_a = -cross(self.bones[ia].transform_vector(spring.anchor_a), force_a); // LEFT HANDED !!
+            let torque_b = -cross(self.bones[ib].transform_vector(spring.anchor_b), force_b); // LEFT HANDED !!
 
-            let dir_a = self.bones[ia].body.transform_vector(vec2::EX);
-            let dir_b = self.bones[ib].body.transform_vector(vec2::EX);
+            let dir_a = self.bones[ia].transform_vector(vec2::EX);
+            let dir_b = self.bones[ib].transform_vector(vec2::EX);
             let restore = 10.0 * cross(dir_b, dir_a).powi(3);
 
             let torque_a = torque_a + restore;
             let torque_b = torque_b - restore;
 
-            self.bones[ia].body.torque += torque_a;
-            self.bones[ib].body.torque += torque_b;
+            self.bones[ia].torque += torque_a;
+            self.bones[ib].torque += torque_b;
 
-            self.bones[ia].body.force += force_a;
-            self.bones[ib].body.force += force_b;
+            self.bones[ia].force += force_a;
+            self.bones[ib].force += force_b;
 
             // laplacian
         }
@@ -124,21 +125,21 @@ impl Assembly {
         let ia = spring.ia;
         let ib = spring.ib;
 
-        let anchor_a = self.bones[ia].body.transform_rel_pos(spring.anchor_a);
-        let anchor_b = self.bones[ib].body.transform_rel_pos(spring.anchor_b);
+        let anchor_a = self.bones[ia].transform_rel_pos(spring.anchor_a);
+        let anchor_b = self.bones[ib].transform_rel_pos(spring.anchor_b);
 
         out.draw_line_screen(L_SPRITES, Line::new(anchor_a.as_(), anchor_b.as_()).with_color(color).with_width(3));
+    }
+
+    fn draw_bone(&self, out: &mut Out, bone: &RigidBody) {
+        let bone_len = self.bone_len;
+        let color = RGBA::YELLOW;
+        let start = bone.transform_rel_pos(vec2(-bone_len / 2.0, 0.0)).as_i32();
+        let end = bone.transform_rel_pos(vec2(bone_len / 2.0, 0.0)).as_i32();
+        out.draw_line_screen(L_SPRITES, Line::new(start, end).with_color(color).with_width(3));
     }
 }
 
 fn cross(a: vec2f, b: vec2f) -> f32 {
     a.x() * b.y() - a.y() * b.x()
-}
-
-fn draw_bone(out: &mut Out, bone: &Bone) {
-    //draw_body(out, &bone.body);
-    let color = RGBA::YELLOW;
-    let start = bone.body.transform_rel_pos(vec2(-bone.len / 2.0, 0.0)).as_i32();
-    let end = bone.body.transform_rel_pos(vec2(bone.len / 2.0, 0.0)).as_i32();
-    out.draw_line_screen(L_SPRITES, Line::new(start, end).with_color(color).with_width(3));
 }

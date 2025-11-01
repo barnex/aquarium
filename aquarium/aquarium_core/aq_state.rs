@@ -86,7 +86,7 @@ impl AqState {
             //b.body.position += speed * delta;
             //b.body.velocity = speed * delta;
             //b.body.position = self.inputs.mouse_position().as_();
-            b.body.position = self.manual_ctl.last().copied().unwrap();
+            b.position = self.manual_ctl.last().copied().unwrap();
         }
     }
 
