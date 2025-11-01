@@ -18,11 +18,11 @@ pub struct Spring {
 impl World {
     pub(crate) fn test() -> Self {
         let mass = 1.0;
-        let rot_inertia = 100.0;
+        let rot_inertia = 300.0;
         let len = 60.0;
         //let leg1 = Bone::new(mass, rot_inertia, len).with(|v| v.body.position = vec2f(70.0, 50.0));
 
-        let n = 10;
+        let n = 15;
         let mut bones = (0..n).map(|i| Bone::new(mass, rot_inertia, len).with(|v| v.body.position = vec2f(600.0 - (i as f32) * len, 150.0))).collect_vec();
 
         bones[0].len = 0.001;
@@ -56,14 +56,59 @@ impl World {
     }
 
     pub(crate) fn tick(&mut self) {
-        for _i in 0..60 {
+        for _i in 0..20 {
             self.minor_tick();
         }
     }
 
     pub(crate) fn minor_tick(&mut self) {
-        let dt = 0.03;
+        let dt = 0.05;
 
+        self.update_velocity_half(dt);
+        self.update_positions(dt);
+
+        self.update_forces();
+        self.update_accell();
+
+        self.update_velocity(dt);
+
+        self.dampen();
+
+        self.bones[0].body.position = vec2(600.0, 150.0);
+    }
+
+    fn update_velocity(&mut self, dt: f32) {
+        for b in &mut self.bones {
+            b.body.update_velocity(dt);
+        }
+    }
+
+    fn update_velocity_half(&mut self, dt: f32) {
+        for b in &mut self.bones {
+            b.body.update_velocity_half(dt);
+        }
+    }
+
+    fn update_accell(&mut self) {
+        for b in &mut self.bones {
+            b.body.update_accel();
+        }
+    }
+
+    fn update_positions(&mut self, dt: f32) {
+        for b in &mut self.bones {
+            b.body.update_position(dt);
+        }
+    }
+
+    fn dampen(&mut self) {
+        for b in &mut self.bones {
+            b.body.velocity *= 0.9999;
+            b.body.rot_velocity *= 0.9999;
+        }
+    }
+
+    fn update_forces(&mut self) {
         for bone in &mut self.bones {
             bone.body.force = vec2(0.0, 0.05);
             //bone.body.force = default();
@@ -89,14 +134,6 @@ impl World {
             self.bones[ia].body.force += force_a;
             self.bones[ib].body.force += force_b;
         }
-
-        for b in &mut self.bones {
-            b.body.tick(dt);
-            b.body.velocity *= 0.9999;
-            b.body.rot_velocity *= 0.999;
-        }
-
-        self.bones[0].body.position = vec2(600.0, 150.0);
     }
 
     fn draw_spring(&self, out: &mut Out, i: usize) {
