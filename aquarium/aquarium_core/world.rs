@@ -22,8 +22,8 @@ impl World {
         let len = 60.0;
         //let leg1 = Bone::new(mass, rot_inertia, len).with(|v| v.body.position = vec2f(70.0, 50.0));
 
-        let n = 20;
-        let mut bones = (0..n).map(|i| Bone::new(mass, rot_inertia, len).with(|v| v.body.position = vec2f(200.0 - (i as f32) * len, 50.0))).collect_vec();
+        let n = 10;
+        let mut bones = (0..n).map(|i| Bone::new(mass, rot_inertia, len).with(|v| v.body.position = vec2f(600.0 - (i as f32) * len, 150.0))).collect_vec();
 
         bones[0].len = 0.001;
 
@@ -34,7 +34,7 @@ impl World {
                 ib,
                 anchor_a: vec2(-len / 2.0, 0.0),
                 anchor_b: vec2(len / 2.0, 0.0),
-                k: 0.02,
+                k: 0.1,
             })
             .collect_vec();
 
@@ -62,10 +62,11 @@ impl World {
     }
 
     pub(crate) fn minor_tick(&mut self) {
-        let dt = 0.05;
+        let dt = 0.03;
 
         for bone in &mut self.bones {
-            bone.body.force = default();
+            bone.body.force = vec2(0.0, 0.05);
+            //bone.body.force = default();
             bone.body.torque = default();
         }
 
@@ -91,44 +92,11 @@ impl World {
 
         for b in &mut self.bones {
             b.body.tick(dt);
-            b.body.velocity *= 0.996;
-            b.body.rot_velocity *= 0.996;
+            b.body.velocity *= 0.9999;
+            b.body.rot_velocity *= 0.999;
         }
-    }
 
-    pub(crate) fn minor_tick_OLD(&mut self) {
-        //self.critters.iter_mut().for_each(Critter::tick);
-        let dt = 0.02;
-        let can_walk = |pos: vec2f| pos.y() < 200.0;
-
-        for i in 0..self.bones.len() {
-            self.bones[i].body.force = vec2f(0.0, 0.0);
-            self.bones[i].body.torque = 0.0;
-
-            let b = &self.bones[i];
-
-            if i > 0 {
-                let anchor1 = vec2(-b.len / 2.0, 0.0);
-                let anchor2 = vec2(b.len / 2.0, 0.0);
-
-                let neigh = self.bones[i - 1].body.transform_rel_pos(anchor1);
-
-                let k = 0.02;
-                let spring_force = k * (neigh - b.body.transform_rel_pos(anchor2));
-
-                self.bones[i].body.torque += -0.03 * cross(b.body.transform_vector(anchor2), spring_force); // LEFT HANDED !!
-                //log::trace!("torque: {torque}");
-
-                self.bones[i].body.force += spring_force;
-            }
-
-            let b = &mut self.bones[i];
-
-            b.body.tick(dt);
-
-            b.body.velocity *= 0.99;
-            b.body.rot_velocity *= 0.99;
-        }
+        self.bones[0].body.position = vec2(600.0, 150.0);
     }
 
     fn draw_spring(&self, out: &mut Out, i: usize) {

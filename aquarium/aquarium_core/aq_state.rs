@@ -75,7 +75,7 @@ impl AqState {
         let speed = 1.0;
         if let Some(b) = self.world.bones.get_mut(0) {
             b.body.position += speed * delta;
-            b.body.velocity =  speed*delta;
+            b.body.velocity = speed * delta;
         }
     }
 
@@ -105,6 +105,7 @@ impl AqState {
     fn exec_command_impl(&mut self, cmd: &str) -> Result<()> {
         match cmd.trim().split_ascii_whitespace().collect_vec().as_slice() {
             ["pause"] => Ok(toggle(&mut self.paused)),
+            ["reset"] => Ok(self.reset()),
             _ => Err(anyhow!("unknown command: {cmd:?}")),
         }
     }
