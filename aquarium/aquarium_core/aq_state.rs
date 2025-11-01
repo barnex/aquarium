@@ -13,7 +13,7 @@ pub struct AqState {
 
     pub console: Console,
 
-    pub world: World,
+    pub world: Assembly,
 
     // filter for smooth manual control
     manual_ctl: [vec2f; 3],
@@ -32,7 +32,7 @@ impl AqState {
 
         let console = Console::with_hotkey(K_CLI);
 
-        let world = World::test(60);
+        let world = Assembly::test(60);
 
         Self {
             now_secs: 0.0,
@@ -91,6 +91,7 @@ impl AqState {
     }
 
     fn draw(&self, out: &mut Out) {
+        draw_background(out);
         self.world.draw(out);
     }
 
@@ -117,7 +118,7 @@ impl AqState {
         match cmd.trim().split_ascii_whitespace().collect_vec().as_slice() {
             ["pause"] => Ok(toggle(&mut self.paused)),
             ["reset"] => Ok(self.reset()),
-            ["n", n] => Ok(self.world = World::test(n.parse()?)),
+            ["n", n] => Ok(self.world = Assembly::test(n.parse()?)),
             ["g", g] => Ok(self.world.g = g.parse()?),
             ["k", k] => Ok({
                 let k = k.parse()?;
@@ -146,4 +147,26 @@ impl shell_api::GameCore for AqState {
 
 fn toggle(v: &mut bool) {
     *v = !*v
+}
+
+fn draw_body(out: &mut Out, body: &RigidBody) {
+    let pos = body.position.as_i32();
+    let color = RGBA::WHITE;
+
+    // draw center
+    let s = vec2(2, 2);
+    out.draw_rect_screen(L_SPRITES, Rectangle::new((pos - s, pos + s), color));
+
+    // draw frame/axes
+    let ax_len = 15.0;
+    let x = body.transform_rel_pos(vec2::EX * ax_len).as_i32();
+    let y = body.transform_rel_pos(vec2::EY * ax_len).as_i32();
+    out.draw_line_screen(L_SPRITES, Line::new(pos, x).with_color(color));
+    out.draw_line_screen(L_SPRITES, Line::new(pos, y).with_color(color));
+}
+
+fn draw_background(out: &mut Out) {
+    let (w, h) = out.viewport_size.as_i32().into();
+    let bg = [0, 0, 80];
+    out.draw_rect_screen(0, Rectangle::from((((0, 0), (w, h)), bg)).with_fill(bg));
 }

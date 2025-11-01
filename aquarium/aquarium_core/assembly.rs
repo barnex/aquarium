@@ -1,14 +1,14 @@
 use crate::prelude::*;
 
+/// A contraption made of rigid bodies connected via springs.
 #[derive(Serialize, Deserialize)]
-pub struct World {
+pub struct Assembly {
     pub g: f32,
     pub bones: Vec<Bone>,
     pub springs: Vec<Spring>,
 }
 
-
-impl World {
+impl Assembly {
     pub(crate) fn test(n: usize) -> Self {
         let mass = 1.0;
         let rot_inertia = 300.0;
@@ -36,9 +36,7 @@ impl World {
         Self { bones, springs, g: 0.01 }
     }
 
-    pub(crate) fn draw(&self, out: &mut Out) {
-        draw_background(out);
-
+    pub fn draw(&self, out: &mut Out) {
         for b in &self.bones {
             draw_bone(out, b)
         }
@@ -104,7 +102,7 @@ impl World {
 
             let dir_a = self.bones[ia].body.transform_vector(vec2::EX);
             let dir_b = self.bones[ib].body.transform_vector(vec2::EX);
-            let restore = 10.0*cross(dir_b, dir_a).powi(3);
+            let restore = 10.0 * cross(dir_b, dir_a).powi(3);
 
             let torque_a = torque_a + restore;
             let torque_b = torque_b - restore;
@@ -143,26 +141,4 @@ fn draw_bone(out: &mut Out, bone: &Bone) {
     let start = bone.body.transform_rel_pos(vec2(-bone.len / 2.0, 0.0)).as_i32();
     let end = bone.body.transform_rel_pos(vec2(bone.len / 2.0, 0.0)).as_i32();
     out.draw_line_screen(L_SPRITES, Line::new(start, end).with_color(color).with_width(3));
-}
-
-fn draw_body(out: &mut Out, body: &RigidBody) {
-    let pos = body.position.as_i32();
-    let color = RGBA::WHITE;
-
-    // draw center
-    let s = vec2(2, 2);
-    out.draw_rect_screen(L_SPRITES, Rectangle::new((pos - s, pos + s), color));
-
-    // draw frame/axes
-    let ax_len = 15.0;
-    let x = body.transform_rel_pos(vec2::EX * ax_len).as_i32();
-    let y = body.transform_rel_pos(vec2::EY * ax_len).as_i32();
-    out.draw_line_screen(L_SPRITES, Line::new(pos, x).with_color(color));
-    out.draw_line_screen(L_SPRITES, Line::new(pos, y).with_color(color));
-}
-
-fn draw_background(out: &mut Out) {
-    let (w, h) = out.viewport_size.as_i32().into();
-    let bg = [0, 0, 80];
-    out.draw_rect_screen(0, Rectangle::from((((0, 0), (w, h)), bg)).with_fill(bg));
 }
