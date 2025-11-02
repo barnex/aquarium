@@ -58,7 +58,13 @@ impl Contraption {
 
     pub(crate) fn minor_tick(&mut self) {
         self.update_forces();
-        self.verlet_tick();
+        self.damping_tick();
+    }
+
+    fn damping_tick(&mut self) {
+        let dt = 0.03;
+        self.bones.iter_mut().for_each(|b| b.update_accel()); //          |
+        self.bones.iter_mut().for_each(|b| b.dampen_position(dt)); //     |
     }
 
     fn verlet_tick(&mut self) {

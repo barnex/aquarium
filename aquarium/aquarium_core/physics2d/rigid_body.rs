@@ -69,6 +69,12 @@ impl RigidBody {
         self.rotation = wrap_angle(self.rotation);
     }
 
+    pub fn dampen_position(&mut self, dt: f32) {
+        self.position += dt * self.acceleration;
+        self.rotation += dt * self.rot_accel;
+        self.rotation = wrap_angle(self.rotation);
+    }
+
     pub fn tick_old(&mut self, dt: f32, force: vec2f, torque: f32, can_walk: impl Fn(vec2f) -> bool) {
         // translation
         self.acceleration = force / self.mass;
