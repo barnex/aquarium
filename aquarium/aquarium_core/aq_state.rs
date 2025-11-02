@@ -22,9 +22,11 @@ pub struct AqState {
     // filter for smooth manual control
     mouse_filter: [vec2f; 3],
 
+    pub dt: f32,
     pub crawl_amplitude: f32,
     pub crawl_wavenumber: f32,
     pub crawl_frequency: f32,
+    pub crawl_gamma: f32,
 }
 
 impl AqState {
@@ -53,9 +55,11 @@ impl AqState {
             mouse_filter: default(),
             controlled_contraption: 0,
             follow_mouse: false,
-            crawl_amplitude: default(),
-            crawl_frequency: default(),
-            crawl_wavenumber: default(),
+            crawl_amplitude: 0.9,
+            crawl_frequency: -0.2,
+            crawl_wavenumber: 0.5,
+            crawl_gamma: 1.0,
+            dt: 0.02,
         }
     }
 
@@ -75,7 +79,7 @@ impl AqState {
     }
 
     fn tick_contraptions(&mut self) {
-        self.contraptions.iter_mut().for_each(|v| v.tick());
+        self.contraptions.iter_mut().for_each(|v| v.tick(self.dt));
         self.tick_crawl_test();
     }
 
@@ -85,10 +89,13 @@ impl AqState {
 
         for (i, spring) in contraption.springs.iter_mut().enumerate() {
             let x = i as f32;
-            spring.sin_angle = self.crawl_amplitude * f32::sin(2.0 * PI * t * self.crawl_frequency + x * self.crawl_wavenumber); // .sin() ?
-            if i == 0 {
-                log::trace!("angle {}", spring.sin_angle);
-            }
+            let a = f32::sin(2.0 * PI * t * self.crawl_frequency + x * self.crawl_wavenumber);
+            let a = a.abs().powf(self.crawl_gamma) * a.signum();
+            let a = self.crawl_amplitude * a;
+            spring.sin_angle = a;
+            //if i == 0 {
+            //    log::trace!("angle {}", spring.sin_angle);
+            //}
         }
     }
 
@@ -166,11 +173,13 @@ impl AqState {
                 let a = f32::sin(a.parse()?);
                 self.controlled_contraption()?.springs.iter_mut().for_each(|s| s.sin_angle = a)
             }),
-            ["ca", v] => Ok(self.crawl_amplitude = v.parse::<f32>()?.clamp(-1.0, 1.0)),
-            ["cf", v] => Ok(self.crawl_frequency = v.parse::<f32>()?.clamp(-1.0, 1.0)),
-            ["cw", v] => Ok(self.crawl_wavenumber = v.parse::<f32>()?.clamp(-1.0, 1.0)),
+            ["ca", v] => Ok(self.crawl_amplitude = v.parse::<f32>()?),
+            ["cf", v] => Ok(self.crawl_frequency = v.parse::<f32>()?),
+            ["cw", v] => Ok(self.crawl_wavenumber = v.parse::<f32>()?),
+            ["cg", v] => Ok(self.crawl_gamma = v.parse::<f32>()?),
             ["mouse"] => Ok(toggle(&mut self.follow_mouse)),
             ["mouse", v] => Ok(self.follow_mouse = v.parse()?),
+            ["dt", v] => Ok(self.dt = v.parse()?),
             _ => Err(anyhow!("unknown command: {cmd:?}")),
         }
     }

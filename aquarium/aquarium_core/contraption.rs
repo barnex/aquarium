@@ -50,25 +50,24 @@ impl Contraption {
         }
     }
 
-    pub(crate) fn tick(&mut self) {
+    pub(crate) fn tick(&mut self, dt: f32) {
         for _i in 0..10 {
-            self.minor_tick();
+            self.minor_tick(dt);
         }
     }
 
-    pub(crate) fn minor_tick(&mut self) {
+    pub(crate) fn minor_tick(&mut self, dt: f32) {
         self.update_forces();
-        self.damping_tick();
+        self.damping_tick(dt);
+        //self.verlet_tick();
     }
 
-    fn damping_tick(&mut self) {
-        let dt = 0.03;
+    fn damping_tick(&mut self, dt: f32) {
         self.bones.iter_mut().for_each(|b| b.update_accel()); //          |
         self.bones.iter_mut().for_each(|b| b.dampen_position(dt)); //     |
     }
 
-    fn verlet_tick(&mut self) {
-        let dt = 0.03;
+    fn verlet_tick(&mut self, dt: f32) {
 
         //                                                      <-----<--------
         //self.bones[0].body.position = vec2(600.0, 150.0); //                   ^
