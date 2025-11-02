@@ -15,8 +15,15 @@ pub struct AqState {
 
     pub contraptions: Vec<Contraption>,
 
+    // commands and keypresses control this contraption.
+    pub controlled_contraption: usize,
+
     // filter for smooth manual control
-    manual_ctl: [vec2f; 3],
+    mouse_filter: [vec2f; 3],
+
+    pub crawl_amplitude: f32,
+    pub crawl_wavenumber: f32,
+    pub crawl_frequency: f32,
 }
 
 impl AqState {
@@ -42,7 +49,11 @@ impl AqState {
             inputs: default(),
             console,
             contraptions,
-            manual_ctl: default(),
+            mouse_filter: default(),
+            controlled_contraption: 0,
+            crawl_amplitude: default(),
+            crawl_frequency: default(),
+            crawl_wavenumber: default(),
         }
     }
 
@@ -55,10 +66,21 @@ impl AqState {
         }
 
         if !self.paused || self.inputs.is_down(K_TICK) {
-            self.contraptions.iter_mut().for_each(|v| v.tick());
+            self.tick_contraptions();
         }
 
         self.draw(out);
+    }
+
+    fn tick_contraptions(&mut self) {
+        self.contraptions.iter_mut().for_each(|v| v.tick());
+        self.tick_crawl_test();
+    }
+
+    fn tick_crawl_test(&mut self) {
+        let Some(contraption) = self.contraptions.get_mut(self.controlled_contraption) else { return };
+
+        //for (i,b)in contraption.sp
     }
 
     fn tick_manual_control(&mut self) {
@@ -76,18 +98,18 @@ impl AqState {
             delta += (0.0, -1.0);
         }
 
-        self.manual_ctl[0] = self.inputs.mouse_position().as_();
-        for i in 1..self.manual_ctl.len() {
-            self.manual_ctl[i] = 0.7 * self.manual_ctl[i] + 0.3 * self.manual_ctl[i - 1];
+        self.mouse_filter[0] = self.inputs.mouse_position().as_();
+        for i in 1..self.mouse_filter.len() {
+            self.mouse_filter[i] = 0.7 * self.mouse_filter[i] + 0.3 * self.mouse_filter[i - 1];
         }
 
         let speed = 1.0;
-        if let Some(c) = self.contraptions.get_mut(0) {
+        if let Some(c) = self.contraptions.get_mut(self.controlled_contraption) {
             if let Some(b) = c.bones.get_mut(0) {
                 //b.body.position += speed * delta;
                 //b.body.velocity = speed * delta;
                 //b.body.position = self.inputs.mouse_position().as_();
-                b.position = self.manual_ctl.last().copied().unwrap();
+                b.position = self.mouse_filter.last().copied().unwrap();
             }
         }
     }
@@ -120,15 +142,27 @@ impl AqState {
         match cmd.trim().split_ascii_whitespace().collect_vec().as_slice() {
             ["pause"] => Ok(toggle(&mut self.paused)),
             ["reset"] => Ok(self.reset()),
-            ["s", s] => Ok(self.contraptions.get_mut(0).ok_or_else(not_found)?.stiffness = s.parse()?),
-            //["n", n] => Ok(self.world = Assembly::rope(n.parse()?)),
-            ["g", g] => Ok(self.contraptions.get_mut(0).ok_or_else(not_found)?.g = g.parse()?),
+            ["ctl", i] => Ok(self.controlled_contraption = i.parse()?),
+            ["s", s] => Ok(self.controlled_contraption()?.stiffness = s.parse()?),
+            ["n", n] => Ok(*self.controlled_contraption()? = Contraption::rope(n.parse()?)),
+            ["g", g] => Ok(self.controlled_contraption()?.g = g.parse()?),
             ["k", k] => Ok({
                 let k = k.parse()?;
-                self.contraptions.get_mut(0).ok_or_else(not_found)?.springs.iter_mut().for_each(|s| s.k = k)
+                self.controlled_contraption()?.springs.iter_mut().for_each(|s| s.k = k)
             }),
+            ["angle", a] => Ok({
+                let a = f32::sin(a.parse()?);
+                self.controlled_contraption()?.springs.iter_mut().for_each(|s| s.sin_angle = a)
+            }),
+            ["ca", v] => Ok(self.crawl_amplitude = v.parse::<f32>()?.clamp(-1.0, 1.0)),
+            ["cf", v] => Ok(self.crawl_frequency = v.parse::<f32>()?.clamp(-1.0, 1.0)),
+            ["cw", v] => Ok(self.crawl_wavenumber = v.parse::<f32>()?.clamp(-1.0, 1.0)),
             _ => Err(anyhow!("unknown command: {cmd:?}")),
         }
+    }
+
+    fn controlled_contraption(&mut self) -> Result<&mut Contraption> {
+        self.contraptions.get_mut(self.controlled_contraption).ok_or_else(|| anyhow!("there is no contraption #{}", self.controlled_contraption))
     }
 }
 
