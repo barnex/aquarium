@@ -17,6 +17,7 @@ pub struct AqState {
 
     // commands and keypresses control this contraption.
     pub controlled_contraption: usize,
+    pub follow_mouse: bool,
 
     // filter for smooth manual control
     mouse_filter: [vec2f; 3],
@@ -39,7 +40,7 @@ impl AqState {
 
         let console = Console::with_hotkey(K_CLI);
 
-        let contraptions = vec![Contraption::rope(60), Contraption::rope(20)];
+        let contraptions = vec![Contraption::rope(40), Contraption::rope(20)];
 
         Self {
             now_secs: 0.0,
@@ -51,6 +52,7 @@ impl AqState {
             contraptions,
             mouse_filter: default(),
             controlled_contraption: 0,
+            follow_mouse: false,
             crawl_amplitude: default(),
             crawl_frequency: default(),
             crawl_wavenumber: default(),
@@ -79,8 +81,15 @@ impl AqState {
 
     fn tick_crawl_test(&mut self) {
         let Some(contraption) = self.contraptions.get_mut(self.controlled_contraption) else { return };
+        let t = self.now_secs as f32;
 
-        //for (i,b)in contraption.sp
+        for (i, spring) in contraption.springs.iter_mut().enumerate() {
+            let x = i as f32;
+            spring.sin_angle = self.crawl_amplitude * f32::sin(2.0 * PI * t * self.crawl_frequency + x * self.crawl_wavenumber); // .sin() ?
+            if i == 0 {
+                log::trace!("angle {}", spring.sin_angle);
+            }
+        }
     }
 
     fn tick_manual_control(&mut self) {
@@ -104,12 +113,15 @@ impl AqState {
         }
 
         let speed = 1.0;
-        if let Some(c) = self.contraptions.get_mut(self.controlled_contraption) {
-            if let Some(b) = c.bones.get_mut(0) {
-                //b.body.position += speed * delta;
-                //b.body.velocity = speed * delta;
-                //b.body.position = self.inputs.mouse_position().as_();
-                b.position = self.mouse_filter.last().copied().unwrap();
+
+        if self.follow_mouse {
+            if let Some(c) = self.contraptions.get_mut(self.controlled_contraption) {
+                if let Some(b) = c.bones.get_mut(0) {
+                    //b.body.position += speed * delta;
+                    //b.body.velocity = speed * delta;
+                    //b.body.position = self.inputs.mouse_position().as_();
+                    b.position = self.mouse_filter.last().copied().unwrap();
+                }
             }
         }
     }
@@ -157,6 +169,8 @@ impl AqState {
             ["ca", v] => Ok(self.crawl_amplitude = v.parse::<f32>()?.clamp(-1.0, 1.0)),
             ["cf", v] => Ok(self.crawl_frequency = v.parse::<f32>()?.clamp(-1.0, 1.0)),
             ["cw", v] => Ok(self.crawl_wavenumber = v.parse::<f32>()?.clamp(-1.0, 1.0)),
+            ["mouse"] => Ok(toggle(&mut self.follow_mouse)),
+            ["mouse", v] => Ok(self.follow_mouse = v.parse()?),
             _ => Err(anyhow!("unknown command: {cmd:?}")),
         }
     }
