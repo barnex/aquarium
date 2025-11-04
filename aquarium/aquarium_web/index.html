@@ -2,36 +2,24 @@
 <html lang="en">
 
 <head>
+
 	<style>
+		html,
 		body {
-			background: white;
-			color: black;
 			margin: 0;
+			padding: 0;
+			height: 100%;
 			overflow: hidden;
 		}
 
-		@media (prefers-color-scheme: dark) {
-			body {
-				background: #121212;
-				color: white;
-			}
-		}
-
 		canvas {
-			image-rendering: pixelated;
-			image-rendering: crisp-edges;
-		}
-
-		.button-row {
-			display: inline-flex;
-			gap: 2px;
-			align-items: stretch;
-		}
-
-		.button-row button {
-			white-space: nowrap;
+			display: block;
+			width: 100vw;
+			height: 100vh;
 		}
 	</style>
+
+
 	<meta charset="utf-8" />
 	<title>game</title>
 
@@ -40,27 +28,6 @@
 </head>
 
 <body>
-
-	<div class="button-row">
-		<button title="Save game" onclick='window.wasmBindings.cmd("save")'>💾</button>
-		<button title="Save & reload" onclick='window.wasmBindings.cmd("save_reload")'>↻</button>
-		<button title="Reset game" onclick='window.wasmBindings.cmd("reset")'>❌</button>
-		&nbsp;
-		<button title="Paws, err Pause" onclick='window.wasmBindings.cmd("pause")'>⏸️</button>
-		<button title="Advance one tick" onclick='window.wasmBindings.cmd("tick")'>⏯️</button>
-		&nbsp;
-		<button title="Toggle large screen" onclick='window.wasmBindings.cmd("toggle_large")'>↔️</button>
-		<button title="Toggle UI" onclick='window.wasmBindings.cmd("toggle_ui")'>🎮</button>
-		<button title="Screenshot" onclick='window.wasmBindings.cmd("screenshot")'>📷</button>
-		&nbsp;
-		<button title="Toggle inspect under cursor" onclick='window.wasmBindings.cmd("inspect_under_cursor")'>🔎</button>
-		<button title="Toggle walkable overlay" onclick='window.wasmBindings.cmd("show_walkable")'>🥾</button>
-		<button title="Toggle buildable overlay" onclick='window.wasmBindings.cmd("show_buildable")'>🧱</button>
-		<button title="Toggle destination overlay" onclick='window.wasmBindings.cmd("show_destination")'>📍</button>
-		<button title="Toggle home overlay" onclick='window.wasmBindings.cmd("show_home")'>🏠</button>
-		<button title="Toggle factory downstream overlay" onclick='window.wasmBindings.cmd("show_downstream")'>🏭</button>
-	</div><br />
-
 
 	<canvas id="canvas" width="480" height="320" draggable="false" style="border: 1px solid black;"></canvas>
 
@@ -72,6 +39,17 @@
 <script>
 	// Prevent default context menu on canvas.
 	document.getElementById('canvas').addEventListener('contextmenu', function (event) { event.preventDefault(); });
+</script>
+
+<script>
+	const canvas = document.getElementById('canvas');
+	function resizeCanvas() {
+		const rect = canvas.getBoundingClientRect();
+		canvas.width = rect.width;
+		canvas.height = rect.height;
+	}
+	window.addEventListener('resize', resizeCanvas);
+	resizeCanvas();
 </script>
 
 </html
