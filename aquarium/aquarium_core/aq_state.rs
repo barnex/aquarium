@@ -27,6 +27,7 @@ pub struct AqState {
     pub crawl_wavenumber: f32,
     pub crawl_frequency: f32,
     pub crawl_gamma: f32,
+    pub speed: u32,
 }
 
 impl AqState {
@@ -55,11 +56,12 @@ impl AqState {
             mouse_filter: default(),
             controlled_contraption: 0,
             follow_mouse: false,
-            crawl_amplitude: 0.9,
-            crawl_frequency: -0.2,
-            crawl_wavenumber: 0.5,
+            crawl_amplitude: 1.2,
+            crawl_frequency: -0.3,
+            crawl_wavenumber: 0.8,
             crawl_gamma: 1.0,
             dt: 0.02,
+            speed: 1,
         }
     }
 
@@ -72,7 +74,9 @@ impl AqState {
         }
 
         if !self.paused || self.inputs.is_down(K_TICK) {
-            self.tick_contraptions();
+            for _ in 0..self.speed {
+                self.tick_contraptions();
+            }
         }
 
         self.draw(out);
@@ -180,6 +184,7 @@ impl AqState {
             ["mouse"] => Ok(toggle(&mut self.follow_mouse)),
             ["mouse", v] => Ok(self.follow_mouse = v.parse()?),
             ["dt", v] => Ok(self.dt = v.parse()?),
+            ["speed", v] => Ok(self.speed = v.parse()?),
             _ => Err(anyhow!("unknown command: {cmd:?}")),
         }
     }
