@@ -70,7 +70,8 @@ impl RigidBody {
     }
 
     pub fn dampen_position(&mut self, dt: f32) {
-        self.position += dt * self.acceleration;
+        self.velocity = self.acceleration;
+        self.position += dt * self.velocity;
         self.rotation += dt * self.rot_accel;
         self.rotation = wrap_angle(self.rotation);
     }

@@ -42,7 +42,7 @@ impl AqState {
 
         let console = Console::with_hotkey(K_CLI);
 
-        let contraptions = vec![Contraption::rope(40), Contraption::rope(20)];
+        let contraptions = vec![Contraption::rope(10)];
 
         Self {
             now_secs: 0.0,

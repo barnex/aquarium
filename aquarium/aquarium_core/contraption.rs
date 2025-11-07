@@ -58,6 +58,7 @@ impl Contraption {
 
     pub(crate) fn minor_tick(&mut self, dt: f32) {
         self.update_forces();
+        self.add_drag_forces();
         self.damping_tick(dt);
         //self.verlet_tick();
     }
@@ -68,7 +69,6 @@ impl Contraption {
     }
 
     fn verlet_tick(&mut self, dt: f32) {
-
         //                                                      <-----<--------
         //self.bones[0].body.position = vec2(600.0, 150.0); //                   ^
         self.bones.iter_mut().for_each(|b| b.update_accel()); //          |
@@ -88,11 +88,26 @@ impl Contraption {
         }
     }
 
+    fn add_drag_forces(&mut self) {
+        for bone in &mut self.bones {
+            let v = bone.velocity;
+            let vn = v.normalized();
+            let n = rot90(vn);
+            let w = bone.transform_vector(vec2::EX); // todo: take length into account.
+
+            let lift = -1.0*n * cross(v, w) * v.dot(w);
+            log::info!("v:{v}, lift:{lift}");
+
+            if lift.is_finite() {
+                bone.force += lift;
+            }
+        }
+    }
+
     fn update_forces(&mut self) {
         let g = self.g;
         for bone in &mut self.bones {
             bone.force = vec2(0.0, g);
-            //bone.body.force = default();
             bone.torque = default();
         }
 
@@ -152,4 +167,8 @@ impl Contraption {
 
 fn cross(a: vec2f, b: vec2f) -> f32 {
     a.x() * b.y() - a.y() * b.x()
+}
+
+fn rot90(v: vec2f) -> vec2f {
+    vec2(v.y(), -v.x())
 }
