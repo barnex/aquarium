@@ -31,7 +31,7 @@ pub const L_CLI: u8 = 7;
 
 /// Scenegraph, sounds, etc. to output after a tick.
 /// Sent to the browser who will render it.
-#[derive(Default, Debug, PartialEq, Eq)]
+#[derive(Default, Debug, PartialEq)]
 pub struct Out {
     pub viewport_size: vec2u,
     pub layers: Vec<Layer>,
@@ -39,18 +39,25 @@ pub struct Out {
 }
 
 /// Command to draw a sprite.
-#[derive(Debug, PartialEq, Eq)]
+#[derive(Debug, PartialEq)]
 pub struct DrawSprite {
     pub sprite: Sprite,
     pub pos: vec2i,
     pub dst_size: Option<vec2<NonZeroU8>>,
     pub src_pos: Option<vec2u8>,
+    pub rot: f32,
 }
 
 impl DrawSprite {
     /// Draw sprite at position. Natural size.
     pub fn at_pos(sprite: Sprite, pos: vec2i) -> Self {
-        Self { sprite, pos, dst_size: None, src_pos: None }
+        Self {
+            sprite,
+            pos,
+            dst_size: None,
+            src_pos: None,
+            rot: 0.0,
+        }
     }
 
     pub fn with_size(self, dst_size: vec2u8) -> Self {
@@ -67,7 +74,7 @@ impl DrawSprite {
     }
 }
 
-#[derive(Default, Debug, PartialEq, Eq)]
+#[derive(Default, Debug, PartialEq)]
 pub struct Layer {
     pub sprites: Vec<DrawSprite>,
     pub lines: Vec<Line>,
@@ -86,11 +93,15 @@ impl Out {
 
     /// Draw sprite in screen coordinates (i.e. ignoring camera).
     pub fn draw_sprite_screen(&mut self, layer: u8, sprite: Sprite, screen_pos: vec2i) {
-        self.layer(layer).sprites.push(DrawSprite::at_pos(sprite, screen_pos));
+        self.draw_sprite(layer, DrawSprite::at_pos(sprite, screen_pos));
     }
 
     pub fn draw_sprite_screen_with_size(&mut self, layer: u8, sprite: Sprite, pos: vec2i, dst_size: vec2u8) {
-        self.layer(layer).sprites.push(DrawSprite::at_pos(sprite, pos).with_size(dst_size));
+        self.draw_sprite(layer, DrawSprite::at_pos(sprite, pos).with_size(dst_size));
+    }
+
+    pub fn draw_sprite(&mut self, layer: u8, cmd: DrawSprite) {
+        self.layer(layer).sprites.push(cmd)
     }
 
     /// Draw a portion of sprite (E.g. sprite from atlas).

@@ -26,6 +26,11 @@ impl G {
         out.draw_sprite_screen(layer, sprite, world_pos - self.camera_pos);
     }
 
+    pub fn draw_sprite_rot(&self, out: &mut Out, layer: u8, sprite: Sprite, world_pos: vec2i, rot: f32) {
+        let pos = world_pos - self.camera_pos;
+        out.draw_sprite(layer, DrawSprite { sprite, pos, dst_size: None, src_pos: None, rot });
+    }
+
     pub fn draw_text(&self, out: &mut Out, layer: u8, text: &str, world_pos: vec2i) {
         out.draw_text(layer, world_pos - self.camera_pos, text);
     }
@@ -120,7 +125,8 @@ fn draw_resources(g: &G, out: &mut Out) {
 
 fn draw_pawns(g: &G, out: &mut Out) {
     for pawn in visible_pawns(g) {
-        g.draw_sprite(out, L_SPRITES, pawn.typ.sprite(), pawn.tile.pos());
+        //g.draw_sprite(out, L_SPRITES, pawn.typ.sprite(), pawn.tile.pos());
+        g.draw_sprite_rot(out, L_SPRITES, pawn.typ.sprite(), pawn.tile.pos(), 1.0);
         if let Some(res) = pawn.cargo.get() {
             g.draw_sprite(out, L_SPRITES + 1, res.sprite(), pawn.tile.pos() + vec2(0, 8));
         }
