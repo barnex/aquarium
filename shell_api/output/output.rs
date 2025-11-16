@@ -35,6 +35,8 @@ pub const L_CLI: u8 = 7;
 pub struct Out {
     pub viewport_size: vec2u,
     pub layers: Vec<Layer>,
+    pub bloom: bool,
+    pub vignette: bool,
     pub debug: String,
 }
 

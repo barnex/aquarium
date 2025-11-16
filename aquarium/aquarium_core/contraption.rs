@@ -96,7 +96,7 @@ impl Contraption {
             let w = bone.transform_vector(vec2::EX); // todo: take length into account.
 
             let lift = -1.0 * n * cross(v, w) * v.dot(w);
-            log::info!("v:{v}, lift:{lift}");
+            //log::info!("v:{v}, lift:{lift}");
 
             if lift.is_finite() {
                 let lift = lift.map(|v| v.clamp(-1.0, 1.0));

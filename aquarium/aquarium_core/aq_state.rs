@@ -140,6 +140,7 @@ impl AqState {
     fn draw(&self, out: &mut Out) {
         draw_background(out);
         self.contraptions.iter().for_each(|v| v.draw(out));
+        out.bloom = true;
     }
 
     fn update_inputs(&mut self, now_secs: f64, events: impl Iterator<Item = InputEvent>) {
