@@ -159,3 +159,19 @@ fn wrap_angle(theta: f32) -> f32 {
     }
     theta
 }
+
+fn draw_body(out: &mut Out, body: &RigidBody) {
+    let pos = body.position.as_i32();
+    let color = RGBA::WHITE;
+
+    // draw center
+    let s = vec2(2, 2);
+    out.draw_rect_screen(L_SPRITES, Rectangle::new((pos - s, pos + s), color));
+
+    // draw frame/axes
+    let ax_len = 15.0;
+    let x = body.transform_rel_pos(vec2::EX * ax_len).as_i32();
+    let y = body.transform_rel_pos(vec2::EY * ax_len).as_i32();
+    out.draw_line_screen(L_SPRITES, Line::new(pos, x).with_color(color));
+    out.draw_line_screen(L_SPRITES, Line::new(pos, y).with_color(color));
+}
