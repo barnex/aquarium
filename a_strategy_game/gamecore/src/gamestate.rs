@@ -104,7 +104,7 @@ impl G {
             ui: Ui::new(),
             viewport_size: vec2(0, 0),
             water: default(),
-            console: default(),
+            console: Console::with_hotkey(K_CLI),
         }
     }
 

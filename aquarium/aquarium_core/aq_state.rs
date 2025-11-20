@@ -57,7 +57,7 @@ impl AqState {
             controlled_contraption: 0,
             follow_mouse: false,
             crawl_amplitude: 0.2,
-            crawl_frequency: -0.3,
+            crawl_frequency: 0.3,
             crawl_wavenumber: 0.8,
             crawl_gamma: 1.0,
             dt: 0.02,
