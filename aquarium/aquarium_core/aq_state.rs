@@ -23,10 +23,6 @@ pub struct AqState {
     mouse_filter: [vec2f; 3],
 
     pub dt: f32,
-    pub crawl_amplitude: f32,
-    pub crawl_wavenumber: f32,
-    pub crawl_frequency: f32,
-    pub crawl_gamma: f32,
     pub speed: u32,
 }
 
@@ -56,10 +52,6 @@ impl AqState {
             mouse_filter: default(),
             controlled_contraption: 0,
             follow_mouse: false,
-            crawl_amplitude: 0.2,
-            crawl_frequency: 0.3,
-            crawl_wavenumber: 0.8,
-            crawl_gamma: 1.0,
             dt: 0.02,
             speed: 1,
         }
@@ -83,24 +75,7 @@ impl AqState {
     }
 
     fn tick_contraptions(&mut self) {
-        self.contraptions.iter_mut().for_each(|v| v.tick(self.dt));
-        self.tick_crawl_test();
-    }
-
-    fn tick_crawl_test(&mut self) {
-        let Some(contraption) = self.contraptions.get_mut(self.controlled_contraption) else { return };
-        let t = self.now_secs as f32;
-
-        for (i, spring) in contraption.springs.iter_mut().enumerate() {
-            let x = i as f32;
-            let a = f32::sin(2.0 * PI * t * self.crawl_frequency + x * self.crawl_wavenumber);
-            let a = a.abs().powf(self.crawl_gamma) * a.signum();
-            let a = self.crawl_amplitude * a;
-            spring.sin_angle = a;
-            //if i == 0 {
-            //    log::trace!("angle {}", spring.sin_angle);
-            //}
-        }
+        self.contraptions.iter_mut().for_each(|v| v.tick(self.now_secs, self.dt));
     }
 
     fn tick_manual_control(&mut self) {
@@ -167,21 +142,21 @@ impl AqState {
             ["pause"] => Ok(toggle(&mut self.paused)),
             ["reset"] => Ok(self.reset()),
             ["ctl", i] => Ok(self.controlled_contraption = i.parse()?),
-            ["s", s] => Ok(self.controlled_contraption()?.stiffness = s.parse()?),
-            ["n", n] => Ok(*self.controlled_contraption()? = Contraption::rope(n.parse()?)),
-            ["g", g] => Ok(self.controlled_contraption()?.g = g.parse()?),
+            ["s", s] => Ok(self.worm1()?.stiffness = s.parse()?),
+            ["n", n] => Ok(*self.worm1()? = Contraption::rope(n.parse()?)),
+            ["g", g] => Ok(self.worm1()?.g = g.parse()?),
             ["k", k] => Ok({
                 let k = k.parse()?;
-                self.controlled_contraption()?.springs.iter_mut().for_each(|s| s.k = k)
+                self.worm1()?.springs.iter_mut().for_each(|s| s.k = k)
             }),
             ["angle", a] => Ok({
                 let a = f32::sin(a.parse()?);
-                self.controlled_contraption()?.springs.iter_mut().for_each(|s| s.sin_angle = a)
+                self.worm1()?.springs.iter_mut().for_each(|s| s.sin_angle = a)
             }),
-            ["ca", v] => Ok(self.crawl_amplitude = v.parse::<f32>()?),
-            ["cf", v] => Ok(self.crawl_frequency = v.parse::<f32>()?),
-            ["cw", v] => Ok(self.crawl_wavenumber = v.parse::<f32>()?),
-            ["cg", v] => Ok(self.crawl_gamma = v.parse::<f32>()?),
+            ["ca", v] => Ok(self.worm1()?.crawl_amplitude = v.parse::<f32>()?),
+            ["cf", v] => Ok(self.worm1()?.crawl_frequency = v.parse::<f32>()?),
+            ["cw", v] => Ok(self.worm1()?.crawl_wavenumber = v.parse::<f32>()?),
+            ["cg", v] => Ok(self.worm1()?.crawl_gamma = v.parse::<f32>()?),
             ["mouse"] => Ok(toggle(&mut self.follow_mouse)),
             ["mouse", v] => Ok(self.follow_mouse = v.parse()?),
             ["dt", v] => Ok(self.dt = v.parse()?),
@@ -190,7 +165,7 @@ impl AqState {
         }
     }
 
-    fn controlled_contraption(&mut self) -> Result<&mut Contraption> {
+    fn worm1(&mut self) -> Result<&mut Contraption> {
         self.contraptions.get_mut(self.controlled_contraption).ok_or_else(|| anyhow!("there is no contraption #{}", self.controlled_contraption))
     }
 }
