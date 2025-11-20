@@ -4,7 +4,7 @@ version = "1.0.0"
 edition = "2024"
 
 [lib]
-path = "aquarium_core.rs"
+path = "lib_aquarium.rs"
 
 [dependencies]
 anyhow = { workspace = true }

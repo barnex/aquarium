@@ -13,7 +13,7 @@ pub struct AqState {
 
     pub console: Console,
 
-    pub contraptions: Vec<Contraption>,
+    pub critters: Vec<Critter>,
 
     // commands and keypresses control this contraption.
     pub controlled_contraption: usize,
@@ -39,7 +39,7 @@ impl AqState {
 
         let console = Console::with_hotkey(K_CLI);
 
-        let contraptions = vec![Contraption::rope(10)];
+        let critters = vec![Critter::new(4)];
 
         Self {
             now_secs: 0.0,
@@ -48,7 +48,7 @@ impl AqState {
             keymap,
             inputs: default(),
             console,
-            contraptions,
+            critters,
             mouse_filter: default(),
             controlled_contraption: 0,
             follow_mouse: false,
@@ -75,7 +75,7 @@ impl AqState {
     }
 
     fn tick_contraptions(&mut self) {
-        self.contraptions.iter_mut().for_each(|v| v.tick(self.now_secs, self.dt));
+        self.critters.iter_mut().for_each(|v| v.tick(self.now_secs, self.dt));
     }
 
     fn tick_manual_control(&mut self) {
@@ -101,8 +101,8 @@ impl AqState {
         let speed = 1.0;
 
         if self.follow_mouse {
-            if let Some(c) = self.contraptions.get_mut(self.controlled_contraption) {
-                if let Some(b) = c.bones.get_mut(0) {
+            if let Some(c) = self.critters.get_mut(self.controlled_contraption) {
+                if let Some(b) = c.body.bones.get_mut(0) {
                     //b.body.position += speed * delta;
                     //b.body.velocity = speed * delta;
                     //b.body.position = self.inputs.mouse_position().as_();
@@ -114,7 +114,7 @@ impl AqState {
 
     fn draw(&self, out: &mut Out) {
         draw_background(out);
-        self.contraptions.iter().for_each(|v| v.draw(out));
+        self.critters.iter().for_each(|v| v.draw(out));
         out.bloom = true;
     }
 
@@ -142,16 +142,16 @@ impl AqState {
             ["pause"] => Ok(toggle(&mut self.paused)),
             ["reset"] => Ok(self.reset()),
             ["ctl", i] => Ok(self.controlled_contraption = i.parse()?),
-            ["s", s] => Ok(self.worm1()?.stiffness = s.parse()?),
-            ["n", n] => Ok(*self.worm1()? = Contraption::rope(n.parse()?)),
-            ["g", g] => Ok(self.worm1()?.g = g.parse()?),
+            ["s", s] => Ok(self.worm1()?.body.stiffness = s.parse()?),
+            ["n", n] => Ok(*self.worm1()? = Critter::new(n.parse()?)),
+            ["g", g] => Ok(self.worm1()?.body.g = g.parse()?),
             ["k", k] => Ok({
                 let k = k.parse()?;
-                self.worm1()?.springs.iter_mut().for_each(|s| s.k = k)
+                self.worm1()?.body.springs.iter_mut().for_each(|s| s.k = k)
             }),
             ["angle", a] => Ok({
                 let a = f32::sin(a.parse()?);
-                self.worm1()?.springs.iter_mut().for_each(|s| s.sin_angle = a)
+                self.worm1()?.body.springs.iter_mut().for_each(|s| s.sin_angle = a)
             }),
             ["ca", v] => Ok(self.worm1()?.crawl_amplitude = v.parse::<f32>()?),
             ["cf", v] => Ok(self.worm1()?.crawl_frequency = v.parse::<f32>()?),
@@ -165,8 +165,8 @@ impl AqState {
         }
     }
 
-    fn worm1(&mut self) -> Result<&mut Contraption> {
-        self.contraptions.get_mut(self.controlled_contraption).ok_or_else(|| anyhow!("there is no contraption #{}", self.controlled_contraption))
+    fn worm1(&mut self) -> Result<&mut Critter> {
+        self.critters.get_mut(self.controlled_contraption).ok_or_else(|| anyhow!("there is no contraption #{}", self.controlled_contraption))
     }
 }
 

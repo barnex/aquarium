@@ -1,5 +1,6 @@
 use crate::prelude::*;
 
+
 /// A contraption made of rigid bodies connected via springs.
 #[derive(Serialize, Deserialize)]
 pub struct Contraption {
@@ -8,11 +9,6 @@ pub struct Contraption {
     pub bone_len: f32,
     pub stiffness: f32,
     pub springs: Vec<Spring>,
-
-    pub crawl_amplitude: f32,
-    pub crawl_wavenumber: f32,
-    pub crawl_frequency: f32,
-    pub crawl_gamma: f32,
 }
 
 impl Contraption {
@@ -42,11 +38,6 @@ impl Contraption {
             springs,
             g: 0.0,
             stiffness: 50.0,
-
-            crawl_amplitude: 0.2,
-            crawl_frequency: 0.3,
-            crawl_wavenumber: 0.8,
-            crawl_gamma: 1.0,
         }
     }
 
@@ -60,21 +51,9 @@ impl Contraption {
         }
     }
 
-    pub(crate) fn tick(&mut self, t: f64, dt: f32) {
-        self.tick_crawl_test(t);
+    pub(crate) fn tick(&mut self, dt: f32) {
         for _i in 0..10 {
             self.minor_tick(dt);
-        }
-    }
-
-    fn tick_crawl_test(&mut self, t: f64) {
-        let t = t as f32;
-        for (i, spring) in self.springs.iter_mut().enumerate() {
-            let x = i as f32;
-            let a = f32::sin(2.0 * PI * t * self.crawl_frequency + x * self.crawl_wavenumber);
-            let a = a.abs().powf(self.crawl_gamma) * a.signum();
-            let a = self.crawl_amplitude * a;
-            spring.sin_angle = a;
         }
     }
 
