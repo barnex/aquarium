@@ -1,6 +1,5 @@
 use crate::prelude::*;
 
-
 /// A contraption made of rigid bodies connected via springs.
 #[derive(Serialize, Deserialize)]
 pub struct Contraption {
