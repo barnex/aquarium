@@ -31,6 +31,7 @@ impl Tilemap {
         }
     }
 
+    #[inline]
     fn index(&self, idx: vec2i16) -> usize {
         idx.y() as usize * self.size().x() as usize + idx.x() as usize
     }

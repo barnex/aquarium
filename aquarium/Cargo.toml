@@ -1,3 +1,6 @@
+# WARNING: This Cargo.toml file is for binary `aquarium_mq` only.
+# See `aquarium_core/Cargo.toml`.
+# 
 [package]
 name = "aquarium"
 version = "3.0.0"

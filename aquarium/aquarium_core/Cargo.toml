@@ -1,3 +1,5 @@
+# Cargo.toml for crate `aquarium_core`
+
 [package]
 name = "aquarium_core"
 version = "1.0.0"
@@ -10,15 +12,18 @@ path = "lib_aquarium.rs"
 anyhow = { workspace = true }
 core_util = { workspace = true }
 fixed_str = { workspace = true }
+fnv = { workspace = true }
 gamelib = { workspace = true }
+geometry = { workspace = true }
 itertools = { workspace = true }
 log = { workspace = true }
 matrix = { workspace = true }
 proc_macros = { workspace = true }
+rand = { workspace = true }
+rand_chacha = { workspace = true }
 serde = { workspace = true }
 shell_api = { workspace = true }
 vector = { workspace = true }
-fnv = { workspace = true }
 
 [profile.dev]
 debug = "line-tables-only"

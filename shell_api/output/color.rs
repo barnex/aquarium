@@ -12,6 +12,7 @@ impl RGB {
     pub const YELLOW: Self = Self([255, 255, 0]);
     pub const GREEN: Self = Self([0, 255, 0]);
     pub const BLUE: Self = Self([0, 0, 255]);
+    pub const CYAN: Self = Self([0, 255, 255]);
     pub const WHITE: Self = Self([255, 255, 255]);
 
     pub const fn new(r: u8, g: u8, b: u8) -> Self {
