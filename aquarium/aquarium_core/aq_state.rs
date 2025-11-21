@@ -16,7 +16,7 @@ pub struct AqState {
     pub critters: Vec<Critter>,
 
     // commands and keypresses control this contraption.
-    pub controlled_contraption: usize,
+    pub selected_critter: Option<usize>,
     pub follow_mouse: bool,
 
     // filter for smooth manual control
@@ -50,7 +50,7 @@ impl AqState {
             console,
             critters,
             mouse_filter: default(),
-            controlled_contraption: 0,
+            selected_critter: Some(0),
             follow_mouse: false,
             dt: 0.02,
             speed: 1,
@@ -101,7 +101,7 @@ impl AqState {
         let speed = 1.0;
 
         if self.follow_mouse {
-            if let Some(c) = self.critters.get_mut(self.controlled_contraption) {
+            if let Some(c) = self.selected_critter.and_then(|i| self.critters.get_mut(i)) {
                 if let Some(b) = c.body.bones.get_mut(0) {
                     //b.body.position += speed * delta;
                     //b.body.velocity = speed * delta;
@@ -115,6 +115,9 @@ impl AqState {
     fn draw(&self, out: &mut Out) {
         draw_background(out);
         self.critters.iter().for_each(|v| v.draw(out));
+        if let Some(sel) = self.selected_critter() {
+            sel.brain.draw(out)
+        }
         out.bloom = true;
     }
 
@@ -141,22 +144,22 @@ impl AqState {
         match cmd.trim().split_ascii_whitespace().collect_vec().as_slice() {
             ["pause"] => Ok(toggle(&mut self.paused)),
             ["reset"] => Ok(self.reset()),
-            ["ctl", i] => Ok(self.controlled_contraption = i.parse()?),
-            ["s", s] => Ok(self.worm1()?.body.stiffness = s.parse()?),
-            ["n", n] => Ok(*self.worm1()? = Critter::new(n.parse()?)),
-            ["g", g] => Ok(self.worm1()?.body.g = g.parse()?),
+            ["sel" | "select", i] => Ok(self.selected_critter = Some(i.parse()?)),
+            ["s", s] => Ok(self.selected_critter_mut()?.body.stiffness = s.parse()?),
+            ["n", n] => Ok(*self.selected_critter_mut()? = Critter::new(n.parse()?)),
+            ["g", g] => Ok(self.selected_critter_mut()?.body.g = g.parse()?),
             ["k", k] => Ok({
                 let k = k.parse()?;
-                self.worm1()?.body.springs.iter_mut().for_each(|s| s.k = k)
+                self.selected_critter_mut()?.body.springs.iter_mut().for_each(|s| s.k = k)
             }),
             ["angle", a] => Ok({
                 let a = f32::sin(a.parse()?);
-                self.worm1()?.body.springs.iter_mut().for_each(|s| s.sin_angle = a)
+                self.selected_critter_mut()?.body.springs.iter_mut().for_each(|s| s.sin_angle = a)
             }),
-            ["ca", v] => Ok(self.worm1()?.crawl_amplitude = v.parse::<f32>()?),
-            ["cf", v] => Ok(self.worm1()?.crawl_frequency = v.parse::<f32>()?),
-            ["cw", v] => Ok(self.worm1()?.crawl_wavenumber = v.parse::<f32>()?),
-            ["cg", v] => Ok(self.worm1()?.crawl_gamma = v.parse::<f32>()?),
+            ["ca", v] => Ok(self.selected_critter_mut()?.crawl_amplitude = v.parse::<f32>()?),
+            ["cf", v] => Ok(self.selected_critter_mut()?.crawl_frequency = v.parse::<f32>()?),
+            ["cw", v] => Ok(self.selected_critter_mut()?.crawl_wavenumber = v.parse::<f32>()?),
+            ["cg", v] => Ok(self.selected_critter_mut()?.crawl_gamma = v.parse::<f32>()?),
             ["mouse"] => Ok(toggle(&mut self.follow_mouse)),
             ["mouse", v] => Ok(self.follow_mouse = v.parse()?),
             ["dt", v] => Ok(self.dt = v.parse()?),
@@ -165,8 +168,12 @@ impl AqState {
         }
     }
 
-    fn worm1(&mut self) -> Result<&mut Critter> {
-        self.critters.get_mut(self.controlled_contraption).ok_or_else(|| anyhow!("there is no contraption #{}", self.controlled_contraption))
+    fn selected_critter_mut(&mut self) -> Result<&mut Critter> {
+        self.selected_critter.and_then(|i| self.critters.get_mut(i)).ok_or_else(|| anyhow!("there is no critter #{:?}", self.selected_critter))
+    }
+
+    fn selected_critter(&self) -> Option<&Critter> {
+        self.selected_critter.and_then(|i| self.critters.get(i))
     }
 }
 
@@ -189,7 +196,6 @@ impl shell_api::GameCore for AqState {
 fn toggle(v: &mut bool) {
     *v = !*v
 }
-
 
 fn draw_background(out: &mut Out) {
     let (w, h) = out.viewport_size.as_i32().into();

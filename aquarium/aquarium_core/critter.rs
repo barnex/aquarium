@@ -3,6 +3,7 @@ use crate::prelude::*;
 #[derive(Serialize, Deserialize)]
 pub struct Critter {
     pub body: Contraption,
+    pub brain: Brain,
 
     pub crawl_amplitude: f32,
     pub crawl_wavenumber: f32,
@@ -12,8 +13,11 @@ pub struct Critter {
 
 impl Critter {
     pub fn new(len: usize) -> Self {
+        let brain = Brain::new([4, 4]);
+
         Self {
             body: Contraption::rope(len),
+            brain,
             crawl_amplitude: 0.2,
             crawl_frequency: 0.3,
             crawl_wavenumber: 0.8,
