@@ -13,9 +13,7 @@ pub struct AqState {
 
     pub console: Console,
 
-    
-    pub critters: Vec<Critter>,
-    
+    pub world: World,
 
     // commands and keypresses control this contraption.
     pub selected_critter: Option<usize>,
@@ -41,7 +39,7 @@ impl AqState {
 
         let console = Console::with_hotkey(K_CLI);
 
-        let critters = vec![Critter::new(4)];
+        let world = World::test();
 
         Self {
             now_secs: 0.0,
@@ -50,7 +48,7 @@ impl AqState {
             keymap,
             inputs: default(),
             console,
-            critters,
+            world,
             mouse_filter: default(),
             selected_critter: Some(0),
             follow_mouse: false,
@@ -69,16 +67,13 @@ impl AqState {
 
         if !self.paused || self.inputs.is_down(K_TICK) {
             for _ in 0..self.speed {
-                self.tick_contraptions();
+                self.world.tick(self.now_secs, self.dt);
             }
         }
 
         self.draw(out);
     }
 
-    fn tick_contraptions(&mut self) {
-        self.critters.iter_mut().for_each(|v| v.tick(self.now_secs, self.dt));
-    }
 
     fn tick_manual_control(&mut self) {
         let mut delta = vec2f::ZERO;
@@ -103,7 +98,7 @@ impl AqState {
         let speed = 1.0;
 
         if self.follow_mouse {
-            if let Some(c) = self.selected_critter.and_then(|i| self.critters.get_mut(i)) {
+            if let Some(c) = self.selected_critter.and_then(|i| self.world.critters.get_mut(i)) {
                 if let Some(b) = c.body.bones.get_mut(0) {
                     //b.body.position += speed * delta;
                     //b.body.velocity = speed * delta;
@@ -115,8 +110,7 @@ impl AqState {
     }
 
     fn draw(&self, out: &mut Out) {
-        draw_background(out);
-        self.critters.iter().for_each(|v| v.draw(out));
+        self.world.draw(out);
         if let Some(sel) = self.selected_critter() {
             sel.brain.draw(out)
         }
@@ -171,11 +165,11 @@ impl AqState {
     }
 
     fn selected_critter_mut(&mut self) -> Result<&mut Critter> {
-        self.selected_critter.and_then(|i| self.critters.get_mut(i)).ok_or_else(|| anyhow!("there is no critter #{:?}", self.selected_critter))
+        self.selected_critter.and_then(|i| self.world.critters.get_mut(i)).ok_or_else(|| anyhow!("there is no critter #{:?}", self.selected_critter))
     }
 
     fn selected_critter(&self) -> Option<&Critter> {
-        self.selected_critter.and_then(|i| self.critters.get(i))
+        self.selected_critter.and_then(|i| self.world.critters.get(i))
     }
 }
 
@@ -199,11 +193,6 @@ fn toggle(v: &mut bool) {
     *v = !*v
 }
 
-fn draw_background(out: &mut Out) {
-    let (w, h) = out.viewport_size.as_i32().into();
-    let bg = [0, 0, 80];
-    out.draw_rect_screen(0, Rectangle::from((((0, 0), (w, h)), bg)).with_fill(bg));
-}
 
 fn not_found() -> Error {
     anyhow!("does not exist")
