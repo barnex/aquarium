@@ -121,6 +121,7 @@ dependencies = [
  "itertools",
  "log",
  "matrix",
+ "num-traits",
  "proc_macros",
  "rand",
  "rand_chacha",

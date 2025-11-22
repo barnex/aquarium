@@ -13,7 +13,7 @@ pub struct Critter {
 
 impl Critter {
     pub fn new(len: usize) -> Self {
-        let mut brain = Brain::new([16, (len + 5) as u32]);
+        let mut brain = Brain::new([8, (len + 5) as u32]);
 
         let mut rng = ChaCha8Rng::seed_from_u64(123);
         //brain.signals.iter_mut().for_each(|v| *v = rng.gen_range(-2.0..=2.0));
@@ -42,13 +42,14 @@ impl Critter {
         let brain = &mut self.brain.signals;
 
         let y0 = brain.size().y() as usize - bones.len();
-        let ix = (brain.size().x() / 2) as usize;
+        let ix1 = 0;
+        let ix2 = (brain.size().x() - 1).as_();
 
-        for ((i1, b1), (i2, b2)) in bones.iter().enumerate().tuple_windows() {
-            let y = y0 + i1;
+        for ((i1, b1), (_, b2)) in bones.iter().enumerate().tuple_windows() {
             let angle = b1.direction().cross(b2.direction());
-            brain.set(vec2(ix-1, y).as_u32(), 7.0 * angle);
-            brain.set(vec2(ix, y).as_u32(), -7.0 * angle);
+            let y = y0 + i1;
+            brain.set(vec2(ix1, y).as_u32(), 7.0 * angle);
+            brain.set(vec2(ix2, y).as_u32(), -7.0 * angle);
         }
     }
 
