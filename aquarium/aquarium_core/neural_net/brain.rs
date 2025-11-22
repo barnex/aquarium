@@ -2,6 +2,35 @@ use std::iter::zip;
 
 use crate::prelude::*;
 
+/*
+        --- --- --- --- --- --- --- --- ---
+       | v | v | v | v | v | v | v | v | v |
+        --- --- --- --- --- --- --- --- ---
+       |   |   |   |   |   |   |   |   |   |
+        --- --- --- --- --- --- --- --- ---
+       |   |   |   |   |   |   |   |   |   |
+        --- --- --- --- --- --- --- --- ---
+       |   |   |   | L |   | R |   |   |   |
+        --- --- --- --- --- --- --- --- ---
+       |   |   |   |   |   |   |   |   |   |
+        --- --- --- --- --- --- --- --- ---
+       |   |   |   |*l*|   |*r*|   |   |   |
+        --- --- --- --- --- --- --- --- ---
+       |   |   |   |   |   |   |   |   |   |
+        --- --- --- --- --- --- --- --- ---
+       |   |   |   | L |   | R |   |   |   |
+        --- --- --- --- --- --- --- --- ---
+       |   |   |   |   |   |   |   |   |   |
+        --- --- --- --- --- --- --- --- ---
+       |   |   |   |*l*|   |*r*|   |   |   |
+        --- --- --- --- --- --- --- --- ---
+       |   |   |   |   |   |   |   |   |   |
+        --- --- --- --- --- --- --- --- ---
+       |   |   |   | L |   | R |   |   |   |
+        --- --- --- --- --- --- --- --- ---
+
+*/
+
 #[derive(Serialize, Deserialize)]
 pub struct Brain {
     pub signals: Vec2D<f32>,
@@ -58,7 +87,7 @@ impl Brain {
         //out.draw_text(l, (0, 0), format!("brain {}", self.size()));
 
         let offset = vec2i(10, 10);
-        let stroke = RGBA::WHITE;
+        let stroke = RGBA::DARK_GRAY;
         let stride = vec2i(8, 8);
 
         let mut fill_rect = |pos, fill| out.draw_rect_screen(l, Rectangle::with_size(pos, stride + 1, stroke).with_fill(fill).translated(offset));

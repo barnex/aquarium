@@ -14,6 +14,7 @@ impl RGB {
     pub const BLUE: Self = Self([0, 0, 255]);
     pub const CYAN: Self = Self([0, 255, 255]);
     pub const WHITE: Self = Self([255, 255, 255]);
+    pub const GRAY: Self = Self([128, 128, 128]);
 
     pub const fn new(r: u8, g: u8, b: u8) -> Self {
         Self([r, g, b])
@@ -56,6 +57,8 @@ impl RGBA {
     pub const GREEN: Self = Self([0, 255, 0, 255]);
     pub const BLUE: Self = Self([0, 0, 255, 255]);
     pub const WHITE: Self = Self([255, 255, 255, 255]);
+    pub const GRAY: Self = Self([128, 128, 128, 255]);
+    pub const DARK_GRAY: Self = Self([64, 64, 64, 255]);
     pub const TRANSPARENT: Self = Self([0, 0, 0, 0]);
 
     pub const fn new(r: u8, g: u8, b: u8, a: u8) -> Self {

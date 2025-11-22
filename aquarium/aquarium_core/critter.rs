@@ -13,7 +13,7 @@ pub struct Critter {
 
 impl Critter {
     pub fn new(len: usize) -> Self {
-        let mut brain = Brain::new([20, 3]);
+        let mut brain = Brain::new([16, (len + 5) as u32]);
 
         let mut rng = ChaCha8Rng::seed_from_u64(123);
         //brain.signals.iter_mut().for_each(|v| *v = rng.gen_range(-2.0..=2.0));
@@ -29,13 +29,30 @@ impl Critter {
     }
 
     pub fn tick(&mut self, t: f64, dt: f32, food: &[vec2f]) {
-        self.brain.update();
+        self.brain.update(); // <<< TODO: don't overwrite input neurons, annoying for visualization
         self.update_vision(food);
+        self.update_body_sense();
         self.tick_crawl_test(t);
         self.body.tick(dt);
         // brain & sensory
     }
 
+    fn update_body_sense(&mut self) {
+        let bones = &self.body.bones;
+        let brain = &mut self.brain.signals;
+
+        let y0 = brain.size().y() as usize - bones.len();
+        let ix = (brain.size().x() / 2) as usize;
+
+        for ((i1, b1), (i2, b2)) in bones.iter().enumerate().tuple_windows() {
+            let y = y0 + i1;
+            let angle = b1.direction().cross(b2.direction());
+            brain.set(vec2(ix-1, y).as_u32(), 7.0 * angle);
+            brain.set(vec2(ix, y).as_u32(), -7.0 * angle);
+        }
+    }
+
+    /// Set signals of vision neurons (layer 0) to see food.
     fn update_vision(&mut self, food: &[vec2f]) {
         let head = &self.body.bones[0];
         let matrix = head.rotation_matrix();
@@ -54,6 +71,7 @@ impl Critter {
             let x = dir.dot(ex); //(-1..1)
             let y = dir.dot(ey);
             if y > 0.0 {
+                // only see before you
                 let i = linterp(-1.0, 0.0 + eta / 2.0, 1.0, n - eta / 2.0, x).clamp(0.0, n) as u32;
                 let sig = (1000.0 / dist).clamp(0.0, 1.0);
                 let sig = match sig.is_finite() {
