@@ -74,7 +74,6 @@ impl AqState {
         self.draw(out);
     }
 
-
     fn tick_manual_control(&mut self) {
         let mut delta = vec2f::ZERO;
         if self.inputs.is_down(K_LEFT) {
@@ -111,7 +110,7 @@ impl AqState {
 
     fn draw(&self, out: &mut Out) {
         self.world.draw(out);
-        if let Some(sel) = self.selected_critter() {
+        if let Ok(sel) = self.selected_critter() {
             sel.brain.draw(out)
         }
         out.bloom = true;
@@ -142,7 +141,7 @@ impl AqState {
             ["reset"] => Ok(self.reset()),
             ["sel" | "select", i] => Ok(self.selected_critter = Some(i.parse()?)),
             ["s", s] => Ok(self.selected_critter_mut()?.body.stiffness = s.parse()?),
-            ["n", n] => Ok(*self.selected_critter_mut()? = Critter::new(n.parse()?)),
+            ["n", n] => Ok(*self.selected_critter_mut()? = Critter::new(n.parse()?, self.selected_critter()?.brain.size().x())),
             ["g", g] => Ok(self.selected_critter_mut()?.body.g = g.parse()?),
             ["k", k] => Ok({
                 let k = k.parse()?;
@@ -168,8 +167,8 @@ impl AqState {
         self.selected_critter.and_then(|i| self.world.critters.get_mut(i)).ok_or_else(|| anyhow!("there is no critter #{:?}", self.selected_critter))
     }
 
-    fn selected_critter(&self) -> Option<&Critter> {
-        self.selected_critter.and_then(|i| self.world.critters.get(i))
+    fn selected_critter(&self) -> Result<&Critter> {
+        self.selected_critter.and_then(|i| self.world.critters.get(i)).ok_or_else(|| anyhow!("there is no critter #{:?}", self.selected_critter))
     }
 }
 
@@ -192,7 +191,6 @@ impl shell_api::GameCore for AqState {
 fn toggle(v: &mut bool) {
     *v = !*v
 }
-
 
 fn not_found() -> Error {
     anyhow!("does not exist")

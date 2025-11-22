@@ -12,8 +12,8 @@ pub struct Critter {
 }
 
 impl Critter {
-    pub fn new(len: usize) -> Self {
-        let mut brain = Brain::new([8, (len + 5) as u32]);
+    pub fn new(len: usize, retina: u32) -> Self {
+        let mut brain = Brain::new([retina, (len + 5) as u32]);
 
         let mut rng = ChaCha8Rng::seed_from_u64(123);
         //brain.signals.iter_mut().for_each(|v| *v = rng.gen_range(-2.0..=2.0));
