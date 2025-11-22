@@ -13,7 +13,9 @@ pub struct AqState {
 
     pub console: Console,
 
+    
     pub critters: Vec<Critter>,
+    
 
     // commands and keypresses control this contraption.
     pub selected_critter: Option<usize>,

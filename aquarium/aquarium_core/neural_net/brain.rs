@@ -1,10 +1,11 @@
-use std::{iter::zip, ops::RangeBounds};
+use std::iter::zip;
 
 use crate::prelude::*;
 
 #[derive(Serialize, Deserialize)]
 pub struct Brain {
     pub signals: Vec2D<f32>,
+    pub sigbuf: Vec2D<f32>,
     pub neurons: Vec2D<Neuron>,
 }
 
@@ -18,12 +19,36 @@ impl Brain {
     pub fn new(size: impl Into<vec2u>) -> Self {
         let size = size.into();
         let signals = Vec2D::new(size);
+        let sigbuf = signals.clone();
         let neurons = Vec2D::new(size);
-        Self { signals, neurons }
+        Self { signals, sigbuf, neurons }
     }
 
     pub fn size(&self) -> vec2u {
         self.signals.size()
+    }
+
+    pub fn update(&mut self) {
+        let signals = &self.signals.values;
+        let sigbuf = &mut self.sigbuf.values;
+        let neurons = &self.neurons.values;
+
+        assert!(signals.len() == sigbuf.len());
+        assert!(signals.len() == neurons.len());
+        assert!(sigbuf.len() == neurons.len());
+
+        for i in 0..sigbuf.len() {
+            sigbuf[i] = neurons[i].bias;
+            let weights = &neurons[i].weights;
+            for (k, w) in weights.iter().copied() {
+                sigbuf[i] += w * signals[k as usize];
+            }
+        }
+
+        // Activation function: rectifier + clamp
+        for v in sigbuf {
+            *v = v.clamp(0.0, 1.0);
+        }
     }
 
     pub fn draw(&self, out: &mut Out) {

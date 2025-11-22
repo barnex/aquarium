@@ -1,9 +1,9 @@
 use crate::prelude::*;
 
-#[derive(Serialize, Deserialize)]
+#[derive(Serialize, Deserialize, Clone)]
 pub struct Vec2D<T> {
-    size: vec2u,
-    values: Vec<T>,
+    pub size: vec2u,
+    pub values: Vec<T>,
 }
 
 impl<T: Default> Vec2D<T> {

@@ -16,7 +16,7 @@ impl Critter {
         let mut brain = Brain::new([6, 3]);
 
         let mut rng = ChaCha8Rng::seed_from_u64(123);
-        brain.signals.iter_mut().for_each(|v| *v = rng.gen_range(-2.0..=2.0));
+        //brain.signals.iter_mut().for_each(|v| *v = rng.gen_range(-2.0..=2.0));
 
         Self {
             body: Contraption::rope(len),
