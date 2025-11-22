@@ -15,7 +15,7 @@ impl World {
     }
 
     pub fn tick(&mut self, now: f64, dt: f32) {
-        self.critters.iter_mut().for_each(|v| v.tick(now, dt));
+        self.critters.iter_mut().for_each(|v| v.tick(now, dt, &self.food));
     }
 
     pub(crate) fn draw(&self, out: &mut Out) {

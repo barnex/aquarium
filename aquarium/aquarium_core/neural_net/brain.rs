@@ -45,9 +45,11 @@ impl Brain {
             }
         }
 
+        let signals = &mut self.signals.values;
         // Activation function: rectifier + clamp
-        for v in sigbuf {
-            *v = v.clamp(0.0, 1.0);
+        // + copy to signals
+        for i in 0..sigbuf.len() {
+            signals[i] = sigbuf[i].clamp(0.0, 1.0);
         }
     }
 

@@ -13,7 +13,7 @@ pub struct Critter {
 
 impl Critter {
     pub fn new(len: usize) -> Self {
-        let mut brain = Brain::new([6, 3]);
+        let mut brain = Brain::new([20, 3]);
 
         let mut rng = ChaCha8Rng::seed_from_u64(123);
         //brain.signals.iter_mut().for_each(|v| *v = rng.gen_range(-2.0..=2.0));
@@ -22,15 +22,47 @@ impl Critter {
             body: Contraption::rope(len),
             brain,
             crawl_amplitude: 0.2,
-            crawl_frequency: 0.3,
+            crawl_frequency: -0.3,
             crawl_wavenumber: 0.8,
             crawl_gamma: 1.0,
         }
     }
 
-    pub fn tick(&mut self, t: f64, dt: f32) {
+    pub fn tick(&mut self, t: f64, dt: f32, food: &[vec2f]) {
+        self.brain.update();
+        self.update_vision(food);
         self.tick_crawl_test(t);
         self.body.tick(dt);
+        // brain & sensory
+    }
+
+    fn update_vision(&mut self, food: &[vec2f]) {
+        let head = &self.body.bones[0];
+        let matrix = head.rotation_matrix();
+        // Y = view direction
+        let ey = vec2::from(matrix[0]);
+        // X = sideways (retina) direction
+        let ex = vec2::from(matrix[1]);
+        let or = head.position.as_f32();
+
+        let n = (self.brain.size().x() - 1) as f32;
+        let eta = 1.0 / n;
+
+        for &food in food {
+            let dir = (food - or).normalized();
+            let dist = (food - or).len();
+            let x = dir.dot(ex); //(-1..1)
+            let y = dir.dot(ey);
+            if y > 0.0 {
+                let i = linterp(-1.0, 0.0 + eta / 2.0, 1.0, n - eta / 2.0, x).clamp(0.0, n) as u32;
+                let sig = (1000.0 / dist).clamp(0.0, 1.0);
+                let sig = match sig.is_finite() {
+                    true => sig,
+                    false => 0.0,
+                };
+                self.brain.signals.set(vec2(i, 0), sig);
+            }
+        }
     }
 
     fn tick_crawl_test(&mut self, t: f64) {
@@ -46,5 +78,20 @@ impl Critter {
 
     pub fn draw(&self, out: &mut Out) {
         self.body.draw(out);
+        self.draw_vision(out);
+    }
+
+    fn draw_vision(&self, out: &mut Out) {
+        let head = &self.body.bones[0];
+        let matrix = head.rotation_matrix();
+        let ey = vec2::from(matrix[0]);
+        let ex = vec2::from(matrix[1]);
+
+        let start = head.position.as_f32();
+        let len = 100.0;
+        let forward = start + len * ey;
+        let sideways = start + len * ex;
+        out.draw_line_screen(L_SPRITES + 2, Line::new(start.as_(), forward.as_()).with_color(RGBA::WHITE));
+        out.draw_line_screen(L_SPRITES + 2, Line::new(start.as_(), sideways.as_()).with_color(RGBA::YELLOW));
     }
 }

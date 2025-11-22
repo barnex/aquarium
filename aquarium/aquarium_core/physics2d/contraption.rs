@@ -17,7 +17,7 @@ impl Contraption {
 
         let rot_inertia = mass * bone_len.powi(2); // approx. Ideally should be chosen so that rotational and translational frequencies are equal (for most efficient time step).
 
-        let bones = (0..n).map(|i| RigidBody::new(mass, rot_inertia).with(|v| v.position = vec2f(600.0 - (i as f32) * bone_len, 150.0))).collect_vec();
+        let bones = (0..n).map(|i| RigidBody::new(mass, rot_inertia).with(|v| v.position = vec2f(100.0 - (i as f32) * bone_len, 150.0))).collect_vec();
 
         let springs = (0..(bones.len()))
             .tuple_windows()

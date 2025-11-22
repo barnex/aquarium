@@ -127,6 +127,11 @@ impl RigidBody {
         mat2x2f::from([[cos, -sin], [sin, cos]])
     }
 
+    pub fn direction(&self) -> vec2f {
+        let (sin, cos) = f32::sin_cos(self.rotation);
+        vec2(cos, -sin)
+    }
+
     pub fn transform_rel_pos(&self, rel_pos: vec2f) -> vec2f {
         (self.rotation_matrix() * rel_pos) + self.position
     }
