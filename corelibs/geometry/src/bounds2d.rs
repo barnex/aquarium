@@ -3,6 +3,7 @@ use math::{max, min};
 use std::{
     cmp::PartialOrd,
     ops::{AddAssign, Range},
+    process::Output,
 };
 
 /// TODO: remove MyNumber etc in favor of num_traits
@@ -82,6 +83,16 @@ where
     #[inline]
     pub fn with_size(min: vec2<T>, size: vec2<T>) -> Self {
         Self::new(min, min + size)
+    }
+}
+
+impl<T> Bounds2D<T>
+where
+    T: Copy + PartialOrd + std::fmt::Debug + Add<Output = T> + Sub<Output = T> + num_traits::Num,
+{
+    #[inline]
+    pub fn with_radius(center: vec2<T>, radius: vec2<T>) -> Self {
+        Self::new(center - radius, center + radius)
     }
 }
 

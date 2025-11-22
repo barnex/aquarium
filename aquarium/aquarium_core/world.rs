@@ -3,13 +3,15 @@ use crate::prelude::*;
 #[derive(Serialize, Deserialize)]
 pub struct World {
     pub critters: Vec<Critter>,
+    pub food: Vec<vec2f>,
 }
 
 impl World {
     pub fn test() -> Self {
         let critters = vec![Critter::new(4)];
+        let food = vec![vec2(120.0, 230.0), vec2(110.0, 55.0), vec2(410.0, 100.0)];
 
-        Self { critters }
+        Self { critters, food }
     }
 
     pub fn tick(&mut self, now: f64, dt: f32) {
@@ -19,6 +21,13 @@ impl World {
     pub(crate) fn draw(&self, out: &mut Out) {
         self.draw_background(out);
         self.critters.iter().for_each(|v| v.draw(out));
+        self.food.iter().for_each(|v| self.draw_food(out, *v));
+    }
+
+    fn draw_food(&self, out: &mut Out, pos: vec2f) {
+        let color = RGBA::GREEN;
+        let radius = vec2(2, 2);
+        out.draw_rect_screen(L_SPRITES + 1, Rectangle::with_radius(pos.as_i32(), radius, color));
     }
 
     fn draw_background(&self, out: &mut Out) {
