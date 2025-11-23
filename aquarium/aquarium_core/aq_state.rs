@@ -96,16 +96,15 @@ impl AqState {
             self.mouse_filter[i] = 0.7 * self.mouse_filter[i] + 0.3 * self.mouse_filter[i - 1];
         }
 
-        let speed = 1.0;
-
-        if self.follow_mouse {
-            if let Some(c) = self.selected_critter.and_then(|i| self.world.critters.get_mut(i)) {
-                if let Some(b) = c.body.bones.get_mut(0) {
-                    //b.body.position += speed * delta;
-                    //b.body.velocity = speed * delta;
-                    //b.body.position = self.inputs.mouse_position().as_();
+        if let Some(c) = self.selected_critter.and_then(|i| self.world.critters.get_mut(i)) {
+            if let Some(b) = c.body.bones.get_mut(0) {
+                //b.body.position = self.inputs.mouse_position().as_();
+                if self.follow_mouse {
                     b.position = self.mouse_filter.last().copied().unwrap();
                 }
+                let speed = 1.0;
+                b.position += speed * delta;
+                b.velocity = speed * delta;
             }
         }
 
