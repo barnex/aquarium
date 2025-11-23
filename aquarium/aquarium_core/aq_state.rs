@@ -18,6 +18,7 @@ pub struct AqState {
     // commands and keypresses control this contraption.
     pub selected_critter: Option<usize>,
     pub follow_mouse: bool,
+    pub food_follows_mouse: bool,
 
     // filter for smooth manual control
     mouse_filter: [vec2f; 3],
@@ -52,6 +53,7 @@ impl AqState {
             mouse_filter: default(),
             selected_critter: Some(0),
             follow_mouse: false,
+            food_follows_mouse: false,
             dt: 0.02,
             speed: 1,
         }
@@ -106,6 +108,12 @@ impl AqState {
                 }
             }
         }
+        
+        if self.food_follows_mouse{
+            if let Some(food) = self.world.food.get_mut(0){
+                *food = self.inputs.mouse_position().as_();
+            }
+        }
     }
 
     fn draw(&self, out: &mut Out) {
@@ -157,6 +165,7 @@ impl AqState {
             ["cg", v] => Ok(self.selected_critter_mut()?.crawl_gamma = v.parse::<f32>()?),
             ["mouse"] => Ok(toggle(&mut self.follow_mouse)),
             ["mouse", v] => Ok(self.follow_mouse = v.parse()?),
+            ["mousefood" | "mf"] => Ok(toggle(&mut self.food_follows_mouse)),
             ["dt", v] => Ok(self.dt = v.parse()?),
             ["speed", v] => Ok(self.speed = v.parse()?),
             _ => Err(anyhow!("unknown command: {cmd:?}")),

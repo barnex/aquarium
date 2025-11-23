@@ -32,7 +32,7 @@ impl Critter {
         self.brain.update(); // <<< TODO: don't overwrite input neurons, annoying for visualization
         self.update_vision(food);
         self.update_body_sense();
-        self.tick_crawl_test(t);
+        //self.tick_crawl_test(t);
         self.body.tick(dt);
         // brain & sensory
     }
