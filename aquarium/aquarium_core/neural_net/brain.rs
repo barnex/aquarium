@@ -76,17 +76,22 @@ impl Brain {
         let l = L_SPRITES + 1;
         //out.draw_text(l, (0, 0), format!("brain {}", self.size()));
 
-        let offset = vec2i(10, 10);
         let stroke = RGBA::DARK_GRAY;
-        let stride = vec2i(8, 8);
-
-        let mut fill_rect = |pos, fill| out.draw_rect_screen(l, Rectangle::with_size(pos, stride + 1, stroke).with_fill(fill).translated(offset));
 
         for (idx, v) in self.signals.enumerate() {
-            let pos = idx.as_i32() * stride;
-            fill_rect(pos, RGBA(colormap(v).into()));
+            let pos = self.neuron_to_screen_pos(idx);
+            let size = Self::NEURON_SCREEN_SIZE + 1;
+            let fill = RGBA(colormap(v).into());
+            out.draw_rect_screen(l, Rectangle::with_size(pos, size, stroke).with_fill(fill));
         }
     }
+
+    fn neuron_to_screen_pos(&self, idx: vec2u) -> vec2i {
+        let offset = vec2i(10, 10);
+        idx.as_i32() * Self::NEURON_SCREEN_SIZE + offset
+    }
+
+    const NEURON_SCREEN_SIZE: vec2i = vec2i(8, 8);
 }
 
 fn colormap(v: f32) -> vec4u8 {
