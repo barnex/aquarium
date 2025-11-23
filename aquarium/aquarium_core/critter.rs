@@ -29,10 +29,16 @@ impl Critter {
     }
 
     pub fn tick(&mut self, t: f64, dt: f32, food: &[vec2f]) {
-        self.brain.update(); // <<< TODO: don't overwrite input neurons, annoying for visualization
-        self.update_vision(food);
         self.update_body_sense();
+        self.update_vision(food);
+        self.brain.update(); // <<< TODO: don't overwrite input neurons, annoying for visualization
+
+        // HACK: because they're lost on update
+        self.update_body_sense();
+        self.update_vision(food);
+
         //self.tick_crawl_test(t);
+        self.brain_controls_motion(t);
         self.body.tick(dt);
         // brain & sensory
     }
@@ -50,6 +56,20 @@ impl Critter {
             let y = y0 + i1;
             brain.set(vec2(ix1, y).as_u32(), 7.0 * angle);
             brain.set(vec2(ix2, y).as_u32(), -7.0 * angle);
+        }
+    }
+
+    fn brain_controls_motion(&mut self, t: f64) {
+        let bones = &mut self.body.bones;
+        let brain = &self.brain.signals;
+
+        let y0 = brain.size().y() - bones.len() as u32;
+        let ix1 = brain.size().x() / 2;
+        let ix2 = brain.size().x() / 2 + 1;
+
+        for (i, spring) in self.body.springs.iter_mut().enumerate() {
+            let y = y0 + i as u32;
+            spring.angle_setpoint = brain.at(vec2(ix1, y)) - brain.at(vec2(ix2, y))
         }
     }
 
