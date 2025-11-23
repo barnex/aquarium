@@ -9,7 +9,7 @@ pub struct World {
 impl World {
     pub fn test() -> Self {
         let critters = vec![Critter::new(4, 6)];
-        let food = vec![vec2(120.0, 230.0), vec2(110.0, 55.0), vec2(410.0, 100.0)];
+        let food = vec![vec2(120.0, 230.0)]; //, vec2(110.0, 55.0), vec2(410.0, 100.0)];
 
         Self { critters, food }
     }

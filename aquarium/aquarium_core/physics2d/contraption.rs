@@ -27,7 +27,7 @@ impl Contraption {
                 anchor_a: vec2(-bone_len / 2.0, 0.0),
                 anchor_b: vec2(bone_len / 2.0, 0.0),
                 k: 10.0,
-                sin_angle: 0.0,
+                angle_setpoint: 0.0,
             })
             .collect_vec();
 
@@ -131,7 +131,7 @@ impl Contraption {
             // additional torque that tries to straighten out the connection (via stiffness).
             let dir_a = bone_a.transform_vector(vec2::EX);
             let dir_b = bone_b.transform_vector(vec2::EX);
-            let stiffness_torque = self.stiffness * (cross(dir_b, dir_a) + spring.sin_angle);
+            let stiffness_torque = self.stiffness * (cross(dir_b, dir_a) + spring.angle_setpoint);
             let torque_a = torque_a + stiffness_torque;
             let torque_b = torque_b - stiffness_torque;
 

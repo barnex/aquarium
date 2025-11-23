@@ -157,7 +157,7 @@ impl AqState {
             }),
             ["angle", a] => Ok({
                 let a = f32::sin(a.parse()?);
-                self.selected_critter_mut()?.body.springs.iter_mut().for_each(|s| s.sin_angle = a)
+                self.selected_critter_mut()?.body.springs.iter_mut().for_each(|s| s.angle_setpoint = a)
             }),
             ["ca", v] => Ok(self.selected_critter_mut()?.crawl_amplitude = v.parse::<f32>()?),
             ["cf", v] => Ok(self.selected_critter_mut()?.crawl_frequency = v.parse::<f32>()?),

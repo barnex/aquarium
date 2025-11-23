@@ -63,7 +63,7 @@ impl Critter {
         let ex = vec2::from(matrix[1]);
         let or = head.position.as_f32();
 
-        let n = (self.brain.size().x() - 1) as f32;
+        let n = (self.brain.size().x()) as f32;
         let eta = 1.0 / n;
 
         for &food in food {
@@ -73,7 +73,7 @@ impl Critter {
             let y = dir.dot(ey);
             if y > 0.0 {
                 // only see before you
-                let i = linterp(-1.0, 0.0 + eta / 2.0, 1.0, n - eta / 2.0, x).clamp(0.0, n) as u32;
+                let i = linterp(-1.0, 0.0 + eta / 2.0, 1.0, n - eta / 2.0, x).clamp(0.0, n - 1.0) as u32;
                 let sig = (1000.0 / dist).clamp(0.0, 1.0);
                 let sig = match sig.is_finite() {
                     true => sig,
@@ -91,7 +91,7 @@ impl Critter {
             let a = f32::sin(2.0 * PI * t * self.crawl_frequency + x * self.crawl_wavenumber);
             let a = a.abs().powf(self.crawl_gamma) * a.signum();
             let a = self.crawl_amplitude * a;
-            spring.sin_angle = a;
+            spring.angle_setpoint = a;
         }
     }
 
