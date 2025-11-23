@@ -23,6 +23,7 @@ use crate::prelude::*;
 
 #[derive(Serialize, Deserialize)]
 pub struct Brain {
+    pub inputs: Vec2D<f32>,
     pub signals: Vec2D<f32>,
     pub sigbuf: Vec2D<f32>,
     pub neurons: Vec2D<Neuron>,
@@ -38,9 +39,10 @@ impl Brain {
     pub fn new(size: impl Into<vec2u>) -> Self {
         let size = size.into();
         let signals = Vec2D::new(size);
+        let inputs = signals.clone();
         let sigbuf = signals.clone();
         let neurons = Vec2D::new(size);
-        Self { signals, sigbuf, neurons }
+        Self { inputs, signals, sigbuf, neurons }
     }
 
     pub fn size(&self) -> vec2u {
@@ -48,6 +50,7 @@ impl Brain {
     }
 
     pub fn update(&mut self) {
+        let inputs = &self.inputs.values;
         let signals = &self.signals.values;
         let sigbuf = &mut self.sigbuf.values;
         let neurons = &self.neurons.values;
@@ -55,9 +58,10 @@ impl Brain {
         assert!(signals.len() == sigbuf.len());
         assert!(signals.len() == neurons.len());
         assert!(sigbuf.len() == neurons.len());
+        assert!(sigbuf.len() == inputs.len());
 
         for i in 0..sigbuf.len() {
-            sigbuf[i] = neurons[i].bias;
+            sigbuf[i] = inputs[i] + neurons[i].bias;
             let weights = &neurons[i].weights;
             for (k, w) in weights.iter().copied() {
                 sigbuf[i] += w * signals[k as usize];
@@ -86,12 +90,17 @@ impl Brain {
         }
     }
 
-    fn neuron_to_screen_pos(&self, idx: vec2u) -> vec2i {
-        let offset = vec2i(10, 10);
-        idx.as_i32() * Self::NEURON_SCREEN_SIZE + offset
+    pub fn neuron_to_screen_pos(&self, idx: vec2u) -> vec2i {
+        idx.as_i32() * Self::NEURON_SCREEN_SIZE + Self::SCREEN_OFFSET
+    }
+
+    pub fn screen_pos_to_neuron(&self, screen: vec2i) -> Option<vec2u> {
+        let idx = (screen - Self::SCREEN_OFFSET) / Self::NEURON_SCREEN_SIZE;
+        self.signals.in_bounds(idx).then_some(idx.as_u32())
     }
 
     const NEURON_SCREEN_SIZE: vec2i = vec2i(8, 8);
+    const SCREEN_OFFSET: vec2i = vec2i(10, 10);
 }
 
 fn colormap(v: f32) -> vec4u8 {
@@ -120,4 +129,12 @@ fn colormap(v: f32) -> vec4u8 {
         }
     }
     vec4(128, 128, 128, 255)
+}
+
+pub fn zap(brain: &mut Brain, screen_pos: Option<vec2i>) {
+    if let Some(screen_pos) = screen_pos {
+        if let Some(neuron) = brain.screen_pos_to_neuron(screen_pos) {
+            brain.inputs.set(neuron, 1.0);
+        }
+    }
 }

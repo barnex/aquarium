@@ -13,9 +13,9 @@ pub struct Critter {
 
 impl Critter {
     pub fn new(len: usize, retina: u32) -> Self {
-        let mut brain = Brain::new([retina, (len + 5) as u32]);
+        let brain = Brain::new([retina, (len + 5) as u32]);
 
-        let mut rng = ChaCha8Rng::seed_from_u64(123);
+        //let mut rng = ChaCha8Rng::seed_from_u64(123);
         //brain.signals.iter_mut().for_each(|v| *v = rng.gen_range(-2.0..=2.0));
 
         Self {
@@ -31,45 +31,46 @@ impl Critter {
     pub fn tick(&mut self, t: f64, dt: f32, food: &[vec2f]) {
         self.update_body_sense();
         self.update_vision(food);
-        self.brain.update(); // <<< TODO: don't overwrite input neurons, annoying for visualization
+        self.brain.update();
 
         // HACK: because they're lost on update
-        self.update_body_sense();
-        self.update_vision(food);
+        //self.update_body_sense();
+        //self.update_vision(food);
 
         //self.tick_crawl_test(t);
-        self.brain_controls_motion(t);
+        self.brain_controls_motion();
         self.body.tick(dt);
         // brain & sensory
     }
 
     fn update_body_sense(&mut self) {
         let bones = &self.body.bones;
-        let brain = &mut self.brain.signals;
+        let inputs = &mut self.brain.inputs;
 
-        let y0 = brain.size().y() as usize - bones.len();
         let ix1 = 0;
-        let ix2 = (brain.size().x() - 1).as_();
+        let ix2 = (inputs.size().x() - 1).as_();
+
+        let y0 = inputs.size().y() as usize - bones.len();
 
         for ((i1, b1), (_, b2)) in bones.iter().enumerate().tuple_windows() {
             let angle = b1.direction().cross(b2.direction());
             let y = y0 + i1;
-            brain.set(vec2(ix1, y).as_u32(), 7.0 * angle);
-            brain.set(vec2(ix2, y).as_u32(), -7.0 * angle);
+            inputs.set(vec2(ix1, y).as_u32(), 7.0 * angle);
+            inputs.set(vec2(ix2, y).as_u32(), -7.0 * angle);
         }
     }
 
-    fn brain_controls_motion(&mut self, t: f64) {
+    fn brain_controls_motion(&mut self) {
         let bones = &mut self.body.bones;
         let brain = &self.brain.signals;
 
-        let y0 = brain.size().y() - bones.len() as u32;
-        let ix1 = brain.size().x() / 2;
-        let ix2 = brain.size().x() / 2 + 1;
+        let y0 = brain.size().y() - bones.len() as u32 + 1;
+        let ix1 = brain.size().x() / 2 - 1;
+        let ix2 = brain.size().x() / 2;
 
         for (i, spring) in self.body.springs.iter_mut().enumerate() {
             let y = y0 + i as u32;
-            spring.angle_setpoint = brain.at(vec2(ix1, y)) - brain.at(vec2(ix2, y))
+            spring.angle_setpoint = (brain.at(vec2(ix1, y)) - brain.at(vec2(ix2, y))) * 0.4 // <<< !!!
         }
     }
 
@@ -83,9 +84,19 @@ impl Critter {
         let ex = vec2::from(matrix[1]);
         let or = head.position.as_f32();
 
-        let n = (self.brain.size().x()) as f32;
+        let w = self.brain.size().x();
+        let n = (w) as f32;
         let eta = 1.0 / n;
 
+        let brain = &mut self.brain.inputs;
+
+        let iy = 0; // visual input layer
+
+        // reset to 0 first
+        for ix in 0..w {
+            brain.set(vec2(ix, iy), 0.0);
+        }
+        // then add food sigals
         for &food in food {
             let dir = (food - or).normalized();
             let dist = (food - or).len();
@@ -93,13 +104,13 @@ impl Critter {
             let y = dir.dot(ey);
             if y > 0.0 {
                 // only see before you
-                let i = linterp(-1.0, 0.0 + eta / 2.0, 1.0, n - eta / 2.0, x).clamp(0.0, n - 1.0) as u32;
+                let ix = linterp(-1.0, 0.0 + eta / 2.0, 1.0, n - eta / 2.0, x).clamp(0.0, n - 1.0) as u32;
                 let sig = (1000.0 / dist).clamp(0.0, 1.0);
                 let sig = match sig.is_finite() {
                     true => sig,
                     false => 0.0,
                 };
-                self.brain.signals.set(vec2(i, 0), sig);
+                brain.set(vec2(ix, iy), sig);
             }
         }
     }

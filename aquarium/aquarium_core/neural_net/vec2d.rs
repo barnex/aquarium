@@ -38,6 +38,12 @@ impl<T> Vec2D<T> {
     }
 
     #[inline]
+    pub fn at_mut(&mut self, idx: vec2u) -> &mut T {
+        let i = self.index(idx);
+        &mut self.values[i]
+    }
+
+    #[inline]
     fn index(&self, idx: vec2u) -> usize {
         idx.y() as usize * self.size().x() as usize + idx.x() as usize
     }
@@ -55,11 +61,11 @@ impl<T> Vec2D<T> {
         self.values.iter_mut()
     }
 
-    //#[inline]
-    //fn in_bounds(&self, idx: vec2i16) -> bool {
-    //    let (w, h) = self.size().as_i16().into();
-    //    (0..w).contains(&idx.x()) && (0..h).contains(&idx.y())
-    //}
+    #[inline]
+    pub fn in_bounds(&self, idx: vec2i) -> bool {
+        let (w, h) = self.size().as_i32().into();
+        (0..w).contains(&idx.x()) && (0..h).contains(&idx.y())
+    }
 }
 
 impl<T: Copy> Vec2D<T> {

@@ -53,7 +53,7 @@ impl AqState {
             mouse_filter: default(),
             selected_critter: Some(0),
             follow_mouse: false,
-            food_follows_mouse: false,
+            food_follows_mouse: true, // <<
             dt: 0.02,
             speed: 1,
         }
@@ -108,10 +108,24 @@ impl AqState {
                 }
             }
         }
-        
-        if self.food_follows_mouse{
-            if let Some(food) = self.world.food.get_mut(0){
+
+        if self.food_follows_mouse {
+            if let Some(food) = self.world.food.get_mut(0) {
                 *food = self.inputs.mouse_position().as_();
+            }
+        }
+
+        let mouse1 = self.inputs.just_pressed(K_MOUSE1);
+        let mouse2 = self.inputs.just_pressed(K_MOUSE2);
+        let mouse = self.inputs.mouse_position();
+        if let Ok(c) = self.selected_critter_mut() {
+            if let Some(idx) = c.brain.screen_pos_to_neuron(mouse) {
+                if mouse1 {
+                    *c.brain.inputs.at_mut(idx) += 0.5;
+                }
+                if mouse2 {
+                    *c.brain.inputs.at_mut(idx) -= 0.5;
+                }
             }
         }
     }
