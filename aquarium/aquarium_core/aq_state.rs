@@ -54,7 +54,7 @@ impl AqState {
             selected_critter: Some(0),
             follow_mouse: false,
             food_follows_mouse: true, // <<
-            dt: 0.02,
+            dt: 0.01,
             speed: 1,
         }
     }
