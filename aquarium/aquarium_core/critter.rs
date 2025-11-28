@@ -13,10 +13,20 @@ pub struct Critter {
 
 impl Critter {
     pub fn new(len: usize, retina: u32) -> Self {
-        let brain = Brain::new([retina, (len + 5) as u32]);
+        let mut brain = Brain::new([retina, (len + 5) as u32]);
 
         //let mut rng = ChaCha8Rng::seed_from_u64(123);
         //brain.signals.iter_mut().for_each(|v| *v = rng.gen_range(-2.0..=2.0));
+
+        // brain.neurons.at_mut(vec2(2, 3)).bias = -0.5;
+
+        brain.neurons.at_mut(vec2(3, 8)).weights.push((0, 0.8));
+        brain.neurons.at_mut(vec2(3, 6)).weights.push((1, 0.8));
+        brain.neurons.at_mut(vec2(3, 7)).weights.push((3, 0.8));
+
+        brain.neurons.at_mut(vec2(2, 6)).weights.push((2, 0.8));
+        brain.neurons.at_mut(vec2(2, 7)).weights.push((4, 0.8));
+        brain.neurons.at_mut(vec2(2, 8)).weights.push((5, 0.8));
 
         Self {
             body: Contraption::rope(len),

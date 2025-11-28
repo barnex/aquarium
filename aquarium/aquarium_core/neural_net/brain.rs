@@ -88,19 +88,29 @@ impl Brain {
             let fill = RGBA(colormap(v).into());
             out.draw_rect_screen(l, Rectangle::with_size(pos, size, stroke).with_fill(fill));
         }
+
+        for (idx, neuron) in self.neurons.enumerate_ref() {
+            let start = self.neuron_to_screen_pos(idx);
+            for (i, w) in &neuron.weights {
+                let idx = self.neurons.reverse_index(i.as_());
+                let end = self.neuron_to_screen_pos(idx);
+                let off = Self::NEURON_SCREEN_SIZE / 2;
+                out.draw_line_screen(L_SPRITES + 2, Line::new(start, end).translated(off).with_color(RGBA([255, 255, 255, 128])));
+            }
+        }
     }
 
     pub fn neuron_to_screen_pos(&self, idx: vec2u) -> vec2i {
-        idx.as_i32() * Self::NEURON_SCREEN_SIZE + Self::SCREEN_OFFSET
+        idx.as_i32() * Self::NEURON_SCREEN_SIZE + Self::BRAIN_SCREEN_OFFSET
     }
 
     pub fn screen_pos_to_neuron(&self, screen: vec2i) -> Option<vec2u> {
-        let idx = (screen - Self::SCREEN_OFFSET) / Self::NEURON_SCREEN_SIZE;
+        let idx = (screen - Self::BRAIN_SCREEN_OFFSET) / Self::NEURON_SCREEN_SIZE;
         self.signals.in_bounds(idx).then_some(idx.as_u32())
     }
 
-    const NEURON_SCREEN_SIZE: vec2i = vec2i(8, 8);
-    const SCREEN_OFFSET: vec2i = vec2i(10, 10);
+    const NEURON_SCREEN_SIZE: vec2i = vec2i(12, 12);
+    const BRAIN_SCREEN_OFFSET: vec2i = vec2i(10, 10);
 }
 
 fn colormap(v: f32) -> vec4u8 {

@@ -48,6 +48,14 @@ impl<T> Vec2D<T> {
         idx.y() as usize * self.size().x() as usize + idx.x() as usize
     }
 
+    #[inline]
+    pub fn reverse_index(&self, i: usize) -> vec2u {
+        let i = i as u32;
+        let y = i / self.size().x();
+        let x = i % self.size().x();
+        vec2(x, y)
+    }
+
     pub fn enumerate_ref(&self) -> impl Iterator<Item = (vec2u, &T)> {
         let (w, h) = self.size().into();
         cross(0..w, 0..h).map(move |(x, y)| (vec2(x, y), &self.values[self.index(vec2(x, y))]))
