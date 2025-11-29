@@ -17,7 +17,39 @@ impl Contraption {
 
         let rot_inertia = mass * bone_len.powi(2); // approx. Ideally should be chosen so that rotational and translational frequencies are equal (for most efficient time step).
 
-        let bones = (0..n).map(|i| RigidBody::new(mass, rot_inertia).with(|v| v.position = vec2f(100.0 - (i as f32) * bone_len, 150.0))).collect_vec();
+        let bones = (0..n).map(|i| RigidBody::new_at_origin(mass, rot_inertia).with(|v| v.position = vec2f(100.0 - (i as f32) * bone_len, 150.0))).collect_vec();
+
+        let springs = (0..(bones.len()))
+            .tuple_windows()
+            .map(|(ia, ib)| Spring {
+                ia,
+                ib,
+                anchor_a: vec2(-bone_len / 2.0, 0.0),
+                anchor_b: vec2(bone_len / 2.0, 0.0),
+                k: 10.0,
+                angle_setpoint: 0.0,
+            })
+            .collect_vec();
+
+        Self {
+            bone_len,
+            bones,
+            springs,
+            g: 0.0,
+            stiffness: 50.0,
+        }
+    }
+
+    pub fn harmonic_osc() -> Self {
+        log::debug!("OK");
+        let mass = 1.0;
+        let bone_len = 15.0f32;
+
+        let rot_inertia = mass * bone_len.powi(2); // approx. Ideally should be chosen so that rotational and translational frequencies are equal (for most efficient time step).
+
+        let pos1 = vec2(50.0, 50.0);
+        let pos2 = vec2(200.0, 50.0);
+        let bones = vec![RigidBody::new(pos1, mass, rot_inertia), RigidBody::new(pos2, mass, rot_inertia)];
 
         let springs = (0..(bones.len()))
             .tuple_windows()
@@ -58,27 +90,34 @@ impl Contraption {
 
     pub(crate) fn minor_tick(&mut self, dt: f32) {
         self.update_forces();
-        self.add_drag_forces();
-        //self.damping_tick(dt);
+        //self.add_drag_forces();
         self.verlet_tick(dt);
-    }
-
-    fn damping_tick(&mut self, dt: f32) {
-        self.bones.iter_mut().for_each(|b| b.update_accel()); //          |
-        self.bones.iter_mut().for_each(|b| b.dampen_position(dt)); //     |
+        //println!("{} {} {} {}", self.bones[0].position.x(), self.bones[0].position.y(), self.bones[1].position.x(), self.bones[1].position.y());
     }
 
     fn verlet_tick(&mut self, dt: f32) {
         //                                                      <-----<--------
         //self.bones[0].body.position = vec2(600.0, 150.0); //                   ^
         self.bones.iter_mut().for_each(|b| b.update_accel()); //          |
-        self.bones.iter_mut().for_each(|b| b.update_velocity(dt)); //     |
-        self.dampen(); //                                                      |
-        //                                                                     ^
+        self.bones.iter_mut().for_each(|b| b.update_velocity_verlet(dt)); //     |
+        //self.bones.iter_mut().for_each(|b| b.update_velocity_from_half(dt)); //     |
+        //self.bones.iter_mut().for_each(|b| b.update_velocity_half(dt)); //     |
+
         // logically, the cycle starts here:                                   |
-        self.bones.iter_mut().for_each(|b| b.update_velocity_half(dt)); //|
-        self.bones.iter_mut().for_each(|b| b.update_position(dt)); //     |
+        //self.bones.iter_mut().for_each(|b| b.update_velocity_half(dt)); //|
+        self.bones.iter_mut().for_each(|b| b.update_position_verlet(dt)); //     |
         //                                                       >------>------^
+    }
+
+    fn euler_tick(&mut self, dt: f32) {
+        self.bones.iter_mut().for_each(|b| b.update_accel()); //          |
+        self.bones.iter_mut().for_each(|b| b.update_velocity_euler(dt)); //     |
+        self.bones.iter_mut().for_each(|b| b.update_position_euler(dt)); //     |
+    }
+
+    fn damping_tick(&mut self, dt: f32) {
+        self.bones.iter_mut().for_each(|b| b.update_accel()); //          |
+        self.bones.iter_mut().for_each(|b| b.dampen_position(dt)); //     |
     }
 
     fn dampen(&mut self) {
@@ -102,6 +141,8 @@ impl Contraption {
                 let lift = lift.map(|v| v.clamp(-1.0, 1.0));
                 bone.force += lift;
             }
+
+            // TODO: add drag
         }
     }
 

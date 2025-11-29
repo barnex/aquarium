@@ -23,13 +23,13 @@ pub struct RigidBody {
 }
 
 impl RigidBody {
-    pub fn new(mass: f32, rot_inertia: f32) -> Self {
+    pub fn new(position: vec2f, mass: f32, rot_inertia: f32) -> Self {
         debug_assert!(mass > 0.0);
         debug_assert!(rot_inertia > 0.0);
 
         Self {
             mass,
-            position: default(),
+            position,
             velocity_half: default(),
             velocity: default(),
             acceleration: default(),
@@ -43,10 +43,8 @@ impl RigidBody {
         }
     }
 
-    pub fn tick(&mut self, dt: f32) {
-        self.update_accel();
-        self.update_velocity(dt);
-        self.update_position(dt);
+    pub fn new_at_origin(mass: f32, rot_inertia: f32) -> Self {
+        Self::new(vec2::ZERO, mass, rot_inertia)
     }
 
     pub fn update_accel(&mut self) {
@@ -54,19 +52,33 @@ impl RigidBody {
         self.rot_accel = self.torque / self.rot_inertia;
     }
 
-    pub fn update_velocity(&mut self, dt: f32) {
+    pub(crate) fn update_velocity_verlet(&mut self, dt: f32) {
         self.velocity = self.velocity_half + dt / 2.0 * self.acceleration;
         self.rot_velocity = self.rot_velocity_half + dt / 2.0 * self.rot_accel;
-    }
-
-    pub fn update_velocity_half(&mut self, dt: f32) {
         self.velocity_half = self.velocity + dt / 2.0 * self.acceleration;
         self.rot_velocity_half = self.rot_velocity + dt / 2.0 * self.rot_accel;
     }
 
-    pub fn update_position(&mut self, dt: f32) {
+    pub fn update_position_verlet(&mut self, dt: f32) {
         self.position += dt * self.velocity_half;
         self.rotation += dt * self.rot_velocity_half;
+        self.rotation = wrap_angle(self.rotation);
+    }
+
+    //fn tick_euler(&mut self, dt: f32) {
+    //    self.update_accel();
+    //    self.update_velocity_euler(dt);
+    //    self.update_position_euler(dt);
+    //}
+
+    pub(crate) fn update_velocity_euler(&mut self, dt: f32) {
+        self.velocity += dt * self.acceleration;
+        self.rot_velocity += dt * self.rot_accel;
+    }
+
+    pub(crate) fn update_position_euler(&mut self, dt: f32) {
+        self.position += dt * self.velocity;
+        self.rotation += dt * self.rot_velocity;
         self.rotation = wrap_angle(self.rotation);
     }
 

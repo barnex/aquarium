@@ -40,7 +40,9 @@ impl AqState {
 
         let console = Console::with_hotkey(K_CLI);
 
-        let world = World::test();
+        let world = World::test1();
+        log::info!("new...");
+        //let world = World::harmonic_osc();
 
         Self {
             now_secs: 0.0,
@@ -54,7 +56,7 @@ impl AqState {
             selected_critter: Some(0),
             follow_mouse: false,
             food_follows_mouse: true, // <<
-            dt: 0.01,
+            dt: 0.05,
             speed: 1,
         }
     }

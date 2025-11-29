@@ -7,9 +7,18 @@ pub struct World {
 }
 
 impl World {
-    pub fn test() -> Self {
+    pub fn test1() -> Self {
         let critters = vec![Critter::new(4, 6)];
         let food = vec![vec2(120.0, 230.0)]; //, vec2(110.0, 55.0), vec2(410.0, 100.0)];
+
+        Self { critters, food }
+    }
+
+    /// Test world with a dummy creature that is just a harmonic oscillator,
+    /// to test physics.
+    pub fn harmonic_osc() -> Self {
+        let critters = vec![Critter::harmonic_osc()];
+        let food = vec![];
 
         Self { critters, food }
     }

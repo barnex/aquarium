@@ -13,20 +13,20 @@ pub struct Critter {
 
 impl Critter {
     pub fn new(len: usize, retina: u32) -> Self {
-        let mut brain = Brain::new([retina, (len + 5) as u32]);
+        let mut brain = Brain::new([retina, (len + 1) as u32]);
 
         //let mut rng = ChaCha8Rng::seed_from_u64(123);
         //brain.signals.iter_mut().for_each(|v| *v = rng.gen_range(-2.0..=2.0));
 
         // brain.neurons.at_mut(vec2(2, 3)).bias = -0.5;
 
-        brain.neurons.at_mut(vec2(3, 8)).weights.push((0, 0.8));
-        brain.neurons.at_mut(vec2(3, 6)).weights.push((1, 0.8));
-        brain.neurons.at_mut(vec2(3, 7)).weights.push((3, 0.8));
+        //brain.neurons.at_mut(vec2(3, 8)).weights.push((0, 0.8));
+        //brain.neurons.at_mut(vec2(3, 6)).weights.push((1, 0.8));
+        //brain.neurons.at_mut(vec2(3, 7)).weights.push((3, 0.8));
 
-        brain.neurons.at_mut(vec2(2, 6)).weights.push((2, 0.8));
-        brain.neurons.at_mut(vec2(2, 7)).weights.push((4, 0.8));
-        brain.neurons.at_mut(vec2(2, 8)).weights.push((5, 0.8));
+        //brain.neurons.at_mut(vec2(2, 6)).weights.push((2, 0.8));
+        //brain.neurons.at_mut(vec2(2, 7)).weights.push((4, 0.8));
+        //brain.neurons.at_mut(vec2(2, 8)).weights.push((5, 0.8));
 
         Self {
             body: Contraption::rope(len),
@@ -38,19 +38,26 @@ impl Critter {
         }
     }
 
+    pub fn harmonic_osc() -> Self {
+        let brain = Brain::new(dbg!((5, 6)));
+
+        Self {
+            body: Contraption::harmonic_osc(),
+            brain,
+            crawl_amplitude: 0.0,
+            crawl_frequency: 0.0,
+            crawl_wavenumber: 0.0,
+            crawl_gamma: 0.0,
+        }
+    }
+
     pub fn tick(&mut self, t: f64, dt: f32, food: &[vec2f]) {
         self.update_body_sense();
         self.update_vision(food);
         self.brain.update();
 
-        // HACK: because they're lost on update
-        //self.update_body_sense();
-        //self.update_vision(food);
-
-        //self.tick_crawl_test(t);
         self.brain_controls_motion();
         self.body.tick(dt);
-        // brain & sensory
     }
 
     fn update_body_sense(&mut self) {
