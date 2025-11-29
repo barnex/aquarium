@@ -57,6 +57,7 @@ impl Critter {
         self.brain.update();
 
         self.brain_controls_motion();
+        self.tick_crawl_test(t);
         self.body.tick(dt);
     }
 

@@ -92,6 +92,7 @@ impl Contraption {
         self.update_forces();
         self.add_drag_forces();
         self.verlet_tick(dt);
+        self.dampen();
         //println!("{} {} {} {}", self.bones[0].position.x(), self.bones[0].position.y(), self.bones[1].position.x(), self.bones[1].position.y());
     }
 
@@ -114,30 +115,35 @@ impl Contraption {
 
     fn dampen(&mut self) {
         for b in &mut self.bones {
-            b.velocity *= 0.9995;
-            b.rot_velocity *= 0.9995;
+            b.velocity *= 0.9999;
+            b.rot_velocity *= 0.99;
         }
     }
 
     fn add_drag_forces(&mut self) {
+        let lift_coeff = 1.0;
+        let drag_coeff = 0.2;
+        let drag_paras = 0.3;
+
         for bone in &mut self.bones {
             let v = bone.velocity;
             let vn = v.normalized();
             let n = rot90(vn);
             let w = bone.transform_vector(vec2::EX); // wing: todo: take length into account.
 
+            let clamp = 10.0;
             {
-                let lift = -1.0 * n * cross(v, w) * v.dot(w);
+                let lift = -lift_coeff * n * cross(v, w) * v.dot(w);
                 if lift.is_finite() {
-                    let lift = lift.map(|v| v.clamp(-1.0, 1.0));
+                    let lift = lift.map(|v| v.clamp(-clamp, clamp));
                     bone.force += lift;
                 }
             }
 
             {
-                let drag = -1.0 * vn.cross(w).powi(2) * v;
+                let drag = -drag_coeff * (drag_paras + vn.cross(w).powi(2)) * v;
                 if drag.is_finite() {
-                    let drag = drag.map(|v| v.clamp(-1.0, 1.0));
+                    let drag = drag.map(|v| v.clamp(-clamp, clamp));
                     bone.force += drag;
                 }
             }

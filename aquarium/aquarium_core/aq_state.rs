@@ -104,9 +104,9 @@ impl AqState {
                 if self.follow_mouse {
                     b.position = self.mouse_filter.last().copied().unwrap();
                 }
-                let speed = 1.0;
+                let speed = 10.0;
                 b.position += speed * delta;
-                b.velocity = speed * delta;
+                b.velocity += speed * delta;
             }
         }
 
