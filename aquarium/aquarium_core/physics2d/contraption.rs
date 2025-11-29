@@ -90,34 +90,26 @@ impl Contraption {
 
     pub(crate) fn minor_tick(&mut self, dt: f32) {
         self.update_forces();
-        //self.add_drag_forces();
+        self.add_drag_forces();
         self.verlet_tick(dt);
         //println!("{} {} {} {}", self.bones[0].position.x(), self.bones[0].position.y(), self.bones[1].position.x(), self.bones[1].position.y());
     }
 
     fn verlet_tick(&mut self, dt: f32) {
-        //                                                      <-----<--------
-        //self.bones[0].body.position = vec2(600.0, 150.0); //                   ^
-        self.bones.iter_mut().for_each(|b| b.update_accel()); //          |
-        self.bones.iter_mut().for_each(|b| b.update_velocity_verlet(dt)); //     |
-        //self.bones.iter_mut().for_each(|b| b.update_velocity_from_half(dt)); //     |
-        //self.bones.iter_mut().for_each(|b| b.update_velocity_half(dt)); //     |
-
-        // logically, the cycle starts here:                                   |
-        //self.bones.iter_mut().for_each(|b| b.update_velocity_half(dt)); //|
-        self.bones.iter_mut().for_each(|b| b.update_position_verlet(dt)); //     |
-        //                                                       >------>------^
+        self.bones.iter_mut().for_each(|b| b.update_accel());
+        self.bones.iter_mut().for_each(|b| b.update_velocity_verlet(dt));
+        self.bones.iter_mut().for_each(|b| b.update_position_verlet(dt));
     }
 
     fn euler_tick(&mut self, dt: f32) {
-        self.bones.iter_mut().for_each(|b| b.update_accel()); //          |
-        self.bones.iter_mut().for_each(|b| b.update_velocity_euler(dt)); //     |
-        self.bones.iter_mut().for_each(|b| b.update_position_euler(dt)); //     |
+        self.bones.iter_mut().for_each(|b| b.update_accel());
+        self.bones.iter_mut().for_each(|b| b.update_velocity_euler(dt));
+        self.bones.iter_mut().for_each(|b| b.update_position_euler(dt));
     }
 
     fn damping_tick(&mut self, dt: f32) {
-        self.bones.iter_mut().for_each(|b| b.update_accel()); //          |
-        self.bones.iter_mut().for_each(|b| b.dampen_position(dt)); //     |
+        self.bones.iter_mut().for_each(|b| b.update_accel());
+        self.bones.iter_mut().for_each(|b| b.dampen_position(dt));
     }
 
     fn dampen(&mut self) {
@@ -132,17 +124,23 @@ impl Contraption {
             let v = bone.velocity;
             let vn = v.normalized();
             let n = rot90(vn);
-            let w = bone.transform_vector(vec2::EX); // todo: take length into account.
+            let w = bone.transform_vector(vec2::EX); // wing: todo: take length into account.
 
-            let lift = -1.0 * n * cross(v, w) * v.dot(w);
-            //log::info!("v:{v}, lift:{lift}");
-
-            if lift.is_finite() {
-                let lift = lift.map(|v| v.clamp(-1.0, 1.0));
-                bone.force += lift;
+            {
+                let lift = -1.0 * n * cross(v, w) * v.dot(w);
+                if lift.is_finite() {
+                    let lift = lift.map(|v| v.clamp(-1.0, 1.0));
+                    bone.force += lift;
+                }
             }
 
-            // TODO: add drag
+            {
+                let drag = -1.0 * vn.cross(w).powi(2) * v;
+                if drag.is_finite() {
+                    let drag = drag.map(|v| v.clamp(-1.0, 1.0));
+                    bone.force += drag;
+                }
+            }
         }
     }
 
