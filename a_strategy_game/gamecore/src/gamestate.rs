@@ -121,7 +121,7 @@ impl G {
         self.update_fps(); // 👈 FPS is gamespeed independent
         self.exec_commands(); // 👈 exec commands even when paused (speed 0)
 
-        if let Some(cmd) = self.console.tick(&self.inputs){
+        if let Some(cmd) = self.console.tick(&self.inputs) {
             self.commands.push_back(cmd);
         }
         // 👇 📺 console overlays normal game. Disables game control when active.
@@ -437,8 +437,6 @@ impl GameCore for G {
     fn tick(&mut self, now_secs: f64, events: impl Iterator<Item = InputEvent>, out: &mut Out) {
         self.tick(now_secs, events, out)
     }
-
-
 
     fn reset(&mut self) {
         *self = Self::test_world();

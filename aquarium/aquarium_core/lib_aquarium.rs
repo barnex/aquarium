@@ -1,13 +1,13 @@
 pub(crate) mod prelude;
 
-mod aq_state;
-mod physics2d;
 mod critter;
-mod world;
+mod gamestate;
 mod neural_net;
+mod physics2d;
+mod world;
 
-pub use aq_state::*;
-pub use physics2d::*;
 pub use critter::*;
-pub use world::*;
+pub use gamestate::*;
 pub use neural_net::*;
+pub use physics2d::*;
+pub use world::*;

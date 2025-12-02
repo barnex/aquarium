@@ -1,4 +1,4 @@
 #[macroquad::main("Game")]
 async fn main() {
-    macroquad_shell::mq_main::<aquarium_core::AqState>().await
+    macroquad_shell::mq_main::<aquarium_core::GameState>().await
 }

@@ -1,16 +1,16 @@
 use crate::prelude::*;
 
 #[derive(Serialize, Deserialize)]
-pub struct AqState {
+pub struct GameState {
     pub now_secs: f64,
+    pub dt: f32,
+    pub speed: u32,
     pub tick: u64,
     pub paused: bool,
 
     pub keymap: Keymap,
-
     #[serde(skip)]
     pub inputs: Inputs,
-
     pub console: Console,
 
     pub world: World,
@@ -19,15 +19,11 @@ pub struct AqState {
     pub selected_critter: Option<usize>,
     pub follow_mouse: bool,
     pub food_follows_mouse: bool,
-
     // filter for smooth manual control
     mouse_filter: [vec2f; 3],
-
-    pub dt: f32,
-    pub speed: u32,
 }
 
-impl AqState {
+impl GameState {
     pub fn new() -> Self {
         let keymap = Keymap::from([
             (button!("tab"), K_CLI), // macroquad
@@ -196,13 +192,13 @@ impl AqState {
     }
 }
 
-impl Default for AqState {
+impl Default for GameState {
     fn default() -> Self {
         Self::new()
     }
 }
 
-impl shell_api::GameCore for AqState {
+impl shell_api::GameCore for GameState {
     fn tick(&mut self, now_secs: f64, events: impl Iterator<Item = shell_api::InputEvent>, out: &mut shell_api::Out) {
         self.tick_and_draw(now_secs, events, out)
     }
