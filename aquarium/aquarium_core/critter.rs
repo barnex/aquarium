@@ -15,23 +15,21 @@ impl Critter {
     pub fn new(len: usize, retina: u32) -> Self {
         let mut brain = Brain::new([retina, (len + 1) as u32]);
 
-        //let mut rng = ChaCha8Rng::seed_from_u64(123);
-        //brain.signals.iter_mut().for_each(|v| *v = rng.gen_range(-2.0..=2.0));
+        let mut rng = ChaCha8Rng::seed_from_u64(123);
+        brain.signals.iter_mut().for_each(|v| *v = rng.gen_range(-2.0..=2.0));
 
-        // brain.neurons.at_mut(vec2(2, 3)).bias = -0.5;
+        brain.neurons.at_mut(vec2(3, 8)).weights.push((5, 0.8));
+        brain.neurons.at_mut(vec2(3, 6)).weights.push((4, 0.8));
+        brain.neurons.at_mut(vec2(3, 7)).weights.push((2, 0.8));
 
-        //brain.neurons.at_mut(vec2(3, 8)).weights.push((0, 0.8));
-        //brain.neurons.at_mut(vec2(3, 6)).weights.push((1, 0.8));
-        //brain.neurons.at_mut(vec2(3, 7)).weights.push((3, 0.8));
-
-        //brain.neurons.at_mut(vec2(2, 6)).weights.push((2, 0.8));
-        //brain.neurons.at_mut(vec2(2, 7)).weights.push((4, 0.8));
-        //brain.neurons.at_mut(vec2(2, 8)).weights.push((5, 0.8));
+        brain.neurons.at_mut(vec2(2, 6)).weights.push((3, 0.8));
+        brain.neurons.at_mut(vec2(2, 7)).weights.push((1, 0.8));
+        brain.neurons.at_mut(vec2(2, 8)).weights.push((0, 0.8));
 
         Self {
             body: Contraption::rope(len),
             brain,
-            crawl_amplitude: 0.2,
+            crawl_amplitude: 0.0,
             crawl_frequency: -0.3,
             crawl_wavenumber: 0.8,
             crawl_gamma: 1.0,
@@ -57,7 +55,7 @@ impl Critter {
         self.brain.update();
 
         self.brain_controls_motion();
-        self.tick_crawl_test(t);
+        //self.tick_crawl_test(t);
         self.body.tick(dt);
     }
 
@@ -88,7 +86,7 @@ impl Critter {
 
         for (i, spring) in self.body.springs.iter_mut().enumerate() {
             let y = y0 + i as u32;
-            spring.angle_setpoint = (brain.at(vec2(ix1, y)) - brain.at(vec2(ix2, y))) * 0.4 // <<< !!!
+            spring.angle_setpoint = (brain.at(vec2(ix1, y)) - brain.at(vec2(ix2, y))) * 0.5; // <<< !!!
         }
     }
 
