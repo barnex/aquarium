@@ -155,9 +155,6 @@ impl G {
         self.draw_world(out);
         self.console.draw(out);
 
-        //write_debug_output(self, out);
-        //debug_println!(3, "hi");
-
         self.pawns.gc();
         self.buildings.gc();
     }
@@ -167,23 +164,24 @@ impl G {
         TICK_FOR_LOGGING.store(self.tick, std::sync::atomic::Ordering::Relaxed);
         self.tick_pawns();
         self.tick_farmland();
+        self.update_text_overlay();
+    }
 
-        // tick text
-        {
-            self.header_text.clear();
-            write!(&mut self.header_text, "{}", self.name).swallow_err();
-
-            // print total resources
-            let mut total_resources = [0u32; ResourceTyp::COUNT];
-            for b in self.buildings.iter() {
-                for (res, count) in b.iter_resources() {
-                    total_resources[res as usize] += count as u32
-                }
+    /// Update the text shown at the top of the screen:
+    /// number of resources etc.
+    fn update_text_overlay(&mut self) {
+        self.header_text.clear();
+        write!(&mut self.header_text, "{}", self.name).swallow_err();
+        // print total resources
+        let mut total_resources = [0u32; ResourceTyp::COUNT];
+        for b in self.buildings.iter() {
+            for (res, count) in b.iter_resources() {
+                total_resources[res as usize] += count as u32
             }
-            for res in ResourceTyp::all() {
-                let count = total_resources[res as usize];
-                write!(&mut self.header_text, " | {res:?}:{count}").swallow_err();
-            }
+        }
+        for res in ResourceTyp::all() {
+            let count = total_resources[res as usize];
+            write!(&mut self.header_text, " | {res:?}:{count}").swallow_err();
         }
     }
 
@@ -194,15 +192,6 @@ impl G {
     }
 
     pub(crate) fn tick_farmland(&mut self) {
-        //let growth_rate = 0.01;
-        //for tile in farmland_tiles {
-        //    if self.water_level_at(tile) > 0.01 {
-        //        if self.resources.at(tile).is_none() && self.random::<f32>() < growth_rate * self.water_level_at(tile) {
-        //            self.spawn_resource(tile, ResourceTyp::Leaf);
-        //            *self.water.h.get_mut(&tile).unwrap() = 0.0;
-        //        }
-        //    }
-        //}
         let mut buf = Vec::new();
         for (&pos, water) in self.water.farm_water.iter_mut() {
             if *water >= 100.0 {
@@ -235,7 +224,7 @@ impl G {
         if !Self::tile_is_walkable(self.tile_at(tile)) {
             return false;
         }
-        // 🪲 TODO: very inefficient
+        // Cannot walk on buildings. 🪲 TODO: very inefficient
         //for b in self.buildings.iter() {
         //    if b.tile_bounds().contains(tile) && b.entrance() != tile {
         //        return false;
