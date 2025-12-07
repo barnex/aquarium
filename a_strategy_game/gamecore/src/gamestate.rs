@@ -40,7 +40,6 @@ pub struct G {
     #[serde(skip)]
     pub inputs: Inputs,
     pub commands: VecDeque<String>,
-    #[serde(skip)]
     pub keymap: Keymap,
 
     // 📺 output/rendering
@@ -76,6 +75,21 @@ impl G {
             //debug.inspect_under_cursor = true;
         }
 
+        let keymap = Keymap::from([
+            // Camera
+            (button!("s"), K_CAM_LEFT),  //_
+            (button!("e"), K_CAM_UP),    //_
+            (button!("d"), K_CAM_DOWN),  //_
+            (button!("f"), K_CAM_RIGHT), //_
+            // Camera alt.
+            (button!("arrowleft"), K_CAM_LEFT),   //_
+            (button!("arrowup"), K_CAM_UP),       //_
+            (button!("arrowdown"), K_CAM_DOWN),   //_
+            (button!("arrowright"), K_CAM_RIGHT), //_
+            //
+            (button!("tab"), K_CLI), // macroquad
+        ]);
+
         Self {
             _prev_secs: 0.0,
             _rng: RefCell::new(ChaCha8Rng::seed_from_u64(12345678)),
@@ -91,7 +105,7 @@ impl G {
             frames_per_tick: 8,
             header_text: default(),
             inputs: default(),
-            keymap: default_keybindings(),
+            keymap,
             last_sanity_error: None,
             name: "".into(),
             now_secs: 0.0,
@@ -127,7 +141,7 @@ impl G {
         // 👇 📺 console overlays normal game. Disables game control when active.
         if !self.console.active {
             self.ui.update_and_draw(&mut self.inputs, out); // 👈 may consume inputs
-            self.control();
+            self.command_game();
         }
 
         if !self.paused {
@@ -264,7 +278,12 @@ impl G {
     // -------------------------------- Pawns
 
     /// Add a pawn to the game and return it (now with `id` set).
-    pub fn spawn(&self, pawn: Pawn) -> &Pawn {
+    pub fn spawn(&self, typ: PawnTyp, tile: vec2i16) -> &Pawn {
+        self.spawn_pawn(Pawn::new(typ, tile))
+    }
+
+    #[deprecated = "use spawn"]
+    pub fn spawn_pawn(&self, pawn: Pawn) -> &Pawn {
         log::trace!("spawn {:?} @ tile {}", pawn.typ, pawn.tile);
         self.pawns.insert(pawn)
     }
@@ -331,53 +350,21 @@ impl G {
         let mut footprint = cross(bounds.x_range(), bounds.y_range());
         let can_build = footprint.all(|(x, y)| self.is_buildable(vec2(x, y)));
         if !can_build {
-            log::trace!("cannot build here");
+            log::trace!("ERROR spawning {:?} @ {}: cannot build here", building.typ, building.tile);
             return None;
         }
 
         log::trace!("spawn {:?} @ {}", building.typ, building.tile);
         let building = self.buildings.insert(building);
-        self.update_downstream_buildings();
+
+        building.init(self);
+
         Some(building)
-    }
-
-    fn update_downstream_buildings(&self) {
-        log::trace!("update downstream buildings");
-        let Some(hq) = self.buildings().find(|b| b.typ == BuildingTyp::HQ) else { return log::error!("No HQ") };
-
-        // 🪲 TODO: quadratic in #buildings. Use spatial queries instead.
-        const MAX_DIST2: i32 = 30 * 30; // TODO
-        for building in self.buildings().filter(|b| b.id != hq.id) {
-            let my_resources = building.iter_resources().map(|(r, _)| r).collect::<HashSet<_>>();
-            let neighbors = self
-                .buildings() //_
-                .filter(|b| b.id != building.id)
-                .filter(|b| b.is_depot())
-                .filter(|b| b.tile.distance_squared(building.tile) < MAX_DIST2)
-                .filter(|b| b.tile.distance_squared(hq.tile) < building.tile.distance_squared(hq.tile))
-                .filter(|b| b.iter_resources().map(|(r, _)| r).any(|r| my_resources.contains(&r)))
-                .map(|b| b.id);
-            building._downstream.clear();
-            building._downstream.extend(neighbors);
-        }
-
-        // upstream
-        // for building in self.buildings() {
-        //     let my_resources = building.iter_resources().map(|(r, _)| r).collect::<HashSet<_>>();
-        //     let neighbors = self
-        //         .buildings() //_
-        //         .filter(|b| b.id != building.id)
-        //         .filter(|b| b.tile.distance_squared(building.tile) < MAX_DIST2)
-        //         .filter(|b| b.tile.distance_squared(hq.tile) >= building.tile.distance_squared(hq.tile))
-        //         .filter(|b| b.iter_resources().map(|(r, _)| r).any(|r| my_resources.contains(&r)))
-        //         .map(|b| b.id);
-        //     building._downstream.clear();
-        //     building._downstream.extend(neighbors);
-        // }
     }
 
     /// 🏠 Assign pawn to work at building.
     pub fn assign_to(&self, pawn: &Pawn, building: &Building) {
+        log::trace!("assign {pawn} to {building}");
         if let Some(home) = pawn.home(self) {
             home.workers.remove(&pawn.id);
         }

@@ -21,7 +21,7 @@ impl Debug for Id {
 
 impl Display for Id {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        write!(f, "{:04x}.{:04x}", self.index, self.generation)
+        write!(f, "{:04x}{:04x}", self.index, self.generation)
     }
 }
 

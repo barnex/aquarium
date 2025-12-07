@@ -20,8 +20,8 @@ pub enum Action {
 }
 
 impl G {
-    /// User inputs give commands to the world.
-    pub fn control(&mut self) {
+    /// 🖱️ User inputs give commands to the world.
+    pub fn command_game(&mut self) {
         update_contextual_action(self);
         control_camera(self);
         doodle_on_map(self);
@@ -81,6 +81,7 @@ fn select_pawns(g: &mut G) {
     }
 }
 
+//🖱️
 fn command_pawns(g: &mut G) {
     if g.ui.active_tool == Tool::Pointer {
         if g.inputs.just_pressed(K_MOUSE2) {
@@ -110,7 +111,7 @@ fn doodle_on_map(g: &mut G) {
             Tool::Pawn(typ) => {
                 if g.inputs.just_pressed(K_MOUSE1) {
                     log::trace!("player spawns pawn {typ:?} @ {mouse}");
-                    g.spawn(Pawn::new(typ, mouse));
+                    g.spawn_pawn(Pawn::new(typ, mouse));
                 }
             }
             Tool::Building(typ) => {

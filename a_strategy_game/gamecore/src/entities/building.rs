@@ -37,6 +37,14 @@ impl BuildingTyp {
             Quarry => sprite!("quarry"),
         }
     }
+
+    pub fn default_workers(&self) -> (PawnTyp, usize) {
+        match self {
+            BuildingTyp::HQ => (PawnTyp::Crablet, 2),
+            BuildingTyp::Farm => (PawnTyp::Crablet, 1),
+            BuildingTyp::Quarry => (PawnTyp::Kitten, 1),
+        }
+    }
 }
 
 impl Building {
@@ -49,6 +57,24 @@ impl Building {
             resources: default(),
             _downstream: default(),
             _upstream: default(),
+        }
+    }
+
+    /// Called post-insert to initialized whatever is needed after building.
+    pub fn init(&self, g: &G) {
+        log::trace!("init {self}");
+        update_downstream_buildings(g);
+        self.spawn_default_workers(g);
+    }
+
+    /// Building::init -> spawn the workers for this building.
+    fn spawn_default_workers(&self, g: &G) {
+        log::trace!("spawn default workers for {self}");
+        let (pawntyp, num) = self.typ.default_workers();
+
+        for _ in 0..num {
+            let pawn = g.spawn(pawntyp, self.tile);
+            g.assign_to(pawn, self);
         }
     }
 
@@ -159,9 +185,44 @@ impl Building {
         self.tile // TODO
     }
 
-    pub fn id(&self) -> Id{
+    pub fn id(&self) -> Id {
         self.id
     }
+}
+
+fn update_downstream_buildings(g: &G) {
+    log::trace!("update downstream buildings");
+    let Some(hq) = g.buildings().find(|b| b.typ == BuildingTyp::HQ) else { return log::error!("No HQ") };
+
+    // 🪲 TODO: quadratic in #buildings. Use spatial queries instead.
+    const MAX_DIST2: i32 = 30 * 30; // TODO
+    for building in g.buildings().filter(|b| b.id != hq.id) {
+        let my_resources = building.iter_resources().map(|(r, _)| r).collect::<HashSet<_>>();
+        let neighbors = g
+            .buildings() //_
+            .filter(|b| b.id != building.id)
+            .filter(|b| b.is_depot())
+            .filter(|b| b.tile.distance_squared(building.tile) < MAX_DIST2)
+            .filter(|b| b.tile.distance_squared(hq.tile) < building.tile.distance_squared(hq.tile))
+            .filter(|b| b.iter_resources().map(|(r, _)| r).any(|r| my_resources.contains(&r)))
+            .map(|b| b.id);
+        building._downstream.clear();
+        building._downstream.extend(neighbors);
+    }
+
+    // upstream
+    // for building in self.buildings() {
+    //     let my_resources = building.iter_resources().map(|(r, _)| r).collect::<HashSet<_>>();
+    //     let neighbors = self
+    //         .buildings() //_
+    //         .filter(|b| b.id != building.id)
+    //         .filter(|b| b.tile.distance_squared(building.tile) < MAX_DIST2)
+    //         .filter(|b| b.tile.distance_squared(hq.tile) >= building.tile.distance_squared(hq.tile))
+    //         .filter(|b| b.iter_resources().map(|(r, _)| r).any(|r| my_resources.contains(&r)))
+    //         .map(|b| b.id);
+    //     building._downstream.clear();
+    //     building._downstream.extend(neighbors);
+    // }
 }
 
 /// For Memkeep::insert().
