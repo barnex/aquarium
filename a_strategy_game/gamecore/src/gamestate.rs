@@ -326,18 +326,23 @@ impl G {
 
     /// Add a building, if the location is suitable.
     pub fn spawn_building(&self, building: Building) -> Option<&Building> {
+        //❓check if building fits here
         let bounds = building.tile_bounds();
         let mut footprint = cross(bounds.x_range(), bounds.y_range());
         let can_build = footprint.all(|(x, y)| self.is_buildable(vec2(x, y)));
         if !can_build {
+            log::trace!("cannot build here");
             return None;
         }
+
+        log::trace!("spawn {:?} @ {}", building.typ, building.tile);
         let building = self.buildings.insert(building);
         self.update_downstream_buildings();
         Some(building)
     }
 
     fn update_downstream_buildings(&self) {
+        log::trace!("update downstream buildings");
         let Some(hq) = self.buildings().find(|b| b.typ == BuildingTyp::HQ) else { return log::error!("No HQ") };
 
         // 🪲 TODO: quadratic in #buildings. Use spatial queries instead.

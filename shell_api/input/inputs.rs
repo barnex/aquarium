@@ -111,10 +111,11 @@ impl Inputs {
 
     /// Record that this button was just pressed.
     fn record_press(&mut self, keymap: &Keymap, button: Button) {
-        let button = keymap.map(button);
-        if !self.buttons_down.contains(&button) {
-            self.buttons_pressed.insert(button);
-            self.buttons_down.insert(button);
+        let mapped = keymap.map(button);
+        log::trace!("press {mapped:?} (keymapped from {button:?})");
+        if !self.buttons_down.contains(&mapped) {
+            self.buttons_pressed.insert(mapped);
+            self.buttons_down.insert(mapped);
         }
     }
 
@@ -129,7 +130,6 @@ impl Inputs {
         self.mouse_position = pos
     }
 
-    
     // The relative mouse wheel movement since last tick.
     //pub fn mouse_wheel_delta(&self) -> i32 {
     //	let mut delta = 0;
