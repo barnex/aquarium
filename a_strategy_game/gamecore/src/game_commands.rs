@@ -34,6 +34,7 @@ impl G {
             &["i" | "inspect_under_cursor"] => Ok(toggle(&mut self.debug.inspect_under_cursor)),
             &["t" | "trace"] => self.trace_selected(),
             &["ut" | "untrace"] => Ok(self.untrace_all()),
+            &["kill"] => Ok(self.selected_pawns().for_each(|p| self.kill_pawn(p))),
             &[cmd, ..] => Err(anyhow!("unknown command: {cmd:?}")),
             &[] => Ok(()),
         }

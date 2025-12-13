@@ -54,9 +54,9 @@ impl BuildingTyp {
 
     pub fn default_workers(self) -> (PawnTyp, usize) {
         match self {
-            BuildingTyp::HQ => (PawnTyp::Crablet, 2),
-            BuildingTyp::Farm => (PawnTyp::Crablet, 1),
-            BuildingTyp::Quarry => (PawnTyp::Kitten, 1),
+            BuildingTyp::HQ => (PawnTyp::Cat, 2),
+            BuildingTyp::Farm => (PawnTyp::Cat, 1),
+            BuildingTyp::Quarry => (PawnTyp::Cat, 1),
             BuildingTyp::StarNest => (PawnTyp::Starfish, 10),
         }
     }
