@@ -11,6 +11,8 @@ pub struct Pawn {
     pub home: Cel<Option<Id>>,
     pub cargo: Cel<Option<ResourceTyp>>,
     pub traced: Cel<bool>,
+    pub target: Cel<Option<Id>>,
+    pub rot: Cel<Option<f32>>,
 }
 
 #[derive(Serialize, Deserialize, Clone, Copy, PartialEq, Eq, Hash, TryFromPrimitive, Debug)]
@@ -84,7 +86,13 @@ impl Pawn {
             home: None.cel(),
             cargo: None.cel(),
             traced: false.cel(),
+            target: None.cel(),
+            rot: None.cel(),
         }
+    }
+
+    pub fn id(&self) -> Id {
+        self.id
     }
 
     // ⏱️
@@ -360,13 +368,43 @@ impl Pawn {
     fn tick_attack(&self, g: &G) {
         debug_assert!(self.can_attack());
 
-        let attack_radius = 8; // TODO
-
-        if let Some(victim) = g.find_pawn(self.tile(), attack_radius, |p| self.team.is_hostile_to(p.team)) {
-            trace!(self, "Attack {victim}");
-            g.effects.add_bolt(g, self.center(), victim.center());
-            g.deal_damage(victim, self.attack_strength())
+        match self.target.and_then(|id| g.pawn(id)) {
+            Some(pawn) => self.attack(g, pawn),
+            None => self.find_target(g),
         }
+    }
+
+    fn find_target(&self, g: &G) {
+        let attack_radius = 8; // TODO
+        self.target.set(g.find_pawn(self.tile(), attack_radius, |p| self.team.is_hostile_to(p.team)).map(Pawn::id));
+        trace!(self, "find_target: {:?}", self.target);
+    }
+
+    fn attack(&self, g: &G, victim: &Pawn) {
+        trace!(self, "Attack {victim}");
+        g.effects.add_bolt(g, self.center(), victim.center());
+        g.deal_damage(victim, self.attack_strength())
+    }
+
+    pub(crate) fn draw(&self, g: &G, out: &mut Out) {
+        match self.typ {
+            PawnTyp::Kitten => self.base_draw(g, out),
+            PawnTyp::Cat => self.base_draw(g, out),
+            PawnTyp::Crablet => self.base_draw(g, out),
+            PawnTyp::Turret => self.draw_turret(g, out),
+            PawnTyp::Starfish => self.base_draw(g, out),
+        }
+    }
+
+    fn base_draw(&self, g: &G, out: &mut Out) {
+        g.draw_sprite_rot(out, L_SPRITES, self.typ.sprite(), self.tile.pos(), self.rot.unwrap_or_default());
+        if let Some(res) = self.cargo.get() {
+            g.draw_sprite(out, L_SPRITES + 1, res.sprite(), self.tile.pos() + vec2(0, 8));
+        }
+    }
+
+    fn draw_turret(&self, g: &G, out: &mut Out) {
+        self.base_draw(g, out);
     }
 
     //pub fn crab(tile: impl Into<vec2i16>) -> Self {

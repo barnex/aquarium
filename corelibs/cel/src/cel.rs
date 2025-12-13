@@ -131,6 +131,13 @@ impl Cel<u16> {
 
 // NOTE: operators (+, -, *, /) not very useful due to the need to borrow cel (not Copy).
 
+// ---------- Option
+
+pub trait CelOptionExt<T> {
+    fn unwrap_or_default(&self) -> T;
+    fn take(&self) -> Option<T>;
+}
+
 // ---------- fmt
 
 impl<T> Debug for Cel<T>

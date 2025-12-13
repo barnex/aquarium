@@ -126,11 +126,7 @@ fn draw_resources(g: &G, out: &mut Out) {
 
 fn draw_pawns(g: &G, out: &mut Out) {
     for pawn in visible_pawns(g) {
-        //g.draw_sprite(out, L_SPRITES, pawn.typ.sprite(), pawn.tile.pos());
-        g.draw_sprite_rot(out, L_SPRITES, pawn.typ.sprite(), pawn.tile.pos(), 1.0);
-        if let Some(res) = pawn.cargo.get() {
-            g.draw_sprite(out, L_SPRITES + 1, res.sprite(), pawn.tile.pos() + vec2(0, 8));
-        }
+        pawn.draw(g, out)
     }
 }
 

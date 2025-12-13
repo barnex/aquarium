@@ -77,6 +77,10 @@ impl DrawSprite {
     pub fn with_src_pos(self, src_pos: vec2u8) -> Self {
         self.with(|s| s.src_pos = Some(src_pos))
     }
+
+    pub fn with_rot(self, rot: f32) -> Self {
+        self.with(|s| s.rot = rot)
+    }
 }
 
 #[derive(Default, Debug, PartialEq)]

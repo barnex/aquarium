@@ -35,6 +35,12 @@ impl<T: Copy> Cel<Option<T>> {
     }
 }
 
+impl<T: Copy + Default> Cel<Option<T>> {
+    pub fn unwrap_or_default(&self) -> T {
+        self.get().unwrap_or_default()
+    }
+}
+
 // ---------- vector
 
 impl<T: Copy> Cel<Vector<T, 2>> {
