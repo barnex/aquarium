@@ -17,7 +17,7 @@ impl G {
         draw_pawns(g, out);
         draw_cursor(g, out);
         draw_selection(g, out);
-        self.effects.draw(g, out);
+        self.effects.tick_and_draw(g, out);
 
         draw_debug_overlay(g, out);
     }

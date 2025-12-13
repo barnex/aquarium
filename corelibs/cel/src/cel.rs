@@ -1,6 +1,5 @@
 use crate::*;
 
-use num_traits::Num;
 use std::cell::Cell;
 use std::fmt::{Debug, Display};
 use std::ops::{Add, Sub};
@@ -107,10 +106,18 @@ impl<T: Copy + Add<Output = T>> CelAdd<&Cel<T>> for Cel<T> {
 }
 
 impl<T: Copy + Sub<Output = T>> Cel<T> {
-    /// Increment value by `rhs`.
+    /// Decrement value by `rhs`.
     #[inline(always)]
     pub fn sub(&self, rhs: T) {
         self.set(self.get() - rhs);
+    }
+}
+
+impl Cel<u8> {
+    /// Decrement value by `rhs`.
+    #[inline(always)]
+    pub fn saturating_sub(&self, rhs: u8) {
+        self.set(self.get().saturating_sub(rhs));
     }
 }
 

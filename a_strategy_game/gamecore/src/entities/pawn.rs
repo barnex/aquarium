@@ -6,7 +6,7 @@ pub struct Pawn {
     pub typ: PawnTyp,
     pub tile: Cel<vec2i16>,
     pub team: Team,
-    pub health: u8,
+    pub health: Cel<u8>,
     pub route: Route,
     pub home: Cel<Option<Id>>,
     pub cargo: Cel<Option<ResourceTyp>>,
@@ -49,16 +49,6 @@ impl PawnTyp {
         }
     }
 
-    fn can_attack(self) -> bool {
-        match self {
-            PawnTyp::Kitten => false,
-            PawnTyp::Cat => false,
-            PawnTyp::Crablet => true,
-            PawnTyp::Turret => true,
-            PawnTyp::Starfish => false,
-        }
-    }
-
     fn default_health(self) -> u8 {
         match self {
             PawnTyp::Kitten => 3,
@@ -88,7 +78,7 @@ impl Pawn {
             id: Id::default(),
             team,
             typ,
-            health: typ.default_health(),
+            health: typ.default_health().cel(),
             tile: tile.cel(),
             route: default(),
             home: None.cel(),
@@ -111,7 +101,7 @@ impl Pawn {
             self.tick_delivery_work(g, home)
         }
 
-        if self.typ.can_attack() {
+        if self.can_attack() {
             self.tick_attack(g)
         }
 
@@ -353,15 +343,29 @@ impl Pawn {
         self.typ.can_walk_on(tile)
     }
 
+    fn attack_strength(&self) -> u8 {
+        match self.typ {
+            PawnTyp::Kitten => 0,
+            PawnTyp::Cat => 0,
+            PawnTyp::Crablet => 1,
+            PawnTyp::Turret => 1,
+            PawnTyp::Starfish => 0,
+        }
+    }
+
+    fn can_attack(&self) -> bool {
+        self.attack_strength() != 0
+    }
+
     fn tick_attack(&self, g: &G) {
-        debug_assert!(self.typ.can_attack());
+        debug_assert!(self.can_attack());
 
         let attack_radius = 8; // TODO
 
         if let Some(victim) = g.find_pawn(self.tile(), attack_radius, |p| self.team.is_hostile_to(p.team)) {
             trace!(self, "Attack {victim}");
-
-            g.effects.add_line(Line::new(self.center(), victim.center()));
+            g.effects.add_bolt(g, self.center(), victim.center());
+            g.deal_damage(victim, self.attack_strength())
         }
     }
 

@@ -274,6 +274,11 @@ impl G {
         self.spawn_pawn(Pawn::new(typ, tile, team))
     }
 
+    pub fn kill_pawn(&self, pawn: &Pawn) {
+        trace!(pawn, "killed");
+        self.pawns.remove(pawn.id);
+    }
+
     #[deprecated = "use spawn"]
     pub fn spawn_pawn(&self, pawn: Pawn) -> &Pawn {
         log::trace!("spawn {:?} @ tile {}", pawn.typ, pawn.tile);
@@ -414,6 +419,13 @@ impl G {
         // ☘️ resource becomes unreachable, remove it.
         if !self.tile_at(idx).is_default_walkable() {
             self.resources.remove(idx);
+        }
+    }
+
+    pub(crate) fn deal_damage(&self, victim: &Pawn, amount: u8) {
+        victim.health.saturating_sub(amount);
+        if victim.health == 0 {
+            self.kill_pawn(victim);
         }
     }
 }
