@@ -1,8 +1,4 @@
 use crate::prelude::*;
-/*
- *
- *
- */
 
 /// The Game State.
 /// Short name `g: &G`, because it's passed down ehhhhhhverywhere.
@@ -26,6 +22,9 @@ pub struct G {
     pub pawns: MemKeep<Pawn>,
     pub water: WaterSim,
     pub header_text: String,
+
+    #[serde(skip)]
+    pub effects: Effects,
 
     // ⏯️ UI
     pub player: Team,
@@ -121,6 +120,7 @@ impl G {
             viewport_size: vec2(0, 0),
             water: default(),
             console: Console::with_hotkey(K_CLI),
+            effects: default(),
         }
     }
 

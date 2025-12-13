@@ -359,7 +359,9 @@ impl Pawn {
         let attack_radius = 8; // TODO
 
         if let Some(victim) = g.find_pawn(self.tile(), attack_radius, |p| self.team.is_hostile_to(p.team)) {
-            trace!(self, "Attack {victim}")
+            trace!(self, "Attack {victim}");
+
+            g.effects.add_line(Line::new(self.center(), victim.center()));
         }
     }
 

@@ -14,20 +14,23 @@ pub const L_WATER: u8 = 1;
 /// The layer we draw the sprites to.
 pub const L_SPRITES: u8 = 2;
 
+/// The layer we draw the sprites to.
+pub const L_EFFECTS: u8 = 3;
+
 /// UI background layer (window fill etc).
-pub const L_UI_BG: u8 = 3;
+pub const L_UI_BG: u8 = 4;
 
 /// UI mid layer (text, buttons, ...).
-pub const L_UI: u8 = 4;
+pub const L_UI: u8 = 5;
 
 /// UI foreground layer (selection markers etc).
-pub const L_UI_FG: u8 = 5;
+pub const L_UI_FG: u8 = 6;
 
 /// Text layer
-pub const L_TEXT: u8 = 6;
+pub const L_TEXT: u8 = 7;
 
 /// Command-line interface
-pub const L_CLI: u8 = 7;
+pub const L_CLI: u8 = 8;
 
 /// Scenegraph, sounds, etc. to output after a tick.
 /// Sent to the browser who will render it.
