@@ -121,6 +121,14 @@ impl Cel<u8> {
     }
 }
 
+impl Cel<u16> {
+    /// Decrement value by `rhs`.
+    #[inline(always)]
+    pub fn saturating_sub(&self, rhs: u16) {
+        self.set(self.get().saturating_sub(rhs));
+    }
+}
+
 // NOTE: operators (+, -, *, /) not very useful due to the need to borrow cel (not Copy).
 
 // ---------- fmt

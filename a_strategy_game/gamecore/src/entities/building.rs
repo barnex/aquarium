@@ -115,9 +115,15 @@ impl Building {
 
     fn tick_star_nest(&self, g: &G) {
         // TODO: delay
-        self.workers.retain(|&id| g.pawn(id).is_some());
-        if self.workers.is_empty() {
-            self.spawn_default_workers(g);
+        if g.tick % 128 == 0 {
+            self.workers.retain(|&id| g.pawn(id).is_some());
+            if self.workers.is_empty() {
+                self.spawn_default_workers(g);
+            }
+        }
+        // slowly drain resources
+        if g.tick % 16 == 0 {
+            self.resources[0].saturating_sub(1);
         }
     }
 
@@ -138,7 +144,7 @@ impl Building {
             BuildingTyp::HQ => true,
             BuildingTyp::Farm => false,
             BuildingTyp::Quarry => false,
-            BuildingTyp::StarNest => true,
+            BuildingTyp::StarNest => false,
         }
     }
 
