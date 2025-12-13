@@ -4,6 +4,7 @@ use crate::prelude::*;
 pub struct Pawn {
     pub id: Id,
     pub typ: PawnTyp,
+    pub sleep: Cel<u8>,
     pub tile: Cel<vec2i16>,
     pub team: Team,
     pub health: Cel<u8>,
@@ -78,6 +79,7 @@ impl Pawn {
     pub fn new(typ: PawnTyp, tile: vec2i16, team: Team) -> Self {
         Self {
             id: Id::default(),
+            sleep: 0.cel(),
             team,
             typ,
             health: typ.default_health().cel(),
@@ -97,6 +99,11 @@ impl Pawn {
 
     // ⏱️
     pub(crate) fn tick(&self, g: &G) {
+        if self.sleep != 0 {
+            self.sleep.saturating_sub(1);
+            return;
+        }
+
         // 🥾 always first go where you were going
         if self.can_move() && !self.is_at_destination() {
             self.walk_to_destination(g);
@@ -117,6 +124,10 @@ impl Pawn {
         if self.can_move() {
             self.take_personal_space(g);
         }
+    }
+
+    pub(crate) fn sleep(&self, ticks: u8) {
+        self.sleep.set(ticks);
     }
 
     fn tick_delivery_work(&self, g: &G, home: &Building) {
@@ -378,12 +389,14 @@ impl Pawn {
         let attack_radius = 8; // TODO
         self.target.set(g.find_pawn(self.tile(), attack_radius, |p| self.team.is_hostile_to(p.team)).map(Pawn::id));
         trace!(self, "find_target: {:?}", self.target);
+        self.sleep(1);
     }
 
     fn attack(&self, g: &G, victim: &Pawn) {
         trace!(self, "Attack {victim}");
         g.effects.add_bolt(g, self.center(), victim.center());
-        g.deal_damage(victim, self.attack_strength())
+        g.deal_damage(victim, self.attack_strength());
+        self.sleep(1);
     }
 
     pub(crate) fn draw(&self, g: &G, out: &mut Out) {
