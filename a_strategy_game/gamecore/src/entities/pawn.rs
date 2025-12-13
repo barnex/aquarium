@@ -17,12 +17,14 @@ pub enum PawnTyp {
     Kitten = 1,
     Cat = 2,
     Crablet = 3,
+    Turret = 4,
+    Starfish = 5,
     // ⚠️👇 update `all()` below!
 }
 impl PawnTyp {
     pub fn all() -> impl Iterator<Item = Self> {
         let first = Self::Kitten;
-        let last = Self::Crablet; // 👈⚠️ keep in sync!
+        let last = Self::Starfish; // 👈⚠️ keep in sync!
         ((first as u8)..=(last as u8)).map(|i| Self::try_from_primitive(i).unwrap())
     }
 }
@@ -33,6 +35,8 @@ impl PawnTyp {
             PawnTyp::Kitten => sprite!("kit7"),
             PawnTyp::Cat => sprite!("kit4"),
             PawnTyp::Crablet => sprite!("ferris"),
+            PawnTyp::Turret => sprite!("turret"),
+            PawnTyp::Starfish => sprite!("starfish"),
         }
     }
 }
@@ -270,7 +274,7 @@ impl Pawn {
         let max_dist = 42;
         let distance_map = DistanceMap::new(dest, max_dist, |p| g.is_walkable(p));
         let path = distance_map.path_to_center(self.tile());
-        trace!(self, "dest={dest} path len={:?}", path.as_ref().map(|p|p.len()));
+        trace!(self, "dest={dest} path len={:?}", path.as_ref().map(|p| p.len()));
         self.route.set(path?);
         OK
     }

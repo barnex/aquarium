@@ -19,13 +19,14 @@ pub enum BuildingTyp {
     HQ = 1,
     Farm = 2,
     Quarry = 3,
+    StarNest = 4,
     // 👆 ⚠️ keep in sync!
 }
 
 impl BuildingTyp {
     pub fn all() -> impl Iterator<Item = Self> {
         let first = Self::HQ;
-        let last = Self::Quarry; // 👈⚠️ keep in sync! Use variant_count <https://github.com/rust-lang/rust/issues/73662> when stable.
+        let last = Self::StarNest; // 👈⚠️ keep in sync! Use variant_count <https://github.com/rust-lang/rust/issues/73662> when stable.
         ((first as u8)..=(last as u8)).map(|i| Self::try_from_primitive(i).unwrap())
     }
 
@@ -35,6 +36,7 @@ impl BuildingTyp {
             HQ => sprite!("hq"),
             Farm => sprite!("shell_big"),
             Quarry => sprite!("quarry"),
+            StarNest => sprite!("starnest"),
         }
     }
 
@@ -45,6 +47,7 @@ impl BuildingTyp {
             BuildingTyp::HQ => [None, Some((0, 100)), Some((1, 100))],
             BuildingTyp::Farm => [None, Some((0, 20)), None],
             BuildingTyp::Quarry => [None, None, Some((0, 30))],
+            BuildingTyp::StarNest => [None, Some((0, 100)), None],
         }
     }
 
@@ -53,6 +56,7 @@ impl BuildingTyp {
             BuildingTyp::HQ => (PawnTyp::Crablet, 2),
             BuildingTyp::Farm => (PawnTyp::Crablet, 1),
             BuildingTyp::Quarry => (PawnTyp::Kitten, 1),
+            BuildingTyp::StarNest => (PawnTyp::Starfish, 10),
         }
     }
 }
@@ -106,6 +110,7 @@ impl Building {
             BuildingTyp::HQ => true,
             BuildingTyp::Farm => false,
             BuildingTyp::Quarry => false,
+            BuildingTyp::StarNest => true,
         }
     }
 
@@ -177,6 +182,7 @@ impl Building {
             HQ => (3, 3),
             Farm => (2, 2),
             Quarry => (2, 2),
+            StarNest => (3, 3),
         }
         .into()
     }
