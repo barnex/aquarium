@@ -4,6 +4,16 @@ use crate::prelude::*;
 /// Short name `g: &G`, because it's passed down ehhhhhhverywhere.
 #[derive(Serialize, Deserialize)]
 pub struct G {
+    // 🕣 timekeeping
+    pub paused: bool,
+    pub frame: u64,
+    pub tick: u64,
+    pub now_secs: f64,
+    _prev_secs: f64, // to compute dt
+    pub dt: f64,
+    pub dt_smooth: f64,
+    pub frames_per_tick: u32,
+
     // 🌍 game world
     pub name: String,
     pub _tilemap: Tilemap,
@@ -26,16 +36,6 @@ pub struct G {
     /// Currently selected `Pawn`s.
     pub selected_pawn_ids: CSet<Id>,
 
-    // 🕣 timekeeping
-    pub paused: bool,
-    pub frame: u64,
-    pub tick: u64,
-    pub now_secs: f64,
-    _prev_secs: f64, // to compute dt
-    pub dt: f64,
-    pub dt_smooth: f64,
-    pub frames_per_tick: u32,
-
     // 🕹️ input events
     #[serde(skip)]
     pub inputs: Inputs,
@@ -53,7 +53,6 @@ pub struct G {
     // 🪲 debug
     pub debug: DebugOpts,
     pub last_sanity_error: Option<String>,
-
     pub console: Console,
 }
 
