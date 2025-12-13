@@ -13,7 +13,7 @@ pub struct Pawn {
     pub cargo: Cel<Option<ResourceTyp>>,
     pub traced: Cel<bool>,
     pub target: Cel<Option<Id>>,
-    pub rot: Cel<Option<f32>>,
+    pub rot: Cel<f32>,
 }
 
 #[derive(Serialize, Deserialize, Clone, Copy, PartialEq, Eq, Hash, TryFromPrimitive, Debug)]
@@ -89,7 +89,7 @@ impl Pawn {
             cargo: None.cel(),
             traced: false.cel(),
             target: None.cel(),
-            rot: None.cel(),
+            rot: default(),
         }
     }
 
@@ -393,10 +393,24 @@ impl Pawn {
     }
 
     fn attack(&self, g: &G, victim: &Pawn) {
+        match self.typ {
+            PawnTyp::Turret => self.turret_attack(g, victim),
+            _ => self.attack_base(g, victim),
+        }
+    }
+
+    fn attack_base(&self, g: &G, victim: &Pawn) {
         trace!(self, "Attack {victim}");
         g.effects.add_bolt(g, self.center(), victim.center());
         g.deal_damage(victim, self.attack_strength());
         self.sleep(1);
+    }
+
+    fn turret_attack(&self, g: &G, victim: &Pawn) {
+        let dir = (victim.tile.get() - self.tile.get()).as_f32();
+        let rot = f32::atan2(dir.x(), -dir.y());
+        self.rot.set(rot);
+        self.attack_base(g, victim);
     }
 
     pub(crate) fn draw(&self, g: &G, out: &mut Out) {
@@ -410,7 +424,7 @@ impl Pawn {
     }
 
     fn base_draw(&self, g: &G, out: &mut Out) {
-        g.draw_sprite_rot(out, L_SPRITES, self.typ.sprite(), self.tile.pos(), self.rot.unwrap_or_default());
+        g.draw_sprite_rot(out, L_SPRITES, self.typ.sprite(), self.tile.pos(), self.rot.get());
         if let Some(res) = self.cargo.get() {
             g.draw_sprite(out, L_SPRITES + 1, res.sprite(), self.tile.pos() + vec2(0, 8));
         }
