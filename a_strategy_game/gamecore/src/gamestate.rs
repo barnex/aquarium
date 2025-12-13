@@ -381,6 +381,10 @@ impl G {
     /// 🏠 Assign pawn to work at building.
     pub fn assign_to(&self, pawn: &Pawn, building: &Building) {
         log::trace!("assign {pawn} to {building}");
+        if pawn.team != building.team {
+            log::trace!("assign: wrong team: {} != {}", pawn.team, building.team);
+            return;
+        }
         if let Some(home) = pawn.home(self) {
             home.workers.remove(&pawn.id);
         }

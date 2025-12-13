@@ -13,3 +13,9 @@ impl Team {
         self != rhs
     }
 }
+
+impl Display for Team {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> std::fmt::Result {
+        f.debug_tuple("Team").field(&self.0).finish()
+    }
+}

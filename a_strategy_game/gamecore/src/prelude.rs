@@ -20,6 +20,7 @@ pub use rand_chacha::ChaCha8Rng;
 pub use serde::{Deserialize, Serialize};
 pub use std::cell::RefCell;
 pub use std::convert::TryFrom;
+pub use std::fmt;
 pub use std::iter::zip;
 pub use std::num::NonZeroU8;
 
