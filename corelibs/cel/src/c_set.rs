@@ -55,6 +55,10 @@ impl<T: Eq + Hash + Copy> CSet<T> {
     pub fn contains(&self, v: T) -> bool {
         self.0.borrow().contains(&v)
     }
+
+    pub fn retain(&self, f: impl Fn(&T) -> bool) {
+        self.0.borrow_mut().retain(f);
+    }
 }
 
 impl<T: Eq + Hash + Copy> FromIterator<T> for CSet<T> {

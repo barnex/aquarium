@@ -179,6 +179,7 @@ impl G {
         self.tick += 1;
         TICK_FOR_LOGGING.store(self.tick, std::sync::atomic::Ordering::Relaxed);
         self.tick_pawns();
+        self.tick_buildings();
         self.tick_farmland();
         self.update_text_overlay();
     }
@@ -201,9 +202,15 @@ impl G {
         }
     }
 
-    pub(crate) fn tick_pawns(&mut self) {
+    fn tick_pawns(&mut self) {
         for p in self.pawns.iter() {
             p.tick(self);
+        }
+    }
+
+    fn tick_buildings(&mut self) {
+        for b in self.buildings.iter() {
+            b.tick(self);
         }
     }
 

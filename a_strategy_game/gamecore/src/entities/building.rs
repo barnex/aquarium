@@ -104,7 +104,24 @@ impl Building {
         }
     }
 
-    //-------------------------------------------------------------------------------- buildinf function
+    pub fn tick(&self, g: &G) {
+        match self.typ {
+            BuildingTyp::HQ => (),
+            BuildingTyp::Farm => (),
+            BuildingTyp::Quarry => (),
+            BuildingTyp::StarNest => self.tick_star_nest(g),
+        }
+    }
+
+    fn tick_star_nest(&self, g: &G) {
+        // TODO: delay
+        self.workers.retain(|&id| g.pawn(id).is_some());
+        if self.workers.is_empty() {
+            self.spawn_default_workers(g);
+        }
+    }
+
+    //-------------------------------------------------------------------------------- building function
     pub fn is_full(&self) -> bool {
         self.resource_slots().all(|(_, slot, cap)| slot.get() >= cap)
     }
