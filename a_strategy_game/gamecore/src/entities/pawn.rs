@@ -6,6 +6,7 @@ pub struct Pawn {
     pub typ: PawnTyp,
     pub tile: Cel<vec2i16>,
     pub team: Team,
+    pub health: u8,
     pub route: Route,
     pub home: Cel<Option<Id>>,
     pub cargo: Cel<Option<ResourceTyp>>,
@@ -37,6 +38,36 @@ impl PawnTyp {
             (_, tile) => tile.is_default_walkable(),
         }
     }
+
+    fn can_move(self) -> bool {
+        match self {
+            PawnTyp::Kitten => true,
+            PawnTyp::Cat => true,
+            PawnTyp::Crablet => true,
+            PawnTyp::Turret => false,
+            PawnTyp::Starfish => true,
+        }
+    }
+
+    fn can_attack(self) -> bool {
+        match self {
+            PawnTyp::Kitten => false,
+            PawnTyp::Cat => false,
+            PawnTyp::Crablet => true,
+            PawnTyp::Turret => true,
+            PawnTyp::Starfish => false,
+        }
+    }
+
+    fn default_health(self) -> u8 {
+        match self {
+            PawnTyp::Kitten => 3,
+            PawnTyp::Cat => 5,
+            PawnTyp::Crablet => 5,
+            PawnTyp::Turret => 20,
+            PawnTyp::Starfish => 4,
+        }
+    }
 }
 
 impl PawnTyp {
@@ -57,6 +88,7 @@ impl Pawn {
             id: Id::default(),
             team,
             typ,
+            health: typ.default_health(),
             tile: tile.cel(),
             route: default(),
             home: None.cel(),
@@ -68,20 +100,25 @@ impl Pawn {
     // ⏱️
     pub(crate) fn tick(&self, g: &G) {
         // 🥾 always first go where you were going
-        if !self.is_at_destination() {
+        if self.can_move() && !self.is_at_destination() {
             self.walk_to_destination(g);
             return;
         }
 
         // 📍 now you are at destination
-
         // 🏭 for worker pawns
         if let Some(home) = self.home(g) {
             self.tick_delivery_work(g, home)
         }
 
+        if self.typ.can_attack() {
+            self.tick_attack(g)
+        }
+
         // 😴
-        self.take_personal_space(g);
+        if self.can_move() {
+            self.take_personal_space(g);
+        }
     }
 
     fn tick_delivery_work(&self, g: &G, home: &Building) {
@@ -258,9 +295,7 @@ impl Pawn {
     }
 
     fn can_move(&self) -> bool {
-        match self.typ {
-            _ => true,
-        }
+        self.typ.can_move()
     }
 
     fn walk_to_destination(&self, g: &G) {
@@ -316,6 +351,16 @@ impl Pawn {
 
     pub fn can_walk_on(&self, tile: Tile) -> bool {
         self.typ.can_walk_on(tile)
+    }
+
+    fn tick_attack(&self, g: &G) {
+        debug_assert!(self.typ.can_attack());
+
+        let attack_radius = 8; // TODO
+
+        if let Some(victim) = g.find_pawn(self.tile(), attack_radius, |p| self.team.is_hostile_to(p.team)) {
+            trace!(self, "Attack {victim}")
+        }
     }
 
     //pub fn crab(tile: impl Into<vec2i16>) -> Self {

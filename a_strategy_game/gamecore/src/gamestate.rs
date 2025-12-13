@@ -270,6 +270,7 @@ impl G {
 
     /// Add a pawn to the game and return it (now with `id` set).
     pub fn spawn(&self, typ: PawnTyp, tile: vec2i16, team: Team) -> &Pawn {
+        #[allow(deprecated)]
         self.spawn_pawn(Pawn::new(typ, tile, team))
     }
 
@@ -293,6 +294,18 @@ impl G {
     /// TODO: make faster via a hierarchy.
     pub fn pawn_at(&self, tile: vec2i16) -> Option<&Pawn> {
         self.pawns.iter().find(|v| v.tile == tile)
+    }
+
+    /// Find nearest pawn inside given radius, where `f` is true.
+    /// TODO: make faster via a hierarchy.
+    pub fn find_pawn(&self, around: vec2i16, radius: u16, f: impl Fn(&Pawn) -> bool) -> Option<&Pawn> {
+        let radius = radius as i32;
+        let radius2 = radius * radius;
+        self //_
+            .pawns
+            .iter()
+            .filter(|p| p.tile.get().distance_squared(around) < radius2 && f(p))
+            .min_by_key(|p| p.tile.get().distance_squared(around))
     }
 
     /// All currently selected Pawn Ids.

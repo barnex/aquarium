@@ -7,4 +7,9 @@ impl Team {
     pub const HUMAN1: Team = Team(1);
     pub const HUMAN2: Team = Team(2);
     pub const PESTS: Team = Team(100);
+
+    /// Does this team attack `rhs`?
+    pub(crate) fn is_hostile_to(self, rhs: Team) -> bool {
+        self != rhs
+    }
 }

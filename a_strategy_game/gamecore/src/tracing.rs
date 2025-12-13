@@ -24,9 +24,10 @@ macro_rules! trace {
 
 impl G {
     pub(crate) fn trace_selected(&self) -> Result<()> {
-        self.untrace_all();
+        //self.untrace_all();
         let mut count = 0;
         for p in self.selected_pawns().inspect(|_| count += 1) {
+            log::trace!("now tracing {p}");
             p.traced.set(true);
         }
         log::trace!("tracing {count} entities");
