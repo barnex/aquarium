@@ -5,6 +5,7 @@ pub struct Pawn {
     pub id: Id,
     pub typ: PawnTyp,
     pub tile: Cel<vec2i16>,
+    pub team: Team,
     pub route: Route,
     pub home: Cel<Option<Id>>,
     pub cargo: Cel<Option<ResourceTyp>>,
@@ -27,6 +28,15 @@ impl PawnTyp {
         let last = Self::Starfish; // 👈⚠️ keep in sync!
         ((first as u8)..=(last as u8)).map(|i| Self::try_from_primitive(i).unwrap())
     }
+
+    fn can_walk_on(&self, tile: Tile) -> bool {
+        use PawnTyp::*;
+        use Tile::*;
+        match (self, tile) {
+            (Starfish, Water | Canal) => true,
+            (_, tile) => tile.is_default_walkable(),
+        }
+    }
 }
 
 impl PawnTyp {
@@ -42,9 +52,10 @@ impl PawnTyp {
 }
 
 impl Pawn {
-    pub fn new(typ: PawnTyp, tile: vec2i16) -> Self {
+    pub fn new(typ: PawnTyp, tile: vec2i16, team: Team) -> Self {
         Self {
             id: Id::default(),
+            team,
             typ,
             tile: tile.cel(),
             route: default(),
@@ -234,7 +245,7 @@ impl Pawn {
     }
 
     fn teleport_to(&self, g: &G, dst: vec2i16) {
-        if g.is_walkable(dst) {
+        if g.is_walkable_by(dst, self) {
             self.tile.set(dst);
             self.route.clear();
         }
@@ -254,7 +265,7 @@ impl Pawn {
 
     fn walk_to_destination(&self, g: &G) {
         if let Some(next_tile) = self.route.next() {
-            if g.is_walkable(next_tile) {
+            if g.is_walkable_by(next_tile, self) {
                 self.tile.set(next_tile);
             } else {
                 // TODO: handle destination unreachable
@@ -272,7 +283,7 @@ impl Pawn {
 
     fn start_route_to(&self, g: &G, dest: vec2i16) -> Status {
         let max_dist = 42;
-        let distance_map = DistanceMap::new(dest, max_dist, |p| g.is_walkable(p));
+        let distance_map = DistanceMap::new(dest, max_dist, |p| g.is_walkable_by(p, self));
         let path = distance_map.path_to_center(self.tile());
         trace!(self, "dest={dest} path len={:?}", path.as_ref().map(|p| p.len()));
         self.route.set(path?);
@@ -303,9 +314,13 @@ impl Pawn {
         self.route.is_finished()
     }
 
-    pub fn crab(tile: impl Into<vec2i16>) -> Self {
-        Self::new(PawnTyp::Crablet, tile.into())
+    pub fn can_walk_on(&self, tile: Tile) -> bool {
+        self.typ.can_walk_on(tile)
     }
+
+    //pub fn crab(tile: impl Into<vec2i16>) -> Self {
+    //    Self::new(PawnTyp::Crablet, tile.into())
+    //}
 }
 
 impl Display for Pawn {

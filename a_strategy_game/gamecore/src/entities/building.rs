@@ -7,6 +7,7 @@ pub struct Building {
     pub id: Id,
     pub typ: BuildingTyp,
     pub tile: vec2i16,
+    pub team: Team,
     pub workers: CSet<Id>,
     pub _downstream: CSet<Id>,
     pub _upstream: CSet<Id>,
@@ -59,15 +60,25 @@ impl BuildingTyp {
             BuildingTyp::StarNest => (PawnTyp::Starfish, 10),
         }
     }
+
+    pub(crate) fn can_build_on(self, tile: Tile) -> bool {
+        use BuildingTyp::*;
+        use Tile::*;
+        match (self, tile) {
+            (StarNest, Water) => true,
+            (_, tile) => tile.is_default_walkable(),
+        }
+    }
 }
 
 impl Building {
     //-------------------------------------------------------------------------------- spawn/init
-    pub fn new(typ: BuildingTyp, tile: impl Into<Vector<i16, 2>>) -> Self {
+    pub fn new(typ: BuildingTyp, tile: impl Into<Vector<i16, 2>>, team: Team) -> Self {
         Self {
             id: default(),
-            typ,
             tile: tile.into(),
+            team,
+            typ,
             workers: default(),
             resources: default(),
             _downstream: default(),
@@ -88,7 +99,7 @@ impl Building {
         let (pawntyp, num) = self.typ.default_workers();
 
         for _ in 0..num {
-            let pawn = g.spawn(pawntyp, self.tile);
+            let pawn = g.spawn(pawntyp, self.tile, self.team);
             g.assign_to(pawn, self);
         }
     }

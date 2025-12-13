@@ -49,6 +49,21 @@ impl Tile {
             _ => false,
         }
     }
+
+    /// 🥾 Can one generally walk on this kind of tile?
+    pub fn is_default_walkable(self) -> bool {
+        match self {
+            Tile::Dunes => false,
+            Tile::Mountains => false,
+            Tile::Sand => true,
+            Tile::Snow => true,
+            Tile::Water => false,
+            Tile::Block => false,
+            Tile::Canal => false,
+            Tile::Farmland => true,
+            Tile::Road => true,
+        }
+    }
 }
 
 impl Display for Tile {

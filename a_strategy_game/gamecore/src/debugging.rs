@@ -14,10 +14,10 @@ pub struct DebugOpts {
 
 pub(super) fn draw_debug_overlay(g: &G, out: &mut Out) {
     if g.debug.show_walkable {
-        draw_tile_overlay(g, out, RGBA([255, 0, 0, 100]), |p| !g.is_walkable(p));
+        draw_tile_overlay(g, out, RGBA([255, 0, 0, 100]), |p| !g.tile_at(p).is_default_walkable());
     }
     if g.debug.show_buildable {
-        draw_tile_overlay(g, out, RGBA([255, 0, 0, 100]), |p| !g.is_buildable(p));
+        draw_tile_overlay(g, out, RGBA([255, 0, 0, 100]), |p| !g.is_buildable(p, BuildingTyp::HQ));
     }
     if g.debug.show_home {
         draw_home_overlay(g, out);

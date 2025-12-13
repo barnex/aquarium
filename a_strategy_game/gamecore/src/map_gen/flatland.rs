@@ -1,15 +1,15 @@
 use crate::prelude::*;
 
 pub fn flatland() -> G {
-    let mut g = G::new(vec2(480, 320));
+    let mut g = G::new(vec2(480, 320), Team::HUMAN1);
 
-    let hq = g.spawn_building(Building::new(BuildingTyp::HQ, (12, 8))).unwrap();
+    let hq = g.spawn_building(Building::new(BuildingTyp::HQ, (12, 8), g.player)).unwrap();
 
-    g.spawn_pawn(Pawn::new(PawnTyp::Kitten, vec2(17, 7)));
-    let crab = g.spawn_pawn(Pawn::new(PawnTyp::Crablet, vec2(10, 4)).with(|p| p.cargo = Some(ResourceTyp::Leaf).cel()));
+    g.spawn(PawnTyp::Kitten, vec2(17, 7), g.player);
+    let crab = g.spawn_pawn(Pawn::new(PawnTyp::Crablet, vec2(10, 4), g.player).with(|p| p.cargo = Some(ResourceTyp::Leaf).cel()));
     g.assign_to(crab, hq);
 
-    let crab2 = g.spawn_pawn(Pawn::new(PawnTyp::Crablet, vec2(11, 5)).with(|p| p.cargo = Some(ResourceTyp::Leaf).cel()));
+    let crab2 = g.spawn_pawn(Pawn::new(PawnTyp::Crablet, vec2(11, 5), g.player).with(|p| p.cargo = Some(ResourceTyp::Leaf).cel()));
     g.assign_to(crab2, hq);
 
     g.spawn_resource((3, 9), ResourceTyp::Leaf);

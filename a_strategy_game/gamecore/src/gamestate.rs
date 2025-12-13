@@ -28,15 +28,13 @@ pub struct G {
     pub header_text: String,
 
     // ⏯️ UI
+    pub player: Team,
     #[serde(skip)]
     pub ui: Ui,
-
     /// What will happen when MOUSE2 is pressed. Depends on context.
     pub contextual_action: Action,
-
     /// Where selection rectangle started (mouse down position).
     pub selection_start: Option<vec2i>,
-
     /// Currently selected `Pawn`s.
     pub selected_pawn_ids: CSet<Id>,
 
@@ -69,8 +67,8 @@ impl G {
         map_gen::inception()
     }
 
-    pub fn new(size: vec2u16) -> Self {
-        let mut debug = DebugOpts::default();
+    pub fn new(size: vec2u16, player: Team) -> Self {
+        let debug = DebugOpts::default();
         #[cfg(debug_assertions)]
         {
             //debug.show_home = true;
@@ -97,6 +95,7 @@ impl G {
             _prev_secs: 0.0,
             _rng: RefCell::new(ChaCha8Rng::seed_from_u64(12345678)),
             _tilemap: Tilemap::new(size),
+            player,
             buildings: MemKeep::new(),
             camera_pos: vec2(40, 70), // nonzero so we notice offset issues without having to pan
             commands: default(),
@@ -237,22 +236,26 @@ impl G {
 
     /// 🥾 Can one generally walk on tile?
     /// TODO: ambiguous.
-    pub(crate) fn is_walkable(&self, tile: vec2i16) -> bool {
-        if !Self::tile_is_walkable(self.tile_at(tile)) {
-            return false;
-        }
+    pub(crate) fn is_walkable_by(&self, tile: vec2i16, pawn: &Pawn) -> bool {
+        pawn.can_walk_on(self.tile_at(tile))
+        //if !tile.is_walkable(self.tile_at(tile)) {
+        //    return false;
+        //}
         // Cannot walk on buildings. 🪲 TODO: very inefficient
         //for b in self.buildings.iter() {
         //    if b.tile_bounds().contains(tile) && b.entrance() != tile {
         //        return false;
         //    }
         //}
-        true
+        //true
     }
 
     /// 🧱 Can one generally build something on this tile?
-    pub(crate) fn is_buildable(&self, tile: vec2i16) -> bool {
-        if !Self::tile_is_walkable(self.tile_at(tile)) {
+    pub(crate) fn is_buildable(&self, tile: vec2i16, typ: BuildingTyp) -> bool {
+        //if !Self::tile_is_walkable(self.tile_at(tile)) {
+        //    return false;
+        //}
+        if !typ.can_build_on(self.tile_at(tile)) {
             return false;
         }
         for b in self.buildings.iter() {
@@ -263,26 +266,11 @@ impl G {
         true
     }
 
-    /// 🥾 Can one generally walk on this kind of tile?
-    fn tile_is_walkable(tile: Tile) -> bool {
-        match tile {
-            Tile::Dunes => false,
-            Tile::Mountains => false,
-            Tile::Sand => true,
-            Tile::Snow => true,
-            Tile::Water => false,
-            Tile::Block => false,
-            Tile::Canal => false,
-            Tile::Farmland => true,
-            Tile::Road => true,
-        }
-    }
-
     // -------------------------------- Pawns
 
     /// Add a pawn to the game and return it (now with `id` set).
-    pub fn spawn(&self, typ: PawnTyp, tile: vec2i16) -> &Pawn {
-        self.spawn_pawn(Pawn::new(typ, tile))
+    pub fn spawn(&self, typ: PawnTyp, tile: vec2i16, team: Team) -> &Pawn {
+        self.spawn_pawn(Pawn::new(typ, tile, team))
     }
 
     #[deprecated = "use spawn"]
@@ -351,7 +339,7 @@ impl G {
         //❓check if building fits here
         let bounds = building.tile_bounds();
         let mut footprint = cross(bounds.x_range(), bounds.y_range());
-        let can_build = footprint.all(|(x, y)| self.is_buildable(vec2(x, y)));
+        let can_build = footprint.all(|(x, y)| self.is_buildable(vec2(x, y), building.typ));
         if !can_build {
             log::trace!("ERROR spawning {:?} @ {}: cannot build here", building.typ, building.tile);
             return None;
@@ -411,7 +399,7 @@ impl G {
         }
 
         // ☘️ resource becomes unreachable, remove it.
-        if !self.is_walkable(idx) {
+        if !self.tile_at(idx).is_default_walkable() {
             self.resources.remove(idx);
         }
     }

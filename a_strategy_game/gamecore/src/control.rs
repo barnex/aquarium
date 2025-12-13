@@ -111,13 +111,21 @@ fn doodle_on_map(g: &mut G) {
             Tool::Pawn(typ) => {
                 if g.inputs.just_pressed(K_MOUSE1) {
                     log::trace!("player spawns pawn {typ:?} @ {mouse}");
-                    g.spawn_pawn(Pawn::new(typ, mouse));
+                    let team = match typ {
+                        PawnTyp::Starfish => Team::PESTS,
+                        _ => g.player,
+                    };
+                    g.spawn(typ, mouse, team);
                 }
             }
             Tool::Building(typ) => {
                 if g.inputs.just_pressed(K_MOUSE1) {
                     log::trace!("player spawns building {typ:?} @ {mouse}");
-                    g.spawn_building(Building::new(typ, mouse));
+                    let team = match typ {
+                        BuildingTyp::StarNest => Team::PESTS,
+                        _ => g.player,
+                    };
+                    g.spawn_building(Building::new(typ, mouse, team));
                 }
             }
             Tool::Resource(typ) => {

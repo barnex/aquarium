@@ -46,7 +46,7 @@ fn check_pawns_home_consistency(g: &G) -> Result<()> {
 
 fn check_pawns_on_walkable_tile(g: &G) -> Result<()> {
     for pawn in g.pawns() {
-        if !g.is_walkable(pawn.tile()) {
+        if !g.is_walkable_by(pawn.tile(), pawn) {
             bail!("{} on non-walkable tile at {}", pawn, pawn.tile())
         }
     }
