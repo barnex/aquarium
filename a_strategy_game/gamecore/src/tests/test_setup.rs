@@ -55,7 +55,7 @@ fn test_world(size: vec2u16, name: &str) -> G {
 
     clean_output_dir(name);
 
-    G::new(size, Team::HUMAN1).with(|g| {
+    G::new(size, Team::Red).with(|g| {
         g.name = name.into(); // name used as output dir
         g.ui.hidden = true; // don't accidentally click on UI
         g.debug.draw_mouse = true; // see mouse position in screenshots

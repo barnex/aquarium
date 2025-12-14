@@ -458,7 +458,7 @@ impl Pawn {
 
     pub(crate) fn sprite(&self) -> Sprite {
         match self.typ {
-            PawnTyp::Crab if self.team() == Team::HUMAN1 => sprite!("ferris"),
+            PawnTyp::Crab if self.team() == Team::Red => sprite!("ferris"),
             PawnTyp::Crab => sprite!("ferrisblue"),
             typ => typ.sprite(),
         }

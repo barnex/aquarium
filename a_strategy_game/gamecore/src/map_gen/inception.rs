@@ -2,7 +2,7 @@ use crate::prelude::*;
 
 pub fn inception() -> G {
     let size = 256;
-    let mut g = G::new(vec2(size, size), Team::HUMAN1);
+    let mut g = G::new(vec2(size, size), Team::Red);
     g.name = "Inception".into();
     g.camera_pos = (vec2(size, size) / 2).as_i16().pos();
 

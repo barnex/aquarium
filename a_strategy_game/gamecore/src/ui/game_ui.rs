@@ -36,11 +36,11 @@ impl GameUi {
     }
 
     const PAWN_PROTOTYPES: [(PawnTyp, Team); 5] = [
-        (PawnTyp::Crab, Team::HUMAN1), //_
-        (PawnTyp::Crab, Team::HUMAN2),
-        (PawnTyp::Cat, Team::HUMAN1), //_
-        (PawnTyp::Cat, Team::HUMAN2), //_
-        (PawnTyp::Starfish, Team::PESTS),
+        (PawnTyp::Crab, Team::Red), //_
+        (PawnTyp::Crab, Team::Blue),
+        (PawnTyp::Cat, Team::Red),  //_
+        (PawnTyp::Cat, Team::Blue), //_
+        (PawnTyp::Starfish, Team::Pests),
     ];
 
     fn menu_ui(&mut self, inputs: &mut Inputs, out: &mut Out) {

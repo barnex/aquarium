@@ -120,7 +120,7 @@ fn doodle_on_map(g: &mut G) {
                 if g.inputs.just_pressed(K_MOUSE1) {
                     log::trace!("player spawns building {typ:?} @ {mouse}");
                     let team = match typ {
-                        BuildingTyp::StarNest => Team::PESTS,
+                        BuildingTyp::StarNest => Team::Pests,
                         _ => g.player,
                     };
                     g.spawn_building(Building::new(typ, mouse, team));
