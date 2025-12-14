@@ -6,10 +6,10 @@ pub fn flatland() -> G {
     let hq = g.spawn_building(Building::new(BuildingTyp::HQ, (12, 8), g.player)).unwrap();
 
     g.spawn(PawnTyp::Kitten, vec2(17, 7), g.player);
-    let crab = g.spawn_pawn(Pawn::new(PawnTyp::Crablet, vec2(10, 4), g.player).with(|p| p.cargo = Some(ResourceTyp::Leaf).cel()));
+    let crab = g.spawn_pawn(Pawn::new(PawnTyp::Crab, vec2(10, 4), g.player).with(|p| p.cargo = Some(ResourceTyp::Leaf).cel()));
     g.assign_to(crab, hq);
 
-    let crab2 = g.spawn_pawn(Pawn::new(PawnTyp::Crablet, vec2(11, 5), g.player).with(|p| p.cargo = Some(ResourceTyp::Leaf).cel()));
+    let crab2 = g.spawn_pawn(Pawn::new(PawnTyp::Crab, vec2(11, 5), g.player).with(|p| p.cargo = Some(ResourceTyp::Leaf).cel()));
     g.assign_to(crab2, hq);
 
     g.spawn_resource((3, 9), ResourceTyp::Leaf);

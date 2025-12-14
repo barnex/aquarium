@@ -21,7 +21,7 @@ pub struct Pawn {
 pub enum PawnTyp {
     Kitten = 1,
     Cat = 2,
-    Crablet = 3,
+    Crab = 3,
     Turret = 4,
     Starfish = 5,
     // ⚠️👇 update `all()` below!
@@ -46,7 +46,7 @@ impl PawnTyp {
         match self {
             PawnTyp::Kitten => true,
             PawnTyp::Cat => true,
-            PawnTyp::Crablet => true,
+            PawnTyp::Crab => true,
             PawnTyp::Turret => false,
             PawnTyp::Starfish => true,
         }
@@ -58,7 +58,7 @@ impl PawnTyp {
         let is_worker = match self {
             PawnTyp::Kitten => true,
             PawnTyp::Cat => true,
-            PawnTyp::Crablet => false,
+            PawnTyp::Crab => false,
             PawnTyp::Turret => false,
             PawnTyp::Starfish => true,
         };
@@ -70,7 +70,7 @@ impl PawnTyp {
         match self {
             PawnTyp::Kitten => 3,
             PawnTyp::Cat => 5,
-            PawnTyp::Crablet => 5,
+            PawnTyp::Crab => 5,
             PawnTyp::Turret => 20,
             PawnTyp::Starfish => 4,
         }
@@ -82,7 +82,7 @@ impl PawnTyp {
         match self {
             PawnTyp::Kitten => sprite!("kit7"),
             PawnTyp::Cat => sprite!("kit4"),
-            PawnTyp::Crablet => sprite!("ferris"),
+            PawnTyp::Crab => sprite!("ferris"),
             PawnTyp::Turret => sprite!("turret"),
             PawnTyp::Starfish => sprite!("starfish"),
         }
@@ -392,7 +392,7 @@ impl Pawn {
         match self.typ {
             PawnTyp::Kitten => 0,
             PawnTyp::Cat => 0,
-            PawnTyp::Crablet => 1,
+            PawnTyp::Crab => 1,
             PawnTyp::Turret => 1,
             PawnTyp::Starfish => 0,
         }
@@ -443,7 +443,7 @@ impl Pawn {
         match self.typ {
             PawnTyp::Kitten => self.base_draw(g, out),
             PawnTyp::Cat => self.base_draw(g, out),
-            PawnTyp::Crablet => self.base_draw(g, out),
+            PawnTyp::Crab => self.base_draw(g, out),
             PawnTyp::Turret => self.draw_turret(g, out),
             PawnTyp::Starfish => self.base_draw(g, out),
         }
@@ -456,8 +456,12 @@ impl Pawn {
         }
     }
 
-    fn sprite(&self) -> Sprite {
-        self.typ.sprite()
+    pub(crate) fn sprite(&self) -> Sprite {
+        match self.typ {
+            PawnTyp::Crab if self.team() == Team::HUMAN1 => sprite!("ferris"),
+            PawnTyp::Crab => sprite!("ferrisblue"),
+            typ => typ.sprite(),
+        }
     }
 
     fn draw_turret(&self, g: &G, out: &mut Out) {

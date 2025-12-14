@@ -110,13 +110,9 @@ fn doodle_on_map(g: &mut G) {
         match g.ui.active_tool {
             Tool::Pointer => (),
             Tool::Tile(mat) => g.set_tile(mouse, mat),
-            Tool::Pawn(typ) => {
+            Tool::Pawn(typ, team) => {
                 if g.inputs.just_pressed(K_MOUSE1) {
-                    log::trace!("player spawns pawn {typ:?} @ {mouse}");
-                    let team = match typ {
-                        PawnTyp::Starfish => Team::PESTS,
-                        _ => g.player,
-                    };
+                    log::trace!("player spawns pawn {typ:?} {team:?} @ {mouse}");
                     g.spawn(typ, mouse, team);
                 }
             }

@@ -1,9 +1,8 @@
 use crate::prelude::*;
 
-mod ui;
-pub use ui::*;
+mod game_ui;
+pub use game_ui::*;
 
 pub(super) mod internal;
 
 mod palette;
-

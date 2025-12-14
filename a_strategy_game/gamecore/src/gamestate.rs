@@ -29,7 +29,7 @@ pub struct G {
     // ⏯️ UI
     pub player: Team,
     #[serde(skip)]
-    pub ui: Ui,
+    pub ui: GameUi,
     /// What will happen when MOUSE2 is pressed. Depends on context.
     pub contextual_action: Action,
     /// Where selection rectangle started (mouse down position).
@@ -116,7 +116,7 @@ impl G {
             selected_pawn_ids: default(),
             selection_start: None,
             tick: 0,
-            ui: Ui::new(),
+            ui: GameUi::new(),
             viewport_size: vec2(0, 0),
             water: default(),
             console: Console::with_hotkey(K_CLI),

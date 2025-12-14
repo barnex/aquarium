@@ -2,22 +2,22 @@ use std::iter;
 
 use super::internal::*;
 
-pub struct Ui {
+pub struct GameUi {
     pub hidden: bool,
     pub active_tool: Tool,
 }
 
-#[derive(PartialEq, Eq, Clone, Copy, Debug)]
+#[derive(PartialEq, Eq, Clone, Debug, Copy)]
 pub enum Tool {
     Pointer,
     Tile(Tile),
-    Pawn(PawnTyp),
+    Pawn(PawnTyp, Team),
     Building(BuildingTyp),
     Resource(ResourceTyp),
     WaterBucket,
 }
 
-impl Ui {
+impl GameUi {
     pub fn new() -> Self {
         Self { hidden: false, active_tool: Tool::Pointer }
     }
@@ -35,13 +35,21 @@ impl Ui {
         }
     }
 
+    const PAWN_PROTOTYPES: [(PawnTyp, Team); 5] = [
+        (PawnTyp::Crab, Team::HUMAN1), //_
+        (PawnTyp::Crab, Team::HUMAN2),
+        (PawnTyp::Cat, Team::HUMAN1), //_
+        (PawnTyp::Cat, Team::HUMAN2), //_
+        (PawnTyp::Starfish, Team::PESTS),
+    ];
+
     fn menu_ui(&mut self, inputs: &mut Inputs, out: &mut Out) {
         use iter::once;
 
         let buttons = once((Tool::Pointer, sprite!("pointer"))) //_
             .chain(once((Tool::WaterBucket, sprite!("droplet"))))
             .chain(Tile::all().map(|typ| (Tool::Tile(typ), typ.sprite())))
-            .chain(PawnTyp::all().map(|typ| (Tool::Pawn(typ), typ.sprite())))
+            .chain(Self::PAWN_PROTOTYPES.iter().map(|(typ, team)| (Tool::Pawn(*typ, *team), Pawn::new(*typ, default(), *team).sprite())))
             .chain(BuildingTyp::all().map(|typ| (Tool::Building(typ), typ.sprite())))
             .chain(ResourceTyp::all().map(|typ| (Tool::Resource(typ), typ.sprite())));
 
@@ -57,7 +65,7 @@ impl Ui {
     }
 }
 
-impl Default for Ui {
+impl Default for GameUi {
     fn default() -> Self {
         Self::new()
     }

@@ -10,7 +10,7 @@ fn deliver_resource_to_hq() {
     g.debug.show_home = true;
 
     let hq = g.spawn_building(Building::new(BuildingTyp::HQ, vec2(5, 6), g.player)).unwrap();
-    let crab = g.spawn(PawnTyp::Crablet, vec2(8, 7), g.player);
+    let crab = g.spawn(PawnTyp::Crab, vec2(8, 7), g.player);
 
     g.assign_to(crab, hq);
 
