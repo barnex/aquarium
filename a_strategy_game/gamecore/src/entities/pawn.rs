@@ -52,6 +52,20 @@ impl PawnTyp {
         }
     }
 
+    /// Worker Pawns can be assigned to work at a factory,
+    /// and transport resources.
+    pub fn is_worker(self) -> bool {
+        let is_worker = match self {
+            PawnTyp::Kitten => true,
+            PawnTyp::Cat => true,
+            PawnTyp::Crablet => false,
+            PawnTyp::Turret => false,
+            PawnTyp::Starfish => true,
+        };
+        debug_assert!(if is_worker { self.can_move() } else { true }, "worker must be able to move");
+        is_worker
+    }
+
     fn default_health(self) -> u8 {
         match self {
             PawnTyp::Kitten => 3,
