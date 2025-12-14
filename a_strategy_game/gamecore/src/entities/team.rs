@@ -1,7 +1,7 @@
 use crate::prelude::*;
 
 #[derive(Serialize, Deserialize, PartialEq, Eq, PartialOrd, Ord, Clone, Copy, Debug)]
-pub struct Team(u8);
+pub struct Team(pub u8);
 
 impl Team {
     pub const HUMAN1: Team = Team(1);

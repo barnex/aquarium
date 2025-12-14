@@ -6,7 +6,7 @@ pub struct Pawn {
     pub typ: PawnTyp,
     pub sleep: Cel<u8>,
     pub tile: Cel<vec2i16>,
-    pub team: Team,
+    pub team: Cel<Team>,
     pub health: Cel<u8>,
     pub route: Route,
     pub home: Cel<Option<Id>>,
@@ -94,7 +94,7 @@ impl Pawn {
         Self {
             id: Id::default(),
             sleep: 0.cel(),
-            team,
+            team: team.cel(),
             typ,
             health: typ.default_health().cel(),
             tile: tile.cel(),
@@ -413,7 +413,7 @@ impl Pawn {
 
     fn find_target(&self, g: &G) {
         let attack_radius = 8; // TODO
-        self.target.set(g.find_pawn(self.tile(), attack_radius, |p| self.team.is_hostile_to(p.team)).map(Pawn::id));
+        self.target.set(g.find_pawn(self.tile(), attack_radius, |p| self.team().is_hostile_to(p.team())).map(Pawn::id));
         trace!(self, "find_target: {:?}", self.target);
         self.sleep(1);
     }
@@ -458,6 +458,10 @@ impl Pawn {
 
     fn draw_turret(&self, g: &G, out: &mut Out) {
         self.base_draw(g, out);
+    }
+
+    fn team(&self) -> Team {
+        self.team.get()
     }
 
     //pub fn crab(tile: impl Into<vec2i16>) -> Self {

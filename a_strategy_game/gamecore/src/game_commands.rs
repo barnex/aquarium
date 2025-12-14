@@ -35,6 +35,10 @@ impl G {
             &["t" | "trace"] => self.trace_selected(),
             &["ut" | "untrace"] => Ok(self.untrace_all()),
             &["kill"] => Ok(self.selected_pawns().for_each(|p| self.kill_pawn(p))),
+            &["team", v] => Ok({
+                let v = v.parse()?;
+                self.selected_pawns().for_each(|p| p.team.set(Team(v)))
+            }),
             &[cmd, ..] => Err(anyhow!("unknown command: {cmd:?}")),
             &[] => Ok(()),
         }
