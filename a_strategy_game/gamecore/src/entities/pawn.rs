@@ -87,6 +87,8 @@ impl PawnTyp {
             (Cat, _) => sprite!("kit3"),
             (Crab, Blue) => sprite!("ferrisblue"),
             (Crab, _) => sprite!("ferris"),
+            (Turret, Red) => sprite!("turret"),
+            (Turret, Blue) => sprite!("turretblue"),
             (Turret, _) => sprite!("turret"),
             (Starfish, _) => sprite!("starfish"),
         }
