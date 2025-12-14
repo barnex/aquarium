@@ -450,10 +450,14 @@ impl Pawn {
     }
 
     fn base_draw(&self, g: &G, out: &mut Out) {
-        g.draw_sprite_rot(out, L_SPRITES, self.typ.sprite(), self.tile.pos(), self.rot.get());
+        g.draw_sprite_rot(out, L_SPRITES, self.sprite(), self.tile.pos(), self.rot.get());
         if let Some(res) = self.cargo.get() {
             g.draw_sprite(out, L_SPRITES + 1, res.sprite(), self.tile.pos() + vec2(0, 8));
         }
+    }
+
+    fn sprite(&self) -> Sprite {
+        self.typ.sprite()
     }
 
     fn draw_turret(&self, g: &G, out: &mut Out) {
