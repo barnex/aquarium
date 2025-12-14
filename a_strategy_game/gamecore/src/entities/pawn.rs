@@ -79,12 +79,16 @@ impl PawnTyp {
 
 impl PawnTyp {
     pub fn sprite(&self, team: Team) -> Sprite {
+        use PawnTyp::*;
+        use Team::*;
         match (self, team) {
-            (PawnTyp::Kitten, _) => sprite!("kit7"),
-            (PawnTyp::Cat, _) => sprite!("kit4"),
-            (PawnTyp::Crab, _) => sprite!("ferris"),
-            (PawnTyp::Turret, _) => sprite!("turret"),
-            (PawnTyp::Starfish, _) => sprite!("starfish"),
+            (Kitten, _) => sprite!("kit7"),
+            (Cat, Red) => sprite!("kit4"),
+            (Cat, _) => sprite!("kit3"),
+            (Crab, Blue) => sprite!("ferrisblue"),
+            (Crab, _) => sprite!("ferris"),
+            (Turret, _) => sprite!("turret"),
+            (Starfish, _) => sprite!("starfish"),
         }
     }
 }
