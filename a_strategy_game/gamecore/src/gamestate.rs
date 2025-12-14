@@ -67,12 +67,13 @@ impl G {
     }
 
     pub fn new(size: vec2u16, player: Team) -> Self {
-        let debug = DebugOpts::default();
+        let mut debug = DebugOpts::default();
         #[cfg(debug_assertions)]
         {
             //debug.show_home = true;
             //debug.show_destination = true;
             //debug.inspect_under_cursor = true;
+            debug.pause_on_sanity_failure = true;
         }
 
         let keymap = Keymap::from([
@@ -159,11 +160,11 @@ impl G {
             }
 
             #[cfg(debug_assertions)]
-            if self.debug.pause_on_sanity_failure {
-                if let Err(e) = sanity_check(self) {
+            if let Err(e) = sanity_check(self) {
+                log::error!("sanity check failed: {e}");
+                self.last_sanity_error = Some(e.to_string());
+                if self.debug.pause_on_sanity_failure {
                     self.paused = true;
-                    log::error!("sanity check failed, game paused: {e}");
-                    self.last_sanity_error = Some(e.to_string());
                 }
             }
         }
