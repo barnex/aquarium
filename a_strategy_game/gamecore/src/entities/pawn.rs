@@ -78,13 +78,13 @@ impl PawnTyp {
 }
 
 impl PawnTyp {
-    pub fn sprite(&self) -> Sprite {
-        match self {
-            PawnTyp::Kitten => sprite!("kit7"),
-            PawnTyp::Cat => sprite!("kit4"),
-            PawnTyp::Crab => sprite!("ferris"),
-            PawnTyp::Turret => sprite!("turret"),
-            PawnTyp::Starfish => sprite!("starfish"),
+    pub fn sprite(&self, team: Team) -> Sprite {
+        match (self, team) {
+            (PawnTyp::Kitten, _) => sprite!("kit7"),
+            (PawnTyp::Cat, _) => sprite!("kit4"),
+            (PawnTyp::Crab, _) => sprite!("ferris"),
+            (PawnTyp::Turret, _) => sprite!("turret"),
+            (PawnTyp::Starfish, _) => sprite!("starfish"),
         }
     }
 }
@@ -457,11 +457,7 @@ impl Pawn {
     }
 
     pub(crate) fn sprite(&self) -> Sprite {
-        match self.typ {
-            PawnTyp::Crab if self.team() == Team::Red => sprite!("ferris"),
-            PawnTyp::Crab => sprite!("ferrisblue"),
-            typ => typ.sprite(),
-        }
+        self.typ.sprite(self.team())
     }
 
     fn draw_turret(&self, g: &G, out: &mut Out) {

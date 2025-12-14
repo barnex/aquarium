@@ -35,11 +35,13 @@ impl GameUi {
         }
     }
 
-    const PAWN_PROTOTYPES: [(PawnTyp, Team); 5] = [
+    const PAWN_PROTOTYPES: [(PawnTyp, Team); 7] = [
         (PawnTyp::Crab, Team::Red), //_
         (PawnTyp::Crab, Team::Blue),
-        (PawnTyp::Cat, Team::Red),  //_
-        (PawnTyp::Cat, Team::Blue), //_
+        (PawnTyp::Cat, Team::Red),     //_
+        (PawnTyp::Cat, Team::Blue),    //_
+        (PawnTyp::Turret, Team::Red),  //_
+        (PawnTyp::Turret, Team::Blue), //_
         (PawnTyp::Starfish, Team::Pests),
     ];
 
