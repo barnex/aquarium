@@ -144,6 +144,18 @@ impl Pawn {
         self.sleep.set(ticks);
     }
 
+    pub(crate) fn can_assign_to(&self, building: &Building) -> bool {
+        if !self.typ.is_worker() {
+            trace!(self, "assign {self} to {building}: is not a worker");
+            return false;
+        }
+        if self.team != building.team {
+            trace!(self, "assign {self} to {building}: wrong team: {} != {}", self.team, building.team);
+            return false;
+        }
+        true
+    }
+
     fn tick_delivery_work(&self, g: &G, home: &Building) {
         let on_building = g.building_at(self.tile());
         let on_home = on_building.map(Building::id) == Some(home.id);
@@ -317,7 +329,7 @@ impl Pawn {
         }
     }
 
-    fn can_move(&self) -> bool {
+    pub(crate) fn can_move(&self) -> bool {
         self.typ.can_move()
     }
 

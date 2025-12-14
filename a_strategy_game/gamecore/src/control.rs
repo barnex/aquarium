@@ -38,16 +38,18 @@ fn update_contextual_action(g: &mut G) {
     }
 
     let mouse = g.mouse_tile();
-    let selected = !g.selected_pawn_ids.is_empty();
 
     // ⏬ Assign pawns to factory.
-    if selected && g.building_at(mouse).is_some() {
-        // TODO: and building is friendly
-        return g.contextual_action = Action::Assign;
+    // Only show Assign action if some pawns can be assigned.
+    if let Some(building) = g.building_at(mouse) {
+        if g.selected_pawns().any(|p| p.can_assign_to(building)) {
+            return g.contextual_action = Action::Assign;
+        }
     }
 
     // 🥾 Move to location
-    if selected {
+    // Only show Move action if some pawns can move.
+    if g.selected_pawns().any(|p| p.can_move()) {
         return g.contextual_action = Action::Move;
     }
 

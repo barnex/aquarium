@@ -380,12 +380,7 @@ impl G {
 
     /// 🏠 Assign pawn to work at building.
     pub fn assign_to(&self, pawn: &Pawn, building: &Building) {
-        if !pawn.typ.is_worker() {
-            log::trace!("assign {pawn} to {building}: is not a worker");
-            return;
-        }
-        if pawn.team != building.team {
-            log::trace!("assign {pawn} to {building}: wrong team: {} != {}", pawn.team, building.team);
+        if !pawn.can_assign_to(building) {
             return;
         }
         if let Some(home) = pawn.home(self) {
