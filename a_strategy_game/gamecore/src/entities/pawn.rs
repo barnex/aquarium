@@ -38,6 +38,7 @@ impl PawnTyp {
         use Tile::*;
         match (self, tile) {
             (Starfish, Water | Canal) => true,
+            (Turret, Block) => true,
             (_, tile) => tile.is_default_walkable(),
         }
     }
