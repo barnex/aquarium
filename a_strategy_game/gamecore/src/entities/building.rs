@@ -116,7 +116,7 @@ impl Building {
     fn tick_star_nest(&self, g: &G) {
         // TODO: delay
         if g.tick % 128 == 0 {
-            self.workers.retain(|&id| g.pawn(id).is_some());
+            self.remove_dead_workers(g);
             if self.workers.is_empty() {
                 self.spawn_default_workers(g);
             }
@@ -231,6 +231,10 @@ impl Building {
 
     pub fn id(&self) -> Id {
         self.id
+    }
+
+    pub(crate) fn remove_dead_workers(&self, g: &G) {
+        self.workers.retain(|&id| g.pawn(id).is_some());
     }
 }
 

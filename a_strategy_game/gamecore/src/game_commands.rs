@@ -23,7 +23,9 @@ impl G {
     /// execute a single command
     fn exec_command(&mut self, cmd: &str) -> Result<()> {
         match cmd.trim().split_ascii_whitespace().collect_vec().as_slice() {
+            &["reset"] => Ok(*self = G::test_world()),
             &["pause"] => Ok(toggle(&mut self.paused)),
+            &["unpause"] => Ok(self.paused = false),
             &["tick"] => self.cmd_tick(),
             &["ui" | "toggle_ui"] => Ok(toggle(&mut self.ui.hidden)),
             &["walk" | "show_walkable"] => Ok(toggle(&mut self.debug.show_walkable)),

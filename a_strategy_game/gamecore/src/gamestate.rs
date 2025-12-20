@@ -285,6 +285,8 @@ impl G {
     pub fn kill_pawn(&self, pawn: &Pawn) {
         trace!(pawn, "killed");
         self.pawns.remove(pawn.id);
+        //👇 keep worker list consistent
+        pawn.home(self).map(|b| b.remove_dead_workers(self));
     }
 
     #[deprecated = "use spawn"]
