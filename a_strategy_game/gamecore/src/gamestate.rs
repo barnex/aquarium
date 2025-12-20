@@ -278,7 +278,6 @@ impl G {
 
     /// Add a pawn to the game and return it (now with `id` set).
     pub fn spawn(&self, typ: PawnTyp, tile: vec2i16, team: Team) -> &Pawn {
-        #[allow(deprecated)]
         self.spawn_pawn(Pawn::new(typ, tile, team))
     }
 
@@ -289,7 +288,6 @@ impl G {
         pawn.home(self).map(|b| b.remove_dead_workers(self));
     }
 
-    #[deprecated = "use spawn"]
     pub fn spawn_pawn(&self, pawn: Pawn) -> &Pawn {
         log::trace!("spawn {:?} @ tile {}", pawn.typ, pawn.tile);
         self.pawns.insert(pawn)
