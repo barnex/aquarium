@@ -3,15 +3,12 @@ use futures_util::StreamExt;
 
 // Load image over HTTP. E.g. `assets/my_sprite.png`
 
-
 pub async fn load_bitmap(url: &str) -> Result<ImageBitmap, JsValue> {
     log::info!("load_bitmap {url}");
     let window = web_sys::window().unwrap();
     let document = window.document().unwrap();
 
-    let img = document
-        .create_element("img")?
-        .dyn_into::<HtmlImageElement>()?;
+    let img = document.create_element("img")?.dyn_into::<HtmlImageElement>()?;
     img.set_src(url);
 
     // Use mpsc channel to handle load/error
@@ -40,9 +37,7 @@ pub async fn load_bitmap(url: &str) -> Result<ImageBitmap, JsValue> {
                 return Err(JsValue::from_str("Image dimensions are zero — invalid image"));
             }
 
-            let promise = window
-                .create_image_bitmap_with_html_image_element(&img)
-                .map_err(|e| JsValue::from(format!("ImageBitmap creation failed: {:?}", e)))?;
+            let promise = window.create_image_bitmap_with_html_image_element(&img).map_err(|e| JsValue::from(format!("ImageBitmap creation failed: {:?}", e)))?;
 
             let bitmap = JsFuture::from(promise).await?;
             Ok(bitmap.dyn_into::<ImageBitmap>()?)

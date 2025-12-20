@@ -10,35 +10,35 @@
 ///  player
 ///
 pub trait With {
-	fn with<F: FnOnce(&mut Self)>(self, f: F) -> Self;
+    fn with<F: FnOnce(&mut Self)>(self, f: F) -> Self;
 }
 
 impl<T> With for T {
-	#[inline]
-	fn with<F: FnOnce(&mut Self)>(mut self, f: F) -> Self {
-		f(&mut self);
-		self
-	}
+    #[inline]
+    fn with<F: FnOnce(&mut Self)>(mut self, f: F) -> Self {
+        f(&mut self);
+        self
+    }
 }
 
 pub trait Apply {
-	fn mutate<F: FnOnce(&mut Self)>(&mut self, f: F);
+    fn mutate<F: FnOnce(&mut Self)>(&mut self, f: F);
 }
 
 impl<T> Apply for T {
-	#[inline]
-	fn mutate<F: FnOnce(&mut Self)>(&mut self, f: F) {
-		f(self)
-	}
+    #[inline]
+    fn mutate<F: FnOnce(&mut Self)>(&mut self, f: F) {
+        f(self)
+    }
 }
 
 pub trait Pipe: Sized {
-	fn pipe<T, F: FnOnce(Self) -> T>(self, f: F) -> T;
+    fn pipe<T, F: FnOnce(Self) -> T>(self, f: F) -> T;
 }
 
 impl<T> Pipe for T {
-	#[inline]
-	fn pipe<U, F: FnOnce(Self) -> U>(self, f: F) -> U {
-		f(self)
-	}
+    #[inline]
+    fn pipe<U, F: FnOnce(Self) -> U>(self, f: F) -> U {
+        f(self)
+    }
 }

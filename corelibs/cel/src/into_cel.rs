@@ -1,6 +1,9 @@
 use crate::*;
 
-pub trait IntoCell<T> where T: Copy{
+pub trait IntoCell<T>
+where
+    T: Copy,
+{
     fn cel(self) -> Cel<T>;
 }
 

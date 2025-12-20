@@ -13,29 +13,29 @@ use std::hash::{BuildHasher, Hash};
 ///
 /// ```
 pub trait CollectGrouped {
-	type Key;
-	type Value;
-	fn collect_grouped<H>(self) -> HashMap<Self::Key, Vec<Self::Value>, H>
-	where
-		H: BuildHasher + Default;
+    type Key;
+    type Value;
+    fn collect_grouped<H>(self) -> HashMap<Self::Key, Vec<Self::Value>, H>
+    where
+        H: BuildHasher + Default;
 }
 
 impl<I, K, V> CollectGrouped for I
 where
-	I: Iterator<Item = (K, V)>,
-	K: Eq + Hash,
+    I: Iterator<Item = (K, V)>,
+    K: Eq + Hash,
 {
-	type Key = K;
-	type Value = V;
+    type Key = K;
+    type Value = V;
 
-	fn collect_grouped<H>(self) -> HashMap<Self::Key, Vec<Self::Value>, H>
-	where
-		H: BuildHasher + Default,
-	{
-		let mut result = HashMap::<K, Vec<V>, H>::default();
-		for (k, v) in self {
-			result.entry(k).or_default().push(v);
-		}
-		result
-	}
+    fn collect_grouped<H>(self) -> HashMap<Self::Key, Vec<Self::Value>, H>
+    where
+        H: BuildHasher + Default,
+    {
+        let mut result = HashMap::<K, Vec<V>, H>::default();
+        for (k, v) in self {
+            result.entry(k).or_default().push(v);
+        }
+        result
+    }
 }

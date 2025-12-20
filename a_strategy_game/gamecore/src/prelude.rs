@@ -8,6 +8,8 @@ pub use pathfinder::*;
 pub use shell_api::*;
 pub use vector::*;
 
+pub use crate::BaseT;
+
 pub use fixed_str::*;
 pub use proc_macros::*;
 
@@ -23,6 +25,7 @@ pub use std::convert::TryFrom;
 pub use std::fmt;
 pub use std::iter::zip;
 pub use std::num::NonZeroU8;
+pub use std::ops::Deref;
 
 pub use std::collections::VecDeque;
 

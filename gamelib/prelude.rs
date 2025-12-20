@@ -1,10 +1,10 @@
 pub use crate::*;
 
 pub use cel::*;
-pub use  vector::*;
-pub use shell_api::*;
-pub use geometry::*;
 pub use core_util::*;
+pub use geometry::*;
+pub use shell_api::*;
+pub use vector::*;
 
 pub use serde::{Deserialize, Serialize};
 

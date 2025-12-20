@@ -1,14 +1,13 @@
-mod output;
-mod sprite;
-mod line;
-mod rectangle;
 mod color;
 mod font_layout;
+mod line;
+mod output;
+mod rectangle;
+mod sprite;
 
-pub use output::*;
-pub use sprite::*;
-pub use line::*;
 pub use color::*;
-pub use rectangle::*;
 pub use font_layout::*;
-
+pub use line::*;
+pub use output::*;
+pub use rectangle::*;
+pub use sprite::*;

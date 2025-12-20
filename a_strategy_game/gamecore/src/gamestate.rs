@@ -18,8 +18,11 @@ pub struct G {
     pub name: String,
     pub _tilemap: Tilemap,
     pub resources: ResourceMap,
+
     pub buildings: MemKeep<Building>,
     pub pawns: MemKeep<Pawn>,
+    pub entities: MemKeep<Entity>,
+
     pub water: WaterSim,
     pub header_text: String,
 
@@ -63,7 +66,28 @@ pub const TILE_VSIZE: vec2i = vec2(TILE_ISIZE, TILE_ISIZE);
 
 impl G {
     pub fn test_world() -> Self {
-        map_gen::inception()
+        let g = map_gen::inception();
+        g.spawn2__(
+            Entity::new(
+                vec2(1, 1),
+                Team::Red,
+                Pawn2Ext {
+                    route: default(),
+                    home: default(),
+                    cargo: default(),
+                    target: default(),
+                    rot: default(),
+                },
+            )
+            .with(|e| e.traced().set(true)),
+        );
+        g
+    }
+
+    // TODO: return position generic: concrete type (associated with ext)
+    pub fn spawn2__(&self, e: Entity) -> &Entity {
+        trace!(&e, "insert entity");
+        self.entities.insert(e)
     }
 
     pub fn new(size: vec2u16, player: Team) -> Self {
@@ -113,6 +137,7 @@ impl G {
             now_secs: 0.0,
             paused: false,
             pawns: MemKeep::new(),
+            entities: MemKeep::new(),
             resources: default(),
             selected_pawn_ids: default(),
             selection_start: None,

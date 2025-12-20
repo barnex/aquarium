@@ -15,7 +15,7 @@ macro_rules! trace {
         #[cfg(debug_assertions)]
         {
             let slf = $slf;
-            if slf.traced.get(){
+            if slf.traced().get(){
                 log::trace!("{slf}: {}: {}", caller!(), format!($($arg)*));
             }
         }

@@ -84,9 +84,9 @@ pub(crate) fn draw(canvas: &HtmlCanvasElement, ctx: &CanvasRenderingContext2d, r
         }
     }
 
-    if out.bloom{
-    //graphics_postprocessing::bloom(canvas, ctx);
+    if out.bloom {
+        //graphics_postprocessing::bloom(canvas, ctx);
     }
-    
+
     //graphics_postprocessing::vignette(canvas, ctx);
 }

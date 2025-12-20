@@ -29,7 +29,6 @@ pub fn inverse_bloom(canvas: &HtmlCanvasElement, context: &CanvasRenderingContex
     context.set_fill_style_str("white");
     context.fill_rect(0.0, 0.0, width, height);
     context.restore();
-	
 }
 
 pub fn bloom(canvas: &HtmlCanvasElement, context: &CanvasRenderingContext2d) {
@@ -44,11 +43,9 @@ pub fn bloom(canvas: &HtmlCanvasElement, context: &CanvasRenderingContext2d) {
     context.set_filter("blur(6px)");
     context.draw_image_with_html_canvas_element(&canvas, 0.0, 0.0).unwrap();
     context.restore();
-	
 }
 
 pub fn vignette(canvas: &HtmlCanvasElement, ctx: &CanvasRenderingContext2d) {
-
     let width = canvas.width() as f64;
     let height = canvas.height() as f64;
     let center_x = width / 2.0;

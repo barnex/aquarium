@@ -73,7 +73,6 @@ pub fn render_headless(out: &Out, file: impl AsRef<Path>) -> Result<()> {
 
             // 🪲 TODO: scale and source location (for text)
             canvas.draw_pixmap(cmd.pos.x(), cmd.pos.y(), bitmap.as_ref(), &PixmapPaint::default(), Transform::identity(), None);
-
         }
 
         // ╱ lines

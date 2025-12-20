@@ -6,13 +6,13 @@
 ///```
 pub fn cross<A, B, IX, IY>(x: IX, y: IY) -> impl Iterator<Item = (A, B)>
 where
-	A: Copy + 'static,
-	B: Copy + 'static,
-	IX: IntoIterator<Item = A> + Clone,
-	IY: IntoIterator<Item = B>,
+    A: Copy + 'static,
+    B: Copy + 'static,
+    IX: IntoIterator<Item = A> + Clone,
+    IY: IntoIterator<Item = B>,
 {
-	let y = y.into_iter();
-	y.flat_map(move |y| x.clone().into_iter().map(move |x| (x, y)))
+    let y = y.into_iter();
+    y.flat_map(move |y| x.clone().into_iter().map(move |x| (x, y)))
 }
 
 /// The cross-product (Cartesian product) of three iterators.
@@ -23,10 +23,10 @@ where
 ///```
 pub fn cross3<T, IX, IY, IZ>(x: IX, y: IY, z: IZ) -> impl Iterator<Item = (T, T, T)>
 where
-	T: Copy + 'static,
-	IX: IntoIterator<Item = T> + Clone,
-	IY: IntoIterator<Item = T> + Clone,
-	IZ: IntoIterator<Item = T>,
+    T: Copy + 'static,
+    IX: IntoIterator<Item = T> + Clone,
+    IY: IntoIterator<Item = T> + Clone,
+    IZ: IntoIterator<Item = T>,
 {
-	cross(x, cross(y, z)).map(|(x, (y, z))| (x, y, z))
+    cross(x, cross(y, z)).map(|(x, (y, z))| (x, y, z))
 }

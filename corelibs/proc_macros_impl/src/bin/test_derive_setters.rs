@@ -4,7 +4,7 @@ use proc_macro2::TokenStream;
 use proc_macros_impl::*;
 
 fn main() {
-	let code = r#"
+    let code = r#"
 pub struct Crablet {
 	// tile position on the map
 	pub position: Mut<vec2i>,
@@ -33,9 +33,9 @@ pub struct Crablet {
 }
 	"#;
 
-	let input = TokenStream::from_str(code).expect("tokenize");
+    let input = TokenStream::from_str(code).expect("tokenize");
 
-	let output = derive_setters(input);
+    let output = derive_setters(input);
 
-	println!("{output}");
+    println!("{output}");
 }

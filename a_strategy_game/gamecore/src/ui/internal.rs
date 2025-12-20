@@ -1,2 +1,2 @@
-pub use crate::prelude::*;
 pub use super::palette::*;
+pub use crate::prelude::*;

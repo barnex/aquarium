@@ -1,6 +1,6 @@
 use crate::prelude::*;
 
-const MAX_RES_SLOTS: usize = 4;
+pub const MAX_RES_SLOTS: usize = 4;
 
 #[derive(Serialize, Deserialize, Debug)]
 pub struct Building {
@@ -8,6 +8,7 @@ pub struct Building {
     pub typ: BuildingTyp,
     pub tile: vec2i16,
     pub team: Team,
+
     pub workers: CSet<Id>,
     pub _downstream: CSet<Id>,
     pub _upstream: CSet<Id>,

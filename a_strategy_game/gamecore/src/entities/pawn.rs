@@ -2,16 +2,23 @@ use crate::prelude::*;
 
 #[derive(Serialize, Deserialize, Debug)]
 pub struct Pawn {
+    // all
     pub id: Id,
     pub typ: PawnTyp,
-    pub sleep: Cel<u8>,
     pub tile: Cel<vec2i16>,
     pub team: Cel<Team>,
+    pub sleep: Cel<u8>,
     pub health: Cel<u8>,
+    pub traced: Cel<bool>,
+
+    // move
     pub route: Route,
+
+    // work
     pub home: Cel<Option<Id>>,
     pub cargo: Cel<Option<ResourceTyp>>,
-    pub traced: Cel<bool>,
+
+    // attack
     pub target: Cel<Option<Id>>,
     pub rot: Cel<f32>,
 }
@@ -116,6 +123,10 @@ impl Pawn {
 
     pub fn id(&self) -> Id {
         self.id
+    }
+
+    pub fn traced(&self) -> &Cel<bool> {
+        &self.traced
     }
 
     // ⏱️
