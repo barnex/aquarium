@@ -23,9 +23,10 @@ impl G {
     /// execute a single command
     fn exec_command(&mut self, cmd: &str) -> Result<()> {
         match cmd.trim().split_ascii_whitespace().collect_vec().as_slice() {
+            &["sanitycheck" | "sc"] => sanity_check(self),
             &["reset"] => Ok(*self = G::test_world()),
-            &["pause"] => Ok(toggle(&mut self.paused)),
-            &["unpause"] => Ok(self.paused = false),
+            &["pause" | "pa"] => Ok(toggle(&mut self.paused)),
+            &["unpause" | "up"] => Ok(self.paused = false),
             &["tick"] => self.cmd_tick(),
             &["ui" | "toggle_ui"] => Ok(toggle(&mut self.ui.hidden)),
             &["walk" | "show_walkable"] => Ok(toggle(&mut self.debug.show_walkable)),
@@ -34,7 +35,7 @@ impl G {
             &["dest" | "show_destination"] => Ok(toggle(&mut self.debug.show_destination)),
             &["downstream" | "show_downstream"] => Ok(toggle(&mut self.debug.show_downstream)),
             &["i" | "inspect_under_cursor"] => Ok(toggle(&mut self.debug.inspect_under_cursor)),
-            &["t" | "trace"] => self.trace_selected(),
+            &["tr" | "trace"] => self.trace_selected(),
             &["ut" | "untrace"] => Ok(self.untrace_all()),
             &["kill"] => Ok(self.selected_pawns().for_each(|p| self.kill_pawn(p))),
             &[cmd, ..] => Err(anyhow!("unknown command: {cmd:?}")),
