@@ -11,7 +11,7 @@ use anyhow::bail;
 pub(crate) fn sanity_check(g: &G) -> Result<()> {
     check_pawns_on_walkable_tile(g)?;
     check_pawns_home_consistency(g)?;
-
+    check_turrets_on_turrets(g)?;
     Ok(())
 }
 
@@ -50,5 +50,20 @@ fn check_pawns_on_walkable_tile(g: &G) -> Result<()> {
             bail!("{} on non-walkable tile at {}", pawn, pawn.tile())
         }
     }
+    Ok(())
+}
+
+// Check that we did not build non-walking pawns (like turrets) on top of others.
+fn check_turrets_on_turrets(g: &G) -> Result<()> {
+    let mut occupied_tiles = HashSet::<vec2i16>::default();
+
+    for pawn in g.pawns().filter(|p| !p.can_move()) {
+        if occupied_tiles.contains(&pawn.tile()) {
+            bail!("{pawn}: is on already occupied tile")
+        } else {
+            occupied_tiles.insert(pawn.tile());
+        }
+    }
+
     Ok(())
 }
