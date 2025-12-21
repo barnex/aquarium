@@ -1,3 +1,4 @@
+#[allow(mismatched_lifetime_syntaxes)]
 use crate::prelude::*;
 
 /// The Game State.
@@ -65,6 +66,18 @@ pub const TILE_ISIZE: i32 = TILE_SIZE as i32;
 pub const TILE_VSIZE: vec2i = vec2(TILE_ISIZE, TILE_ISIZE);
 
 impl G {
+    // ________________________________________________________________________________ entities
+    // TODO: return position generic: concrete type (associated with ext)
+    pub fn spawn2__(&self, e: Entity) -> &Entity {
+        trace!(&e, "insert entity");
+        self.entities.insert(e)
+    }
+
+    pub fn entities(&self) -> impl Iterator<Item = EntityRef> {
+        self.entities.iter().map(|e| EntityRef { g: self, base: e.base(), ext: &e.ext })
+    }
+
+    // ________________________________________________________________________________
     pub fn test_world() -> Self {
         let g = map_gen::inception();
         g.spawn2__(
@@ -82,12 +95,6 @@ impl G {
             .with(|e| e.traced().set(true)),
         );
         g
-    }
-
-    // TODO: return position generic: concrete type (associated with ext)
-    pub fn spawn2__(&self, e: Entity) -> &Entity {
-        trace!(&e, "insert entity");
-        self.entities.insert(e)
     }
 
     pub fn new(size: vec2u16, player: Team) -> Self {

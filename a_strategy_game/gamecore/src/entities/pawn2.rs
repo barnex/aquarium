@@ -14,13 +14,13 @@ pub struct Pawn2Ext {
     pub rot: Cel<f32>,
 }
 
-pub struct Pawn2<'g> {
+pub struct PawnRef<'g> {
     pub g: &'g G,
     pub base: &'g Base,
     pub ext: &'g Pawn2Ext,
 }
 
-impl<'g> Pawn2<'g> {
+impl<'g> PawnRef<'g> {
     pub fn tick(&self) {
         println!("hello from soldier @ {}", self.tile())
     }
@@ -34,13 +34,13 @@ impl<'g> Pawn2<'g> {
     }
 }
 
-impl<'g> BaseT for Pawn2<'g> {
+impl<'g> BaseT for PawnRef<'g> {
     fn base(&self) -> &Base {
         &self.base
     }
 }
 
-impl<'g> Deref for Pawn2<'g> {
+impl<'g> Deref for PawnRef<'g> {
     type Target = Pawn2Ext;
 
     fn deref(&self) -> &Self::Target {

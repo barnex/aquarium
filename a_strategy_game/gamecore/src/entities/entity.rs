@@ -7,8 +7,14 @@ use crate::prelude::*;
 
 #[derive(Serialize, Deserialize)]
 pub struct Entity {
-    base: Base,
-    ext: Ext,
+    pub base: Base,
+    pub ext: Ext,
+}
+
+pub struct EntityRef<'g> {
+    pub g: &'g G,
+    pub base: &'g Base,
+    pub ext: &'g Ext,
 }
 
 #[derive(Serialize, Deserialize)]
@@ -70,15 +76,15 @@ impl Entity {
     pub fn tick(&self, g: &G) {
         match &self.ext {
             //👇 TODO: trait with tick, draw, ... (polymorphic functionality)
-            Ext::Pawn(ext) => Pawn2 { g, base: &self.base, ext }.tick(),
-            Ext::Building(ext) => Building2 { g, base: &self.base, ext }.tick(),
+            Ext::Pawn(ext) => PawnRef { g, base: &self.base, ext }.tick(),
+            Ext::Building(ext) => BuildingRef { g, base: &self.base, ext }.tick(),
         }
     }
 
     pub(crate) fn draw(&self, g: &G, out: &mut Out) {
         match &self.ext {
-            Ext::Pawn(ext) => Pawn2 { g, base: &self.base, ext }.draw(out),
-            Ext::Building(ext) => Building2 { g, base: &self.base, ext }.draw(out),
+            Ext::Pawn(ext) => PawnRef { g, base: &self.base, ext }.draw(out),
+            Ext::Building(ext) => BuildingRef { g, base: &self.base, ext }.draw(out),
         }
     }
 }
