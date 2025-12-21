@@ -392,9 +392,9 @@ impl G {
         self.selected_entity_ids().filter_map(|id| self.entity(id))
     }
 
-    /// Add pawn to selection.
-    pub fn select_pawn(&self, id: Id) {
-        self.selected_pawn_ids.insert(id);
+    /// Add Entity to selection.
+    pub fn select_entity(&self, id: Id) {
+        self.selected_entity_ids.insert(id);
     }
 
     // -------------------------------- Resources

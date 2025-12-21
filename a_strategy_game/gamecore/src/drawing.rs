@@ -155,8 +155,8 @@ fn draw_selection(g: &G, out: &mut Out) -> Status {
     }
 
     // 🦀 Selected pawns
-    for pawn in g.selected_pawns() {
-        out.draw_rect(L_SPRITES + 1, Rectangle::new(pawn.bounds(), RGBA::BLUE).with_fill(RGB::BLUE.with_alpha(64)));
+    for entity in g.selected_entities() {
+        out.draw_rect(L_SPRITES + 1, Rectangle::new(entity.bounds().map(|v| (v as i32) * TILE_ISIZE), RGBA::BLUE).with_fill(RGB::BLUE.with_alpha(64)));
     }
     OK
 }

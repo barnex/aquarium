@@ -25,7 +25,7 @@ impl G {
         update_contextual_action(self);
         control_camera(self);
         doodle_on_map(self);
-        select_pawns(self);
+        control_selection(self);
         command_pawns(self);
     }
 }
@@ -56,7 +56,7 @@ fn update_contextual_action(g: &mut G) {
     g.contextual_action = Action::None;
 }
 
-fn select_pawns(g: &mut G) {
+fn control_selection(g: &mut G) {
     if g.ui.active_tool != Tool::Pointer {
         return;
     }
@@ -67,17 +67,18 @@ fn select_pawns(g: &mut G) {
 
     if g.inputs.just_released(K_MOUSE1) {
         if let Some(start) = g.selection_start {
-            g.selected_pawn_ids.clear();
+            g.selected_entity_ids.clear();
 
             let end = g.mouse_position_world();
-            let selection = Bounds2D::new_sorted(start, end);
+            let selection = Bounds2D::new_sorted(start.to_tile(), end.to_tile());
             let selection = selection.with(|s| s.max += 1);
 
-            for p in g.pawns.iter() {
-                if selection.overlaps(&p.bounds()) {
-                    g.select_pawn(p.id) //
+            for e in g.entities() {
+                if selection.overlaps(&e.bounds()) {
+                    g.select_entity(e.id()) //
                 }
             }
+            log::trace!("selected {} entitites", g.selected_entity_ids.len())
         }
         g.selection_start = None;
     }

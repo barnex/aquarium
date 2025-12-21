@@ -61,7 +61,7 @@ fn command_pawn_move() {
 
     let start = vec2(6, 7);
     let crab = g.spawn_pawn(Pawn::new(PawnTyp::Crab, start, g.player)).id;
-    g.select_pawn(crab);
+    g.select_entity(crab);
 
     let dst = start + vec2(2, 2);
     tick(g, [mouse_move_tile(dst)]);

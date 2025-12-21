@@ -23,8 +23,11 @@ pub trait EntityT: BaseT {
     fn tick(&self);
     fn draw(&self, out: &mut Out);
     fn g(&self) -> &G;
-    fn select(&self) {
-        self.g().select_pawn(self.id());
+    fn size(&self) -> vec2u8 {
+        vec2(1, 1) //👈 default, larger entities should override.
+    }
+    fn bounds(&self) -> Bounds2Di16 {
+        Bounds2D::with_size(self.tile(), self.size().as_i16())
     }
 }
 
