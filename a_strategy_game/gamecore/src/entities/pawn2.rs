@@ -41,6 +41,10 @@ impl<'g> EntityT for PawnRef<'g> {
             out.draw_sprite(L_SPRITES + 1, res.sprite(), self.tile().pos() + vec2(0, 8));
         }
     }
+
+    fn g(&self) -> &G {
+        &self.g
+    }
 }
 
 pub struct PawnRef<'g> {

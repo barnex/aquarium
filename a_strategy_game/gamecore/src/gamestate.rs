@@ -70,7 +70,7 @@ impl G {
     // ________________________________________________________________________________ entities
     // TODO: return position generic: concrete type (associated with ext)
     pub fn spawn2__(&self, e: EntityStorage) -> &EntityStorage {
-        trace!(&e, "insert entity");
+        trace!(e.as_ref(self), "insert entity");
         self.entities.insert(e)
     }
 
@@ -79,7 +79,7 @@ impl G {
     }
 
     pub fn entities(&self) -> impl Iterator<Item = Entity> {
-        self.entities.iter().map(|e| Entity { g: self, base: e.base(), ext: &e.ext })
+        self.entities.iter().map(|e| Entity { g: self, base: &e.base, ext: &e.ext })
     }
 
     // ________________________________________________________________________________
@@ -97,8 +97,7 @@ impl G {
                     target: default(),
                     rot: default(),
                 },
-            )
-            .with(|e| e.traced().set(true)),
+            ), //.with(|e| e.traced.set(true)),
         );
         g
     }

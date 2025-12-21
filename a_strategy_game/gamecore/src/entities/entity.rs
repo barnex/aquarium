@@ -22,7 +22,15 @@ pub struct Entity<'g> {
 pub trait EntityT: BaseT {
     fn tick(&self);
     fn draw(&self, out: &mut Out);
+    fn g(&self) -> &G;
+    fn select(&self) {
+        self.g().select_pawn(self.id());
+    }
 }
+
+//pub trait GT {
+//    fn g(&self) -> &G;
+//}
 
 impl EntityStorage {
     pub(crate) fn pawn(typ: PawnTyp, team: Team, tile: vec2i16) -> EntityStorage {
@@ -43,6 +51,9 @@ impl<'g> BaseT for Entity<'g> {
 }
 
 impl<'g> EntityT for Entity<'g> {
+    fn g(&self) -> &G {
+        self.g
+    }
     fn draw(&self, out: &mut Out) {
         match &self.ext {
             Ext::Pawn(ext) => PawnRef { g: self.g, base: &self.base, ext }.draw(out),
@@ -56,6 +67,12 @@ impl<'g> EntityT for Entity<'g> {
         }
     }
 }
+
+//impl<'g> GT for Entity<'g> {
+//    fn g(&self) -> &G {
+//        &self.g
+//    }
+//}
 
 #[derive(Serialize, Deserialize)]
 pub struct Base {
@@ -98,12 +115,12 @@ pub trait BaseT {
     }
 }
 
-impl BaseT for EntityStorage {
-    fn base(&self) -> &Base {
-        &self.base
-    }
-}
-
+//impl BaseT for EntityStorage {
+//    fn base(&self) -> &Base {
+//        &self.base
+//    }
+//}
+//
 #[derive(Serialize, Deserialize)]
 pub enum Ext {
     Pawn(Pawn2Ext),        // pawn2.rs
@@ -134,7 +151,7 @@ impl SetId for EntityStorage {
 
 impl Display for EntityStorage {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        write!(f, "E{}", self.id())
+        write!(f, "E{}", self.base.id)
     }
 }
 
@@ -169,5 +186,11 @@ mod test {
         );
         //soldier.tick();
         //building.tick();
+    }
+}
+
+impl<'g> Display for Entity<'g> {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        write!(f, "{}@{}", self.id(), self.tile())
     }
 }
