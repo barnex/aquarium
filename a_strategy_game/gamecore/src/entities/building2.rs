@@ -37,6 +37,10 @@ impl<'g> EntityT for BuildingRef<'g> {
         out.draw_sprite_rot(L_SPRITES, sprite, self.tile().pos(), /*rot=*/ 0.0);
     }
 
+    fn size(&self) -> vec2u8 {
+        self.typ.size()
+    }
+
     fn g(&self) -> &G {
         &self.g
     }

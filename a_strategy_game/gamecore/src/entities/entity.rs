@@ -23,9 +23,7 @@ pub trait EntityT: BaseT {
     fn tick(&self);
     fn draw(&self, out: &mut Out);
     fn g(&self) -> &G;
-    fn size(&self) -> vec2u8 {
-        vec2(1, 1) //👈 default, larger entities should override.
-    }
+    fn size(&self) -> vec2u8;
     fn bounds(&self) -> Bounds2Di16 {
         Bounds2D::with_size(self.tile(), self.size().as_i16())
     }
@@ -77,13 +75,13 @@ impl<'g> EntityT for Entity<'g> {
             Ext::Building(ext) => BuildingRef { g: self.g, base: &self.base, ext }.tick(),
         }
     }
+    fn size(&self) -> vec2u8 {
+        match &self.ext {
+            Ext::Pawn(ext) => PawnRef { g: self.g, base: &self.base, ext }.size(),
+            Ext::Building(ext) => BuildingRef { g: self.g, base: &self.base, ext }.size(),
+        }
+    }
 }
-
-//impl<'g> GT for Entity<'g> {
-//    fn g(&self) -> &G {
-//        &self.g
-//    }
-//}
 
 #[derive(Serialize, Deserialize)]
 pub struct Base {

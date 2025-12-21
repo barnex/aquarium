@@ -42,6 +42,18 @@ impl BuildingTyp {
         }
     }
 
+    /// Footprint size in tiles.
+    pub fn size(&self) -> vec2u8 {
+        use BuildingTyp::*;
+        match self {
+            HQ => (3, 3),
+            Farm => (2, 2),
+            Quarry => (2, 2),
+            StarNest => (3, 3),
+        }
+        .into()
+    }
+
     /// Index in Building.resrouces and max capacity.
     /// 0 unused :(
     fn _resource_metadata(self) -> [Option<(usize, u16)>; ResourceTyp::COUNT] {
@@ -212,14 +224,7 @@ impl Building {
 
     /// Building size in tiles. E.g. 3x3.
     pub fn size(&self) -> vec2u8 {
-        use BuildingTyp::*;
-        match self.typ {
-            HQ => (3, 3),
-            Farm => (2, 2),
-            Quarry => (2, 2),
-            StarNest => (3, 3),
-        }
-        .into()
+        self.typ.size()
     }
 
     pub fn tile_bounds(&self) -> Bounds2Di16 {

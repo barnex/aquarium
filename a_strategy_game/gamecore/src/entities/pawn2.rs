@@ -42,6 +42,10 @@ impl<'g> EntityT for PawnRef<'g> {
         }
     }
 
+    fn size(&self) -> vec2u8 {
+        vec2(1, 1)
+    }
+
     fn g(&self) -> &G {
         &self.g
     }
