@@ -27,14 +27,18 @@ pub struct BuildingRef<'g> {
     pub ext: &'g BuildingExt,
 }
 
-impl<'g> BuildingRef<'g> {
-    pub fn tick(&self) {
+impl<'g> EntityT for BuildingRef<'g> {
+    fn tick(&self) {
         println!("hello from building @ {}", self.tile())
     }
 
-    pub fn draw(&self, out: &mut Out) {
+    fn draw(&self, out: &mut Out) {
         let sprite = self.typ.sprite();
         out.draw_sprite_rot(L_SPRITES, sprite, self.tile().pos(), /*rot=*/ 0.0);
+    }
+
+    fn g(&self) -> &G {
+        &self.g
     }
 }
 
