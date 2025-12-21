@@ -15,7 +15,8 @@ impl G {
         draw_buildings(g, out);
         draw_resources(g, out);
         draw_pawns(g, out);
-        draw_entities(g, out);
+        //draw_entities(g, out);
+        self.entities().for_each(|e| e.draw(out));
         draw_cursor(g, out);
         draw_selection(g, out);
         self.effects.tick_and_draw(g, out);

@@ -17,6 +17,25 @@ pub struct EntityRef<'g> {
     pub ext: &'g Ext,
 }
 
+pub trait EntityT: BaseT {
+    fn draw(&self, out: &mut Out);
+}
+
+impl<'g> BaseT for EntityRef<'g> {
+    fn base(&self) -> &Base {
+        self.base
+    }
+}
+
+impl<'g> EntityT for EntityRef<'g> {
+    fn draw(&self, out: &mut Out) {
+        match &self.ext {
+            Ext::Pawn(ext) => PawnRef { g: self.g, base: &self.base, ext }.draw(out),
+            Ext::Building(ext) => BuildingRef { g: self.g, base: &self.base, ext }.draw(out),
+        }
+    }
+}
+
 #[derive(Serialize, Deserialize)]
 pub struct Base {
     id: Id,
