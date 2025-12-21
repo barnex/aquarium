@@ -69,6 +69,19 @@ impl<'g> PawnRef<'g> {
         }
         true
     }
+
+    pub(crate) fn move_to(&self, dest: vec2i16) {
+        let max_dist = 42;
+        log::warn!("todo: is_walkable");
+        //let distance_map = DistanceMap::new(dest, max_dist, |p| self.g().is_walkable_by(p, self));
+        let distance_map = DistanceMap::new(dest, max_dist, |p| true); // <<<<<<< TODO
+        if let Some(path) = distance_map.path_to_center(self.tile()) {
+            trace!(self, "dest={dest} path len={}", path.len());
+            self.route.set(path);
+        } else {
+            trace!(self, "no path")
+        }
+    }
 }
 
 impl<'g> BaseT for PawnRef<'g> {
