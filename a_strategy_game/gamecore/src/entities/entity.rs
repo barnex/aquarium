@@ -5,12 +5,14 @@ use crate::prelude::*;
 //    buidlings: Vec<(Base, BuildingExt)>,
 //}
 
+// Like `Box<dyn EntityT>`.
 #[derive(Serialize, Deserialize)]
 pub struct Entity {
     pub base: Base,
     pub ext: Ext,
 }
 
+// Like `&'g dyn EntityT`
 pub struct EntityRef<'g> {
     pub g: &'g G,
     pub base: &'g Base,
@@ -96,21 +98,6 @@ impl Entity {
                 traced: default(),
             },
             ext: ext.into(),
-        }
-    }
-
-    pub fn tick(&self, g: &G) {
-        match &self.ext {
-            //👇 TODO: trait with tick, draw, ... (polymorphic functionality)
-            Ext::Pawn(ext) => PawnRef { g, base: &self.base, ext }.tick(),
-            Ext::Building(ext) => BuildingRef { g, base: &self.base, ext }.tick(),
-        }
-    }
-
-    pub(crate) fn draw(&self, g: &G, out: &mut Out) {
-        match &self.ext {
-            Ext::Pawn(ext) => PawnRef { g, base: &self.base, ext }.draw(out),
-            Ext::Building(ext) => BuildingRef { g, base: &self.base, ext }.draw(out),
         }
     }
 }

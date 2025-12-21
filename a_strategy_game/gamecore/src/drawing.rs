@@ -40,9 +40,9 @@ pub(super) fn visible_pawns(g: &G) -> impl Iterator<Item = &Pawn> {
     g.pawns.iter().filter(move |p| viewport.contains(p.tile.get()))
 }
 
-pub(super) fn visible_entities(g: &G) -> impl Iterator<Item = &Entity> {
+pub(super) fn visible_entities(g: &G) -> impl Iterator<Item = EntityRef> {
     let viewport = visible_tile_range(g);
-    g.entities.iter().filter(move |p| viewport.contains(p.tile()))
+    g.entities().filter(move |p| viewport.contains(p.tile()))
 }
 
 fn draw_water(g: &G, out: &mut Out) {
@@ -115,7 +115,7 @@ fn draw_pawns(g: &G, out: &mut Out) {
 
 fn draw_entities(g: &G, out: &mut Out) {
     for entity in visible_entities(g) {
-        entity.draw(g, out)
+        entity.draw(out)
     }
 }
 

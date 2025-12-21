@@ -9,6 +9,7 @@ pub use shell_api::*;
 pub use vector::*;
 
 pub use crate::BaseT;
+pub use crate::EntityT;
 
 pub use fixed_str::*;
 pub use proc_macros::*;
