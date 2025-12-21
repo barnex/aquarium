@@ -85,6 +85,7 @@ impl G {
                 vec2(1, 1),
                 Team::Red,
                 Pawn2Ext {
+                    typ: PawnTyp::Crab,
                     route: default(),
                     home: default(),
                     cargo: default(),

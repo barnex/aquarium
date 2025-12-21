@@ -2,6 +2,8 @@ use crate::prelude::*;
 
 #[derive(Serialize, Deserialize)]
 pub struct Pawn2Ext {
+    pub typ: PawnTyp,
+
     // move
     pub route: Route,
 
@@ -20,7 +22,7 @@ impl<'g> EntityT for PawnRef<'g> {
     }
 
     fn draw(&self, out: &mut Out) {
-        let sprite = sprite!("TODO");
+        let sprite = self.typ.sprite(self.team());
         out.draw_sprite_rot(L_SPRITES, sprite, self.tile().pos(), self.rot.get());
         if let Some(res) = self.cargo.get() {
             out.draw_sprite(L_SPRITES + 1, res.sprite(), self.tile().pos() + vec2(0, 8));

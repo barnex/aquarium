@@ -125,6 +125,7 @@ mod test {
             tile,
             Team::Red,
             Pawn2Ext {
+                typ: PawnTyp::Crab,
                 route: default(),
                 home: default(),
                 cargo: default(),
