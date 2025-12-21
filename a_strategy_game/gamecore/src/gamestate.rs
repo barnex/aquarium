@@ -378,9 +378,19 @@ impl G {
         self.selected_pawn_ids.iter()
     }
 
+    /// All currently selected Entity Ids.
+    pub fn selected_entity_ids(&self) -> impl Iterator<Item = Id> {
+        self.selected_entity_ids.iter()
+    }
+
     /// All currently selected Pawns.
     pub fn selected_pawns(&self) -> impl Iterator<Item = &Pawn> {
         self.selected_pawn_ids.iter().filter_map(|id| self.pawn(id))
+    }
+
+    /// All currently selected Entities.
+    pub fn selected_entities(&self) -> impl Iterator<Item = Entity> {
+        self.selected_entity_ids().filter_map(|id| self.entity(id))
     }
 
     /// Add pawn to selection.
