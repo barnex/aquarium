@@ -6,6 +6,7 @@ use crate::prelude::*;
 //}
 
 // Like `&'g dyn EntityT`
+#[derive(Copy, Clone)]
 pub struct Entity<'g> {
     pub g: &'g G,
     pub base: &'g Base,
@@ -57,8 +58,6 @@ impl<'g> BaseT for Entity<'g> {
         self.g
     }
 }
-
-impl<'g> Entity<'g> {}
 
 impl<'g> EntityT for Entity<'g> {
     fn draw(&self, out: &mut Out) {

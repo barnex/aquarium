@@ -364,6 +364,10 @@ impl G {
         self.entities().find(|v| v.tile() == tile)
     }
 
+    pub(crate) fn building_entity_at(&self, tile: vec2i16) -> Option<BuildingRef> {
+        self.entity_at(tile).and_then(|e| e.downcast())
+    }
+
     /// Find nearest pawn inside given radius, where `f` is true.
     /// TODO: make faster via a hierarchy.
     pub fn find_pawn(&self, around: vec2i16, radius: u16, f: impl Fn(&Pawn) -> bool) -> Option<&Pawn> {
