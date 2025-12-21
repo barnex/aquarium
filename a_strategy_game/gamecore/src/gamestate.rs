@@ -22,7 +22,7 @@ pub struct G {
 
     pub buildings: MemKeep<Building>,
     pub pawns: MemKeep<Pawn>,
-    pub entities: MemKeep<Entity>,
+    pub entities: MemKeep<EntityStorage>,
 
     pub water: WaterSim,
     pub header_text: String,
@@ -68,20 +68,20 @@ pub const TILE_VSIZE: vec2i = vec2(TILE_ISIZE, TILE_ISIZE);
 impl G {
     // ________________________________________________________________________________ entities
     // TODO: return position generic: concrete type (associated with ext)
-    pub fn spawn2__(&self, e: Entity) -> &Entity {
+    pub fn spawn2__(&self, e: EntityStorage) -> &EntityStorage {
         trace!(&e, "insert entity");
         self.entities.insert(e)
     }
 
-    pub fn entities(&self) -> impl Iterator<Item = EntityRef> {
-        self.entities.iter().map(|e| EntityRef { g: self, base: e.base(), ext: &e.ext })
+    pub fn entities(&self) -> impl Iterator<Item = Entity> {
+        self.entities.iter().map(|e| Entity { g: self, base: e.base(), ext: &e.ext })
     }
 
     // ________________________________________________________________________________
     pub fn test_world() -> Self {
         let g = map_gen::inception();
         g.spawn2__(
-            Entity::new(
+            EntityStorage::new(
                 vec2(1, 1),
                 Team::Red,
                 Pawn2Ext {
@@ -329,6 +329,12 @@ impl G {
         self.pawns.insert(pawn)
     }
 
+    /// TODO: simplify
+    pub(crate) fn spawn_pawn_entity(&self, typ: PawnTyp, mouse: Vector<i16, 2>, team: Team) -> Entity {
+        //log::trace!("spawn {:?} @ tile {}", pawn.typ, pawn.tile);
+        self.entities.insert(EntityStorage::pawn(typ, team, mouse)).as_ref(self)
+    }
+
     /// Pawn with given Id, if any.
     pub fn pawn(&self, id: Id) -> Option<&Pawn> {
         self.pawns.get(id)
@@ -343,6 +349,10 @@ impl G {
     /// TODO: make faster via a hierarchy.
     pub fn pawn_at(&self, tile: vec2i16) -> Option<&Pawn> {
         self.pawns.iter().find(|v| v.tile == tile)
+    }
+
+    pub fn entity_at(&self, tile: vec2i16) -> Option<Entity> {
+        self.entities().find(|v| v.tile() == tile)
     }
 
     /// Find nearest pawn inside given radius, where `f` is true.

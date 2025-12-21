@@ -11,6 +11,7 @@ pub struct GameUi {
 pub enum Tool {
     Pointer,
     Tile(Tile),
+    Pawn2(PawnTyp, Team),
     Pawn(PawnTyp, Team),
     Building(BuildingTyp),
     Resource(ResourceTyp),
@@ -51,7 +52,8 @@ impl GameUi {
         let buttons = once((Tool::Pointer, sprite!("pointer"))) //_
             .chain(once((Tool::WaterBucket, sprite!("droplet"))))
             .chain(Tile::all().map(|typ| (Tool::Tile(typ), typ.sprite())))
-            .chain(Self::PAWN_PROTOTYPES.iter().map(|(typ, team)| (Tool::Pawn(*typ, *team), Pawn::new(*typ, default(), *team).sprite())))
+            .chain(Self::PAWN_PROTOTYPES.iter().map(|(typ, team)| (Tool::Pawn2(*typ, *team), Pawn::new(*typ, default(), *team).sprite())))
+            //.chain(Self::PAWN_PROTOTYPES.iter().map(|(typ, team)| (Tool::Pawn(*typ, *team), Pawn::new(*typ, default(), *team).sprite())))
             .chain(BuildingTyp::all().map(|typ| (Tool::Building(typ), typ.sprite())))
             .chain(ResourceTyp::all().map(|typ| (Tool::Resource(typ), typ.sprite())));
 

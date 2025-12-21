@@ -40,7 +40,7 @@ pub(super) fn visible_pawns(g: &G) -> impl Iterator<Item = &Pawn> {
     g.pawns.iter().filter(move |p| viewport.contains(p.tile.get()))
 }
 
-pub(super) fn visible_entities(g: &G) -> impl Iterator<Item = EntityRef> {
+pub(super) fn visible_entities(g: &G) -> impl Iterator<Item = Entity> {
     let viewport = visible_tile_range(g);
     g.entities().filter(move |p| viewport.contains(p.tile()))
 }
@@ -130,6 +130,7 @@ fn cursor_sprite(g: &G) -> Sprite {
     match g.ui.active_tool {
         Tool::Tile(typ) => typ.sprite(),
         Tool::Pawn(typ, team) => Pawn::new(typ, default(), team).sprite(),
+        Tool::Pawn2(typ, team) => Pawn::new(typ, default(), team).sprite(), // <<< TODO: proper icon
         Tool::Building(typ) => typ.sprite(),
         Tool::Resource(typ) => typ.sprite(),
         Tool::Pointer => match g.contextual_action {

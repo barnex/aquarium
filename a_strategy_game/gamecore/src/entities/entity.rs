@@ -7,13 +7,13 @@ use crate::prelude::*;
 
 // Like `Box<dyn EntityT>`.
 #[derive(Serialize, Deserialize)]
-pub struct Entity {
+pub struct EntityStorage {
     pub base: Base,
     pub ext: Ext,
 }
 
 // Like `&'g dyn EntityT`
-pub struct EntityRef<'g> {
+pub struct Entity<'g> {
     pub g: &'g G,
     pub base: &'g Base,
     pub ext: &'g Ext,
@@ -24,13 +24,25 @@ pub trait EntityT: BaseT {
     fn draw(&self, out: &mut Out);
 }
 
-impl<'g> BaseT for EntityRef<'g> {
+impl EntityStorage {
+    pub(crate) fn pawn(typ: PawnTyp, team: Team, tile: vec2i16) -> EntityStorage {
+        EntityStorage {
+            base: Base::new(team, tile),
+            ext: Ext::Pawn(Pawn2Ext::new(typ)),
+        }
+    }
+    pub fn as_ref<'g>(&'g self, g: &'g G) -> Entity<'g> {
+        Entity { g, base: &self.base, ext: &self.ext }
+    }
+}
+
+impl<'g> BaseT for Entity<'g> {
     fn base(&self) -> &Base {
         self.base
     }
 }
 
-impl<'g> EntityT for EntityRef<'g> {
+impl<'g> EntityT for Entity<'g> {
     fn draw(&self, out: &mut Out) {
         match &self.ext {
             Ext::Pawn(ext) => PawnRef { g: self.g, base: &self.base, ext }.draw(out),
@@ -54,6 +66,18 @@ pub struct Base {
     sleep: Cel<u8>,
     traced: Cel<bool>,
 }
+impl Base {
+    fn new(team: Team, tile: Vector<i16, 2>) -> Self {
+        Self {
+            id: todo!(),
+            tile: todo!(),
+            health: todo!(),
+            team: todo!(),
+            sleep: todo!(),
+            traced: todo!(),
+        }
+    }
+}
 
 pub trait BaseT {
     fn base(&self) -> &Base;
@@ -74,7 +98,7 @@ pub trait BaseT {
     }
 }
 
-impl BaseT for Entity {
+impl BaseT for EntityStorage {
     fn base(&self) -> &Base {
         &self.base
     }
@@ -86,7 +110,7 @@ pub enum Ext {
     Building(BuildingExt), // building2.rs
 }
 
-impl Entity {
+impl EntityStorage {
     pub fn new(tile: vec2i16, team: Team, ext: impl Into<Ext>) -> Self {
         Self {
             base: Base {
@@ -102,13 +126,13 @@ impl Entity {
     }
 }
 
-impl SetId for Entity {
+impl SetId for EntityStorage {
     fn set_id(&mut self, id: Id) {
         self.base.id = id
     }
 }
 
-impl Display for Entity {
+impl Display for EntityStorage {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         write!(f, "E{}", self.id())
     }
@@ -121,7 +145,7 @@ mod test {
     #[test]
     fn test_it() {
         let tile = vec2(1, 2);
-        let soldier = Entity::new(
+        let soldier = EntityStorage::new(
             tile,
             Team::Red,
             Pawn2Ext {
@@ -133,7 +157,7 @@ mod test {
                 rot: default(),
             },
         );
-        let building = Entity::new(
+        let building = EntityStorage::new(
             tile + 1,
             Team::Red,
             BuildingExt {

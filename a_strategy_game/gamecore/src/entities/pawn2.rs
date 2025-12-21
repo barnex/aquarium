@@ -16,6 +16,19 @@ pub struct Pawn2Ext {
     pub rot: Cel<f32>,
 }
 
+impl Pawn2Ext {
+    pub(crate) fn new(typ: PawnTyp) -> Self {
+        Self {
+            typ,
+            route: default(),
+            home: default(),
+            cargo: default(),
+            target: default(),
+            rot: default(),
+        }
+    }
+}
+
 impl<'g> EntityT for PawnRef<'g> {
     fn tick(&self) {
         println!("hello from soldier @ {}", self.tile())
