@@ -15,6 +15,7 @@ impl G {
         draw_buildings(g, out);
         draw_resources(g, out);
         draw_pawns(g, out);
+        draw_entities(g, out);
         draw_cursor(g, out);
         draw_selection(g, out);
         self.effects.tick_and_draw(g, out);
@@ -60,6 +61,11 @@ pub(super) fn visible_tile_range(g: &G) -> Bounds2D<i16> {
 pub(super) fn visible_pawns(g: &G) -> impl Iterator<Item = &Pawn> {
     let viewport = visible_tile_range(g);
     g.pawns.iter().filter(move |p| viewport.contains(p.tile.get()))
+}
+
+pub(super) fn visible_entities(g: &G) -> impl Iterator<Item = &Entity> {
+    let viewport = visible_tile_range(g);
+    g.entities.iter().filter(move |p| viewport.contains(p.tile()))
 }
 
 fn draw_water(g: &G, out: &mut Out) {
@@ -127,6 +133,12 @@ fn draw_resources(g: &G, out: &mut Out) {
 fn draw_pawns(g: &G, out: &mut Out) {
     for pawn in visible_pawns(g) {
         pawn.draw(g, out)
+    }
+}
+
+fn draw_entities(g: &G, out: &mut Out) {
+    for entity in visible_entities(g) {
+        entity.draw(g, out)
     }
 }
 

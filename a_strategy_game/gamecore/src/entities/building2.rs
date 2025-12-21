@@ -9,6 +9,7 @@ pub struct BuildingExt {
 }
 
 pub struct Building2<'g> {
+    pub g: &'g G,
     pub base: &'g Base,
     pub ext: &'g BuildingExt,
 }
@@ -16,6 +17,11 @@ pub struct Building2<'g> {
 impl<'g> Building2<'g> {
     pub fn tick(&self) {
         println!("hello from building @ {}", self.tile())
+    }
+
+    pub fn draw(&self, out: &mut Out) {
+        let sprite = sprite!("TODO");
+        self.g.draw_sprite_rot(out, L_SPRITES, sprite, self.tile().pos(), /*rot=*/ 0.0);
     }
 }
 

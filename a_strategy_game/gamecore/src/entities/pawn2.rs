@@ -15,6 +15,7 @@ pub struct Pawn2Ext {
 }
 
 pub struct Pawn2<'g> {
+    pub g: &'g G,
     pub base: &'g Base,
     pub ext: &'g Pawn2Ext,
 }
@@ -22,6 +23,14 @@ pub struct Pawn2<'g> {
 impl<'g> Pawn2<'g> {
     pub fn tick(&self) {
         println!("hello from soldier @ {}", self.tile())
+    }
+
+    pub fn draw(&self, out: &mut Out) {
+        let sprite = sprite!("TODO");
+        self.g.draw_sprite_rot(out, L_SPRITES, sprite, self.tile().pos(), self.rot.get());
+        if let Some(res) = self.cargo.get() {
+            self.g.draw_sprite(out, L_SPRITES + 1, res.sprite(), self.tile().pos() + vec2(0, 8));
+        }
     }
 }
 

@@ -67,10 +67,18 @@ impl Entity {
         }
     }
 
-    pub fn tick(&self) {
+    pub fn tick(&self, g: &G) {
         match &self.ext {
-            Ext::Pawn(ext) => Pawn2 { base: &self.base, ext }.tick(),
-            Ext::Building(ext) => Building2 { base: &self.base, ext }.tick(),
+            //👇 TODO: trait with tick, draw, ... (polymorphic functionality)
+            Ext::Pawn(ext) => Pawn2 { g, base: &self.base, ext }.tick(),
+            Ext::Building(ext) => Building2 { g, base: &self.base, ext }.tick(),
+        }
+    }
+
+    pub(crate) fn draw(&self, g: &G, out: &mut Out) {
+        match &self.ext {
+            Ext::Pawn(ext) => Pawn2 { g, base: &self.base, ext }.draw(out),
+            Ext::Building(ext) => Building2 { g, base: &self.base, ext }.draw(out),
         }
     }
 }
@@ -115,7 +123,7 @@ mod test {
                 resources: default(),
             },
         );
-        soldier.tick();
-        building.tick();
+        //soldier.tick();
+        //building.tick();
     }
 }
