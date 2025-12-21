@@ -164,7 +164,10 @@ impl G {
     pub fn tick(&mut self, now_secs: f64, events: impl Iterator<Item = InputEvent>, out: &mut Out) {
         self.now_secs = now_secs;
         self.inputs.tick(&self.keymap, events);
-        self.viewport_size = out.viewport_size;
+
+        self.viewport_size = out.viewport_size; //👈
+        out.camera_pos = self.camera_pos; //👈
+
         self.commands.extend(&mut self.inputs.drain_commands());
 
         self.update_fps(); // 👈 FPS is gamespeed independent

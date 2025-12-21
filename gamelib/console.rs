@@ -88,7 +88,7 @@ impl Console {
         let buffer_height = text_height_lines(&text, screen_size.x());
 
         let mut y = (screen_size.y() - buffer_height) * (EMBEDDED_CHAR_SIZE.y() as u16);
-        out.draw_text(layer, vec2(0, y as i32), &text);
+        out.draw_text_screen(layer, vec2(0, y as i32), &text);
 
         // draw tail of output buffer
         let mut i = self.output.len();
@@ -96,7 +96,7 @@ impl Console {
             i -= 1;
             if let Some(line) = self.output.get(i) {
                 y -= text_height_lines(&line, screen_size.x()) * (EMBEDDED_CHAR_SIZE.y() as u16);
-                out.draw_text(layer, vec2(0, y as i32), &line);
+                out.draw_text_screen(layer, vec2(0, y as i32), &line);
             }
         }
     }

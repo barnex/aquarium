@@ -468,9 +468,9 @@ impl Pawn {
     }
 
     fn base_draw(&self, g: &G, out: &mut Out) {
-        g.draw_sprite_rot(out, L_SPRITES, self.sprite(), self.tile.pos(), self.rot.get());
+        out.draw_sprite_rot(L_SPRITES, self.sprite(), self.tile.pos(), self.rot.get());
         if let Some(res) = self.cargo.get() {
-            g.draw_sprite(out, L_SPRITES + 1, res.sprite(), self.tile.pos() + vec2(0, 8));
+            out.draw_sprite(L_SPRITES + 1, res.sprite(), self.tile.pos() + vec2(0, 8));
         }
     }
 

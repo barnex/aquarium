@@ -36,6 +36,7 @@ pub const L_CLI: u8 = 8;
 /// Sent to the browser who will render it.
 #[derive(Default, Debug, PartialEq)]
 pub struct Out {
+    pub camera_pos: vec2i,
     pub viewport_size: vec2u,
     pub layers: Vec<Layer>,
     pub bloom: bool,
@@ -100,16 +101,40 @@ impl Out {
         self.debug.clear();
     }
 
+    /// Draw sprite in world coordinates (i.e. taking into account camera).
+    pub fn draw_sprite(&mut self, layer: u8, sprite: Sprite, world_pos: vec2i) {
+        self.draw_sprite_screen(layer, sprite, world_pos - self.camera_pos);
+    }
+
+    pub fn draw_sprite_rot(&mut self, layer: u8, sprite: Sprite, world_pos: vec2i, rot: f32) {
+        let pos = world_pos - self.camera_pos;
+        self.push_sprite(layer, DrawSprite { sprite, pos, dst_size: None, src_pos: None, rot });
+    }
+
+    pub fn draw_text(&mut self, layer: u8, text: &str, world_pos: vec2i) {
+        self.draw_text_screen(layer, world_pos - self.camera_pos, text);
+    }
+
+    /// Draw line in world coordinates (i.e. taking into account camera).
+    pub fn draw_line(&mut self, layer: u8, line: Line) {
+        self.draw_line_screen(layer, line.translated(-self.camera_pos));
+    }
+
+    /// Draw rectangle in world coordinates (i.e. taking into account camera).
+    pub fn draw_rect(&mut self, layer: u8, rect: Rectangle) {
+        self.draw_rect_screen(layer, rect.translated(-self.camera_pos));
+    }
+
     /// Draw sprite in screen coordinates (i.e. ignoring camera).
     pub fn draw_sprite_screen(&mut self, layer: u8, sprite: Sprite, screen_pos: vec2i) {
-        self.draw_sprite(layer, DrawSprite::at_pos(sprite, screen_pos));
+        self.push_sprite(layer, DrawSprite::at_pos(sprite, screen_pos));
     }
 
     pub fn draw_sprite_screen_with_size(&mut self, layer: u8, sprite: Sprite, pos: vec2i, dst_size: vec2u8) {
-        self.draw_sprite(layer, DrawSprite::at_pos(sprite, pos).with_size(dst_size));
+        self.push_sprite(layer, DrawSprite::at_pos(sprite, pos).with_size(dst_size));
     }
 
-    pub fn draw_sprite(&mut self, layer: u8, cmd: DrawSprite) {
+    pub fn push_sprite(&mut self, layer: u8, cmd: DrawSprite) {
         self.layer(layer).sprites.push(cmd)
     }
 

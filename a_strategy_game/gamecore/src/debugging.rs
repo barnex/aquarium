@@ -29,7 +29,7 @@ pub(super) fn draw_debug_overlay(g: &G, out: &mut Out) {
         draw_destinations(g, out);
     }
     if g.debug.draw_mouse {
-        g.draw_sprite(out, L_UI_FG + 1, sprite!("pointer"), g.mouse_position_world());
+        out.draw_sprite(L_UI_FG + 1, sprite!("pointer"), g.mouse_position_world());
     }
     if g.debug.inspect_under_cursor {
         inspect_under_cursor(g, out);
@@ -83,7 +83,7 @@ fn draw_home_overlay(g: &G, out: &mut Out) {
 fn draw_downstream_overlay(g: &G, out: &mut Out) {
     for src in visible_buildings(g) {
         for dst in src.downstream_buildings(g) {
-            g.draw_line(out, L_SPRITES + 1, Line::new(src.tile_bounds().max.pos(), dst.entrance().pos()));
+            out.draw_line(L_SPRITES + 1, Line::new(src.tile_bounds().max.pos(), dst.entrance().pos()));
         }
     }
 }

@@ -34,7 +34,7 @@ pub const FONT_SHIELD: &str = "\x08\x09";
 ///  +----------------+
 ///
 impl Out {
-    pub fn draw_text(&mut self, layer: u8, pos: impl Into<vec2i>, text: impl AsRef<str>) {
+    pub fn draw_text_screen(&mut self, layer: u8, pos: impl Into<vec2i>, text: impl AsRef<str>) {
         draw_text(self, layer, pos.into(), text.as_ref());
 
         fn draw_text(out: &mut Out, layer: u8, pos: vec2i, text: &str) {

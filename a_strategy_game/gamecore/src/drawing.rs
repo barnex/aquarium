@@ -5,7 +5,7 @@ impl G {
     pub fn draw_world(&self, out: &mut Out) {
         debug_assert!(out.viewport_size != vec2::ZERO);
 
-        out.draw_text(L_TEXT, vec2(0, 0), &self.header_text);
+        out.draw_text_screen(L_TEXT, vec2(0, 0), &self.header_text);
 
         // Note: ⚠️ UI already rendered (may consume input events)
 
@@ -22,30 +22,6 @@ impl G {
         self.effects.tick_and_draw(g, out);
 
         draw_debug_overlay(g, out);
-    }
-
-    /// Draw sprite in world coordinates (i.e. taking into account camera).
-    pub fn draw_sprite(&self, out: &mut Out, layer: u8, sprite: Sprite, world_pos: vec2i) {
-        out.draw_sprite_screen(layer, sprite, world_pos - self.camera_pos);
-    }
-
-    pub fn draw_sprite_rot(&self, out: &mut Out, layer: u8, sprite: Sprite, world_pos: vec2i, rot: f32) {
-        let pos = world_pos - self.camera_pos;
-        out.draw_sprite(layer, DrawSprite { sprite, pos, dst_size: None, src_pos: None, rot });
-    }
-
-    pub fn draw_text(&self, out: &mut Out, layer: u8, text: &str, world_pos: vec2i) {
-        out.draw_text(layer, world_pos - self.camera_pos, text);
-    }
-
-    /// Draw line in world coordinates (i.e. taking into account camera).
-    pub fn draw_line(&self, out: &mut Out, layer: u8, line: Line) {
-        out.draw_line_screen(layer, line.translated(-self.camera_pos));
-    }
-
-    /// Draw rectangle in world coordinates (i.e. taking into account camera).
-    pub fn draw_rect(&self, out: &mut Out, layer: u8, rect: Rectangle) {
-        out.draw_rect_screen(layer, rect.translated(-self.camera_pos));
     }
 }
 
@@ -79,7 +55,7 @@ fn draw_water(g: &G, out: &mut Out) {
             let a = (level * 255.0).clamp(0.0, 255.0) as u8;
             let color = RGBA([r, 0, b, a]);
             let bounds = Bounds2D::with_size(tile.pos(), TILE_VSIZE);
-            g.draw_rect(out, L_WATER, Rectangle::new(bounds, RGBA::TRANSPARENT).with_fill(color));
+            out.draw_rect(L_WATER, Rectangle::new(bounds, RGBA::TRANSPARENT).with_fill(color));
 
             // speed arrow
             let speed = g.water.water_speed_at(tile);
@@ -87,16 +63,16 @@ fn draw_water(g: &G, out: &mut Out) {
             let start = mid - speed * (TILE_SIZE / 2) as f32;
             let end = mid + speed * (TILE_SIZE / 2) as f32;
             let arrow = Line::new(start.as_i32(), end.as_i32()).with_color(RGBA::RED).with_width(2);
-            g.draw_line(out, L_WATER + 1, arrow);
+            out.draw_line(L_WATER + 1, arrow);
             let bud = Rectangle::new(Bounds2D::new(start.as_i32() - 2, start.as_i32() + 2), RGBA::RED);
-            g.draw_rect(out, L_WATER + 1, bud);
+            out.draw_rect(L_WATER + 1, bud);
         }
     }
 }
 
 fn draw_tilemap(g: &G, out: &mut Out) {
     for (idx, mat) in visible_tiles(g) {
-        g.draw_sprite(out, L_TILES, mat.sprite(), idx.pos());
+        out.draw_sprite(L_TILES, mat.sprite(), idx.pos());
     }
 }
 
@@ -108,14 +84,14 @@ fn draw_buildings(g: &G, out: &mut Out) {
 
 fn draw_building(g: &G, out: &mut Out, building: &Building) {
     // 🏭 Building sprite
-    g.draw_sprite(out, L_SPRITES, building.typ.sprite(), building.tile.pos());
+    out.draw_sprite(L_SPRITES, building.typ.sprite(), building.tile.pos());
 
     // ☘️ Resource amounts
     let vstride = 18; // some fiddly offsets to make it look better
     let mut cursor = building.tile.pos() - vec2(4, 4);
     for (typ, count) in building.iter_resources() {
-        g.draw_sprite(out, L_SPRITES + 1, typ.sprite(), cursor - vec2(0, 4));
-        g.draw_text(out, L_SPRITES + 1, &format!("{count}"), cursor + vec2::EX * TILE_ISIZE);
+        out.draw_sprite(L_SPRITES + 1, typ.sprite(), cursor - vec2(0, 4));
+        out.draw_text(L_SPRITES + 1, &format!("{count}"), cursor + vec2::EX * TILE_ISIZE);
         cursor[1] += vstride;
     }
 }
@@ -127,7 +103,7 @@ pub(super) fn visible_buildings(g: &G) -> impl Iterator<Item = &Building> {
 
 fn draw_resources(g: &G, out: &mut Out) {
     for (tile, res) in g.resources.iter() {
-        g.draw_sprite(out, L_SPRITES, res.sprite(), tile.pos());
+        out.draw_sprite(L_SPRITES, res.sprite(), tile.pos());
     }
 }
 
@@ -146,8 +122,8 @@ fn draw_entities(g: &G, out: &mut Out) {
 // ↑
 fn draw_cursor(g: &G, out: &mut Out) {
     let sprite = cursor_sprite(g);
-    g.draw_sprite(out, L_SPRITES, sprite, g.mouse_tile().pos());
-    g.draw_sprite(out, L_SPRITES, sprite!("grid24"), g.mouse_tile().pos());
+    out.draw_sprite(L_SPRITES, sprite, g.mouse_tile().pos());
+    out.draw_sprite(L_SPRITES, sprite!("grid24"), g.mouse_tile().pos());
 }
 
 fn cursor_sprite(g: &G) -> Sprite {
@@ -174,12 +150,12 @@ fn draw_selection(g: &G, out: &mut Out) -> Status {
         let max = start.zip_with(end, i32::max);
         let sel = Bounds2D::new(min, max);
 
-        g.draw_rect(out, L_SPRITES + 1, Rectangle::new(sel, RGBA::BLUE).with_fill(RGB::BLUE.with_alpha(64)));
+        out.draw_rect(L_SPRITES + 1, Rectangle::new(sel, RGBA::BLUE).with_fill(RGB::BLUE.with_alpha(64)));
     }
 
     // 🦀 Selected pawns
     for pawn in g.selected_pawns() {
-        g.draw_rect(out, L_SPRITES + 1, Rectangle::new(pawn.bounds(), RGBA::BLUE).with_fill(RGB::BLUE.with_alpha(64)));
+        out.draw_rect(L_SPRITES + 1, Rectangle::new(pawn.bounds(), RGBA::BLUE).with_fill(RGB::BLUE.with_alpha(64)));
     }
     OK
 }

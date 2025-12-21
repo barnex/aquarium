@@ -21,7 +21,7 @@ impl<'g> BuildingRef<'g> {
 
     pub fn draw(&self, out: &mut Out) {
         let sprite = sprite!("TODO");
-        self.g.draw_sprite_rot(out, L_SPRITES, sprite, self.tile().pos(), /*rot=*/ 0.0);
+        out.draw_sprite_rot(L_SPRITES, sprite, self.tile().pos(), /*rot=*/ 0.0);
     }
 }
 

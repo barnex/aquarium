@@ -18,7 +18,7 @@ impl Effects {
         bolts.retain(|b| b.born + TTL > g.tick);
 
         for b in bolts.iter() {
-            g.draw_line(out, L_EFFECTS, Line::new(b.start, b.end).with_color(RGBA::YELLOW.with_alpha(128)).with_width(3));
+            out.draw_line(L_EFFECTS, Line::new(b.start, b.end).with_color(RGBA::YELLOW.with_alpha(128)).with_width(3));
         }
     }
 }
