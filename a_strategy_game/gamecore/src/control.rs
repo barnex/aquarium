@@ -115,7 +115,7 @@ fn doodle_on_map(g: &mut G) {
             Tool::Pawn2(typ, team) => {
                 if g.inputs.just_pressed(K_MOUSE1) {
                     log::trace!("player spawns pawn {typ:?} {team:?} @ {mouse}");
-                    if g.entity_at(mouse).is_none() {
+                    if g.entities_at(mouse).next().is_none() {
                         g.spawn_pawn_entity(typ, mouse, team);
                     } else {
                         log::trace!("cannot spawn at @ {mouse}: already occupied");

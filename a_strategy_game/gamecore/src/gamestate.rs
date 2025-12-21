@@ -360,12 +360,13 @@ impl G {
         self.pawns.iter().find(|v| v.tile == tile)
     }
 
-    pub fn entity_at(&self, tile: vec2i16) -> Option<Entity> {
-        self.entities().find(|v| v.tile() == tile)
+    pub fn entities_at(&self, tile: vec2i16) -> impl Iterator<Item = Entity> {
+        self.entities().filter(move |e| e.bounds().contains(tile))
     }
 
     pub(crate) fn building_entity_at(&self, tile: vec2i16) -> Option<BuildingRef> {
-        self.entity_at(tile).and_then(|e| e.downcast())
+        // There can be multiple entities on one tile, but there should only be one building.
+        self.entities_at(tile).filter_map(|e| e.downcast::<BuildingRef>()).next()
     }
 
     /// Find nearest pawn inside given radius, where `f` is true.
