@@ -23,6 +23,7 @@ impl G {
     /// execute a single command
     fn exec_command(&mut self, cmd: &str) -> Result<()> {
         match cmd.trim().split_ascii_whitespace().collect_vec().as_slice() {
+            &["setcamera" | "setcam", x, y] => Ok(self.camera_pos = vec2(x.parse()?, y.parse()?)),
             &["sanitycheck" | "sc"] => sanity_check(self),
             &["reset"] => Ok(*self = G::test_world()),
             &["pause" | "pa"] => Ok(toggle(&mut self.paused)),
