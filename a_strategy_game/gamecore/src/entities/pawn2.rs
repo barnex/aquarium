@@ -46,8 +46,8 @@ impl<'g> EntityT for PawnRef<'g> {
         vec2(1, 1)
     }
 
-    fn g(&self) -> &G {
-        &self.g
+    fn can_move(&self) -> bool {
+        self.typ.can_move()
     }
 }
 
@@ -60,6 +60,9 @@ pub struct PawnRef<'g> {
 impl<'g> BaseT for PawnRef<'g> {
     fn base(&self) -> &Base {
         &self.base
+    }
+    fn g(&self) -> &G {
+        &self.g
     }
 }
 

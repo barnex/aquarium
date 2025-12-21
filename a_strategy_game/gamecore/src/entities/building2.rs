@@ -40,15 +40,17 @@ impl<'g> EntityT for BuildingRef<'g> {
     fn size(&self) -> vec2u8 {
         self.typ.size()
     }
-
-    fn g(&self) -> &G {
-        &self.g
+    fn can_move(&self) -> bool {
+        false
     }
 }
 
 impl<'g> BaseT for BuildingRef<'g> {
     fn base(&self) -> &Base {
         &self.base
+    }
+    fn g(&self) -> &G {
+        &self.g
     }
 }
 

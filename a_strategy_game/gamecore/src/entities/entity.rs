@@ -22,11 +22,11 @@ pub struct EntityStorage {
 pub trait EntityT: BaseT {
     fn tick(&self);
     fn draw(&self, out: &mut Out);
-    fn g(&self) -> &G;
     fn size(&self) -> vec2u8;
     fn bounds(&self) -> Bounds2Di16 {
         Bounds2D::with_size(self.tile(), self.size().as_i16())
     }
+    fn can_move(&self) -> bool;
 }
 
 impl EntityStorage {
@@ -53,19 +53,14 @@ impl<'g> BaseT for Entity<'g> {
     fn base(&self) -> &Base {
         self.base
     }
-}
-
-impl<'g> Entity<'g> {
-    pub fn kill(&self) {
-        trace!(self);
-        self.g().entities.remove(self.id());
-    }
-}
-
-impl<'g> EntityT for Entity<'g> {
     fn g(&self) -> &G {
         self.g
     }
+}
+
+impl<'g> Entity<'g> {}
+
+impl<'g> EntityT for Entity<'g> {
     fn draw(&self, out: &mut Out) {
         match &self.ext {
             Ext::Pawn(ext) => PawnRef { g: self.g, base: &self.base, ext }.draw(out),
@@ -82,6 +77,12 @@ impl<'g> EntityT for Entity<'g> {
         match &self.ext {
             Ext::Pawn(ext) => PawnRef { g: self.g, base: &self.base, ext }.size(),
             Ext::Building(ext) => BuildingRef { g: self.g, base: &self.base, ext }.size(),
+        }
+    }
+    fn can_move(&self) -> bool {
+        match &self.ext {
+            Ext::Pawn(ext) => PawnRef { g: self.g, base: &self.base, ext }.can_move(),
+            Ext::Building(ext) => BuildingRef { g: self.g, base: &self.base, ext }.can_move(),
         }
     }
 }
@@ -109,6 +110,7 @@ impl Base {
 }
 
 pub trait BaseT {
+    fn g(&self) -> &G;
     fn base(&self) -> &Base;
     fn id(&self) -> Id {
         self.base().id
@@ -124,6 +126,10 @@ pub trait BaseT {
     }
     fn traced(&self) -> &Cel<bool> {
         &self.base().traced
+    }
+    fn kill(&self) {
+        trace!(self);
+        self.g().entities.remove(self.id());
     }
 }
 

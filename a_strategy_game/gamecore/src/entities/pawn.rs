@@ -50,7 +50,7 @@ impl PawnTyp {
         }
     }
 
-    fn can_move(self) -> bool {
+    pub fn can_move(self) -> bool {
         match self {
             PawnTyp::Kitten => true,
             PawnTyp::Cat => true,

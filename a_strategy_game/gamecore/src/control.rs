@@ -49,7 +49,7 @@ fn update_contextual_action(g: &mut G) {
 
     // 🥾 Move to location
     // Only show Move action if some pawns can move.
-    if g.selected_pawns().any(|p| p.can_move()) {
+    if g.selected_entities().any(|e| e.can_move()) {
         return g.contextual_action = Action::Move;
     }
 
