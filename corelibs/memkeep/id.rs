@@ -8,8 +8,10 @@ pub struct Id {
 }
 
 impl Id {
+    pub const INVALID: Self = Self { index: 0, generation: 0 };
+
     pub fn is_valid(&self) -> bool {
-        *self != Self::default()
+        *self != Self::INVALID
     }
 }
 

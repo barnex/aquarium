@@ -67,14 +67,14 @@ pub struct Base {
     traced: Cel<bool>,
 }
 impl Base {
-    fn new(team: Team, tile: Vector<i16, 2>) -> Self {
+    fn new(team: Team, tile: vec2i16) -> Self {
         Self {
-            id: todo!(),
-            tile: todo!(),
-            health: todo!(),
-            team: todo!(),
-            sleep: todo!(),
-            traced: todo!(),
+            id: Id::INVALID,
+            tile: tile.cel(),
+            health: 1.cel(), // << TODO
+            team: team.cel(),
+            sleep: default(),
+            traced: default(),
         }
     }
 }
