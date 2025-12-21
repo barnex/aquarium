@@ -14,24 +14,24 @@ pub struct Pawn2Ext {
     pub rot: Cel<f32>,
 }
 
-pub struct PawnRef<'g> {
-    pub g: &'g G,
-    pub base: &'g Base,
-    pub ext: &'g Pawn2Ext,
-}
-
-impl<'g> PawnRef<'g> {
-    pub fn tick(&self) {
+impl<'g> EntityT for PawnRef<'g> {
+    fn tick(&self) {
         println!("hello from soldier @ {}", self.tile())
     }
 
-    pub fn draw(&self, out: &mut Out) {
+    fn draw(&self, out: &mut Out) {
         let sprite = sprite!("TODO");
         self.g.draw_sprite_rot(out, L_SPRITES, sprite, self.tile().pos(), self.rot.get());
         if let Some(res) = self.cargo.get() {
             self.g.draw_sprite(out, L_SPRITES + 1, res.sprite(), self.tile().pos() + vec2(0, 8));
         }
     }
+}
+
+pub struct PawnRef<'g> {
+    pub g: &'g G,
+    pub base: &'g Base,
+    pub ext: &'g Pawn2Ext,
 }
 
 impl<'g> BaseT for PawnRef<'g> {

@@ -18,6 +18,7 @@ pub struct EntityRef<'g> {
 }
 
 pub trait EntityT: BaseT {
+    fn tick(&self);
     fn draw(&self, out: &mut Out);
 }
 
@@ -32,6 +33,12 @@ impl<'g> EntityT for EntityRef<'g> {
         match &self.ext {
             Ext::Pawn(ext) => PawnRef { g: self.g, base: &self.base, ext }.draw(out),
             Ext::Building(ext) => BuildingRef { g: self.g, base: &self.base, ext }.draw(out),
+        }
+    }
+    fn tick(&self) {
+        match &self.ext {
+            Ext::Pawn(ext) => PawnRef { g: self.g, base: &self.base, ext }.tick(),
+            Ext::Building(ext) => BuildingRef { g: self.g, base: &self.base, ext }.tick(),
         }
     }
 }
