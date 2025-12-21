@@ -5,18 +5,18 @@ use crate::prelude::*;
 //    buidlings: Vec<(Base, BuildingExt)>,
 //}
 
-// Like `Box<dyn EntityT>`.
-#[derive(Serialize, Deserialize)]
-pub struct EntityStorage {
-    pub base: Base,
-    pub ext: Ext,
-}
-
 // Like `&'g dyn EntityT`
 pub struct Entity<'g> {
     pub g: &'g G,
     pub base: &'g Base,
     pub ext: &'g Ext,
+}
+
+// Like `Box<dyn EntityT>`.
+#[derive(Serialize, Deserialize)]
+pub struct EntityStorage {
+    pub base: Base,
+    pub ext: Ext,
 }
 
 pub trait EntityT: BaseT {
@@ -28,10 +28,6 @@ pub trait EntityT: BaseT {
         Bounds2D::with_size(self.tile(), self.size().as_i16())
     }
 }
-
-//pub trait GT {
-//    fn g(&self) -> &G;
-//}
 
 impl EntityStorage {
     pub(crate) fn pawn(typ: PawnTyp, team: Team, tile: vec2i16) -> EntityStorage {
@@ -56,6 +52,13 @@ impl EntityStorage {
 impl<'g> BaseT for Entity<'g> {
     fn base(&self) -> &Base {
         self.base
+    }
+}
+
+impl<'g> Entity<'g> {
+    pub fn kill(&self) {
+        trace!(self);
+        self.g().entities.remove(self.id());
     }
 }
 
@@ -124,12 +127,6 @@ pub trait BaseT {
     }
 }
 
-//impl BaseT for EntityStorage {
-//    fn base(&self) -> &Base {
-//        &self.base
-//    }
-//}
-//
 #[derive(Serialize, Deserialize)]
 pub enum Ext {
     Pawn(Pawn2Ext),        // pawn2.rs
@@ -157,14 +154,6 @@ impl SetId for EntityStorage {
         self.base.id = id
     }
 }
-
-//impl Display for EntityStorage {
-//    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-//        write!(f, "E{}", self.base.id)
-//    }
-//}
-
-#[cfg(test)]
 
 impl<'g> Display for Entity<'g> {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
