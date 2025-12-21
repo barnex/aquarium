@@ -39,7 +39,8 @@ pub struct G {
     /// Where selection rectangle started (mouse down position).
     pub selection_start: Option<vec2i>,
     /// Currently selected `Pawn`s.
-    pub selected_pawn_ids: CSet<Id>,
+    pub selected_pawn_ids: CSet<Id>, // <<< TODO: remove
+    pub selected_entity_ids: CSet<Id>,
 
     // 🕹️ input events
     #[serde(skip)]
@@ -71,6 +72,10 @@ impl G {
     pub fn spawn2__(&self, e: EntityStorage) -> &EntityStorage {
         trace!(&e, "insert entity");
         self.entities.insert(e)
+    }
+
+    pub fn entity(&self, id: Id) -> Option<Entity> {
+        self.entities.get(id).map(|v| v.as_ref(self))
     }
 
     pub fn entities(&self) -> impl Iterator<Item = Entity> {
@@ -147,7 +152,8 @@ impl G {
             pawns: MemKeep::new(),
             entities: MemKeep::new(),
             resources: default(),
-            selected_pawn_ids: default(),
+            selected_pawn_ids: default(),   // <<< TODO: remove
+            selected_entity_ids: default(), // <<< TODO: remove
             selection_start: None,
             tick: 0,
             ui: GameUi::new(),
