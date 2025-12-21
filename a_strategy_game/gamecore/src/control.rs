@@ -43,9 +43,9 @@ fn update_contextual_action(g: &mut G) {
     // Only show Assign action if some pawns can be assigned.
     //log::warn!("todo");
     if let Some(building) = g.building_entity_at(mouse) {
-        //    if g.selected_pawns().any(|p| p.can_assign_to(building)) {
-        return g.contextual_action = Action::Assign;
-        //    }
+        if g.selected_pawn_entities().any(|p| p.can_assign_to(&building)) {
+            return g.contextual_action = Action::Assign;
+        }
     }
 
     // 🥾 Move to location

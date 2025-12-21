@@ -16,6 +16,12 @@ pub struct Pawn2Ext {
     pub rot: Cel<f32>,
 }
 
+pub struct PawnRef<'g> {
+    pub g: &'g G,
+    pub base: &'g Base,
+    pub ext: &'g Pawn2Ext,
+}
+
 impl Pawn2Ext {
     pub(crate) fn new(typ: PawnTyp) -> Self {
         Self {
@@ -51,10 +57,18 @@ impl<'g> EntityT for PawnRef<'g> {
     }
 }
 
-pub struct PawnRef<'g> {
-    pub g: &'g G,
-    pub base: &'g Base,
-    pub ext: &'g Pawn2Ext,
+impl<'g> PawnRef<'g> {
+    pub fn can_assign_to(&self, building: &BuildingRef) -> bool {
+        if !self.typ.is_worker() {
+            //trace!(self, "assign {self} to {building}: is not a worker");
+            return false;
+        }
+        if self.team() != building.team() {
+            //trace!(self, "assign {self} to {building}: wrong team: {} != {}", self.team, building.team);
+            return false;
+        }
+        true
+    }
 }
 
 impl<'g> BaseT for PawnRef<'g> {

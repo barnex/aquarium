@@ -401,6 +401,11 @@ impl G {
         self.selected_entity_ids().filter_map(|id| self.entity(id))
     }
 
+    /// All currently selected Pawns.
+    pub(crate) fn selected_pawn_entities(&self) -> impl Iterator<Item = PawnRef> {
+        self.entities().filter_map(|e| e.downcast::<PawnRef>())
+    }
+
     /// Add Entity to selection.
     pub fn select_entity(&self, id: Id) {
         self.selected_entity_ids.insert(id);
