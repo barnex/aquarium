@@ -129,7 +129,6 @@ fn draw_cursor(g: &G, out: &mut Out) {
 fn cursor_sprite(g: &G) -> Sprite {
     match g.ui.active_tool {
         Tool::Tile(typ) => typ.sprite(),
-        Tool::Pawn(typ, team) => Pawn::new(typ, default(), team).sprite(),
         Tool::Pawn2(typ, team) => Pawn::new(typ, default(), team).sprite(), // <<< TODO: proper icon
         Tool::Building(typ) => typ.sprite(),
         Tool::Resource(typ) => typ.sprite(),

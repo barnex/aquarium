@@ -12,7 +12,6 @@ pub enum Tool {
     Pointer,
     Tile(Tile),
     Pawn2(PawnTyp, Team),
-    Pawn(PawnTyp, Team),
     Building(BuildingTyp),
     Resource(ResourceTyp),
     WaterBucket,

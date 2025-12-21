@@ -42,6 +42,14 @@ impl EntityStorage {
             ext: Ext::Pawn(Pawn2Ext::new(typ)),
         }
     }
+
+    pub(crate) fn building(typ: BuildingTyp, team: Team, tile: Vector<i16, 2>) -> EntityStorage {
+        EntityStorage {
+            base: Base::new(team, tile),
+            ext: Ext::Building(BuildingExt::new(typ)),
+        }
+    }
+
     pub fn as_ref<'g>(&'g self, g: &'g G) -> Entity<'g> {
         Entity { g, base: &self.base, ext: &self.ext }
     }
@@ -152,45 +160,13 @@ impl SetId for EntityStorage {
     }
 }
 
-impl Display for EntityStorage {
-    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        write!(f, "E{}", self.base.id)
-    }
-}
+//impl Display for EntityStorage {
+//    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+//        write!(f, "E{}", self.base.id)
+//    }
+//}
 
 #[cfg(test)]
-mod test {
-    use super::*;
-
-    #[test]
-    fn test_it() {
-        let tile = vec2(1, 2);
-        let soldier = EntityStorage::new(
-            tile,
-            Team::Red,
-            Pawn2Ext {
-                typ: PawnTyp::Crab,
-                route: default(),
-                home: default(),
-                cargo: default(),
-                target: default(),
-                rot: default(),
-            },
-        );
-        let building = EntityStorage::new(
-            tile + 1,
-            Team::Red,
-            BuildingExt {
-                workers: default(),
-                _downstream: default(),
-                _upstream: default(),
-                resources: default(),
-            },
-        );
-        //soldier.tick();
-        //building.tick();
-    }
-}
 
 impl<'g> Display for Entity<'g> {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {

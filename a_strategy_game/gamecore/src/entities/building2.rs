@@ -2,10 +2,23 @@ use crate::prelude::*;
 
 #[derive(Serialize, Deserialize)]
 pub struct BuildingExt {
+    pub typ: BuildingTyp,
     pub workers: CSet<Id>,
     pub _downstream: CSet<Id>,
     pub _upstream: CSet<Id>,
     pub resources: [Cel<u16>; MAX_RES_SLOTS],
+}
+
+impl BuildingExt {
+    pub(crate) fn new(typ: BuildingTyp) -> Self {
+        Self {
+            typ,
+            workers: default(),
+            _downstream: default(),
+            _upstream: default(),
+            resources: default(),
+        }
+    }
 }
 
 pub struct BuildingRef<'g> {
@@ -20,7 +33,7 @@ impl<'g> BuildingRef<'g> {
     }
 
     pub fn draw(&self, out: &mut Out) {
-        let sprite = sprite!("TODO");
+        let sprite = self.typ.sprite();
         out.draw_sprite_rot(L_SPRITES, sprite, self.tile().pos(), /*rot=*/ 0.0);
     }
 }

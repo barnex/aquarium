@@ -335,9 +335,13 @@ impl G {
     }
 
     /// TODO: simplify
-    pub(crate) fn spawn_pawn_entity(&self, typ: PawnTyp, mouse: Vector<i16, 2>, team: Team) -> Entity {
+    pub(crate) fn spawn_pawn_entity(&self, typ: PawnTyp, tile: Vector<i16, 2>, team: Team) -> Entity {
         //log::trace!("spawn {:?} @ tile {}", pawn.typ, pawn.tile);
-        self.entities.insert(EntityStorage::pawn(typ, team, mouse)).as_ref(self)
+        self.entities.insert(EntityStorage::pawn(typ, team, tile)).as_ref(self)
+    }
+    pub(crate) fn spawn_building_entity(&self, typ: BuildingTyp, tile: vec2i16, team: Team) -> Entity {
+        //log::trace!("spawn {:?} @ tile {}", pawn.typ, pawn.tile);
+        self.entities.insert(EntityStorage::building(typ, team, tile)).as_ref(self)
     }
 
     /// Pawn with given Id, if any.

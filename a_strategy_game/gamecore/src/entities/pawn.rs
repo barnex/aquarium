@@ -164,11 +164,11 @@ impl Pawn {
 
     pub(crate) fn can_assign_to(&self, building: &Building) -> bool {
         if !self.typ.is_worker() {
-            trace!(self, "assign {self} to {building}: is not a worker");
+            //trace!(self, "assign {self} to {building}: is not a worker");
             return false;
         }
         if self.team != building.team {
-            trace!(self, "assign {self} to {building}: wrong team: {} != {}", self.team, building.team);
+            //trace!(self, "assign {self} to {building}: wrong team: {} != {}", self.team, building.team);
             return false;
         }
         true
@@ -201,7 +201,7 @@ impl Pawn {
     /// | 🦀 |   |    |    ☘️️️ ☘️️
     /// +----+   +----+
     fn tick_on_other_building(&self, g: &G, home: &Building, building: &Building) {
-        trace!(self, "{home} {building}");
+        //trace!(self, "{home} {building}");
         self.try_deliver_cargo(building);
         match self.cargo() {
             None => self.go_to_near_resource(g, home).or_else(|| self.go_home(g)),
@@ -253,7 +253,7 @@ impl Pawn {
     }
 
     fn move_resource_downstream(&self, g: &G, home: &Building) -> Status {
-        trace!(self, "cargo={:?}", &self.cargo);
+        //trace!(self, "cargo={:?}", &self.cargo);
         debug_assert!(self.cargo.is_none());
 
         if self.cargo.is_some() {
@@ -268,7 +268,7 @@ impl Pawn {
                 if slot.get() > 0 && downstream.can_accept_resource(res) {
                     self.cargo.set(home.take_resource(res));
                     if self.set_destination(g, downstream.entrance()).is_some() {
-                        trace!(self, "taking {:?} to {}", self.cargo(), downstream);
+                        //trace!(self, "taking {:?} to {}", self.cargo(), downstream);
                         return OK;
                     }
                 }
@@ -278,14 +278,14 @@ impl Pawn {
     }
 
     pub fn try_deliver_cargo(&self, building: &Building) -> Status {
-        trace!(self, "cargo={:?} to {building}", self.cargo);
+        //trace!(self, "cargo={:?} to {building}", self.cargo);
 
         let resource = self.cargo.take()?;
         match building.add_resource(resource) {
             OK => OK,
             FAIL => {
                 // TODO: go sleep a bit or so
-                trace!(self, "failed");
+                //trace!(self, "failed");
                 self.cargo.set(Some(resource));
                 FAIL
             }
@@ -294,7 +294,7 @@ impl Pawn {
 
     pub fn try_pick_up_cargo(&self, g: &G, home: &Building) -> Status {
         let res = g.resources.at(self.tile());
-        trace!(self, "res={res:?}");
+        //trace!(self, "res={res:?}");
         if home.can_accept_resource(res?) {
             self.cargo.set(g.resources.remove(self.tile()));
             OK
@@ -304,14 +304,14 @@ impl Pawn {
     }
 
     fn steal_any_resource(&self, g: &G, home: &Building, building: &Building) -> Status {
-        trace!(self, "building={building}");
+        //trace!(self, "building={building}");
         debug_assert!(self.home.get() == Some(home.id));
 
         for (res, slot, _) in building.resource_slots() {
             if slot.get() > 0 && home.can_accept_resource(res) {
                 self.cargo.set(building.take_resource(res));
                 if self.set_destination(g, home.entrance()).is_some() {
-                    trace!(self, "take {:?} home to {:?}", self.cargo(), home.typ);
+                    //trace!(self, "take {:?} home to {:?}", self.cargo(), home.typ);
                     return OK;
                 }
             }
@@ -373,7 +373,7 @@ impl Pawn {
         let max_dist = 42;
         let distance_map = DistanceMap::new(dest, max_dist, |p| g.is_walkable_by(p, self));
         let path = distance_map.path_to_center(self.tile());
-        trace!(self, "dest={dest} path len={:?}", path.as_ref().map(|p| p.len()));
+        //trace!(self, "dest={dest} path len={:?}", path.as_ref().map(|p| p.len()));
         self.route.set(path?);
         OK
     }
@@ -432,7 +432,7 @@ impl Pawn {
     fn find_target(&self, g: &G) {
         let attack_radius = 8; // TODO
         self.target.set(g.find_pawn(self.tile(), attack_radius, |p| self.team().is_hostile_to(p.team())).map(Pawn::id));
-        trace!(self, "find_target: {:?}", self.target);
+        //trace!(self, "find_target: {:?}", self.target);
         self.sleep(1);
     }
 
@@ -444,7 +444,7 @@ impl Pawn {
     }
 
     fn attack_base(&self, g: &G, victim: &Pawn) {
-        trace!(self, "Attack {victim}");
+        //trace!(self, "Attack {victim}");
         g.effects.add_bolt(g, self.center(), victim.center());
         g.deal_damage(victim, self.attack_strength());
         self.sleep(1);
