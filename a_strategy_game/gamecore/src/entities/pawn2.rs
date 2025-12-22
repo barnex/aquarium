@@ -36,9 +36,7 @@ impl Pawn2Ext {
 }
 
 impl<'g> EntityT for PawnRef<'g> {
-    fn tick(&self) {
-        println!("hello from soldier @ {}", self.tile())
-    }
+    fn tick(&self) {}
 
     fn draw(&self, out: &mut Out) {
         let sprite = self.typ.sprite(self.team());

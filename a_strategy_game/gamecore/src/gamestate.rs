@@ -220,8 +220,7 @@ impl G {
     pub(crate) fn major_tick(&mut self) {
         self.tick += 1;
         TICK_FOR_LOGGING.store(self.tick, std::sync::atomic::Ordering::Relaxed);
-        self.tick_pawns();
-        self.tick_buildings();
+        self.tick_entities();
         self.tick_farmland();
         self.update_text_overlay();
     }
@@ -242,6 +241,10 @@ impl G {
             let count = total_resources[res as usize];
             write!(&mut self.header_text, " | {res:?}:{count}").swallow_err();
         }
+    }
+
+    fn tick_entities(&mut self) {
+        self.entities().for_each(|e| e.tick());
     }
 
     fn tick_pawns(&mut self) {

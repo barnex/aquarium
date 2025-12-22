@@ -67,6 +67,11 @@ impl<'g> EntityT for Entity<'g> {
         }
     }
     fn tick(&self) {
+        if self.base.sleep != 0 {
+            self.base.sleep.saturating_sub(1);
+            return;
+        }
+
         match &self.ext {
             Ext::Pawn(ext) => PawnRef { g: self.g, base: &self.base, ext }.tick(),
             Ext::Building(ext) => BuildingRef { g: self.g, base: &self.base, ext }.tick(),
@@ -125,6 +130,10 @@ pub trait BaseT {
     }
     fn traced(&self) -> &Cel<bool> {
         &self.base().traced
+    }
+    fn sleep(&self, ticks: u8) {
+        trace!(self, "{ticks} ticks");
+        self.base().sleep.set(ticks);
     }
     fn kill(&self) {
         trace!(self);

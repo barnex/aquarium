@@ -29,7 +29,7 @@ pub struct BuildingRef<'g> {
 
 impl<'g> EntityT for BuildingRef<'g> {
     fn tick(&self) {
-        println!("hello from building @ {}", self.tile())
+        //println!("hello from building @ {}", self.tile())
     }
 
     fn draw(&self, out: &mut Out) {
