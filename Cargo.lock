@@ -486,6 +486,7 @@ dependencies = [
  "proc_macros",
  "rand",
  "rand_chacha",
+ "ron",
  "serde",
  "shell_api",
  "tiny-skia",

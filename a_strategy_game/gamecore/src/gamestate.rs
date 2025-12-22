@@ -41,6 +41,7 @@ pub struct G {
     /// Currently selected `Pawn`s.
     pub selected_pawn_ids: CSet<Id>, // <<< TODO: remove
     pub selected_entity_ids: CSet<Id>,
+    pub inspected: CSet<Id>,
 
     // 🕹️ input events
     #[serde(skip)]
@@ -153,6 +154,7 @@ impl G {
             resources: default(),
             selected_pawn_ids: default(),   // <<< TODO: remove
             selected_entity_ids: default(), // <<< TODO: remove
+            inspected: default(),
             selection_start: None,
             tick: 0,
             ui: GameUi::new(),
@@ -218,6 +220,8 @@ impl G {
     }
 
     pub(crate) fn major_tick(&mut self) {
+        //self.tick_inspect(); //👈 must be first
+
         self.tick += 1;
         TICK_FOR_LOGGING.store(self.tick, std::sync::atomic::Ordering::Relaxed);
         self.tick_entities();
