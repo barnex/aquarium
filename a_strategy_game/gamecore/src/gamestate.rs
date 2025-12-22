@@ -410,7 +410,7 @@ impl G {
 
     /// All currently selected Pawns.
     pub(crate) fn selected_pawn_entities(&self) -> impl Iterator<Item = PawnRef> {
-        self.entities().filter_map(|e| e.downcast::<PawnRef>())
+        self.selected_entities().filter_map(|e| e.downcast())
     }
 
     /// Add Entity to selection.

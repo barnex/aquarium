@@ -4,7 +4,7 @@
 //! (but will only carry out when time progresses).
 use crate::prelude::*;
 
-/// Contextual action, happens when right-clicking.
+/// 🖱️ Contextual action, happens when right-clicking.
 #[derive(Serialize, Deserialize, Default, PartialEq, Eq, Clone, Copy, Debug)]
 #[repr(u8)]
 pub enum Action {
@@ -22,11 +22,41 @@ pub enum Action {
 impl G {
     /// 🖱️ User inputs give commands to the world.
     pub fn command_game(&mut self) {
-        update_contextual_action(self);
         control_camera(self);
         doodle_on_map(self);
-        control_selection(self);
-        command_pawns(self);
+
+        drag_to_select(self);
+        update_contextual_action(self);
+        command_selected_entities(self);
+    }
+}
+
+/// 🖱️ 𛲝   Drag mouse to select entities.
+fn drag_to_select(g: &mut G) {
+    if g.ui.active_tool != Tool::Pointer {
+        return;
+    }
+
+    if g.inputs.just_pressed(K_MOUSE1) {
+        g.selection_start = Some(g.mouse_position_world())
+    }
+
+    if g.inputs.just_released(K_MOUSE1) {
+        if let Some(start) = g.selection_start {
+            g.selected_entity_ids.clear();
+
+            let end = g.mouse_position_world();
+            let selection = Bounds2D::new_sorted(start.to_tile(), end.to_tile());
+            let selection = selection.with(|s| s.max += 1);
+
+            for e in g.entities() {
+                if selection.overlaps(&e.bounds()) {
+                    g.select_entity(e.id()) //
+                }
+            }
+            log::trace!("selected {} entitites", g.selected_entity_ids.len())
+        }
+        g.selection_start = None;
     }
 }
 
@@ -57,44 +87,15 @@ fn update_contextual_action(g: &mut G) {
     g.contextual_action = Action::None;
 }
 
-fn control_selection(g: &mut G) {
-    if g.ui.active_tool != Tool::Pointer {
-        return;
-    }
-
-    if g.inputs.just_pressed(K_MOUSE1) {
-        g.selection_start = Some(g.mouse_position_world())
-    }
-
-    if g.inputs.just_released(K_MOUSE1) {
-        if let Some(start) = g.selection_start {
-            g.selected_entity_ids.clear();
-
-            let end = g.mouse_position_world();
-            let selection = Bounds2D::new_sorted(start.to_tile(), end.to_tile());
-            let selection = selection.with(|s| s.max += 1);
-
-            for e in g.entities() {
-                if selection.overlaps(&e.bounds()) {
-                    g.select_entity(e.id()) //
-                }
-            }
-            log::trace!("selected {} entitites", g.selected_entity_ids.len())
-        }
-        g.selection_start = None;
-    }
-}
-
 //🖱️
-fn command_pawns(g: &mut G) {
+fn command_selected_entities(g: &mut G) {
     if g.ui.active_tool == Tool::Pointer {
         if g.inputs.just_pressed(K_MOUSE2) {
+            log::trace!("contextual_action: {:?}", g.contextual_action);
             let mouse = g.mouse_tile();
             match g.contextual_action {
                 Action::None => (),
-                Action::Move => g.selected_pawns().for_each(|p| {
-                    p.set_destination(g, mouse);
-                }),
+                Action::Move => g.selected_pawn_entities().for_each(|e| e.set_destination(mouse)),
                 Action::Assign => {
                     if let Some(building) = g.building_at(mouse) {
                         g.selected_pawns().for_each(|pawn| g.assign_to(pawn, building));
