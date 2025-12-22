@@ -36,7 +36,12 @@ impl Pawn2Ext {
 }
 
 impl<'g> EntityT for PawnRef<'g> {
-    fn tick(&self) {}
+    fn tick(&self) {
+        if !self.route.is_finished() {
+            self.walk_to_destination();
+            return;
+        }
+    }
 
     fn draw(&self, out: &mut Out) {
         let sprite = self.typ.sprite(self.team());
@@ -56,19 +61,8 @@ impl<'g> EntityT for PawnRef<'g> {
 }
 
 impl<'g> PawnRef<'g> {
-    pub fn can_assign_to(&self, building: &BuildingRef) -> bool {
-        if !self.typ.is_worker() {
-            //trace!(self, "assign {self} to {building}: is not a worker");
-            return false;
-        }
-        if self.team() != building.team() {
-            //trace!(self, "assign {self} to {building}: wrong team: {} != {}", self.team, building.team);
-            return false;
-        }
-        true
-    }
-
-    pub(crate) fn move_to(&self, dest: vec2i16) {
+    /// Find path to `dest` and start moving.
+    pub(crate) fn set_destination(&self, dest: vec2i16) {
         let max_dist = 42;
         log::warn!("todo: is_walkable");
         //let distance_map = DistanceMap::new(dest, max_dist, |p| self.g().is_walkable_by(p, self));
@@ -79,6 +73,31 @@ impl<'g> PawnRef<'g> {
         } else {
             trace!(self, "no path")
         }
+    }
+
+    /// Take one step towards destination, if any.
+    fn walk_to_destination(&self) {
+        if let Some(next_tile) = self.route.next() {
+            log::warn!("todo: is_walkable");
+            //if g.is_walkable_by(next_tile, self) {
+            self.set_tile(next_tile);
+            //} else {
+            //    // TODO: handle destination unreachable
+            //    self.route.clear(); // ☹️
+            //}
+        }
+    }
+
+    pub fn can_assign_to(&self, building: &BuildingRef) -> bool {
+        if !self.typ.is_worker() {
+            //trace!(self, "assign {self} to {building}: is not a worker");
+            return false;
+        }
+        if self.team() != building.team() {
+            //trace!(self, "assign {self} to {building}: wrong team: {} != {}", self.team, building.team);
+            return false;
+        }
+        true
     }
 }
 

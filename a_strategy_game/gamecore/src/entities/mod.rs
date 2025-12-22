@@ -1,3 +1,4 @@
+mod base;
 mod building;
 mod building2;
 mod downcast;
@@ -7,6 +8,7 @@ mod pawn2;
 mod route;
 mod team;
 
+pub use base::*;
 pub use building::*;
 pub use building2::*;
 pub use downcast::*;

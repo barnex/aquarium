@@ -92,56 +92,6 @@ impl<'g> EntityT for Entity<'g> {
 }
 
 #[derive(Serialize, Deserialize)]
-pub struct Base {
-    id: Id,
-    tile: Cel<vec2i16>,
-    health: Cel<u8>,
-    team: Cel<Team>,
-    sleep: Cel<u8>,
-    traced: Cel<bool>,
-}
-impl Base {
-    fn new(team: Team, tile: vec2i16) -> Self {
-        Self {
-            id: Id::INVALID,
-            tile: tile.cel(),
-            health: 1.cel(), // << TODO
-            team: team.cel(),
-            sleep: default(),
-            traced: default(),
-        }
-    }
-}
-
-pub trait BaseT {
-    fn g(&self) -> &G;
-    fn base(&self) -> &Base;
-    fn id(&self) -> Id {
-        self.base().id
-    }
-    fn tile(&self) -> vec2i16 {
-        self.base().tile.get()
-    }
-    fn health(&self) -> u8 {
-        self.base().health.get()
-    }
-    fn team(&self) -> Team {
-        self.base().team.get()
-    }
-    fn traced(&self) -> &Cel<bool> {
-        &self.base().traced
-    }
-    fn sleep(&self, ticks: u8) {
-        trace!(self, "{ticks} ticks");
-        self.base().sleep.set(ticks);
-    }
-    fn kill(&self) {
-        trace!(self);
-        self.g().entities.remove(self.id());
-    }
-}
-
-#[derive(Serialize, Deserialize)]
 pub enum Ext {
     Pawn(Pawn2Ext),        // pawn2.rs
     Building(BuildingExt), // building2.rs
@@ -165,7 +115,7 @@ impl EntityStorage {
 
 impl SetId for EntityStorage {
     fn set_id(&mut self, id: Id) {
-        self.base.id = id
+        self.base.set_id(id)
     }
 }
 

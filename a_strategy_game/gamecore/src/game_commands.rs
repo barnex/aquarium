@@ -26,7 +26,7 @@ impl G {
             &["inspect" | "in"] => Ok(self.selected_entity_ids().filter_map(|id| self.entities.get(id)).for_each(|e| self.inspect(e))),
             &["uninspect" | "unin"] => Ok(self.inspected.clear()),
             &["sleep" | "sl", t] => Ok(t.parse::<u8>()?.pipe(|t| self.selected_entities().for_each(|e| e.sleep(t)))),
-            &["moveto" | "mv", x, y] => Ok(vec2(x.parse()?, y.parse()?).pipe(|dst| self.selected_pawn_entities().for_each(|p| p.move_to(dst)))),
+            &["moveto" | "mv", x, y] => Ok(vec2(x.parse()?, y.parse()?).pipe(|dst| self.selected_pawn_entities().for_each(|p| p.set_destination(dst)))),
             &["setcamera" | "setcam", x, y] => Ok(self.camera_pos = vec2(x.parse()?, y.parse()?)),
             &["sanitycheck" | "sc"] => sanity_check(self),
             &["reset"] => Ok(*self = G::test_world()),
