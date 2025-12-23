@@ -1,11 +1,9 @@
 use crate::prelude::*;
 
 impl G {
-    //pub(crate) fn tick_inspect(&self) {
-    //    for e in self.inspected.iter().filter_map(|id| self.entities.get(id)) {
-    //        inspect(e)
-    //    }
-    //}
+    pub fn inspect(&self, e: &dyn Entity) {
+        self.console.print(format!("{e:?}"))
+    }
 
     //pub(crate) fn inspect(&self, e: &EntityStorage) {
     //    let pretty_cfg = ron::ser::PrettyConfig::new();

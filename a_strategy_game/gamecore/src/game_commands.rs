@@ -23,7 +23,7 @@ impl G {
     /// execute a single command
     fn exec_command(&mut self, cmd: &str) -> Result<()> {
         match cmd.trim().split_ascii_whitespace().collect_vec().as_slice() {
-            //&["inspect" | "in"] => Ok(self.selected_entity_ids().filter_map(|id| self.entities.get(id)).for_each(|e| self.inspect(e))),
+            &["inspect" | "in"] => Ok(self.selected_entities().for_each(|e| self.inspect(e))),
             &["uninspect" | "unin"] => Ok(self.inspected.clear()),
             //&["sleep" | "sl", t] => Ok(t.parse::<u8>()?.pipe(|t| self.selected_entities().for_each(|e| e.sleep(t)))),
             //&["moveto" | "mv", x, y] => Ok(vec2(x.parse()?, y.parse()?).pipe(|dst| self.selected_pawn_entities().for_each(|p| p.set_destination(dst)))),
