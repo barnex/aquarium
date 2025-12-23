@@ -195,27 +195,30 @@ pub trait HasId3 {
 #[cfg(test)]
 mod test {
     use super::*;
+    use googletest::prelude::*;
 
-    #[test]
+    #[gtest]
     fn it() {
         //let p: Box<dyn Entity3T> = Box::new(Pawn::new(crate::PawnTyp::Cat, default(), crate::Team::Blue));
         let m = Entities::new();
 
-        let p = m.insert(Pawn::new(PawnTyp::Cat, vec2(3, 4), Team::Blue));
-        let b = m.insert(Building::new(BuildingTyp::Farm, vec2(5, 6), Team::Red));
-        println!("{p}");
-        println!("{b}");
+        let pawn = m.insert(Pawn::new(PawnTyp::Cat, vec2(3, 4), Team::Blue));
+        let building = m.insert(Building::new(BuildingTyp::Farm, vec2(5, 6), Team::Red));
 
-        let v1 = m.get::<Pawn>(p.id);
-        println!("{v1:?}");
-        let v2 = m.get::<Building>(p.id);
-        println!("{v2:?}");
+        expect_true!(pawn.id() != Id::INVALID);
+        expect_true!(building.id() != Id::INVALID);
 
-        let v3 = m.get_dyn(p.id);
-        println!("{v3:?}");
+        expect_true!(m.get::<Pawn>(pawn.id).is_some());
+        expect_true!(m.get::<Building>(pawn.id).is_none());
 
-        for v in m.iter_dyn() {
-            println!("i: {v:?}")
-        }
+        expect_true!(m.get::<Pawn>(building.id).is_none());
+        expect_true!(m.get::<Building>(building.id).is_some());
+
+        //let v3 = m.get_dyn(p.id);
+        //println!("{v3:?}");
+
+        //for v in m.iter_dyn() {
+        //    println!("i: {v:?}")
+        //}
     }
 }

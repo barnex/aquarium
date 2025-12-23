@@ -378,7 +378,7 @@ impl Pawn {
     }
 
     fn find_target(&self, g: &G) {
-        let attack_radius = 8; // TODO
+        let attack_radius = 12; // TODO
         self.target.set(g.find_entity(self.tile(), attack_radius, |p| self.team().is_hostile_to(p.team())).map(|e| e.id()));
         //trace!(self, "find_target: {:?}", self.target);
         self.sleep(1);
