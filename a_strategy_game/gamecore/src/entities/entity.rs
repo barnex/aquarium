@@ -1,6 +1,6 @@
 use crate::prelude::*;
 
-pub trait Entity: Debug + GetId3 + 'static {
+pub trait Entity: HasId3 + Debug + 'static {
     fn draw(&self, g: &G, out: &mut Out);
     fn tile(&self) -> vec2i16;
     fn team(&self) -> Team;

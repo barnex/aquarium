@@ -23,7 +23,7 @@ impl Entities {
 
     pub fn insert<T>(&self, v: T) -> &T
     where
-        T: Entity + GetStorage<T> + SetId3 + HasTypeId,
+        T: Entity + HasTypeId,
     {
         let shard = T::get_storage(self);
         let type_id = T::typeid();
@@ -34,7 +34,7 @@ impl Entities {
 
     pub fn get<T>(&self, id: Id3) -> Option<&T>
     where
-        T: Entity + GetStorage<T> + HasTypeId,
+        T: Entity + HasTypeId,
     {
         let shard = T::get_storage(self);
         match id.type_id == T::typeid() {
@@ -54,10 +54,9 @@ impl Entities {
         self.pawns.iter_dyn().chain(self.buildings.iter_dyn())
     }
 
-    // lifetimes??
     pub fn iter<T>(&self) -> impl Iterator<Item = &T>
     where
-        T: Entity + GetStorage<T> + HasTypeId + 'static,
+        T: Entity + HasTypeId,
     {
         let shard = T::get_storage(self);
         shard.iter()
@@ -121,30 +120,23 @@ impl<T: Entity> MemKeep3<T> {
     }
 }
 
-pub trait HasTypeId {
+pub trait HasTypeId: Sized {
     fn typeid() -> EntityType;
-}
-
-pub trait GetStorage<T> {
-    fn get_storage(v: &Entities) -> &MemKeep3<T>;
+    fn get_storage(v: &Entities) -> &MemKeep3<Self>;
 }
 
 impl HasTypeId for Pawn {
     fn typeid() -> EntityType {
         EntityType::Pawn
     }
-}
-impl GetStorage<Pawn> for Pawn {
     fn get_storage(v: &Entities) -> &MemKeep3<Self> {
         &v.pawns
     }
 }
-impl SetId3 for Pawn {
+impl HasId3 for Pawn {
     fn set_id3(&mut self, id: Id3) {
         self.id = id
     }
-}
-impl GetId3 for Pawn {
     fn id(&self) -> Id3 {
         self.id
     }
@@ -153,18 +145,14 @@ impl HasTypeId for Building {
     fn typeid() -> EntityType {
         EntityType::Building
     }
-}
-impl GetStorage<Building> for Building {
     fn get_storage(v: &Entities) -> &MemKeep3<Self> {
         &v.buildings
     }
 }
-impl SetId3 for Building {
+impl HasId3 for Building {
     fn set_id3(&mut self, id: Id3) {
         self.id = id
     }
-}
-impl GetId3 for Building {
     fn id(&self) -> Id3 {
         self.id
     }
@@ -176,10 +164,6 @@ impl GetId3 for Building {
 pub struct Id3 {
     id: Id,
     type_id: EntityType,
-}
-
-pub trait GetId3 {
-    fn id(&self) -> Id3;
 }
 
 impl Id3 {
@@ -198,8 +182,9 @@ impl Debug for Id3 {
     }
 }
 
-pub trait SetId3 {
+pub trait HasId3 {
     fn set_id3(&mut self, id: Id3);
+    fn id(&self) -> Id3;
 }
 
 #[cfg(test)]

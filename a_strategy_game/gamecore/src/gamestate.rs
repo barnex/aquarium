@@ -69,7 +69,7 @@ impl G {
     // TODO: return position generic: concrete type (associated with ext)
     pub fn spawn3<T>(&self, v: T) -> &T
     where
-        T: Entity + GetStorage<T> + SetId3 + HasTypeId,
+        T: Entity + HasTypeId,
     {
         self.entities.insert(v)
     }
@@ -80,7 +80,7 @@ impl G {
 
     pub fn get<T>(&self, id: Id3) -> Option<&T>
     where
-        T: Entity + GetStorage<T> + HasTypeId,
+        T: Entity + HasTypeId,
     {
         self.entities.get(id)
     }
@@ -354,7 +354,7 @@ impl G {
         self.entities().filter(move |e| e.bounds().contains(tile))
     }
 
-    pub fn entities_at<T: Entity + GetStorage<T> + SetId3 + HasTypeId + 'static>(&self, tile: vec2i16) -> impl Iterator<Item = &T> {
+    pub fn entities_at<T: Entity + HasTypeId>(&self, tile: vec2i16) -> impl Iterator<Item = &T> {
         self.entities.iter::<T>().filter(move |e| e.tile() == tile)
     }
 
@@ -510,7 +510,7 @@ impl G {
         }
     }
 
-    pub fn spawn<T: Entity + GetStorage<T> + SetId3 + HasTypeId>(&self, v: T) -> &T {
+    pub fn spawn<T: Entity + HasTypeId>(&self, v: T) -> &T {
         self.entities.insert(v)
     }
 }
