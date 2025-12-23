@@ -38,7 +38,7 @@ pub struct G {
     pub selection_start: Option<vec2i>,
     /// Currently selected `Pawn`s.
     pub selected_entity_ids: CSet<Id3>,
-    pub inspected: CSet<Id>,
+    pub inspected: CSet<Id3>,
 
     // 🕹️ input events
     #[serde(skip)]
