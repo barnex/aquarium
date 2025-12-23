@@ -24,7 +24,7 @@ impl Entities {
 
     pub fn insert<T>(&self, v: T) -> &T
     where
-        T: Entity + HasTypeId,
+        T: EntityT + HasTypeId,
     {
         let shard = T::get_storage(self);
         let type_id = T::typeid();
@@ -35,7 +35,7 @@ impl Entities {
 
     pub fn get<T>(&self, id: Id) -> Option<&T>
     where
-        T: Entity + HasTypeId,
+        T: EntityT + HasTypeId,
     {
         let shard = T::get_storage(self);
         match id.type_id == T::typeid() {
@@ -44,20 +44,20 @@ impl Entities {
         }
     }
 
-    pub fn get_dyn(&self, id: Id) -> Option<&dyn Entity> {
+    pub fn get_dyn(&self, id: Id) -> Option<Entity> {
         match id.type_id {
-            EntityType::Pawn => self.pawns.get_unchecked(id).map(|v| v as &dyn Entity),
-            EntityType::Building => self.buildings.get_unchecked(id).map(|v| v as &dyn Entity),
+            EntityType::Pawn => self.pawns.get_unchecked(id).map(|v| Entity::from(v)),
+            EntityType::Building => self.buildings.get_unchecked(id).map(|v| Entity::from(v)),
         }
     }
 
-    pub(crate) fn iter_dyn(&self) -> impl Iterator<Item = &dyn Entity> {
-        self.pawns.iter_dyn().chain(self.buildings.iter_dyn())
+    pub(crate) fn iter_dyn(&self) -> impl Iterator<Item = Entity> {
+        self.pawns.iter().map(|v| Entity::from(v)).chain(self.buildings.iter().map(|v| Entity::from(v)))
     }
 
     pub fn iter<T>(&self) -> impl Iterator<Item = &T>
     where
-        T: Entity + HasTypeId,
+        T: EntityT + HasTypeId,
     {
         let shard = T::get_storage(self);
         shard.iter()
@@ -116,10 +116,10 @@ impl<T: HasTypeId> MemKeep3<T> {
     }
 }
 
-impl<T: Entity> MemKeep3<T> {
-    fn iter_dyn(&self) -> impl Iterator<Item = &dyn Entity> {
-        self.inner.iter().map(|v| v as &dyn Entity)
-    }
+impl<T: EntityT> MemKeep3<T> {
+    //fn iter_dyn(&self) -> impl Iterator<Item = Entity> {
+    //    self.inner.iter().map(|v| Entity::from_dyn(v))
+    //}
 }
 
 pub trait HasTypeId: Sized {

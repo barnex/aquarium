@@ -66,26 +66,23 @@ pub const TILE_VSIZE: vec2i = vec2(TILE_ISIZE, TILE_ISIZE);
 
 impl G {
     // ________________________________________________________________________________ entities
-    // TODO: return position generic: concrete type (associated with ext)
-    pub fn spawn3<T>(&self, v: T) -> &T
-    where
-        T: Entity + HasTypeId,
-    {
+
+    pub fn spawn<T: EntityT + HasTypeId>(&self, v: T) -> &T {
         self.entities.insert(v)
     }
 
-    pub fn entity(&self, id: Id) -> Option<&dyn Entity> {
+    pub fn entity(&self, id: Id) -> Option<Entity> {
         self.entities.get_dyn(id)
     }
 
     pub fn get<T>(&self, id: Id) -> Option<&T>
     where
-        T: Entity + HasTypeId,
+        T: EntityT + HasTypeId,
     {
         self.entities.get(id)
     }
 
-    pub fn entities(&self) -> impl Iterator<Item = &dyn Entity> {
+    pub fn entities(&self) -> impl Iterator<Item = Entity> {
         self.entities.iter_dyn()
     }
 
@@ -313,8 +310,8 @@ impl G {
     //    pawn.home(self).map(|b| b.remove_dead_workers(self));
     //}
 
-    pub fn kill(&self, e: &dyn Entity) {
-        self.entities.remove(e.id())
+    pub fn kill<'g>(&'g self, e: impl Into<Entity<'g>>) {
+        self.entities.remove(e.into().id())
         // TODO: on_kill_hook
     }
 
@@ -350,11 +347,11 @@ impl G {
         self.pawns().find(|v| v.tile == tile)
     }
 
-    pub fn dyn_entities_at(&self, tile: vec2i16) -> impl Iterator<Item = &dyn Entity> {
+    pub fn dyn_entities_at(&self, tile: vec2i16) -> impl Iterator<Item = Entity> {
         self.entities().filter(move |e| e.bounds().contains(tile))
     }
 
-    pub fn entities_at<T: Entity + HasTypeId>(&self, tile: vec2i16) -> impl Iterator<Item = &T> {
+    pub fn entities_at<T: EntityT + HasTypeId>(&self, tile: vec2i16) -> impl Iterator<Item = &T> {
         self.entities.iter::<T>().filter(move |e| e.tile() == tile)
     }
 
@@ -365,7 +362,7 @@ impl G {
 
     /// Find nearest pawn inside given radius, where `f` is true.
     /// TODO: make faster via a hierarchy.
-    pub fn find_entity(&self, around: vec2i16, radius: u16, f: impl Fn(&dyn Entity) -> bool) -> Option<&dyn Entity> {
+    pub fn find_entity(&self, around: vec2i16, radius: u16, f: impl Fn(Entity) -> bool) -> Option<Entity> {
         let radius = radius as i32;
         let radius2 = radius * radius;
         self //_
@@ -385,7 +382,7 @@ impl G {
     //}
 
     /// All currently selected Entities.
-    pub fn selected_entities(&self) -> impl Iterator<Item = &dyn Entity> {
+    pub fn selected_entities(&self) -> impl Iterator<Item = Entity> {
         self.selected_entity_ids().filter_map(|id| self.entity(id))
     }
 
@@ -508,10 +505,6 @@ impl G {
         if victim.health == 0 {
             self.kill(victim);
         }
-    }
-
-    pub fn spawn<T: Entity + HasTypeId>(&self, v: T) -> &T {
-        self.entities.insert(v)
     }
 }
 

@@ -13,7 +13,7 @@ pub struct Building {
     resources: [Cel<u16>; Self::MAX_RES_SLOTS],
 }
 
-impl Entity for Building {
+impl EntityT for Building {
     fn draw(&self, g: &G, out: &mut Out) {
         let building = self;
         // 🏭 Building sprite

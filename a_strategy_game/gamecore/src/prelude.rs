@@ -13,7 +13,7 @@ pub use proc_macros::*;
 pub use anyhow::{Result, anyhow};
 pub use core_util::*;
 pub use itertools::Itertools as _;
-pub use num_enum::{IntoPrimitive, TryFromPrimitive};
+pub use num_enum::TryFromPrimitive;
 pub use rand::{Rng, SeedableRng};
 pub use rand_chacha::ChaCha8Rng;
 pub use serde::{Deserialize, Serialize};

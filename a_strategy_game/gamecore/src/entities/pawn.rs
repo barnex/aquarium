@@ -23,7 +23,7 @@ pub struct Pawn {
     pub rot: Cel<f32>,
 }
 
-impl Entity for Pawn {
+impl EntityT for Pawn {
     fn draw(&self, g: &G, out: &mut Out) {
         match self.typ {
             PawnTyp::Kitten => self.base_draw(g, out),
@@ -317,9 +317,8 @@ impl Pawn {
 
     fn start_route_to(&self, g: &G, dest: vec2i16) -> Status {
         let max_dist = 42;
-        //let distance_map = DistanceMap::new(dest, max_dist, |p| g.is_walkable_by(p, self));
-        // TODO
-        let distance_map = DistanceMap::new(dest, max_dist, |p| true);
+        let distance_map = DistanceMap::new(dest, max_dist, |p| self.can_walk_on(g.tile_at(p)));
+        //let distance_map = DistanceMap::new(dest, max_dist, |p| true);
         let path = distance_map.path_to_center(self.tile());
         //trace!(self, "dest={dest} path len={:?}", path.as_ref().map(|p| p.len()));
         self.route.set(path?);

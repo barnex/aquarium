@@ -39,7 +39,7 @@ pub(super) fn visible_pawns(g: &G) -> impl Iterator<Item = &Pawn> {
     g.pawns().filter(move |p| viewport.contains(p.tile.get()))
 }
 
-pub(super) fn visible_entities(g: &G) -> impl Iterator<Item = &dyn Entity> {
+pub(super) fn visible_entities(g: &G) -> impl Iterator<Item = Entity> {
     let viewport = visible_tile_range(g);
     g.entities().filter(move |p| viewport.contains(p.tile()))
 }

@@ -1,7 +1,7 @@
 use crate::prelude::*;
 
 impl G {
-    pub fn inspect(&self, e: &dyn Entity) {
+    pub fn inspect(&self, e: Entity) {
         self.console.print(format!("{e:?}"))
     }
 
