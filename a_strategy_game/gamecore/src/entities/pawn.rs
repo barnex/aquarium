@@ -3,7 +3,7 @@ use crate::prelude::*;
 #[derive(Serialize, Deserialize, Debug)]
 pub struct Pawn {
     // all
-    pub id: Id3,
+    pub id: Id,
     pub typ: PawnTyp,
     pub tile: Cel<vec2i16>,
     pub team: Cel<Team>,
@@ -15,11 +15,11 @@ pub struct Pawn {
     pub route: Route,
 
     // work
-    pub home: Cel<Option<Id3>>,
+    pub home: Cel<Option<Id>>,
     pub cargo: Cel<Option<ResourceTyp>>,
 
     // attack
-    pub target: Cel<Option<Id3>>,
+    pub target: Cel<Option<Id>>,
     pub rot: Cel<f32>,
 }
 
@@ -49,7 +49,7 @@ impl Entity for Pawn {
 impl Pawn {
     pub fn new(typ: PawnTyp, tile: vec2i16, team: Team) -> Self {
         Self {
-            id: Id3::INVALID,
+            id: Id::INVALID,
             sleep: 0.cel(),
             team: team.cel(),
             typ,
@@ -64,7 +64,7 @@ impl Pawn {
         }
     }
 
-    pub fn id(&self) -> Id3 {
+    pub fn id(&self) -> Id {
         self.id
     }
 

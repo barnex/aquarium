@@ -2,14 +2,14 @@ use crate::prelude::*;
 
 #[derive(Serialize, Deserialize, Debug)]
 pub struct Building {
-    pub id: Id3,
+    pub id: Id,
     pub typ: BuildingTyp,
     pub tile: vec2i16,
     pub team: Team,
 
-    pub workers: CSet<Id3>,
-    pub _downstream: CSet<Id3>,
-    pub _upstream: CSet<Id3>,
+    pub workers: CSet<Id>,
+    pub _downstream: CSet<Id>,
+    pub _upstream: CSet<Id>,
     resources: [Cel<u16>; Self::MAX_RES_SLOTS],
 }
 
@@ -46,7 +46,7 @@ impl Building {
     //-------------------------------------------------------------------------------- spawn/init
     pub fn new(typ: BuildingTyp, tile: impl Into<Vector<i16, 2>>, team: Team) -> Self {
         Self {
-            id: Id3::INVALID,
+            id: Id::INVALID,
             tile: tile.into(),
             team,
             typ,

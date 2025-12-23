@@ -1,5 +1,5 @@
 use crate::prelude::*;
-use memkeep::{Id, MemKeep};
+use memkeep::MemKeep;
 
 #[derive(Serialize, Deserialize)]
 pub struct Entities {
@@ -28,12 +28,12 @@ impl Entities {
     {
         let shard = T::get_storage(self);
         let type_id = T::typeid();
-        let id1 = shard.inner.insert_with_mut(v, |v, id| v.set_id3(Id3 { id, type_id }));
+        let id1 = shard.inner.insert_with_mut(v, |v, id| v.set_id3(Id { id, type_id }));
         let v = shard.inner.get(id1).unwrap();
         v
     }
 
-    pub fn get<T>(&self, id: Id3) -> Option<&T>
+    pub fn get<T>(&self, id: Id) -> Option<&T>
     where
         T: Entity + HasTypeId,
     {
@@ -44,10 +44,10 @@ impl Entities {
         }
     }
 
-    pub fn get_dyn(&self, id: Id3) -> Option<&dyn Entity> {
+    pub fn get_dyn(&self, id: Id) -> Option<&dyn Entity> {
         match id.type_id {
-            EntityType::Pawn => self.pawns.get_unchecked(id.id).map(|v| v as &dyn Entity),
-            EntityType::Building => self.buildings.get_unchecked(id.id).map(|v| v as &dyn Entity),
+            EntityType::Pawn => self.pawns.get_unchecked(id).map(|v| v as &dyn Entity),
+            EntityType::Building => self.buildings.get_unchecked(id).map(|v| v as &dyn Entity),
         }
     }
 
@@ -68,7 +68,7 @@ impl Entities {
         self.buildings.gc();
     }
 
-    pub fn remove(&self, id: Id3) {
+    pub fn remove(&self, id: Id) {
         match id.type_id {
             EntityType::Pawn => drop(self.pawns.remove(id)),
             EntityType::Building => drop(self.buildings.remove(id)),
@@ -85,10 +85,11 @@ struct MemKeep3<T> {
 impl<T> MemKeep3<T> {
     // dont' check the Id3 type tag, for when we already know we're indexing in the correct shard.
     fn get_unchecked(&self, id: Id) -> Option<&T> {
-        self.inner.get(id)
+        debug_assert_eq!(id.type_id as u8, self.type_id);
+        self.inner.get(id.id)
     }
 
-    pub fn get(&self, id: Id3) -> Option<&T> {
+    pub fn get(&self, id: Id) -> Option<&T> {
         debug_assert_eq!(id.type_id as u8, self.type_id);
         self.inner.get(id.id)
     }
@@ -96,7 +97,7 @@ impl<T> MemKeep3<T> {
     pub fn iter(&self) -> impl Iterator<Item = &T> {
         self.inner.iter()
     }
-    fn remove(&self, id: Id3) -> Option<&T> {
+    fn remove(&self, id: Id) -> Option<&T> {
         debug_assert_eq!(id.type_id as u8, self.type_id);
         self.inner.remove(id.id)
     }
@@ -135,10 +136,10 @@ impl HasTypeId for Pawn {
     }
 }
 impl HasId3 for Pawn {
-    fn set_id3(&mut self, id: Id3) {
+    fn set_id3(&mut self, id: Id) {
         self.id = id
     }
-    fn id(&self) -> Id3 {
+    fn id(&self) -> Id {
         self.id
     }
 }
@@ -151,10 +152,10 @@ impl HasTypeId for Building {
     }
 }
 impl HasId3 for Building {
-    fn set_id3(&mut self, id: Id3) {
+    fn set_id3(&mut self, id: Id) {
         self.id = id
     }
-    fn id(&self) -> Id3 {
+    fn id(&self) -> Id {
         self.id
     }
 }
@@ -162,30 +163,33 @@ impl HasId3 for Building {
 // ----------------- id
 
 #[derive(Serialize, Deserialize, Clone, Copy, PartialEq, Eq, PartialOrd, Ord, Hash)]
-pub struct Id3 {
-    id: Id,
+pub struct Id {
+    id: memkeep::Id,
     type_id: EntityType,
 }
 
-impl Id3 {
-    pub const INVALID: Self = Self { id: Id::INVALID, type_id: EntityType::Pawn }; // << ??
+impl Id {
+    pub const INVALID: Self = Self {
+        id: memkeep::Id::INVALID,
+        type_id: EntityType::Pawn,
+    }; // << ??
 }
 
-impl Display for Id3 {
+impl Display for Id {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         write!(f, "{:02x}:{}", self.type_id as u8, self.id)
     }
 }
 
-impl Debug for Id3 {
+impl Debug for Id {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         write!(f, "{}", self)
     }
 }
 
 pub trait HasId3 {
-    fn set_id3(&mut self, id: Id3);
-    fn id(&self) -> Id3;
+    fn set_id3(&mut self, id: Id);
+    fn id(&self) -> Id;
 }
 
 #[cfg(test)]

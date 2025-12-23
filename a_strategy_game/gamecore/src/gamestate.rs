@@ -37,8 +37,8 @@ pub struct G {
     /// Where selection rectangle started (mouse down position).
     pub selection_start: Option<vec2i>,
     /// Currently selected `Pawn`s.
-    pub selected_entity_ids: CSet<Id3>,
-    pub inspected: CSet<Id3>,
+    pub selected_entity_ids: CSet<Id>,
+    pub inspected: CSet<Id>,
 
     // 🕹️ input events
     #[serde(skip)]
@@ -74,11 +74,11 @@ impl G {
         self.entities.insert(v)
     }
 
-    pub fn entity(&self, id: Id3) -> Option<&dyn Entity> {
+    pub fn entity(&self, id: Id) -> Option<&dyn Entity> {
         self.entities.get_dyn(id)
     }
 
-    pub fn get<T>(&self, id: Id3) -> Option<&T>
+    pub fn get<T>(&self, id: Id) -> Option<&T>
     where
         T: Entity + HasTypeId,
     {
@@ -375,7 +375,7 @@ impl G {
     }
 
     /// All currently selected Entity Ids.
-    pub fn selected_entity_ids(&self) -> impl Iterator<Item = Id3> {
+    pub fn selected_entity_ids(&self) -> impl Iterator<Item = Id> {
         self.selected_entity_ids.iter()
     }
 
@@ -395,7 +395,7 @@ impl G {
     //}
 
     /// Add Entity to selection.
-    pub fn select_entity(&self, id: Id3) {
+    pub fn select_entity(&self, id: Id) {
         self.selected_entity_ids.insert(id);
     }
 
@@ -408,11 +408,11 @@ impl G {
     // -------------------------------- Buildings
 
     /// Building with given Id, if any.
-    pub fn building(&self, id: Id3) -> Option<&Building> {
+    pub fn building(&self, id: Id) -> Option<&Building> {
         self.entities.get::<Building>(id)
     }
 
-    pub fn pawn(&self, id: Id3) -> Option<&Pawn> {
+    pub fn pawn(&self, id: Id) -> Option<&Pawn> {
         self.entities.get::<Pawn>(id)
     }
 
