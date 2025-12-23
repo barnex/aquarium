@@ -1,6 +1,6 @@
 use crate::prelude::*;
 
-pub trait EntityT: HasId3 + Debug + 'static {
+pub trait EntityT: Any + HasId3 + Debug + 'static {
     fn draw(&self, g: &G, out: &mut Out);
     fn tile(&self) -> vec2i16;
     fn team(&self) -> Team;
@@ -13,6 +13,12 @@ pub trait EntityT: HasId3 + Debug + 'static {
 
 #[derive(Clone, Copy)]
 pub struct Entity<'g>(&'g dyn EntityT);
+
+impl<'g> Entity<'g> {
+    pub fn downcast<T: Any>(self) -> Option<&'g T> {
+        (self.0 as &dyn Any).downcast_ref()
+    }
+}
 
 impl<'g> Deref for Entity<'g> {
     type Target = dyn EntityT;
