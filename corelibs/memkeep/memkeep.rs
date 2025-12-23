@@ -70,8 +70,16 @@ impl<T> MemKeep<T> {
         id.and_then(|id| self.get(id))
     }
 
-    fn insert_without_setting_id(&self, v: T) -> Id {
+    pub fn insert_without_setting_id(&self, v: T) -> Id {
         let (id, slot) = self._prepare_slot();
+        unsafe { slot.insert(v) };
+        id
+    }
+
+    pub fn insert_with_mut(&self, v: T, f: impl FnOnce(&mut T, Id)) -> Id {
+        let (id, slot) = self._prepare_slot();
+        let mut v = v;
+        f(&mut v, id);
         unsafe { slot.insert(v) };
         id
     }

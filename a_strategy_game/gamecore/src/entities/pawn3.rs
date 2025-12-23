@@ -1,9 +1,9 @@
 use crate::prelude::*;
 
 #[derive(Serialize, Deserialize, Debug)]
-pub struct Pawn {
+pub struct Pawn3 {
     // all
-    pub id: Id,
+    pub id: Id3,
     pub typ: PawnTyp,
     pub tile: Cel<vec2i16>,
     pub team: Cel<Team>,
@@ -23,90 +23,16 @@ pub struct Pawn {
     pub rot: Cel<f32>,
 }
 
-#[derive(Serialize, Deserialize, Clone, Copy, PartialEq, Eq, Hash, TryFromPrimitive, Debug)]
-#[repr(u8)]
-pub enum PawnTyp {
-    Kitten = 1,
-    Cat = 2,
-    Crab = 3,
-    Turret = 4,
-    Starfish = 5,
-    // ⚠️👇 update `all()` below!
-}
-impl PawnTyp {
-    pub fn all() -> impl Iterator<Item = Self> {
-        let first = Self::Kitten;
-        let last = Self::Starfish; // 👈⚠️ keep in sync!
-        ((first as u8)..=(last as u8)).map(|i| Self::try_from_primitive(i).unwrap())
-    }
-
-    pub fn can_walk_on(&self, tile: Tile) -> bool {
-        use PawnTyp::*;
-        use Tile::*;
-        match (self, tile) {
-            (Starfish, Water | Canal) => true,
-            (Turret, Block) => true,
-            (_, tile) => tile.is_default_walkable(),
-        }
-    }
-
-    pub fn can_move(self) -> bool {
-        match self {
-            PawnTyp::Kitten => true,
-            PawnTyp::Cat => true,
-            PawnTyp::Crab => true,
-            PawnTyp::Turret => false,
-            PawnTyp::Starfish => true,
-        }
-    }
-
-    /// Worker Pawns can be assigned to work at a factory,
-    /// and transport resources.
-    pub fn is_worker(self) -> bool {
-        let is_worker = match self {
-            PawnTyp::Kitten => true,
-            PawnTyp::Cat => true,
-            PawnTyp::Crab => false,
-            PawnTyp::Turret => false,
-            PawnTyp::Starfish => true,
-        };
-        debug_assert!(if is_worker { self.can_move() } else { true }, "worker must be able to move");
-        is_worker
-    }
-
-    pub fn default_health(self) -> u8 {
-        match self {
-            PawnTyp::Kitten => 3,
-            PawnTyp::Cat => 5,
-            PawnTyp::Crab => 5,
-            PawnTyp::Turret => 20,
-            PawnTyp::Starfish => 4,
-        }
+impl Entity3T for Pawn3 {
+    fn tile(&self) -> vec2i16 {
+        self.tile.get()
     }
 }
 
-impl PawnTyp {
-    pub fn sprite(&self, team: Team) -> Sprite {
-        use PawnTyp::*;
-        use Team::*;
-        match (self, team) {
-            (Kitten, _) => sprite!("kit7"),
-            (Cat, Red) => sprite!("kit4"),
-            (Cat, _) => sprite!("kit3"),
-            (Crab, Blue) => sprite!("ferrisblue"),
-            (Crab, _) => sprite!("ferris"),
-            (Turret, Red) => sprite!("turret"),
-            (Turret, Blue) => sprite!("turretblue"),
-            (Turret, _) => sprite!("turret"),
-            (Starfish, _) => sprite!("starfish"),
-        }
-    }
-}
-
-impl Pawn {
+impl Pawn3 {
     pub fn new(typ: PawnTyp, tile: vec2i16, team: Team) -> Self {
         Self {
-            id: Id::default(),
+            id: Id3::INVALID,
             sleep: 0.cel(),
             team: team.cel(),
             typ,
@@ -121,7 +47,7 @@ impl Pawn {
         }
     }
 
-    pub fn id(&self) -> Id {
+    pub fn id(&self) -> Id3 {
         self.id
     }
 
@@ -325,20 +251,22 @@ impl Pawn {
 
     /// If standing on another pawn, move aside randomly.
     fn take_personal_space(&self, g: &G) {
-        if !self.can_move() {
-            return;
-        }
-        let standing_on_other = g.pawns().filter(|p| p.id != self.id).find(|p| p.tile == self.tile).is_some();
-        if standing_on_other {
-            self.teleport_to(g, self.tile.get() + g.random_vec_incl::<i16>(-1..=1));
-        }
+        // TODO
+        // if !self.can_move() {
+        //     return;
+        // }
+        // let standing_on_other = g.pawns().filter(|p| p.id != self.id).find(|p| p.tile == self.tile).is_some();
+        // if standing_on_other {
+        //     self.teleport_to(g, self.tile.get() + g.random_vec_incl::<i16>(-1..=1));
+        // }
     }
 
     fn teleport_to(&self, g: &G, dst: vec2i16) {
-        if g.is_walkable_by(dst, self) {
-            self.tile.set(dst);
-            self.route.clear();
-        }
+        // TODO
+        //if g.is_walkable_by(dst, self) {
+        self.tile.set(dst);
+        self.route.clear();
+        //}
     }
 
     fn is_commandable(&self) -> bool {
@@ -353,12 +281,13 @@ impl Pawn {
 
     fn walk_to_destination(&self, g: &G) {
         if let Some(next_tile) = self.route.next() {
-            if g.is_walkable_by(next_tile, self) {
-                self.tile.set(next_tile);
-            } else {
-                // TODO: handle destination unreachable
-                self.route.clear(); // ☹️
-            }
+            // TODO
+            //if g.is_walkable_by(next_tile, self) {
+            self.tile.set(next_tile);
+            //} else {
+            //    // TODO: handle destination unreachable
+            //    self.route.clear(); // ☹️
+            //}
         }
     }
 
@@ -371,7 +300,9 @@ impl Pawn {
 
     fn start_route_to(&self, g: &G, dest: vec2i16) -> Status {
         let max_dist = 42;
-        let distance_map = DistanceMap::new(dest, max_dist, |p| g.is_walkable_by(p, self));
+        //let distance_map = DistanceMap::new(dest, max_dist, |p| g.is_walkable_by(p, self));
+        // TODO
+        let distance_map = DistanceMap::new(dest, max_dist, |p| true);
         let path = distance_map.path_to_center(self.tile());
         //trace!(self, "dest={dest} path len={:?}", path.as_ref().map(|p| p.len()));
         self.route.set(path?);
@@ -482,7 +413,7 @@ impl Pawn {
         self.base_draw(g, out);
     }
 
-    pub fn team(&self) -> Team {
+    fn team(&self) -> Team {
         self.team.get()
     }
 
@@ -491,15 +422,8 @@ impl Pawn {
     //}
 }
 
-impl Display for Pawn {
+impl Display for Pawn3 {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         write!(f, "{:?}{}", self.typ, self.id)
-    }
-}
-
-// For MemKeep::insert.
-impl SetId for Pawn {
-    fn set_id(&mut self, id: Id) {
-        self.id = id;
     }
 }

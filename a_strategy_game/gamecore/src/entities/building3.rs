@@ -1,10 +1,8 @@
 use crate::prelude::*;
 
-pub const MAX_RES_SLOTS: usize = 4;
-
 #[derive(Serialize, Deserialize, Debug)]
-pub struct Building {
-    pub id: Id,
+pub struct Building3 {
+    pub id: Id3,
     pub typ: BuildingTyp,
     pub tile: vec2i16,
     pub team: Team,
@@ -15,80 +13,17 @@ pub struct Building {
     resources: [Cel<u16>; MAX_RES_SLOTS],
 }
 
-#[derive(Serialize, Deserialize, Clone, Copy, PartialEq, Eq, Hash, TryFromPrimitive, Debug)]
-#[repr(u8)]
-pub enum BuildingTyp {
-    HQ = 1,
-    Farm = 2,
-    Quarry = 3,
-    StarNest = 4,
-    // 👆 ⚠️ keep in sync!
-}
-
-impl BuildingTyp {
-    pub fn all() -> impl Iterator<Item = Self> {
-        let first = Self::HQ;
-        let last = Self::StarNest; // 👈⚠️ keep in sync! Use variant_count <https://github.com/rust-lang/rust/issues/73662> when stable.
-        ((first as u8)..=(last as u8)).map(|i| Self::try_from_primitive(i).unwrap())
-    }
-
-    pub fn sprite(&self) -> Sprite {
-        use BuildingTyp::*;
-        match self {
-            HQ => sprite!("hq"),
-            Farm => sprite!("shell_big"),
-            Quarry => sprite!("quarry"),
-            StarNest => sprite!("starnest"),
-        }
-    }
-
-    /// Footprint size in tiles.
-    pub fn size(&self) -> vec2u8 {
-        use BuildingTyp::*;
-        match self {
-            HQ => (3, 3),
-            Farm => (2, 2),
-            Quarry => (2, 2),
-            StarNest => (3, 3),
-        }
-        .into()
-    }
-
-    /// Index in Building.resrouces and max capacity.
-    /// 0 unused :(
-    pub fn _resource_metadata(self) -> [Option<(usize, u16)>; ResourceTyp::COUNT] {
-        match self {
-            BuildingTyp::HQ => [None, Some((0, 100)), Some((1, 100))],
-            BuildingTyp::Farm => [None, Some((0, 20)), None],
-            BuildingTyp::Quarry => [None, None, Some((0, 30))],
-            BuildingTyp::StarNest => [None, Some((0, 100)), None],
-        }
-    }
-
-    pub fn default_workers(self) -> (PawnTyp, usize) {
-        match self {
-            BuildingTyp::HQ => (PawnTyp::Cat, 2),
-            BuildingTyp::Farm => (PawnTyp::Cat, 1),
-            BuildingTyp::Quarry => (PawnTyp::Cat, 1),
-            BuildingTyp::StarNest => (PawnTyp::Starfish, 10),
-        }
-    }
-
-    pub(crate) fn can_build_on(self, tile: Tile) -> bool {
-        use BuildingTyp::*;
-        use Tile::*;
-        match (self, tile) {
-            (StarNest, Water) => true,
-            (_, tile) => tile.is_default_walkable(),
-        }
+impl Entity3T for Building3 {
+    fn tile(&self) -> vec2i16 {
+        self.tile
     }
 }
 
-impl Building {
+impl Building3 {
     //-------------------------------------------------------------------------------- spawn/init
     pub fn new(typ: BuildingTyp, tile: impl Into<Vector<i16, 2>>, team: Team) -> Self {
         Self {
-            id: default(),
+            id: Id3::INVALID,
             tile: tile.into(),
             team,
             typ,
@@ -108,13 +43,14 @@ impl Building {
 
     /// Building::init -> spawn the workers for this building.
     fn spawn_default_workers(&self, g: &G) {
-        log::trace!("spawn default workers for {self}");
-        let (pawntyp, num) = self.typ.default_workers();
+        //TODO
+        //log::trace!("spawn default workers for {self}");
+        //let (pawntyp, num) = self.typ.default_workers();
 
-        for _ in 0..num {
-            let pawn = g.spawn(pawntyp, self.tile, self.team);
-            g.assign_to(pawn, self);
-        }
+        //for _ in 0..num {
+        //    let pawn = g.spawn(pawntyp, self.tile, self.team);
+        //    g.assign_to(pawn, self);
+        //}
     }
 
     pub fn tick(&self, g: &G) {
@@ -235,10 +171,6 @@ impl Building {
         self.tile // TODO
     }
 
-    pub fn id(&self) -> Id {
-        self.id
-    }
-
     pub(crate) fn remove_dead_workers(&self, g: &G) {
         self.workers.retain(|&id| g.pawn(id).is_some());
     }
@@ -279,14 +211,7 @@ fn update_downstream_buildings(g: &G) {
     // }
 }
 
-/// For Memkeep::insert().
-impl SetId for Building {
-    fn set_id(&mut self, id: Id) {
-        self.id = id;
-    }
-}
-
-impl Display for Building {
+impl Display for Building3 {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         write!(f, "{:?}{}", self.typ, self.id)
     }

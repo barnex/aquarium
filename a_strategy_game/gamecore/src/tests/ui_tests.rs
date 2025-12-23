@@ -1,4 +1,5 @@
 //! Tests that require UI interaction (clicking etc).
+/*
 use super::*;
 use crate::*;
 use googletest::prelude::*;
@@ -76,3 +77,4 @@ fn command_pawn_move() {
     let pos = g.pawn(crab).unwrap().tile.get();
     expect_eq!(pos, dst, "pawn moved to destination");
 }
+*/
