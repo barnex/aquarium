@@ -8,9 +8,6 @@ pub use pathfinder::*;
 pub use shell_api::*;
 pub use vector::*;
 
-pub use crate::BaseT;
-pub use crate::EntityT;
-
 pub use fixed_str::*;
 pub use proc_macros::*;
 
@@ -21,6 +18,7 @@ pub use num_enum::{IntoPrimitive, TryFromPrimitive};
 pub use rand::{Rng, SeedableRng};
 pub use rand_chacha::ChaCha8Rng;
 pub use serde::{Deserialize, Serialize};
+pub use std::any::Any;
 pub use std::cell::RefCell;
 pub use std::convert::TryFrom;
 pub use std::fmt;

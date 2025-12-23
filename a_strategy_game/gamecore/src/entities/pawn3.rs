@@ -1,7 +1,7 @@
 use crate::prelude::*;
 
 #[derive(Serialize, Deserialize, Debug)]
-pub struct Pawn3 {
+pub struct Pawn {
     // all
     pub id: Id3,
     pub typ: PawnTyp,
@@ -15,21 +15,38 @@ pub struct Pawn3 {
     pub route: Route,
 
     // work
-    pub home: Cel<Option<Id>>,
+    pub home: Cel<Option<Id3>>,
     pub cargo: Cel<Option<ResourceTyp>>,
 
     // attack
-    pub target: Cel<Option<Id>>,
+    pub target: Cel<Option<Id3>>,
     pub rot: Cel<f32>,
 }
 
-impl Entity3T for Pawn3 {
+impl Entity3T for Pawn {
+    fn draw(&self, g: &G, out: &mut Out) {
+        match self.typ {
+            PawnTyp::Kitten => self.base_draw(g, out),
+            PawnTyp::Cat => self.base_draw(g, out),
+            PawnTyp::Crab => self.base_draw(g, out),
+            PawnTyp::Turret => self.draw_turret(g, out),
+            PawnTyp::Starfish => self.base_draw(g, out),
+        }
+    }
     fn tile(&self) -> vec2i16 {
         self.tile.get()
     }
+
+    fn team(&self) -> Team {
+        self.team.get()
+    }
+
+    fn can_move(&self) -> bool {
+        self.typ.can_move()
+    }
 }
 
-impl Pawn3 {
+impl Pawn {
     pub fn new(typ: PawnTyp, tile: vec2i16, team: Team) -> Self {
         Self {
             id: Id3::INVALID,
@@ -102,7 +119,7 @@ impl Pawn3 {
 
     fn tick_delivery_work(&self, g: &G, home: &Building) {
         let on_building = g.building_at(self.tile());
-        let on_home = on_building.map(Building::id) == Some(home.id);
+        let on_home = on_building.map(|b| b.id) == Some(home.id);
 
         match on_building {
             _ if on_home => self.tick_on_home(g, home),
@@ -245,8 +262,8 @@ impl Pawn3 {
         FAIL
     }
 
-    pub fn home<'a>(&self, g: &'a G) -> Option<&'a Building> {
-        g.buildings.get_maybe(self.home.get())
+    pub fn home<'g>(&self, g: &'g G) -> Option<&'g Building> {
+        g.building(self.home.get()?)
     }
 
     /// If standing on another pawn, move aside randomly.
@@ -362,7 +379,7 @@ impl Pawn3 {
 
     fn find_target(&self, g: &G) {
         let attack_radius = 8; // TODO
-        self.target.set(g.find_pawn(self.tile(), attack_radius, |p| self.team().is_hostile_to(p.team())).map(Pawn::id));
+        self.target.set(g.find_entity(self.tile(), attack_radius, |p| self.team().is_hostile_to(p.team())).map(|e| e.id()));
         //trace!(self, "find_target: {:?}", self.target);
         self.sleep(1);
     }
@@ -386,16 +403,6 @@ impl Pawn3 {
         let rot = f32::atan2(dir.x(), -dir.y());
         self.rot.set(rot);
         self.attack_base(g, victim);
-    }
-
-    pub(crate) fn draw(&self, g: &G, out: &mut Out) {
-        match self.typ {
-            PawnTyp::Kitten => self.base_draw(g, out),
-            PawnTyp::Cat => self.base_draw(g, out),
-            PawnTyp::Crab => self.base_draw(g, out),
-            PawnTyp::Turret => self.draw_turret(g, out),
-            PawnTyp::Starfish => self.base_draw(g, out),
-        }
     }
 
     fn base_draw(&self, g: &G, out: &mut Out) {
@@ -422,7 +429,7 @@ impl Pawn3 {
     //}
 }
 
-impl Display for Pawn3 {
+impl Display for Pawn {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         write!(f, "{:?}{}", self.typ, self.id)
     }

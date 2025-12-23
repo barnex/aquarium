@@ -20,9 +20,7 @@ pub struct G {
     pub _tilemap: Tilemap,
     pub resources: ResourceMap,
 
-    pub buildings: MemKeep<Building>,
-    pub pawns: MemKeep<Pawn>,
-    pub entities: MemKeep<EntityStorage>,
+    pub entities: Entities3,
 
     pub water: WaterSim,
     pub header_text: String,
@@ -39,8 +37,7 @@ pub struct G {
     /// Where selection rectangle started (mouse down position).
     pub selection_start: Option<vec2i>,
     /// Currently selected `Pawn`s.
-    pub selected_pawn_ids: CSet<Id>, // <<< TODO: remove
-    pub selected_entity_ids: CSet<Id>,
+    pub selected_entity_ids: CSet<Id3>,
     pub inspected: CSet<Id>,
 
     // 🕹️ input events
@@ -70,36 +67,31 @@ pub const TILE_VSIZE: vec2i = vec2(TILE_ISIZE, TILE_ISIZE);
 impl G {
     // ________________________________________________________________________________ entities
     // TODO: return position generic: concrete type (associated with ext)
-    pub fn spawn2__(&self, e: EntityStorage) -> &EntityStorage {
-        trace!(e.as_ref(self), "insert entity");
-        self.entities.insert(e)
+    pub fn spawn3<T>(&self, v: T) -> &T
+    where
+        T: Entity3T + GetStorage<T> + SetId3 + HasTypeId,
+    {
+        self.entities.insert(v)
     }
 
-    pub fn entity(&self, id: Id) -> Option<Entity> {
-        self.entities.get(id).map(|v| v.as_ref(self))
+    pub fn entity(&self, id: Id3) -> Option<&dyn Entity3T> {
+        self.entities.get_dyn(id)
     }
 
-    pub fn entities(&self) -> impl Iterator<Item = Entity> {
-        self.entities.iter().map(|e| Entity { g: self, base: &e.base, ext: &e.ext })
+    pub fn get<T>(&self, id: Id3) -> Option<&T>
+    where
+        T: Entity3T + GetStorage<T> + HasTypeId,
+    {
+        self.entities.get(id)
+    }
+
+    pub fn entities(&self) -> impl Iterator<Item = &dyn Entity3T> {
+        self.entities.iter_dyn()
     }
 
     // ________________________________________________________________________________
     pub fn test_world() -> Self {
         let g = map_gen::inception();
-        g.spawn2__(
-            EntityStorage::new(
-                vec2(1, 1),
-                Team::Red,
-                Pawn2Ext {
-                    typ: PawnTyp::Crab,
-                    route: default(),
-                    home: default(),
-                    cargo: default(),
-                    target: default(),
-                    rot: default(),
-                },
-            ), //.with(|e| e.traced.set(true)),
-        );
         g
     }
 
@@ -133,7 +125,6 @@ impl G {
             _rng: RefCell::new(ChaCha8Rng::seed_from_u64(12345678)),
             _tilemap: Tilemap::new(size),
             player,
-            buildings: MemKeep::new(),
             camera_pos: vec2(40, 70), // nonzero so we notice offset issues without having to pan
             commands: default(),
             contextual_action: Action::None,
@@ -149,10 +140,8 @@ impl G {
             name: "".into(),
             now_secs: 0.0,
             paused: false,
-            pawns: MemKeep::new(),
-            entities: MemKeep::new(),
+            entities: Entities3::new(),
             resources: default(),
-            selected_pawn_ids: default(),   // <<< TODO: remove
             selected_entity_ids: default(), // <<< TODO: remove
             inspected: default(),
             selection_start: None,
@@ -215,8 +204,7 @@ impl G {
         self.draw_world(out);
         self.console.draw(out);
 
-        self.pawns.gc();
-        self.buildings.gc();
+        self.entities.gc();
     }
 
     pub(crate) fn major_tick(&mut self) {
@@ -236,7 +224,7 @@ impl G {
         write!(&mut self.header_text, "{}", self.name).swallow_err();
         // print total resources
         let mut total_resources = [0u32; ResourceTyp::COUNT];
-        for b in self.buildings.iter() {
+        for b in self.buildings() {
             for (res, count) in b.iter_resources() {
                 total_resources[res as usize] += count as u32
             }
@@ -248,19 +236,8 @@ impl G {
     }
 
     fn tick_entities(&mut self) {
-        self.entities().for_each(|e| e.tick());
-    }
-
-    fn tick_pawns(&mut self) {
-        for p in self.pawns.iter() {
-            p.tick(self);
-        }
-    }
-
-    fn tick_buildings(&mut self) {
-        for b in self.buildings.iter() {
-            b.tick(self);
-        }
+        self.entities.iter::<Pawn>().for_each(|p| p.tick(self));
+        self.entities.iter::<Building>().for_each(|p| p.tick(self));
     }
 
     pub(crate) fn tick_farmland(&mut self) {
@@ -314,7 +291,7 @@ impl G {
         if !typ.can_build_on(self.tile_at(tile)) {
             return false;
         }
-        for b in self.buildings.iter() {
+        for b in self.buildings() {
             if b.tile_bounds().contains(tile) {
                 return false;
             }
@@ -324,97 +301,101 @@ impl G {
 
     // -------------------------------- Pawns
 
-    /// Add a pawn to the game and return it (now with `id` set).
-    pub fn spawn(&self, typ: PawnTyp, tile: vec2i16, team: Team) -> &Pawn {
-        self.spawn_pawn(Pawn::new(typ, tile, team))
+    // Add a pawn to the game and return it (now with `id` set).
+    //pub fn spawn(&self, typ: PawnTyp, tile: vec2i16, team: Team) -> &Pawn {
+    //    self.spawn_pawn(Pawn::new(typ, tile, team))
+    //}
+
+    //pub fn kill_pawn(&self, pawn: &Pawn) {
+    //    trace!(pawn, "killed");
+    //    self.entities.pawns.remove(pawn.id);
+    //    //👇 keep worker list consistent
+    //    pawn.home(self).map(|b| b.remove_dead_workers(self));
+    //}
+
+    pub fn kill(&self, e: &dyn Entity3T) {
+        self.entities.remove(e.id())
+        // TODO: on_kill_hook
     }
 
-    pub fn kill_pawn(&self, pawn: &Pawn) {
-        trace!(pawn, "killed");
-        self.pawns.remove(pawn.id);
-        //👇 keep worker list consistent
-        pawn.home(self).map(|b| b.remove_dead_workers(self));
-    }
-
-    pub fn spawn_pawn(&self, pawn: Pawn) -> &Pawn {
-        log::trace!("spawn {:?} @ tile {}", pawn.typ, pawn.tile);
-        self.pawns.insert(pawn)
-    }
+    //pub fn spawn(&self, pawn: Pawn) -> &Pawn {
+    //    //log::trace!("spawn {:?} @ tile {}", pawn.typ, pawn.tile);
+    //    //self.pawns.insert(pawn)
+    //    self.entities.insert(pawn)
+    //}
 
     /// TODO: simplify
-    pub(crate) fn spawn_pawn_entity(&self, typ: PawnTyp, tile: Vector<i16, 2>, team: Team) -> Entity {
-        //log::trace!("spawn {:?} @ tile {}", pawn.typ, pawn.tile);
-        self.entities.insert(EntityStorage::pawn(typ, team, tile)).as_ref(self)
-    }
-    pub(crate) fn spawn_building_entity(&self, typ: BuildingTyp, tile: vec2i16, team: Team) -> Entity {
-        //log::trace!("spawn {:?} @ tile {}", pawn.typ, pawn.tile);
-        self.entities.insert(EntityStorage::building(typ, team, tile)).as_ref(self)
-    }
-
-    /// Pawn with given Id, if any.
-    pub fn pawn(&self, id: Id) -> Option<&Pawn> {
-        self.pawns.get(id)
-    }
+    //    pub(crate) fn spawn_pawn_entity(&self, typ: PawnTyp, tile: Vector<i16, 2>, team: Team) -> Entity {
+    //        //log::trace!("spawn {:?} @ tile {}", pawn.typ, pawn.tile);
+    //        self.entities.insert(EntityStorage::pawn(typ, team, tile)).as_ref(self)
+    //    }
+    //    pub(crate) fn spawn_building_entity(&self, typ: BuildingTyp, tile: vec2i16, team: Team) -> Entity {
+    //        //log::trace!("spawn {:?} @ tile {}", pawn.typ, pawn.tile);
+    //        self.entities.insert(EntityStorage::building(typ, team, tile)).as_ref(self)
+    //    }
+    //
+    // Pawn with given Id, if any.
+    //pub fn pawn(&self, id: Id3) -> Option<&Pawn> {
+    //    self.entities.pawns.get(id)
+    //}
 
     /// Iterate over all Pawns.
-    pub fn pawns(&self) -> impl Iterator<Item = &Pawn> {
-        self.pawns.iter()
-    }
+    //pub fn pawns(&self) -> impl Iterator<Item = &Pawn> {
+    //    self.entities.pawns.iter()
+    //}
 
     /// Pawn at given position, if any.
     /// TODO: make faster via a hierarchy.
     pub fn pawn_at(&self, tile: vec2i16) -> Option<&Pawn> {
-        self.pawns.iter().find(|v| v.tile == tile)
+        self.pawns().find(|v| v.tile == tile)
     }
 
-    pub fn entities_at(&self, tile: vec2i16) -> impl Iterator<Item = Entity> {
+    pub fn dyn_entities_at(&self, tile: vec2i16) -> impl Iterator<Item = &dyn Entity3T> {
         self.entities().filter(move |e| e.bounds().contains(tile))
     }
 
-    pub(crate) fn building_entity_at(&self, tile: vec2i16) -> Option<BuildingRef> {
-        // There can be multiple entities on one tile, but there should only be one building.
-        self.entities_at(tile).filter_map(|e| e.downcast::<BuildingRef>()).next()
+    pub fn entities_at<T: Entity3T + GetStorage<T> + SetId3 + HasTypeId + 'static>(&self, tile: vec2i16) -> impl Iterator<Item = &T> {
+        self.entities.iter::<T>().filter(move |e| e.tile() == tile)
     }
+
+    //pub(crate) fn building_entity_at(&self, tile: vec2i16) -> Option<BuildingRef> {
+    //    // There can be multiple entities on one tile, but there should only be one building.
+    //    self.entities_at(tile).filter_map(|e| e.downcast::<BuildingRef>()).next()
+    //}
 
     /// Find nearest pawn inside given radius, where `f` is true.
     /// TODO: make faster via a hierarchy.
-    pub fn find_pawn(&self, around: vec2i16, radius: u16, f: impl Fn(&Pawn) -> bool) -> Option<&Pawn> {
+    pub fn find_entity(&self, around: vec2i16, radius: u16, f: impl Fn(&dyn Entity3T) -> bool) -> Option<&dyn Entity3T> {
         let radius = radius as i32;
         let radius2 = radius * radius;
         self //_
-            .pawns
-            .iter()
-            .filter(|p| p.tile.get().distance_squared(around) < radius2 && f(p))
-            .min_by_key(|p| p.tile.get().distance_squared(around))
-    }
-
-    /// All currently selected Pawn Ids.
-    pub fn selected_pawn_ids(&self) -> impl Iterator<Item = Id> {
-        self.selected_pawn_ids.iter()
+            .entities()
+            .filter(|&p| p.tile().distance_squared(around) < radius2 && f(p))
+            .min_by_key(|p| p.tile().distance_squared(around))
     }
 
     /// All currently selected Entity Ids.
-    pub fn selected_entity_ids(&self) -> impl Iterator<Item = Id> {
+    pub fn selected_entity_ids(&self) -> impl Iterator<Item = Id3> {
         self.selected_entity_ids.iter()
     }
 
-    /// All currently selected Pawns.
-    pub fn selected_pawns(&self) -> impl Iterator<Item = &Pawn> {
-        self.selected_pawn_ids.iter().filter_map(|id| self.pawn(id))
-    }
+    // All currently selected Pawns.
+    //pub fn selected_pawns(&self) -> impl Iterator<Item = &Pawn> {
+    //    self.selected_pawn_ids.iter().filter_map(|id| self.pawn(id))
+    //}
 
     /// All currently selected Entities.
-    pub fn selected_entities(&self) -> impl Iterator<Item = Entity> {
+    pub fn selected_entities(&self) -> impl Iterator<Item = &dyn Entity3T> {
         self.selected_entity_ids().filter_map(|id| self.entity(id))
     }
 
-    /// All currently selected Pawns.
-    pub(crate) fn selected_pawn_entities(&self) -> impl Iterator<Item = PawnRef> {
-        self.selected_entities().filter_map(|e| e.downcast())
-    }
+    // All currently selected Pawns.
+    //pub(crate) fn selected_pawn_entities(&self) -> impl Iterator<Item = PawnRef> {
+    //    self.selected_entities().filter_map(|e| e.downcast())
+    //}
 
     /// Add Entity to selection.
-    pub fn select_entity(&self, id: Id) {
+    pub fn select_entity(&self, id: Id3) {
         self.selected_entity_ids.insert(id);
     }
 
@@ -427,19 +408,27 @@ impl G {
     // -------------------------------- Buildings
 
     /// Building with given Id, if any.
-    pub fn building(&self, id: Id) -> Option<&Building> {
-        self.buildings.get(id)
+    pub fn building(&self, id: Id3) -> Option<&Building> {
+        self.entities.get::<Building>(id)
+    }
+
+    pub fn pawn(&self, id: Id3) -> Option<&Pawn> {
+        self.entities.get::<Pawn>(id)
     }
 
     /// Iterate over all Buildings.
     pub fn buildings(&self) -> impl Iterator<Item = &Building> {
-        self.buildings.iter()
+        self.entities.iter::<Building>()
+    }
+
+    pub fn pawns(&self) -> impl Iterator<Item = &Pawn> {
+        self.entities.iter::<Pawn>()
     }
 
     /// Building at given position, if any.
     /// TODO: make faster via a hierarchy.
     pub fn building_at(&self, tile: vec2i16) -> Option<&Building> {
-        self.buildings.iter().find(|v| v.tile_bounds().contains_incl(tile))
+        self.buildings().find(|v| v.tile_bounds().contains_incl(tile))
     }
 
     /// Add a building, if the location is suitable.
@@ -454,7 +443,7 @@ impl G {
         }
 
         log::trace!("spawn {:?} @ {}", building.typ, building.tile);
-        let building = self.buildings.insert(building);
+        let building = self.spawn(building);
 
         building.init(self);
 
@@ -517,8 +506,12 @@ impl G {
     pub(crate) fn deal_damage(&self, victim: &Pawn, amount: u8) {
         victim.health.saturating_sub(amount);
         if victim.health == 0 {
-            self.kill_pawn(victim);
+            self.kill(victim);
         }
+    }
+
+    pub fn spawn<T: Entity3T + GetStorage<T> + SetId3 + HasTypeId>(&self, v: T) -> &T {
+        self.entities.insert(v)
     }
 }
 

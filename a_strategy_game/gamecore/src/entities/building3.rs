@@ -1,25 +1,46 @@
 use crate::prelude::*;
 
 #[derive(Serialize, Deserialize, Debug)]
-pub struct Building3 {
+pub struct Building {
     pub id: Id3,
     pub typ: BuildingTyp,
     pub tile: vec2i16,
     pub team: Team,
 
-    pub workers: CSet<Id>,
-    pub _downstream: CSet<Id>,
-    pub _upstream: CSet<Id>,
+    pub workers: CSet<Id3>,
+    pub _downstream: CSet<Id3>,
+    pub _upstream: CSet<Id3>,
     resources: [Cel<u16>; MAX_RES_SLOTS],
 }
 
-impl Entity3T for Building3 {
+impl Entity3T for Building {
+    fn draw(&self, g: &G, out: &mut Out) {
+        let building = self;
+        // 🏭 Building sprite
+        out.draw_sprite(L_SPRITES, building.typ.sprite(), building.tile.pos());
+
+        // ☘️ Resource amounts
+        let vstride = 18; // some fiddly offsets to make it look better
+        let mut cursor = building.tile.pos() - vec2(4, 4);
+        for (typ, count) in building.iter_resources() {
+            out.draw_sprite(L_SPRITES + 1, typ.sprite(), cursor - vec2(0, 4));
+            out.draw_text(L_SPRITES + 1, &format!("{count}"), cursor + vec2::EX * TILE_ISIZE);
+            cursor[1] += vstride;
+        }
+    }
+
     fn tile(&self) -> vec2i16 {
         self.tile
     }
+    fn team(&self) -> Team {
+        self.team
+    }
+    fn can_move(&self) -> bool {
+        false
+    }
 }
 
-impl Building3 {
+impl Building {
     //-------------------------------------------------------------------------------- spawn/init
     pub fn new(typ: BuildingTyp, tile: impl Into<Vector<i16, 2>>, team: Team) -> Self {
         Self {
@@ -211,7 +232,7 @@ fn update_downstream_buildings(g: &G) {
     // }
 }
 
-impl Display for Building3 {
+impl Display for Building {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         write!(f, "{:?}{}", self.typ, self.id)
     }

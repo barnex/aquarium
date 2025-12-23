@@ -72,10 +72,12 @@ fn update_contextual_action(g: &mut G) {
     // ⏬ Assign pawns to factory.
     // Only show Assign action if some pawns can be assigned.
     //log::warn!("todo");
-    if let Some(building) = g.building_entity_at(mouse) {
-        if g.selected_pawn_entities().any(|p| p.can_assign_to(&building)) {
-            return g.contextual_action = Action::Assign;
-        }
+    //if let Some(building) = g.entities_at::<Building>(mouse).next() {
+    if g.entities_at::<Building>(mouse).next().is_some() {
+        // TODO: check if can assign
+        //if g.selected_entities().any(|p| p.can_assign_to(&building)) {
+        return g.contextual_action = Action::Assign;
+        //}
     }
 
     // 🥾 Move to location
@@ -95,11 +97,12 @@ fn command_selected_entities(g: &mut G) {
             let mouse = g.mouse_tile();
             match g.contextual_action {
                 Action::None => (),
-                Action::Move => g.selected_pawn_entities().for_each(|e| e.set_destination(mouse)),
+                Action::Move => (log::warn!("TODO")), // g.selected_entities().filter_map(|e| e.downcast_ref::<Pawn>()).for_each(|e| e.set_destination(mouse)),
                 Action::Assign => {
-                    if let Some(building) = g.building_at(mouse) {
-                        g.selected_pawns().for_each(|pawn| g.assign_to(pawn, building));
-                    }
+                    log::warn!("TODO");
+                    //if let Some(building) = g.building_at(mouse) {
+                    //    g.selected_pawns().for_each(|pawn| g.assign_to(pawn, building));
+                    //}
                 }
             }
         }
@@ -116,8 +119,8 @@ fn doodle_on_map(g: &mut G) {
             Tool::Pawn2(typ, team) => {
                 if g.inputs.just_pressed(K_MOUSE1) {
                     log::trace!("player spawns pawn {typ:?} {team:?} @ {mouse}");
-                    if g.entities_at(mouse).next().is_none() {
-                        g.spawn_pawn_entity(typ, mouse, team);
+                    if g.dyn_entities_at(mouse).next().is_none() {
+                        g.spawn(Pawn::new(typ, mouse, team));
                     } else {
                         log::trace!("cannot spawn at @ {mouse}: already occupied");
                     }
@@ -130,7 +133,7 @@ fn doodle_on_map(g: &mut G) {
                         BuildingTyp::StarNest => Team::Pests,
                         _ => g.player,
                     };
-                    g.spawn_building_entity(typ, mouse, team);
+                    g.spawn(Building::new(typ, mouse, team));
                 }
             }
             Tool::Resource(typ) => {

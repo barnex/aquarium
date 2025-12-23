@@ -7,11 +7,11 @@ impl G {
     //    }
     //}
 
-    pub(crate) fn inspect(&self, e: &EntityStorage) {
-        let pretty_cfg = ron::ser::PrettyConfig::new();
-        match ron::ser::to_string_pretty(e, pretty_cfg) {
-            Ok(str) => self.console.print(format!("{str}")),
-            Err(err) => self.console.print(format!("{err}")),
-        }
-    }
+    //pub(crate) fn inspect(&self, e: &EntityStorage) {
+    //    let pretty_cfg = ron::ser::PrettyConfig::new();
+    //    match ron::ser::to_string_pretty(e, pretty_cfg) {
+    //        Ok(str) => self.console.print(format!("{str}")),
+    //        Err(err) => self.console.print(format!("{err}")),
+    //    }
+    //}
 }

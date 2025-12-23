@@ -12,11 +12,10 @@ impl G {
         let g = self;
         draw_tilemap(g, out);
         draw_water(g, out);
-        draw_buildings(g, out);
         draw_resources(g, out);
-        draw_pawns(g, out);
-        //draw_entities(g, out);
-        self.entities().for_each(|e| e.draw(out));
+        visible_entities(g).for_each(|e| e.draw(g, out));
+        //draw_entities(g, out)
+        //self.entities().for_each(|e| e.draw(out));
         draw_cursor(g, out);
         draw_selection(g, out);
         self.effects.tick_and_draw(g, out);
@@ -37,10 +36,10 @@ pub(super) fn visible_tile_range(g: &G) -> Bounds2D<i16> {
 
 pub(super) fn visible_pawns(g: &G) -> impl Iterator<Item = &Pawn> {
     let viewport = visible_tile_range(g);
-    g.pawns.iter().filter(move |p| viewport.contains(p.tile.get()))
+    g.pawns().filter(move |p| viewport.contains(p.tile.get()))
 }
 
-pub(super) fn visible_entities(g: &G) -> impl Iterator<Item = Entity> {
+pub(super) fn visible_entities(g: &G) -> impl Iterator<Item = &dyn Entity3T> {
     let viewport = visible_tile_range(g);
     g.entities().filter(move |p| viewport.contains(p.tile()))
 }
@@ -76,46 +75,9 @@ fn draw_tilemap(g: &G, out: &mut Out) {
     }
 }
 
-fn draw_buildings(g: &G, out: &mut Out) {
-    for building in visible_buildings(g) {
-        draw_building(g, out, building);
-    }
-}
-
-fn draw_building(g: &G, out: &mut Out, building: &Building) {
-    // 🏭 Building sprite
-    out.draw_sprite(L_SPRITES, building.typ.sprite(), building.tile.pos());
-
-    // ☘️ Resource amounts
-    let vstride = 18; // some fiddly offsets to make it look better
-    let mut cursor = building.tile.pos() - vec2(4, 4);
-    for (typ, count) in building.iter_resources() {
-        out.draw_sprite(L_SPRITES + 1, typ.sprite(), cursor - vec2(0, 4));
-        out.draw_text(L_SPRITES + 1, &format!("{count}"), cursor + vec2::EX * TILE_ISIZE);
-        cursor[1] += vstride;
-    }
-}
-
-pub(super) fn visible_buildings(g: &G) -> impl Iterator<Item = &Building> {
-    let viewport = visible_tile_range(g);
-    g.buildings.iter().filter(move |b| b.tile_bounds().overlaps(&viewport))
-}
-
 fn draw_resources(g: &G, out: &mut Out) {
     for (tile, res) in g.resources.iter() {
         out.draw_sprite(L_SPRITES, res.sprite(), tile.pos());
-    }
-}
-
-fn draw_pawns(g: &G, out: &mut Out) {
-    for pawn in visible_pawns(g) {
-        pawn.draw(g, out)
-    }
-}
-
-fn draw_entities(g: &G, out: &mut Out) {
-    for entity in visible_entities(g) {
-        entity.draw(out)
     }
 }
 

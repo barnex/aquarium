@@ -74,18 +74,18 @@ fn draw_destinations(g: &G, out: &mut Out) {
 fn draw_home_overlay(g: &G, out: &mut Out) {
     let color = RGBA::new(0, 0, 255, 100);
     for pawn in visible_pawns(g) {
-        if let Some(home) = g.buildings.get_maybe(pawn.home.get()) {
+        if let Some(home) = pawn.home.get().and_then(|id| g.get::<Building>(id)) {
             out.draw_line_screen(L_SPRITES + 1, Line::new(pawn.center(), home.tile.pos()).with_color(color).with_width(2).translated(-g.camera_pos));
         }
     }
 }
 
 fn draw_downstream_overlay(g: &G, out: &mut Out) {
-    for src in visible_buildings(g) {
-        for dst in src.downstream_buildings(g) {
-            out.draw_line(L_SPRITES + 1, Line::new(src.tile_bounds().max.pos(), dst.entrance().pos()));
-        }
-    }
+    //for src in visible_buildings(g) {
+    //    for dst in src.downstream_buildings(g) {
+    //        out.draw_line(L_SPRITES + 1, Line::new(src.tile_bounds().max.pos(), dst.entrance().pos()));
+    //    }
+    //}
 }
 
 pub(crate) fn write_debug_output(g: &G, out: &mut Out) {
@@ -106,7 +106,7 @@ pub(crate) fn write_debug_output(g: &G, out: &mut Out) {
     writeln!(debug, "camera {:?}", g.camera_pos).unwrap();
     writeln!(debug, "down {:?}", g.inputs.iter_is_down().sorted().collect_vec()).unwrap();
     writeln!(debug, "tile_picker {:?}", g.ui.active_tool).unwrap();
-    writeln!(debug, "selected: {:?}", g.selected_pawn_ids.len()).unwrap();
+    writeln!(debug, "selected: {:?}", g.selected_entity_ids.len()).unwrap();
     writeln!(debug, "contextual_action: {:?}", g.contextual_action).unwrap();
     writeln!(debug, "draw commands: {}", out.layers.iter().map(|l| l.lines.len() + l.rectangles.len() + l.sprites.len()).sum::<usize>()).unwrap();
     writeln!(debug, "map size: {} ({} tiles)", g._tilemap.size(), g._tilemap.size().as_u32().product()).unwrap();
