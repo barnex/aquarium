@@ -23,7 +23,7 @@ pub struct Pawn {
     pub rot: Cel<f32>,
 }
 
-impl Entity3T for Pawn {
+impl Entity for Pawn {
     fn draw(&self, g: &G, out: &mut Out) {
         match self.typ {
             PawnTyp::Kitten => self.base_draw(g, out),

@@ -1,19 +1,19 @@
 use crate::prelude::*;
 
 #[derive(Serialize, Deserialize)]
-pub struct Entities3 {
+pub struct Entities {
     pawns: MemKeep3<Pawn>,
     buildings: MemKeep3<Building>,
 }
 
 #[derive(Debug, Serialize, Deserialize, PartialEq, Eq, PartialOrd, Ord, Clone, Copy, Hash)]
 #[repr(u8)]
-enum TypeIdEnum {
+pub enum EntityType {
     Pawn = 0,
     Building = 1,
 }
 
-impl Entities3 {
+impl Entities {
     pub fn new() -> Self {
         Self {
             pawns: MemKeep3::new(),
@@ -23,7 +23,7 @@ impl Entities3 {
 
     pub fn insert<T>(&self, v: T) -> &T
     where
-        T: Entity3T + GetStorage<T> + SetId3 + HasTypeId,
+        T: Entity + GetStorage<T> + SetId3 + HasTypeId,
     {
         let shard = T::get_storage(self);
         let type_id = T::typeid();
@@ -34,7 +34,7 @@ impl Entities3 {
 
     pub fn get<T>(&self, id: Id3) -> Option<&T>
     where
-        T: Entity3T + GetStorage<T> + HasTypeId,
+        T: Entity + GetStorage<T> + HasTypeId,
     {
         let shard = T::get_storage(self);
         match id.type_id == T::typeid() {
@@ -43,21 +43,21 @@ impl Entities3 {
         }
     }
 
-    pub fn get_dyn(&self, id: Id3) -> Option<&dyn Entity3T> {
+    pub fn get_dyn(&self, id: Id3) -> Option<&dyn Entity> {
         match id.type_id {
-            TypeIdEnum::Pawn => self.pawns.get_unchecked(id.id).map(|v| v as &dyn Entity3T),
-            TypeIdEnum::Building => self.buildings.get_unchecked(id.id).map(|v| v as &dyn Entity3T),
+            EntityType::Pawn => self.pawns.get_unchecked(id.id).map(|v| v as &dyn Entity),
+            EntityType::Building => self.buildings.get_unchecked(id.id).map(|v| v as &dyn Entity),
         }
     }
 
-    pub(crate) fn iter_dyn(&self) -> impl Iterator<Item = &dyn Entity3T> {
+    pub(crate) fn iter_dyn(&self) -> impl Iterator<Item = &dyn Entity> {
         self.pawns.iter_dyn().chain(self.buildings.iter_dyn())
     }
 
     // lifetimes??
     pub fn iter<T>(&self) -> impl Iterator<Item = &T>
     where
-        T: Entity3T + GetStorage<T> + HasTypeId + 'static,
+        T: Entity + GetStorage<T> + HasTypeId + 'static,
     {
         let shard = T::get_storage(self);
         shard.iter()
@@ -70,8 +70,8 @@ impl Entities3 {
 
     pub fn remove(&self, id: Id3) {
         match id.type_id {
-            TypeIdEnum::Pawn => drop(self.pawns.remove(id)),
-            TypeIdEnum::Building => drop(self.buildings.remove(id)),
+            EntityType::Pawn => drop(self.pawns.remove(id)),
+            EntityType::Building => drop(self.buildings.remove(id)),
         }
     }
 }
@@ -115,27 +115,27 @@ impl<T: HasTypeId> MemKeep3<T> {
     }
 }
 
-impl<T: Entity3T> MemKeep3<T> {
-    fn iter_dyn(&self) -> impl Iterator<Item = &dyn Entity3T> {
-        self.inner.iter().map(|v| v as &dyn Entity3T)
+impl<T: Entity> MemKeep3<T> {
+    fn iter_dyn(&self) -> impl Iterator<Item = &dyn Entity> {
+        self.inner.iter().map(|v| v as &dyn Entity)
     }
 }
 
 pub trait HasTypeId {
-    fn typeid() -> TypeIdEnum;
+    fn typeid() -> EntityType;
 }
 
 pub trait GetStorage<T> {
-    fn get_storage(v: &Entities3) -> &MemKeep3<T>;
+    fn get_storage(v: &Entities) -> &MemKeep3<T>;
 }
 
 impl HasTypeId for Pawn {
-    fn typeid() -> TypeIdEnum {
-        TypeIdEnum::Pawn
+    fn typeid() -> EntityType {
+        EntityType::Pawn
     }
 }
 impl GetStorage<Pawn> for Pawn {
-    fn get_storage(v: &Entities3) -> &MemKeep3<Self> {
+    fn get_storage(v: &Entities) -> &MemKeep3<Self> {
         &v.pawns
     }
 }
@@ -150,12 +150,12 @@ impl GetId3 for Pawn {
     }
 }
 impl HasTypeId for Building {
-    fn typeid() -> TypeIdEnum {
-        TypeIdEnum::Building
+    fn typeid() -> EntityType {
+        EntityType::Building
     }
 }
 impl GetStorage<Building> for Building {
-    fn get_storage(v: &Entities3) -> &MemKeep3<Self> {
+    fn get_storage(v: &Entities) -> &MemKeep3<Self> {
         &v.buildings
     }
 }
@@ -170,23 +170,12 @@ impl GetId3 for Building {
     }
 }
 
-pub trait Entity3T: Debug + GetId3 + 'static {
-    fn draw(&self, g: &G, out: &mut Out);
-    fn tile(&self) -> vec2i16;
-    fn team(&self) -> Team;
-    fn can_move(&self) -> bool;
-    fn bounds(&self) -> Bounds2Di16 {
-        //👇 Default size
-        Bounds2D::with_size(self.tile(), vec2(1, 1))
-    }
-}
-
 // ----------------- id
 
 #[derive(Serialize, Deserialize, Clone, Copy, PartialEq, Eq, PartialOrd, Ord, Hash)]
 pub struct Id3 {
     id: Id,
-    type_id: TypeIdEnum,
+    type_id: EntityType,
 }
 
 pub trait GetId3 {
@@ -194,7 +183,7 @@ pub trait GetId3 {
 }
 
 impl Id3 {
-    pub const INVALID: Self = Self { id: Id::INVALID, type_id: TypeIdEnum::Pawn }; // << ??
+    pub const INVALID: Self = Self { id: Id::INVALID, type_id: EntityType::Pawn }; // << ??
 }
 
 impl Display for Id3 {
@@ -220,7 +209,7 @@ mod test {
     #[test]
     fn it() {
         //let p: Box<dyn Entity3T> = Box::new(Pawn::new(crate::PawnTyp::Cat, default(), crate::Team::Blue));
-        let m = Entities3::new();
+        let m = Entities::new();
 
         let p = m.insert(Pawn::new(PawnTyp::Cat, vec2(3, 4), Team::Blue));
         let b = m.insert(Building::new(BuildingTyp::Farm, vec2(5, 6), Team::Red));

@@ -20,7 +20,7 @@ pub struct G {
     pub _tilemap: Tilemap,
     pub resources: ResourceMap,
 
-    pub entities: Entities3,
+    pub entities: Entities,
 
     pub water: WaterSim,
     pub header_text: String,
@@ -69,23 +69,23 @@ impl G {
     // TODO: return position generic: concrete type (associated with ext)
     pub fn spawn3<T>(&self, v: T) -> &T
     where
-        T: Entity3T + GetStorage<T> + SetId3 + HasTypeId,
+        T: Entity + GetStorage<T> + SetId3 + HasTypeId,
     {
         self.entities.insert(v)
     }
 
-    pub fn entity(&self, id: Id3) -> Option<&dyn Entity3T> {
+    pub fn entity(&self, id: Id3) -> Option<&dyn Entity> {
         self.entities.get_dyn(id)
     }
 
     pub fn get<T>(&self, id: Id3) -> Option<&T>
     where
-        T: Entity3T + GetStorage<T> + HasTypeId,
+        T: Entity + GetStorage<T> + HasTypeId,
     {
         self.entities.get(id)
     }
 
-    pub fn entities(&self) -> impl Iterator<Item = &dyn Entity3T> {
+    pub fn entities(&self) -> impl Iterator<Item = &dyn Entity> {
         self.entities.iter_dyn()
     }
 
@@ -140,7 +140,7 @@ impl G {
             name: "".into(),
             now_secs: 0.0,
             paused: false,
-            entities: Entities3::new(),
+            entities: Entities::new(),
             resources: default(),
             selected_entity_ids: default(), // <<< TODO: remove
             inspected: default(),
@@ -313,7 +313,7 @@ impl G {
     //    pawn.home(self).map(|b| b.remove_dead_workers(self));
     //}
 
-    pub fn kill(&self, e: &dyn Entity3T) {
+    pub fn kill(&self, e: &dyn Entity) {
         self.entities.remove(e.id())
         // TODO: on_kill_hook
     }
@@ -350,11 +350,11 @@ impl G {
         self.pawns().find(|v| v.tile == tile)
     }
 
-    pub fn dyn_entities_at(&self, tile: vec2i16) -> impl Iterator<Item = &dyn Entity3T> {
+    pub fn dyn_entities_at(&self, tile: vec2i16) -> impl Iterator<Item = &dyn Entity> {
         self.entities().filter(move |e| e.bounds().contains(tile))
     }
 
-    pub fn entities_at<T: Entity3T + GetStorage<T> + SetId3 + HasTypeId + 'static>(&self, tile: vec2i16) -> impl Iterator<Item = &T> {
+    pub fn entities_at<T: Entity + GetStorage<T> + SetId3 + HasTypeId + 'static>(&self, tile: vec2i16) -> impl Iterator<Item = &T> {
         self.entities.iter::<T>().filter(move |e| e.tile() == tile)
     }
 
@@ -365,7 +365,7 @@ impl G {
 
     /// Find nearest pawn inside given radius, where `f` is true.
     /// TODO: make faster via a hierarchy.
-    pub fn find_entity(&self, around: vec2i16, radius: u16, f: impl Fn(&dyn Entity3T) -> bool) -> Option<&dyn Entity3T> {
+    pub fn find_entity(&self, around: vec2i16, radius: u16, f: impl Fn(&dyn Entity) -> bool) -> Option<&dyn Entity> {
         let radius = radius as i32;
         let radius2 = radius * radius;
         self //_
@@ -385,7 +385,7 @@ impl G {
     //}
 
     /// All currently selected Entities.
-    pub fn selected_entities(&self) -> impl Iterator<Item = &dyn Entity3T> {
+    pub fn selected_entities(&self) -> impl Iterator<Item = &dyn Entity> {
         self.selected_entity_ids().filter_map(|id| self.entity(id))
     }
 
@@ -510,7 +510,7 @@ impl G {
         }
     }
 
-    pub fn spawn<T: Entity3T + GetStorage<T> + SetId3 + HasTypeId>(&self, v: T) -> &T {
+    pub fn spawn<T: Entity + GetStorage<T> + SetId3 + HasTypeId>(&self, v: T) -> &T {
         self.entities.insert(v)
     }
 }
