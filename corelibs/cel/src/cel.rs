@@ -227,4 +227,16 @@ mod test {
         a.inc(1);
         expect_eq!(a, 2);
     }
+
+    #[gtest]
+    fn saturating_sub() {
+        let a = 2u8.cel();
+        expect_eq!(a, 2);
+        a.saturating_sub(1);
+        expect_eq!(a, 1);
+        a.saturating_sub(1);
+        expect_eq!(a, 0);
+        a.saturating_sub(1);
+        expect_eq!(a, 0);
+    }
 }
