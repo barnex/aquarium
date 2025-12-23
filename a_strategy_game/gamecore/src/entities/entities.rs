@@ -2,8 +2,8 @@ use crate::prelude::*;
 
 #[derive(Serialize, Deserialize)]
 pub struct Entities3 {
-    pub pawns: MemKeep3<Pawn>,
-    pub buildings: MemKeep3<Building>,
+    pawns: MemKeep3<Pawn>,
+    buildings: MemKeep3<Building>,
 }
 
 #[derive(Debug, Serialize, Deserialize, PartialEq, Eq, PartialOrd, Ord, Clone, Copy, Hash)]
