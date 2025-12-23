@@ -13,3 +13,9 @@ impl G {
     //    }
     //}
 }
+
+/// Utility for implementing a nice Debug
+pub fn pretty_print(f: &mut fmt::Formatter<'_>, v: &impl Serialize) -> fmt::Result {
+    let pretty_cfg = ron::ser::PrettyConfig::new();
+    ron::ser::to_writer_pretty(f, v, pretty_cfg).map_err(|_| fmt::Error)
+}

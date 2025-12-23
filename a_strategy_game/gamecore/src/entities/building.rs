@@ -1,6 +1,6 @@
 use crate::prelude::*;
 
-#[derive(Serialize, Deserialize, Debug)]
+#[derive(Serialize, Deserialize)]
 pub struct Building {
     pub id: Id,
     pub typ: BuildingTyp,
@@ -237,5 +237,11 @@ fn update_downstream_buildings(g: &G) {
 impl Display for Building {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         write!(f, "{:?}{}", self.typ, self.id)
+    }
+}
+
+impl Debug for Building {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        pretty_print(f, self)
     }
 }
