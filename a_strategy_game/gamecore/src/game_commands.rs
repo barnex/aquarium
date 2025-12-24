@@ -29,6 +29,7 @@ impl G {
             &["moveto" | "mv", x, y] => Ok(vec2(x.parse()?, y.parse()?).pipe(|dst| self.selected_entities().filter_map(|e| e.downcast::<Pawn>()).for_each(|p| p.set_destination(self, dst).ignore()))),
             &["setcamera" | "setcam", x, y] => Ok(self.camera_pos = vec2(x.parse()?, y.parse()?)),
             &["sanitycheck" | "sc"] => sanity_check(self),
+            &["sanitycheck" | "sc", "off"] => Ok(self.debug.pause_on_sanity_failure = false),
             &["reset"] => Ok(*self = G::test_world()),
             &["pause" | "pa"] => Ok(toggle(&mut self.paused)),
             &["unpause" | "up"] => Ok(self.paused = false),
