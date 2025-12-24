@@ -267,7 +267,7 @@ impl G {
     /// 🥾 Can one generally walk on tile?
     /// TODO: ambiguous.
     pub(crate) fn is_walkable_by(&self, tile: vec2i16, pawn: &Pawn) -> bool {
-        pawn.can_walk_on(self.tile_at(tile))
+        pawn.can_walk_on_tile(self.tile_at(tile))
         //if !tile.is_walkable(self.tile_at(tile)) {
         //    return false;
         //}

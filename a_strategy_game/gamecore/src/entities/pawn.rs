@@ -252,22 +252,25 @@ impl Pawn {
 
     /// If standing on another pawn, move aside randomly.
     fn take_personal_space(&self, g: &G) {
-        // TODO
-        // if !self.can_move() {
-        //     return;
-        // }
-        // let standing_on_other = g.pawns().filter(|p| p.id != self.id).find(|p| p.tile == self.tile).is_some();
-        // if standing_on_other {
-        //     self.teleport_to(g, self.tile.get() + g.random_vec_incl::<i16>(-1..=1));
-        // }
+        if !self.can_move() {
+            return;
+        }
+        let standing_on_other = g.pawns().filter(|p| p.id() != self.id()).find(|p| p.tile() == self.tile()).is_some();
+        if standing_on_other {
+            // ⚠️ Don't move diagonally so you don't go trough walls.
+            let random_step = vec2::from(g.pick_random([(-1, 0), (1, 0), (0, -1), (0, 1)]));
+            self.teleport_to(g, self.tile() + random_step);
+        }
     }
 
     fn teleport_to(&self, g: &G, dst: vec2i16) {
-        // TODO
-        //if g.is_walkable_by(dst, self) {
-        self.get_tile().set(dst);
-        self.route.clear();
-        //}
+        if self.can_walk_on_pos(g, dst) {
+            trace!(self, "dst={dst}");
+            self.get_tile().set(dst);
+            self.route.clear();
+        } else {
+            trace!(self, "dst={dst}: cannot walk here");
+        }
     }
 
     fn is_commandable(&self) -> bool {
@@ -282,7 +285,7 @@ impl Pawn {
 
     fn walk_to_destination(&self, g: &G) {
         if let Some(next_tile) = self.route.next() {
-            if self.can_walk_on(g.tile_at(next_tile)) {
+            if self.can_walk_on_tile(g.tile_at(next_tile)) {
                 self.get_tile().set(next_tile);
             } else {
                 trace!(self, "cannot walk on {next_tile}, clearing route");
@@ -297,7 +300,7 @@ impl Pawn {
             return FAIL;
         }
         let max_dist = 42;
-        let distance_map = DistanceMap::new(dest, max_dist, |p| self.can_walk_on(g.tile_at(p)));
+        let distance_map = DistanceMap::new(dest, max_dist, |p| self.can_walk_on_tile(g.tile_at(p)));
         let path = distance_map.path_to_center(self.tile());
         trace!(self, "dest={dest} path len={:?}", path.as_ref().map(|p| p.len()));
         self.route.set(path?);
@@ -320,8 +323,12 @@ impl Pawn {
         self.route.is_finished()
     }
 
-    pub fn can_walk_on(&self, tile: Tile) -> bool {
+    pub fn can_walk_on_tile(&self, tile: Tile) -> bool {
         self.typ.can_walk_on(tile)
+    }
+
+    pub fn can_walk_on_pos(&self, g: &G, idx: vec2i16) -> bool {
+        self.can_walk_on_tile(g.tile_at(idx))
     }
 
     fn attack_strength(&self) -> u8 {

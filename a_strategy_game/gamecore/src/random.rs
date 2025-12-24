@@ -45,4 +45,10 @@ impl G {
     {
         vec2(self.random_range_incl(range.clone()), self.random_range_incl(range))
     }
+
+    pub fn pick_random<T: Copy, const N: usize>(&self, options: [T; N]) -> T {
+        let mut rng = self._rng.borrow_mut();
+        let i = rng.gen_range(0..options.len());
+        options[i]
+    }
 }
