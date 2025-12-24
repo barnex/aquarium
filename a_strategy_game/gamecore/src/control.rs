@@ -97,7 +97,7 @@ fn command_selected_entities(g: &mut G) {
             let mouse = g.mouse_tile();
             match g.contextual_action {
                 Action::None => (),
-                Action::Move => (log::warn!("TODO")), // g.selected_entities().filter_map(|e| e.downcast_ref::<Pawn>()).for_each(|e| e.set_destination(mouse)),
+                Action::Move => g.selected_entities().filter_map(|e| e.downcast::<Pawn>()).for_each(|e| e.set_destination(g, mouse).ignore()),
                 Action::Assign => {
                     log::warn!("TODO");
                     //if let Some(building) = g.building_at(mouse) {

@@ -282,29 +282,24 @@ impl Pawn {
 
     fn walk_to_destination(&self, g: &G) {
         if let Some(next_tile) = self.route.next() {
-            // TODO
-            //if g.is_walkable_by(next_tile, self) {
-            self.get_tile().set(next_tile);
-            //} else {
-            //    // TODO: handle destination unreachable
-            //    self.route.clear(); // ☹️
-            //}
+            if self.can_walk_on(g.tile_at(next_tile)) {
+                self.get_tile().set(next_tile);
+            } else {
+                trace!(self, "cannot walk on {next_tile}, clearing route");
+                self.route.clear(); // ☹️
+            }
         }
     }
 
     pub fn set_destination(&self, g: &G, dest: vec2i16) -> Status {
         if !self.can_move() {
+            trace!(self, "cannot move");
             return FAIL;
         }
-        self.start_route_to(g, dest)
-    }
-
-    fn start_route_to(&self, g: &G, dest: vec2i16) -> Status {
         let max_dist = 42;
         let distance_map = DistanceMap::new(dest, max_dist, |p| self.can_walk_on(g.tile_at(p)));
-        //let distance_map = DistanceMap::new(dest, max_dist, |p| true);
         let path = distance_map.path_to_center(self.tile());
-        //trace!(self, "dest={dest} path len={:?}", path.as_ref().map(|p| p.len()));
+        trace!(self, "dest={dest} path len={:?}", path.as_ref().map(|p| p.len()));
         self.route.set(path?);
         OK
     }

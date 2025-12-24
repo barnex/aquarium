@@ -17,6 +17,7 @@ pub trait EntityT: Any + BaseT + Debug + 'static + HasId3 {
 }
 
 #[derive(Clone, Copy)]
+/// Logically a `&'g dyn EntityT`, but with details hidden.
 pub struct Entity<'g>(&'g dyn EntityT);
 
 impl<'g> Entity<'g> {
