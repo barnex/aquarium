@@ -67,4 +67,8 @@ impl BuildingTyp {
             (_, tile) => tile.is_default_walkable(),
         }
     }
+
+    pub fn default_health(&self) -> u8 {
+        100
+    }
 }

@@ -46,7 +46,7 @@ impl Tilemap {
 
     /// All positions + Tile values inside range (exclusive upper).
     pub fn enumerate_range(&self, range: Bounds2Di16) -> impl Iterator<Item = (vec2i16, Tile)> {
-        let range = range.map(|v| v.max(0));
+        let range = range.flat_map(|v| v.max(0));
         let range = range.with(|r| r.max = range.max.zip_with(self.size.as_i16(), |r, s| r.min(s)));
         let range = range.with(|r| r.min = range.min.zip_with(self.size.as_i16(), |r, s| r.min(s)));
         cross(range.x_range(), range.y_range()).map(move |(x, y)| (vec2i16(x, y), self.tiles[self.index(vec2(x, y))].get()))

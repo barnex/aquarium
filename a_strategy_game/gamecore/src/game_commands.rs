@@ -40,7 +40,7 @@ impl G {
             &["dest" | "show_destination"] => Ok(toggle(&mut self.debug.show_destination)),
             &["downstream" | "show_downstream"] => Ok(toggle(&mut self.debug.show_downstream)),
             &["i" | "inspect_under_cursor"] => Ok(toggle(&mut self.debug.inspect_under_cursor)),
-            //&["tr" | "trace"] => Ok(self.selected_entities().for_each(|e| e.traced().set(true))),
+            &["tr" | "trace"] => Ok(self.selected_entities().for_each(|e| e.get_traced().set(true))),
             //&["ut" | "untrace"] => Ok(self.entities().for_each(|e| e.traced().set(false))),
             //&["kill"] => Ok(self.selected_entities().for_each(|e| e.kill())),
             &[cmd, ..] => Err(anyhow!("unknown command: {cmd:?}")),

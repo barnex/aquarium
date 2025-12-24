@@ -2,26 +2,36 @@ use crate::prelude::*;
 
 #[derive(Serialize, Deserialize)]
 pub struct Building {
-    pub id: Id,
-    pub typ: BuildingTyp,
-    pub tile: vec2i16,
-    pub team: Team,
+    base: Base,
 
+    pub typ: BuildingTyp,
     pub workers: CSet<Id>,
     pub _downstream: CSet<Id>,
     pub _upstream: CSet<Id>,
     resources: [Cel<u16>; Self::MAX_RES_SLOTS],
 }
 
+impl BaseT for Building {
+    fn base(&self) -> &Base {
+        &self.base
+    }
+}
+
+impl HasId3 for Building {
+    fn set_id3(&mut self, id: Id) {
+        self.base.id = id
+    }
+}
+
 impl EntityT for Building {
     fn draw(&self, g: &G, out: &mut Out) {
         let building = self;
         // 🏭 Building sprite
-        out.draw_sprite(L_SPRITES, building.typ.sprite(), building.tile.pos());
+        out.draw_sprite(L_SPRITES, building.typ.sprite(), building.tile().pos());
 
         // ☘️ Resource amounts
         let vstride = 18; // some fiddly offsets to make it look better
-        let mut cursor = building.tile.pos() - vec2(4, 4);
+        let mut cursor = building.tile().pos() - vec2(4, 4);
         for (typ, count) in building.iter_resources() {
             out.draw_sprite(L_SPRITES + 1, typ.sprite(), cursor - vec2(0, 4));
             out.draw_text(L_SPRITES + 1, &format!("{count}"), cursor + vec2::EX * TILE_ISIZE);
@@ -29,14 +39,13 @@ impl EntityT for Building {
         }
     }
 
-    fn tile(&self) -> vec2i16 {
-        self.tile
-    }
-    fn team(&self) -> Team {
-        self.team
-    }
     fn can_move(&self) -> bool {
         false
+    }
+
+    /// Building size in tiles. E.g. 3x3.
+    fn size(&self) -> vec2u8 {
+        self.typ.size()
     }
 }
 
@@ -45,10 +54,9 @@ impl Building {
 
     //-------------------------------------------------------------------------------- spawn/init
     pub fn new(typ: BuildingTyp, tile: impl Into<Vector<i16, 2>>, team: Team) -> Self {
+        let tile = tile.into();
         Self {
-            id: Id::INVALID,
-            tile: tile.into(),
-            team,
+            base: Base::new(tile, team, typ.default_health()),
             typ,
             workers: default(),
             resources: default(),
@@ -181,17 +189,12 @@ impl Building {
             .map(|(r, i)| (r, self.resources[i as usize].get()))
     }
 
-    /// Building size in tiles. E.g. 3x3.
-    pub fn size(&self) -> vec2u8 {
-        self.typ.size()
-    }
-
-    pub fn tile_bounds(&self) -> Bounds2Di16 {
-        Bounds2D::with_size(self.tile, self.size().as_i16())
-    }
+    //pub fn tile_bounds(&self) -> Bounds2Di16 {
+    //    Bounds2D::with_size(self.tile(), self.size().as_i16())
+    //}
 
     pub fn entrance(&self) -> vec2i16 {
-        self.tile // TODO
+        self.tile() // TODO
     }
 
     pub(crate) fn remove_dead_workers(&self, g: &G) {
@@ -205,16 +208,16 @@ fn update_downstream_buildings(g: &G) {
 
     // 🪲 TODO: quadratic in #buildings. Use spatial queries instead.
     const MAX_DIST2: i32 = 30 * 30; // TODO
-    for building in g.buildings().filter(|b| b.id != hq.id) {
+    for building in g.buildings().filter(|b| b.id() != hq.id()) {
         let my_resources = building.iter_resources().map(|(r, _)| r).collect::<HashSet<_>>();
         let neighbors = g
             .buildings() //_
-            .filter(|b| b.id != building.id)
+            .filter(|b| b.id() != building.id())
             .filter(|b| b.is_depot())
-            .filter(|b| b.tile.distance_squared(building.tile) < MAX_DIST2)
-            .filter(|b| b.tile.distance_squared(hq.tile) < building.tile.distance_squared(hq.tile))
+            .filter(|b| b.tile().distance_squared(building.tile()) < MAX_DIST2)
+            .filter(|b| b.tile().distance_squared(hq.tile()) < building.tile().distance_squared(hq.tile()))
             .filter(|b| b.iter_resources().map(|(r, _)| r).any(|r| my_resources.contains(&r)))
-            .map(|b| b.id);
+            .map(|b| b.id());
         building._downstream.clear();
         building._downstream.extend(neighbors);
     }
@@ -236,7 +239,7 @@ fn update_downstream_buildings(g: &G) {
 
 impl Display for Building {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        write!(f, "{:?}{}", self.typ, self.id)
+        write!(f, "{:?}{}", self.typ, self.id())
     }
 }
 

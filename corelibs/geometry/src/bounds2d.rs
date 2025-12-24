@@ -55,12 +55,20 @@ where
         ]
     }
 
-    pub fn map<F, U>(&self, f: F) -> Bounds2D<U>
+    pub fn flat_map<F, U>(&self, f: F) -> Bounds2D<U>
     where
         F: Fn(T) -> U + Copy,
         U: Copy,
     {
         Bounds2D { min: self.min.map(f), max: self.max.map(f) }
+    }
+
+    pub fn map<F, U>(&self, f: F) -> Bounds2D<U>
+    where
+        F: Fn(vec2<T>) -> vec2<U>,
+        U: Copy,
+    {
+        Bounds2D { min: f(self.min), max: f(self.max) }
     }
 }
 

@@ -1,13 +1,18 @@
 use crate::prelude::*;
 
-pub trait EntityT: Any + HasId3 + Debug + 'static {
+pub trait EntityT: Any + BaseT + Debug + 'static + HasId3 {
     fn draw(&self, g: &G, out: &mut Out);
-    fn tile(&self) -> vec2i16;
-    fn team(&self) -> Team;
     fn can_move(&self) -> bool;
-    fn bounds(&self) -> Bounds2Di16 {
+    fn size(&self) -> vec2u8 {
         //👇 Default size
-        Bounds2D::with_size(self.tile(), vec2(1, 1))
+        vec2(1, 1)
+    }
+    fn bounds(&self) -> Bounds2Di16 {
+        Bounds2D::with_size(self.tile(), self.size().map(|v| v as i16))
+    }
+    // Center pixel in world coordinates
+    fn center(&self) -> vec2i {
+        self.bounds().map(|tile| tile.pos()).center()
     }
 }
 

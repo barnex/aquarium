@@ -75,7 +75,7 @@ fn draw_home_overlay(g: &G, out: &mut Out) {
     let color = RGBA::new(0, 0, 255, 100);
     for pawn in visible_pawns(g) {
         if let Some(home) = pawn.home.get().and_then(|id| g.get::<Building>(id)) {
-            out.draw_line_screen(L_SPRITES + 1, Line::new(pawn.center(), home.tile.pos()).with_color(color).with_width(2).translated(-g.camera_pos));
+            out.draw_line_screen(L_SPRITES + 1, Line::new(pawn.center(), home.tile().pos()).with_color(color).with_width(2).translated(-g.camera_pos));
         }
     }
 }

@@ -2,14 +2,9 @@ use crate::prelude::*;
 
 #[derive(Serialize, Deserialize)]
 pub struct Pawn {
-    // all
-    pub id: Id,
+    base: Base,
+
     pub typ: PawnTyp,
-    pub tile: Cel<vec2i16>,
-    pub team: Cel<Team>,
-    pub sleep: Cel<u8>,
-    pub health: Cel<u8>,
-    pub traced: Cel<bool>,
 
     // move
     pub route: Route,
@@ -23,6 +18,18 @@ pub struct Pawn {
     pub rot: Cel<f32>,
 }
 
+impl BaseT for Pawn {
+    fn base(&self) -> &Base {
+        &self.base
+    }
+}
+
+impl HasId3 for Pawn {
+    fn set_id3(&mut self, id: Id) {
+        self.base.id = id
+    }
+}
+
 impl EntityT for Pawn {
     fn draw(&self, g: &G, out: &mut Out) {
         match self.typ {
@@ -33,13 +40,6 @@ impl EntityT for Pawn {
             PawnTyp::Starfish => self.base_draw(g, out),
         }
     }
-    fn tile(&self) -> vec2i16 {
-        self.tile.get()
-    }
-
-    fn team(&self) -> Team {
-        self.team.get()
-    }
 
     fn can_move(&self) -> bool {
         self.typ.can_move()
@@ -49,33 +49,21 @@ impl EntityT for Pawn {
 impl Pawn {
     pub fn new(typ: PawnTyp, tile: vec2i16, team: Team) -> Self {
         Self {
-            id: Id::INVALID,
-            sleep: 0.cel(),
-            team: team.cel(),
+            base: Base::new(tile, team, typ.default_health()),
             typ,
-            health: typ.default_health().cel(),
-            tile: tile.cel(),
+
             route: default(),
             home: None.cel(),
             cargo: None.cel(),
-            traced: false.cel(),
             target: None.cel(),
             rot: default(),
         }
     }
 
-    pub fn id(&self) -> Id {
-        self.id
-    }
-
-    pub fn traced(&self) -> &Cel<bool> {
-        &self.traced
-    }
-
     // ⏱️
     pub(crate) fn tick(&self, g: &G) {
-        if self.sleep != 0 {
-            self.sleep.saturating_sub(1);
+        if self.base.sleep.get() != 0 {
+            self.base.sleep.saturating_sub(1);
             return;
         }
 
@@ -101,16 +89,12 @@ impl Pawn {
         }
     }
 
-    pub(crate) fn sleep(&self, ticks: u8) {
-        self.sleep.set(ticks);
-    }
-
     pub(crate) fn can_assign_to(&self, building: &Building) -> bool {
         if !self.typ.is_worker() {
             //trace!(self, "assign {self} to {building}: is not a worker");
             return false;
         }
-        if self.team != building.team {
+        if self.team() != building.team() {
             //trace!(self, "assign {self} to {building}: wrong team: {} != {}", self.team, building.team);
             return false;
         }
@@ -119,7 +103,7 @@ impl Pawn {
 
     fn tick_delivery_work(&self, g: &G, home: &Building) {
         let on_building = g.building_at(self.tile());
-        let on_home = on_building.map(|b| b.id) == Some(home.id);
+        let on_home = on_building.map(|b| b.id()) == Some(home.id());
 
         match on_building {
             _ if on_home => self.tick_on_home(g, home),
@@ -166,7 +150,7 @@ impl Pawn {
 
     fn go_to_near_resource(&self, g: &G, home: &Building) -> Status {
         trace!(self);
-        let new_dest = g.resources.iter().filter(|(_, res)| home.can_accept_resource(*res)).min_by_key(|(tile, _)| tile.distance_squared(self.tile.get())).map(|(tile, _)| tile)?;
+        let new_dest = g.resources.iter().filter(|(_, res)| home.can_accept_resource(*res)).min_by_key(|(tile, _)| tile.distance_squared(self.tile())).map(|(tile, _)| tile)?;
         self.set_destination(g, new_dest);
         OK
     }
@@ -185,7 +169,7 @@ impl Pawn {
 
         for downstream in home
             .downstream_buildings(g) //_
-            .sorted_by_key(|d| d.tile.distance_squared(self.tile()))
+            .sorted_by_key(|d| d.tile().distance_squared(self.tile()))
         {
             if downstream.can_accept_resource(cargo) {
                 self.set_destination(g, downstream.entrance());
@@ -205,7 +189,7 @@ impl Pawn {
 
         for downstream in home
             .downstream_buildings(g) //_
-            .sorted_by_key(|d| d.tile.distance_squared(home.tile))
+            .sorted_by_key(|d| d.tile().distance_squared(home.tile()))
         {
             for (res, slot, _) in home.resource_slots() {
                 if slot.get() > 0 && downstream.can_accept_resource(res) {
@@ -248,7 +232,7 @@ impl Pawn {
 
     fn steal_any_resource(&self, g: &G, home: &Building, building: &Building) -> Status {
         //trace!(self, "building={building}");
-        debug_assert!(self.home.get() == Some(home.id));
+        debug_assert!(self.home.get() == Some(home.id()));
 
         for (res, slot, _) in building.resource_slots() {
             if slot.get() > 0 && home.can_accept_resource(res) {
@@ -281,7 +265,7 @@ impl Pawn {
     fn teleport_to(&self, g: &G, dst: vec2i16) {
         // TODO
         //if g.is_walkable_by(dst, self) {
-        self.tile.set(dst);
+        self.get_tile().set(dst);
         self.route.clear();
         //}
     }
@@ -300,7 +284,7 @@ impl Pawn {
         if let Some(next_tile) = self.route.next() {
             // TODO
             //if g.is_walkable_by(next_tile, self) {
-            self.tile.set(next_tile);
+            self.get_tile().set(next_tile);
             //} else {
             //    // TODO: handle destination unreachable
             //    self.route.clear(); // ☹️
@@ -329,20 +313,12 @@ impl Pawn {
         self.route.destination()
     }
 
-    pub fn bounds(&self) -> Bounds2Di {
-        Bounds2D::with_size(self.tile.pos(), vec2::splat(TILE_ISIZE))
-    }
-
-    pub fn tile(&self) -> vec2i16 {
-        self.tile.get()
-    }
+    //pub fn bounds(&self) -> Bounds2Di {
+    //    Bounds2D::with_size(self.tile().pos(), vec2::splat(TILE_ISIZE))
+    //}
 
     pub fn cargo(&self) -> Option<ResourceTyp> {
         self.cargo.get()
-    }
-
-    pub fn center(&self) -> vec2i {
-        self.bounds().center()
     }
 
     pub fn is_at_destination(&self) -> bool {
@@ -398,16 +374,16 @@ impl Pawn {
     }
 
     fn turret_attack(&self, g: &G, victim: &Pawn) {
-        let dir = (victim.tile.get() - self.tile.get()).as_f32();
+        let dir = (victim.center() - self.center()).as_f32();
         let rot = f32::atan2(dir.x(), -dir.y());
         self.rot.set(rot);
         self.attack_base(g, victim);
     }
 
     fn base_draw(&self, g: &G, out: &mut Out) {
-        out.draw_sprite_rot(L_SPRITES, self.sprite(), self.tile.pos(), self.rot.get());
+        out.draw_sprite_rot(L_SPRITES, self.sprite(), self.tile().pos(), self.rot.get());
         if let Some(res) = self.cargo.get() {
-            out.draw_sprite(L_SPRITES + 1, res.sprite(), self.tile.pos() + vec2(0, 8));
+            out.draw_sprite(L_SPRITES + 1, res.sprite(), self.tile().pos() + vec2(0, 8));
         }
     }
 
@@ -419,10 +395,6 @@ impl Pawn {
         self.base_draw(g, out);
     }
 
-    fn team(&self) -> Team {
-        self.team.get()
-    }
-
     //pub fn crab(tile: impl Into<vec2i16>) -> Self {
     //    Self::new(PawnTyp::Crablet, tile.into())
     //}
@@ -430,7 +402,7 @@ impl Pawn {
 
 impl Display for Pawn {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        write!(f, "{:?}{}", self.typ, self.id)
+        write!(f, "{:?}{}", self.typ, self.id())
     }
 }
 

@@ -135,28 +135,12 @@ impl HasTypeId for Pawn {
         &v.pawns
     }
 }
-impl HasId3 for Pawn {
-    fn set_id3(&mut self, id: Id) {
-        self.id = id
-    }
-    fn id(&self) -> Id {
-        self.id
-    }
-}
 impl HasTypeId for Building {
     fn typeid() -> EntityType {
         EntityType::Building
     }
     fn get_storage(v: &Entities) -> &MemKeep3<Self> {
         &v.buildings
-    }
-}
-impl HasId3 for Building {
-    fn set_id3(&mut self, id: Id) {
-        self.id = id
-    }
-    fn id(&self) -> Id {
-        self.id
     }
 }
 
@@ -189,7 +173,7 @@ impl Debug for Id {
 
 pub trait HasId3 {
     fn set_id3(&mut self, id: Id);
-    fn id(&self) -> Id;
+    //fn id(&self) -> Id;
 }
 
 #[cfg(test)]
@@ -208,11 +192,11 @@ mod test {
         expect_true!(pawn.id() != Id::INVALID);
         expect_true!(building.id() != Id::INVALID);
 
-        expect_true!(m.get::<Pawn>(pawn.id).is_some());
-        expect_true!(m.get::<Building>(pawn.id).is_none());
+        expect_true!(m.get::<Pawn>(pawn.id()).is_some());
+        expect_true!(m.get::<Building>(pawn.id()).is_none());
 
-        expect_true!(m.get::<Pawn>(building.id).is_none());
-        expect_true!(m.get::<Building>(building.id).is_some());
+        expect_true!(m.get::<Pawn>(building.id()).is_none());
+        expect_true!(m.get::<Building>(building.id()).is_some());
 
         //let v3 = m.get_dyn(p.id);
         //println!("{v3:?}");

@@ -23,7 +23,7 @@ fn check_pawns_home_consistency(g: &G) -> Result<()> {
             let Some(home) = g.building(home) else { bail!("{pawn}: home building does not exist: {home}") };
 
             // home should have pawn on record
-            if !home.workers.contains(pawn.id) {
+            if !home.workers.contains(pawn.id()) {
                 bail!("{pawn}: home building {home} does not have Pawn in workers: {:?}", &home.workers)
             }
         }
@@ -35,7 +35,7 @@ fn check_pawns_home_consistency(g: &G) -> Result<()> {
             let Some(pawn) = g.pawn(pawn) else { bail!("building {building} has non-exiting worker {pawn}") };
 
             // worker should know home building
-            if pawn.home != Some(building.id) {
+            if pawn.home != Some(building.id()) {
                 bail!("{pawn} does not have home {building}");
             }
         }

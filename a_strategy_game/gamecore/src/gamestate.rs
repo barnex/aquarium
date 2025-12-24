@@ -289,7 +289,7 @@ impl G {
             return false;
         }
         for b in self.buildings() {
-            if b.tile_bounds().contains(tile) {
+            if b.bounds().contains(tile) {
                 return false;
             }
         }
@@ -344,7 +344,7 @@ impl G {
     /// Pawn at given position, if any.
     /// TODO: make faster via a hierarchy.
     pub fn pawn_at(&self, tile: vec2i16) -> Option<&Pawn> {
-        self.pawns().find(|v| v.tile == tile)
+        self.pawns().find(|v| v.tile() == tile)
     }
 
     pub fn dyn_entities_at(&self, tile: vec2i16) -> impl Iterator<Item = Entity> {
@@ -425,21 +425,21 @@ impl G {
     /// Building at given position, if any.
     /// TODO: make faster via a hierarchy.
     pub fn building_at(&self, tile: vec2i16) -> Option<&Building> {
-        self.buildings().find(|v| v.tile_bounds().contains_incl(tile))
+        self.buildings().find(|v| v.bounds().contains_incl(tile))
     }
 
     /// Add a building, if the location is suitable.
     pub fn spawn_building(&self, building: Building) -> Option<&Building> {
         //❓check if building fits here
-        let bounds = building.tile_bounds();
+        let bounds = building.bounds();
         let mut footprint = cross(bounds.x_range(), bounds.y_range());
         let can_build = footprint.all(|(x, y)| self.is_buildable(vec2(x, y), building.typ));
         if !can_build {
-            log::trace!("ERROR spawning {:?} @ {}: cannot build here", building.typ, building.tile);
+            log::trace!("ERROR spawning {:?} @ {}: cannot build here", building.typ, building.tile());
             return None;
         }
 
-        log::trace!("spawn {:?} @ {}", building.typ, building.tile);
+        log::trace!("spawn {:?} @ {}", building.typ, building.tile());
         let building = self.spawn(building);
 
         building.init(self);
@@ -453,10 +453,10 @@ impl G {
             return;
         }
         if let Some(home) = pawn.home(self) {
-            home.workers.remove(&pawn.id);
+            home.workers.remove(&pawn.id());
         }
-        building.workers.insert(pawn.id);
-        pawn.home.set(Some(building.id));
+        building.workers.insert(pawn.id());
+        pawn.home.set(Some(building.id()));
     }
 
     // -------------------------------- Mouse
@@ -501,8 +501,8 @@ impl G {
     }
 
     pub(crate) fn deal_damage(&self, victim: &Pawn, amount: u8) {
-        victim.health.saturating_sub(amount);
-        if victim.health == 0 {
+        victim.get_health().saturating_sub(amount);
+        if victim.health() == 0 {
             self.kill(victim);
         }
     }

@@ -36,7 +36,7 @@ pub(super) fn visible_tile_range(g: &G) -> Bounds2D<i16> {
 
 pub(super) fn visible_pawns(g: &G) -> impl Iterator<Item = &Pawn> {
     let viewport = visible_tile_range(g);
-    g.pawns().filter(move |p| viewport.contains(p.tile.get()))
+    g.pawns().filter(move |p| viewport.contains(p.tile()))
 }
 
 pub(super) fn visible_entities(g: &G) -> impl Iterator<Item = Entity> {
@@ -117,7 +117,7 @@ fn draw_selection(g: &G, out: &mut Out) -> Status {
 
     // 🦀 Selected pawns
     for entity in g.selected_entities() {
-        out.draw_rect(L_SPRITES + 1, Rectangle::new(entity.bounds().map(|v| (v as i32) * TILE_ISIZE), RGBA::BLUE).with_fill(RGB::BLUE.with_alpha(64)));
+        out.draw_rect(L_SPRITES + 1, Rectangle::new(entity.bounds().flat_map(|v| (v as i32) * TILE_ISIZE), RGBA::BLUE).with_fill(RGB::BLUE.with_alpha(64)));
     }
     OK
 }

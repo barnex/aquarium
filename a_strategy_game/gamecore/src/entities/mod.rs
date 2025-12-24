@@ -1,3 +1,4 @@
+mod base;
 mod building;
 mod building_typ;
 mod entities;
@@ -7,6 +8,7 @@ mod pawn_typ;
 mod route;
 mod team;
 
+pub use base::*;
 pub use building::*;
 pub use building_typ::*;
 pub use entities::*;

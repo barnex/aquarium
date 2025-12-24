@@ -6,7 +6,7 @@ macro_rules! trace {
         #[cfg(debug_assertions)]
         {
             let slf = $slf;
-            if slf.traced().get(){
+            if slf.traced(){
                 log::trace!("{}: {}", slf.id(), caller!());
             }
         }
@@ -15,7 +15,7 @@ macro_rules! trace {
         #[cfg(debug_assertions)]
         {
             let slf = $slf;
-            if slf.traced().get(){
+            if slf.traced(){
                 log::trace!("{}: {}: {}", slf.id(), caller!(), format!($($arg)*));
             }
         }
