@@ -67,8 +67,14 @@ pub const TILE_VSIZE: vec2i = vec2(TILE_ISIZE, TILE_ISIZE);
 impl G {
     // ________________________________________________________________________________ entities
 
-    pub fn spawn<T: EntityT + HasTypeId>(&self, v: T) -> &T {
-        self.entities.insert(v)
+    pub fn spawn<T: EntityT + HasTypeId>(&self, e: T) -> &T {
+        debug_assert_eq!(e.id(), Id::INVALID, "need fresh entity");
+        self.entities.insert(e).with(|e| e.on_spawned(self))
+    }
+
+    pub fn kill<T: EntityT>(&self, e: &T) {
+        self.entities.remove(e.id());
+        e.on_killed(self)
     }
 
     pub fn entity(&self, id: Id) -> Option<Entity> {
@@ -309,11 +315,6 @@ impl G {
     //    //👇 keep worker list consistent
     //    pawn.home(self).map(|b| b.remove_dead_workers(self));
     //}
-
-    pub fn kill<'g>(&'g self, e: impl Into<Entity<'g>>) {
-        self.entities.remove(e.into().id())
-        // TODO: on_kill_hook
-    }
 
     //pub fn spawn(&self, pawn: Pawn) -> &Pawn {
     //    //log::trace!("spawn {:?} @ tile {}", pawn.typ, pawn.tile);

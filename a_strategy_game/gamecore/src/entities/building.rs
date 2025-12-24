@@ -24,6 +24,11 @@ impl HasId3 for Building {
 }
 
 impl EntityT for Building {
+    fn on_spawned(&self, g: &G) {
+        trace!(self);
+        self.spawn_default_workers(g);
+    }
+
     fn draw(&self, g: &G, out: &mut Out) {
         let building = self;
         // 🏭 Building sprite
@@ -74,14 +79,13 @@ impl Building {
 
     /// Building::init -> spawn the workers for this building.
     fn spawn_default_workers(&self, g: &G) {
-        //TODO
-        //log::trace!("spawn default workers for {self}");
-        //let (pawntyp, num) = self.typ.default_workers();
+        let (pawntyp, num) = self.typ.default_workers();
+        trace!(self, "{num} x {pawntyp:?}");
 
-        //for _ in 0..num {
-        //    let pawn = g.spawn(pawntyp, self.tile, self.team);
-        //    g.assign_to(pawn, self);
-        //}
+        for _ in 0..num {
+            let pawn = g.spawn(Pawn::new(pawntyp, self.tile(), self.team()));
+            g.assign_to(pawn, self);
+        }
     }
 
     pub fn tick(&self, g: &G) {

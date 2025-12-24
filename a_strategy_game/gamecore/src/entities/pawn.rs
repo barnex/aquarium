@@ -273,12 +273,6 @@ impl Pawn {
         }
     }
 
-    fn is_commandable(&self) -> bool {
-        match self.typ {
-            _ => true,
-        }
-    }
-
     pub(crate) fn can_move(&self) -> bool {
         self.typ.can_move()
     }

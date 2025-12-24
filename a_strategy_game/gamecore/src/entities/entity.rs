@@ -1,15 +1,25 @@
 use crate::prelude::*;
 
 pub trait EntityT: Any + BaseT + Debug + 'static + HasId3 {
+    /// Called once right after being spawned
+    fn on_spawned(&self, g: &G) {}
+
+    /// Called once right after being killed (removed)
+    fn on_killed(&self, g: &G) {}
+
     fn draw(&self, g: &G, out: &mut Out);
+
     fn can_move(&self) -> bool;
+
     fn size(&self) -> vec2u8 {
         //👇 Default size
         vec2(1, 1)
     }
+
     fn bounds(&self) -> Bounds2Di16 {
         Bounds2D::with_size(self.tile(), self.size().map(|v| v as i16))
     }
+
     // Center pixel in world coordinates
     fn center(&self) -> vec2i {
         self.bounds().map(|tile| tile.pos()).center()
