@@ -5,7 +5,7 @@ pub struct Building {
     base: Base,
 
     pub typ: BuildingTyp,
-    pub workers: CSet<Id>,
+    workers: CSet<Id>,
     pub _downstream: CSet<Id>,
     pub _upstream: CSet<Id>,
     resources: [Cel<u16>; Self::MAX_RES_SLOTS],
@@ -27,9 +27,10 @@ impl EntityT for Building {
     fn on_spawned(&self, g: &G) {
         trace!(self);
         self.spawn_default_workers(g);
+        update_downstream_buildings(g); // << inefficient
     }
 
-    fn draw(&self, g: &G, out: &mut Out) {
+    fn draw(&self, _: &G, out: &mut Out) {
         let building = self;
         // 🏭 Building sprite
         out.draw_sprite(L_SPRITES, building.typ.sprite(), building.tile().pos());
@@ -70,11 +71,37 @@ impl Building {
         }
     }
 
-    /// Called post-insert to initialized whatever is needed after building.
-    pub fn init(&self, g: &G) {
-        log::trace!("init {self}");
-        update_downstream_buildings(g);
-        self.spawn_default_workers(g);
+    pub fn can_spawn(&self, g: &G) -> bool {
+        //❓check if building fits here
+        let bounds = self.bounds();
+        let mut footprint = cross(bounds.x_range(), bounds.y_range());
+
+        let is_buildable = |tile: vec2i16, typ: BuildingTyp| {
+            if !typ.can_build_on(g.tile_at(tile)) {
+                return false;
+            }
+            for b in g.buildings() {
+                if b.bounds().contains(tile) {
+                    return false;
+                }
+            }
+            true
+        };
+
+        footprint.all(|(x, y)| is_buildable(vec2(x, y), self.typ))
+    }
+
+    pub fn tick(&self, g: &G) {
+        match self.typ {
+            BuildingTyp::HQ => (),
+            BuildingTyp::Farm => (),
+            BuildingTyp::Quarry => (),
+            BuildingTyp::StarNest => self.tick_star_nest(g),
+        }
+    }
+
+    pub fn workers(&self) -> &CSet<Id> {
+        &self.workers
     }
 
     /// Building::init -> spawn the workers for this building.
@@ -88,19 +115,9 @@ impl Building {
         }
     }
 
-    pub fn tick(&self, g: &G) {
-        match self.typ {
-            BuildingTyp::HQ => (),
-            BuildingTyp::Farm => (),
-            BuildingTyp::Quarry => (),
-            BuildingTyp::StarNest => self.tick_star_nest(g),
-        }
-    }
-
     fn tick_star_nest(&self, g: &G) {
         // TODO: delay
         if g.tick % 128 == 0 {
-            self.remove_dead_workers(g);
             if self.workers.is_empty() {
                 self.spawn_default_workers(g);
             }
@@ -199,10 +216,6 @@ impl Building {
 
     pub fn entrance(&self) -> vec2i16 {
         self.tile() // TODO
-    }
-
-    pub(crate) fn remove_dead_workers(&self, g: &G) {
-        self.workers.retain(|&id| g.pawn(id).is_some());
     }
 }
 

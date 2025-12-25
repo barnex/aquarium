@@ -1,11 +1,23 @@
 use crate::prelude::*;
 
 pub trait EntityT: Any + BaseT + Debug + 'static + HasId3 {
+    // Called before the entity is inserted into the game,
+    // to determine if it can spawn here.
+    // Reason to return `false`: e.g., cannot build on top of other building.
+    //fn can_spawn(&self, g: &G) -> bool {
+    //    trace!(self, "default no-op");
+    //    true
+    //}
+
     /// Called once right after being spawned
-    fn on_spawned(&self, g: &G) {}
+    fn on_spawned(&self, g: &G) {
+        trace!(self, "default no-op");
+    }
 
     /// Called once right after being killed (removed)
-    fn on_killed(&self, g: &G) {}
+    fn on_killed(&self, g: &G) {
+        trace!(self, "default no-op");
+    }
 
     fn draw(&self, g: &G, out: &mut Out);
 

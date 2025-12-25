@@ -23,14 +23,14 @@ fn check_pawns_home_consistency(g: &G) -> Result<()> {
             let Some(home) = g.building(home) else { bail!("{pawn}: home building does not exist: {home}") };
 
             // home should have pawn on record
-            if !home.workers.contains(pawn.id()) {
-                bail!("{pawn}: home building {home} does not have Pawn in workers: {:?}", &home.workers)
+            if !home.workers().contains(pawn.id()) {
+                bail!("{pawn}: home building {home} does not have Pawn in workers: {:?}", &home.workers())
             }
         }
     }
     // home -> pawn
     for building in g.buildings() {
-        for pawn in building.workers.iter() {
+        for pawn in building.workers().iter() {
             // worker should exist
             let Some(pawn) = g.pawn(pawn) else { bail!("building {building} has non-exiting worker {pawn}") };
 

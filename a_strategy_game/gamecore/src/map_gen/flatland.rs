@@ -3,7 +3,7 @@ use crate::prelude::*;
 pub fn flatland() -> G {
     let mut g = G::new(vec2(480, 320), Team::Red);
 
-    let hq = g.spawn_building(Building::new(BuildingTyp::HQ, (12, 8), g.player)).unwrap();
+    let hq = g.spawn(Building::new(BuildingTyp::HQ, (12, 8), g.player));
 
     //g.spawn(PawnTyp::Kitten, vec2(17, 7), g.player);
     //let crab = g.spawn_pawn(Pawn::new(PawnTyp::Crab, vec2(10, 4), g.player).with(|p| p.cargo = Some(ResourceTyp::Leaf).cel()));

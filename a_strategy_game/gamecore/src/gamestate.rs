@@ -67,6 +67,15 @@ pub const TILE_VSIZE: vec2i = vec2(TILE_ISIZE, TILE_ISIZE);
 impl G {
     // ________________________________________________________________________________ entities
 
+    //pub fn try_spawn<T: EntityT + HasTypeId>(&self, e: T) -> Option<&T> {
+    //    if e.can_spawn(self) {
+    //        Some(self.spawn(e))
+    //    } else {
+    //        trace!(e, "cannot spawn here");
+    //        None
+    //    }
+    //}
+
     pub fn spawn<T: EntityT + HasTypeId>(&self, e: T) -> &T {
         debug_assert_eq!(e.id(), Id::INVALID, "need fresh entity");
         self.entities.insert(e).with(|e| e.on_spawned(self))
@@ -286,22 +295,6 @@ impl G {
         //true
     }
 
-    /// 🧱 Can one generally build something on this tile?
-    pub(crate) fn is_buildable(&self, tile: vec2i16, typ: BuildingTyp) -> bool {
-        //if !Self::tile_is_walkable(self.tile_at(tile)) {
-        //    return false;
-        //}
-        if !typ.can_build_on(self.tile_at(tile)) {
-            return false;
-        }
-        for b in self.buildings() {
-            if b.bounds().contains(tile) {
-                return false;
-            }
-        }
-        true
-    }
-
     // -------------------------------- Pawns
 
     // Add a pawn to the game and return it (now with `id` set).
@@ -429,24 +422,24 @@ impl G {
         self.buildings().find(|v| v.bounds().contains_incl(tile))
     }
 
-    /// Add a building, if the location is suitable.
-    pub fn spawn_building(&self, building: Building) -> Option<&Building> {
-        //❓check if building fits here
-        let bounds = building.bounds();
-        let mut footprint = cross(bounds.x_range(), bounds.y_range());
-        let can_build = footprint.all(|(x, y)| self.is_buildable(vec2(x, y), building.typ));
-        if !can_build {
-            log::trace!("ERROR spawning {:?} @ {}: cannot build here", building.typ, building.tile());
-            return None;
-        }
+    // Add a building, if the location is suitable.
+    //pub fn spawn_building(&self, building: Building) -> Option<&Building> {
+    //    //❓check if building fits here
+    //    let bounds = building.bounds();
+    //    let mut footprint = cross(bounds.x_range(), bounds.y_range());
+    //    let can_build = footprint.all(|(x, y)| self.is_buildable(vec2(x, y), building.typ));
+    //    if !can_build {
+    //        log::trace!("ERROR spawning {:?} @ {}: cannot build here", building.typ, building.tile());
+    //        return None;
+    //    }
 
-        log::trace!("spawn {:?} @ {}", building.typ, building.tile());
-        let building = self.spawn(building);
+    //    log::trace!("spawn {:?} @ {}", building.typ, building.tile());
+    //    let building = self.spawn(building);
 
-        building.init(self);
+    //    building.init(self);
 
-        Some(building)
-    }
+    //    Some(building)
+    //}
 
     /// 🏠 Assign pawn to work at building.
     pub fn assign_to(&self, pawn: &Pawn, building: &Building) {
@@ -454,9 +447,9 @@ impl G {
             return;
         }
         if let Some(home) = pawn.home(self) {
-            home.workers.remove(&pawn.id());
+            home.workers().remove(&pawn.id());
         }
-        building.workers.insert(pawn.id());
+        building.workers().insert(pawn.id());
         pawn.home.set(Some(building.id()));
     }
 

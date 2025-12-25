@@ -31,6 +31,11 @@ impl HasId3 for Pawn {
 }
 
 impl EntityT for Pawn {
+    fn on_killed(&self, g: &G) {
+        trace!(self);
+        self.home(g).map(|h| h.workers().remove(&self.id()));
+    }
+
     fn draw(&self, g: &G, out: &mut Out) {
         match self.typ {
             PawnTyp::Kitten => self.base_draw(g, out),
@@ -305,10 +310,6 @@ impl Pawn {
         self.route.destination()
     }
 
-    //pub fn bounds(&self) -> Bounds2Di {
-    //    Bounds2D::with_size(self.tile().pos(), vec2::splat(TILE_ISIZE))
-    //}
-
     pub fn cargo(&self) -> Option<ResourceTyp> {
         self.cargo.get()
     }
@@ -390,10 +391,6 @@ impl Pawn {
     fn draw_turret(&self, g: &G, out: &mut Out) {
         self.base_draw(g, out);
     }
-
-    //pub fn crab(tile: impl Into<vec2i16>) -> Self {
-    //    Self::new(PawnTyp::Crablet, tile.into())
-    //}
 }
 
 impl Display for Pawn {
