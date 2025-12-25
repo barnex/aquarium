@@ -129,6 +129,17 @@ impl Cel<u16> {
     }
 }
 
+impl Cel<u8> {
+    /// Increment value, but clamped to `max`.
+    /// E.g.:
+    ///     fn heal(){
+    ///         health.clamped_add(100, 1)
+    ///     }
+    pub fn clamped_add(&self, max: u8, rhs: u8) {
+        self.set(self.get().saturating_add(rhs).clamp(0, max));
+    }
+}
+
 // NOTE: operators (+, -, *, /) not very useful due to the need to borrow cel (not Copy).
 
 // ---------- Option

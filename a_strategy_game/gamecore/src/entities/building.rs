@@ -140,7 +140,10 @@ impl Building {
         }
         // slowly drain resources
         if g.tick % 16 == 0 {
-            self.resources[0].saturating_sub(1);
+            if self.resources[0].get() > 0 {
+                self.get_health().clamped_add(self.typ.default_health(), 1);
+                self.resources[0].saturating_sub(1);
+            }
         }
     }
 
