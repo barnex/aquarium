@@ -1,30 +1,56 @@
 use crate::prelude::*;
+use enum_dispatch::enum_dispatch;
 
 /// Short-lived visual effects.
 #[derive(Default)]
 pub struct Effects {
-    bolts: RefCell<Vec<Bolt>>,
+    effects: RefCell<Vec<(u64, Effect)>>,
+}
+
+#[enum_dispatch]
+pub enum Effect {
+    Bolt,
+}
+
+#[enum_dispatch(Effect)]
+trait EffectT {
+    fn draw(&self, out: &mut Out);
+    fn ttl(&self) -> u64;
 }
 
 impl Effects {
     pub fn add_bolt(&self, g: &G, start: vec2i, end: vec2i) {
-        self.bolts.borrow_mut().push(Bolt { born: g.tick, start, end });
+        self.add(g, Bolt { start, end })
+    }
+
+    pub fn add(&self, g: &G, effect: impl Into<Effect>) {
+        let effect = effect.into();
+        self.effects.borrow_mut().push((g.tick + effect.ttl(), effect));
     }
 
     pub fn tick_and_draw(&self, g: &G, out: &mut Out) {
-        let mut bolts = self.bolts.borrow_mut();
+        let mut effects = self.effects.borrow_mut();
 
-        let TTL = 1; // ticks
-        bolts.retain(|b| b.born + TTL > g.tick);
+        effects.retain(|(eol, _)| *eol > g.tick);
 
-        for b in bolts.iter() {
-            out.draw_line(L_EFFECTS, Line::new(b.start, b.end).with_color(RGBA::YELLOW.with_alpha(128)).with_width(3));
+        for (_, b) in effects.iter() {
+            b.draw(out)
         }
     }
+
+    pub fn add_crater(&self, tile: vec2i16) {}
 }
 
-struct Bolt {
-    born: u64,
+pub struct Bolt {
     start: vec2i,
     end: vec2i,
+}
+
+impl EffectT for Bolt {
+    fn draw(&self, out: &mut Out) {
+        out.draw_line(L_EFFECTS, Line::new(self.start, self.end).with_color(RGBA::YELLOW.with_alpha(128)).with_width(3));
+    }
+    fn ttl(&self) -> u64 {
+        1
+    }
 }

@@ -7,6 +7,7 @@ edition = "2024"
 anyhow = { workspace = true }
 cel = { workspace = true }
 core_util = { workspace = true }
+enum_dispatch = { workspace = true }
 fixed_str = { workspace = true }
 fnv = { workspace = true }
 gamelib = { workspace = true }

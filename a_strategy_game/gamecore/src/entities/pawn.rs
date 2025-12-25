@@ -43,6 +43,8 @@ impl EntityT for Pawn {
                 g.resources.insert(self.tile(), res);
             }
         }
+
+        g.effects.add_crater(self.tile())
     }
 
     fn draw(&self, g: &G, out: &mut Out) {
