@@ -30,6 +30,15 @@ impl EntityT for Building {
         update_downstream_buildings(g); // << inefficient
     }
 
+    fn on_killed(&self, g: &G) {
+        trace!(self);
+        let bounds = self.bounds();
+        let footprint = cross(bounds.x_range(), bounds.y_range());
+        for tile in footprint {
+            g.effects.add_crater(g, tile.into());
+        }
+    }
+
     fn draw(&self, _: &G, out: &mut Out) {
         let building = self;
         // 🏭 Building sprite
