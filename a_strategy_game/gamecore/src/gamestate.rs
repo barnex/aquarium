@@ -380,6 +380,12 @@ impl G {
         self.selected_entity_ids().filter_map(|id| self.entity(id))
     }
 
+    /// All currently selected Entities of type `T`. E.g.
+    ///     g.selected::<Pawn>()
+    pub fn selected<T: EntityT + HasTypeId>(&self) -> impl Iterator<Item = &T> {
+        self.selected_entity_ids().filter_map(|id| self.get::<T>(id))
+    }
+
     // All currently selected Pawns.
     //pub(crate) fn selected_pawn_entities(&self) -> impl Iterator<Item = PawnRef> {
     //    self.selected_entities().filter_map(|e| e.downcast())

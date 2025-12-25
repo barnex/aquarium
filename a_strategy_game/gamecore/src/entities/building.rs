@@ -8,7 +8,7 @@ pub struct Building {
     workers: CSet<Id>,
     pub _downstream: CSet<Id>,
     pub _upstream: CSet<Id>,
-    resources: [Cel<u16>; Self::MAX_RES_SLOTS],
+    pub resources: [Cel<u16>; Self::MAX_RES_SLOTS],
 }
 
 impl BaseT for Building {

@@ -23,10 +23,11 @@ impl G {
     /// execute a single command
     fn exec_command(&mut self, cmd: &str) -> Result<()> {
         match cmd.trim().split_ascii_whitespace().collect_vec().as_slice() {
+            &["drain" | "dr"] => Ok(self.selected::<Building>().for_each(|e| e.resources.iter().for_each(|v| v.set(0)))),
             &["inspect" | "in"] => Ok(self.selected_entities().for_each(|e| self.inspect(e))),
             &["uninspect" | "unin"] => Ok(self.inspected.clear()),
             //&["sleep" | "sl", t] => Ok(t.parse::<u8>()?.pipe(|t| self.selected_entities().for_each(|e| e.sleep(t)))),
-            &["moveto" | "mv", x, y] => Ok(vec2(x.parse()?, y.parse()?).pipe(|dst| self.selected_entities().filter_map(|e| e.downcast::<Pawn>()).for_each(|p| p.set_destination(self, dst).ignore()))),
+            &["moveto" | "mv", x, y] => Ok(vec2(x.parse()?, y.parse()?).pipe(|dst| self.selected::<Pawn>().for_each(|p| p.set_destination(self, dst).ignore()))),
             &["setcamera" | "setcam", x, y] => Ok(self.camera_pos = vec2(x.parse()?, y.parse()?)),
             &["sanitycheck" | "sc"] => sanity_check(self),
             &["sanitycheck" | "sc", "off"] => Ok(self.debug.pause_on_sanity_failure = false),

@@ -5,6 +5,16 @@ use memkeep::MemKeep;
 pub struct Entities {
     pawns: MemKeep3<Pawn>,
     buildings: MemKeep3<Building>,
+    //⚠️👇 After adding a new type: also add to `fn gc()`.
+}
+
+impl Entities {
+    ///⚠️ Must be called after each `tick`.
+    ///Frees the memory used by removed entities.
+    pub(crate) fn gc(&mut self) {
+        self.pawns.gc();
+        self.buildings.gc();
+    }
 }
 
 #[derive(Debug, Serialize, Deserialize, PartialEq, Eq, PartialOrd, Ord, Clone, Copy, Hash)]
@@ -33,6 +43,13 @@ impl Entities {
         v
     }
 
+    /// Try to get the entity of given type. E.g.
+    ///
+    ///     g.get::<Pawn>(id)
+    ///     g.get::<Building>(id)
+    ///     ...
+    ///
+    /// Returns None if no such entity exists.
     pub fn get<T>(&self, id: Id) -> Option<&T>
     where
         T: EntityT + HasTypeId,
@@ -44,17 +61,18 @@ impl Entities {
         }
     }
 
-    pub fn get_dyn(&self, id: Id) -> Option<Entity> {
+    /// Try to get the entity with given id.
+    pub fn get_dyn<'s>(&'s self, id: Id) -> Option<Entity<'s>> {
         match id.type_id {
             EntityType::Pawn => self.pawns.get_unchecked(id).map(|v| Entity::from(v)),
             EntityType::Building => self.buildings.get_unchecked(id).map(|v| Entity::from(v)),
         }
     }
 
-    pub(crate) fn iter_dyn(&self) -> impl Iterator<Item = Entity> {
-        self.pawns.iter().map(|v| Entity::from(v)).chain(self.buildings.iter().map(|v| Entity::from(v)))
-    }
-
+    /// Iterate over all entities of given type. E.g.
+    ///
+    ///     g.iter::<Pawn>()
+    ///
     pub fn iter<T>(&self) -> impl Iterator<Item = &T>
     where
         T: EntityT + HasTypeId,
@@ -63,9 +81,9 @@ impl Entities {
         shard.iter()
     }
 
-    pub(crate) fn gc(&mut self) {
-        self.pawns.gc();
-        self.buildings.gc();
+    /// Iterate over all entities.
+    pub(crate) fn iter_dyn<'s>(&'s self) -> impl Iterator<Item = Entity<'s>> {
+        self.pawns.iter().map(|v| Entity::from(v)).chain(self.buildings.iter().map(|v| Entity::from(v)))
     }
 
     pub fn remove(&self, id: Id) {
@@ -77,7 +95,7 @@ impl Entities {
 }
 
 #[derive(Serialize, Deserialize)]
-struct MemKeep3<T> {
+pub struct MemKeep3<T> {
     inner: MemKeep<T>,
     type_id: u8,
 }
@@ -89,10 +107,10 @@ impl<T> MemKeep3<T> {
         self.inner.get(id.id)
     }
 
-    pub fn get(&self, id: Id) -> Option<&T> {
-        debug_assert_eq!(id.type_id as u8, self.type_id);
-        self.inner.get(id.id)
-    }
+    //pub fn get(&self, id: Id) -> Option<&T> {
+    //    debug_assert_eq!(id.type_id as u8, self.type_id);
+    //    self.inner.get(id.id)
+    //}
 
     pub fn iter(&self) -> impl Iterator<Item = &T> {
         self.inner.iter()
