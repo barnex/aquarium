@@ -251,6 +251,18 @@ impl Pawn {
         FAIL
     }
 
+    /// 🏠 Assign pawn to work at building.
+    pub fn assign_to(&self, g: &G, building: &Building) {
+        if !self.can_assign_to(building) {
+            return;
+        }
+        if let Some(home) = self.home(g) {
+            home.workers().remove(&self.id());
+        }
+        building.workers().insert(self.id());
+        self.home.set(Some(building.id()));
+    }
+
     pub fn home<'g>(&self, g: &'g G) -> Option<&'g Building> {
         g.building(self.home.get()?)
     }

@@ -113,7 +113,7 @@ impl Building {
 
         for _ in 0..num {
             let pawn = g.spawn(Pawn::new(pawntyp, self.tile(), self.team()));
-            g.assign_to(pawn, self);
+            pawn.assign_to(g, self);
         }
     }
 

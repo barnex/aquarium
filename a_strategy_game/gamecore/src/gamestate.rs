@@ -441,18 +441,6 @@ impl G {
     //    Some(building)
     //}
 
-    /// 🏠 Assign pawn to work at building.
-    pub fn assign_to(&self, pawn: &Pawn, building: &Building) {
-        if !pawn.can_assign_to(building) {
-            return;
-        }
-        if let Some(home) = pawn.home(self) {
-            home.workers().remove(&pawn.id());
-        }
-        building.workers().insert(pawn.id());
-        pawn.home.set(Some(building.id()));
-    }
-
     // -------------------------------- Mouse
 
     /// Current mouse position in world coordinates.

@@ -99,10 +99,9 @@ fn command_selected_entities(g: &mut G) {
                 Action::None => (),
                 Action::Move => g.selected_entities().filter_map(|e| e.downcast::<Pawn>()).for_each(|e| e.set_destination(g, mouse).ignore()),
                 Action::Assign => {
-                    log::warn!("TODO");
-                    //if let Some(building) = g.building_at(mouse) {
-                    //    g.selected_pawns().for_each(|pawn| g.assign_to(pawn, building));
-                    //}
+                    if let Some(building) = g.building_at(mouse) {
+                        g.selected_entities().filter_map(|e| e.downcast::<Pawn>()).for_each(|pawn| pawn.assign_to(g, building));
+                    }
                 }
             }
         }
