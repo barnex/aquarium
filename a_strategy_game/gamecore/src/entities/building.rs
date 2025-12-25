@@ -72,6 +72,8 @@ impl Building {
     }
 
     pub fn can_spawn(&self, g: &G) -> bool {
+        debug_assert!(self.id() == Id::INVALID, "can_spawn check is only useful pre-insert");
+
         //❓check if building fits here
         let bounds = self.bounds();
         let mut footprint = cross(bounds.x_range(), bounds.y_range());

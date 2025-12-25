@@ -133,7 +133,10 @@ fn doodle_on_map(g: &mut G) {
                         BuildingTyp::StarNest => Team::Pests,
                         _ => g.player,
                     };
-                    g.spawn(Building::new(typ, mouse, team));
+                    let building = Building::new(typ, mouse, team);
+                    if building.can_spawn(g) {
+                        g.spawn(building);
+                    }
                 }
             }
             Tool::Resource(typ) => {
