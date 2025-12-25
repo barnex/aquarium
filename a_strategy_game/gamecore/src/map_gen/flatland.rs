@@ -1,7 +1,7 @@
 use crate::prelude::*;
 
 pub fn flatland() -> G {
-    let mut g = G::new(vec2(480, 320), Team::Red);
+    let g = G::new(vec2(480, 320), Team::Red);
 
     let hq = g.spawn(Building::new(BuildingTyp::HQ, (12, 8), g.player));
 

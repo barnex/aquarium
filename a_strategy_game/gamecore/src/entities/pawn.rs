@@ -116,6 +116,9 @@ impl Pawn {
     }
 
     fn tick_delivery_work(&self, g: &G, home: &Building) {
+        //👇 corner case: cargo can be on top of a building :(
+        // TODO: Should not be allowed to walk on a building.
+        // TODO: There should not be resources on top of a building.
         self.try_pick_up_cargo(g, home);
 
         let on_building = g.building_at(self.tile());

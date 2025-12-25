@@ -44,7 +44,7 @@ impl G {
             &["i" | "inspect_under_cursor"] => Ok(toggle(&mut self.debug.inspect_under_cursor)),
             &["tr" | "trace"] => Ok(self.selected_entities().for_each(|e| e.get_traced().set(true))),
             //&["ut" | "untrace"] => Ok(self.entities().for_each(|e| e.traced().set(false))),
-            &["kill"] => Ok(self.selected_entity_ids().for_each(|id| self.kill_id(id))),
+            &["kill"] => Ok(self.selected_entities().for_each(|e| self.kill(e))),
             &[cmd, ..] => Err(anyhow!("unknown command: {cmd:?}")),
             &[] => Ok(()),
         }
