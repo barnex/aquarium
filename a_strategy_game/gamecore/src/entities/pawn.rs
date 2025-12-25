@@ -268,6 +268,7 @@ impl Pawn {
 
     /// 🏠 Assign pawn to work at building.
     pub fn assign_to(&self, g: &G, building: &Building) {
+        trace!(self, "{building}");
         if !self.can_assign_to(building) {
             return;
         }
@@ -413,7 +414,7 @@ impl Pawn {
         self.attack_base(g, victim);
     }
 
-    fn base_draw(&self, g: &G, out: &mut Out) {
+    fn base_draw(&self, _g: &G, out: &mut Out) {
         out.draw_sprite_rot(L_SPRITES, self.sprite(), self.tile().pos(), self.rot.get());
         if let Some(res) = self.cargo.get() {
             out.draw_sprite(L_SPRITES + 1, res.sprite(), self.tile().pos() + vec2(0, 8));

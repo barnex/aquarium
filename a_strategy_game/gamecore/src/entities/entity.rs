@@ -1,6 +1,6 @@
 use crate::prelude::*;
 
-pub trait EntityT: Any + BaseT + Debug + 'static + HasId3 {
+pub trait EntityT: Any + BaseT + Debug + Display + 'static + HasId3 {
     // Called before the entity is inserted into the game,
     // to determine if it can spawn here.
     // Reason to return `false`: e.g., cannot build on top of other building.
@@ -10,12 +10,12 @@ pub trait EntityT: Any + BaseT + Debug + 'static + HasId3 {
     //}
 
     /// Called once right after being spawned
-    fn on_spawned(&self, g: &G) {
+    fn on_spawned(&self, _g: &G) {
         trace!(self, "default no-op");
     }
 
     /// Called once right after being killed (removed)
-    fn on_killed(&self, g: &G) {
+    fn on_killed(&self, _g: &G) {
         trace!(self, "default no-op");
     }
 
@@ -69,6 +69,6 @@ impl<'g> From<&'g Building> for Entity<'g> {
 
 impl<'g> Debug for Entity<'g> {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        self.0.fmt(f)
+        write!(f, "{:?}", self.0)
     }
 }

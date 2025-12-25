@@ -7,7 +7,7 @@ macro_rules! trace {
         {
             let slf = $slf;
             if slf.traced(){
-                log::trace!("{}: {}", slf.id(), caller!());
+                log::trace!("{}: {}", slf, caller!());
             }
         }
     };
@@ -16,7 +16,7 @@ macro_rules! trace {
         {
             let slf = $slf;
             if slf.traced(){
-                log::trace!("{}: {}: {}", slf.id(), caller!(), format!($($arg)*));
+                log::trace!("{}: {}: {}", slf, caller!(), format!($($arg)*));
             }
         }
     };
