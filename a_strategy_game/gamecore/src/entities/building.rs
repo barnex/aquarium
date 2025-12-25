@@ -32,6 +32,11 @@ impl EntityT for Building {
 
     fn on_killed(&self, g: &G) {
         trace!(self);
+
+        //🏠 unlink workers from home
+        self.workers().iter().filter_map(|id| g.pawn(id)).for_each(|p| p.home.set(None));
+
+        //💥 draw crater effect
         let bounds = self.bounds();
         let footprint = cross(bounds.x_range(), bounds.y_range());
         for tile in footprint {
