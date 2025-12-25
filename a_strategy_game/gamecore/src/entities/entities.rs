@@ -86,10 +86,10 @@ impl Entities {
         self.pawns.iter().map(|v| Entity::from(v)).chain(self.buildings.iter().map(|v| Entity::from(v)))
     }
 
-    pub fn remove(&self, id: Id) {
+    pub fn remove(&self, id: Id) -> Option<Entity> {
         match id.type_id {
-            EntityType::Pawn => drop(self.pawns.remove(id)),
-            EntityType::Building => drop(self.buildings.remove(id)),
+            EntityType::Pawn => self.pawns.remove(id).map(|e| Entity::from(e)),
+            EntityType::Building => self.buildings.remove(id).map(|e| Entity::from(e)),
         }
     }
 }

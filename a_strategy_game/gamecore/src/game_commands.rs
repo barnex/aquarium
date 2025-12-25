@@ -26,7 +26,7 @@ impl G {
             &["drain" | "dr"] => Ok(self.selected::<Building>().for_each(|e| e.resources.iter().for_each(|v| v.set(0)))),
             &["inspect" | "in"] => Ok(self.selected_entities().for_each(|e| self.inspect(e))),
             &["uninspect" | "unin"] => Ok(self.inspected.clear()),
-            //&["sleep" | "sl", t] => Ok(t.parse::<u8>()?.pipe(|t| self.selected_entities().for_each(|e| e.sleep(t)))),
+            &["sleep" | "sl", t] => Ok(t.parse::<u8>()?.pipe(|t| self.selected_entities().for_each(|e| e.sleep(t)))),
             &["moveto" | "mv", x, y] => Ok(vec2(x.parse()?, y.parse()?).pipe(|dst| self.selected::<Pawn>().for_each(|p| p.set_destination(self, dst).ignore()))),
             &["setcamera" | "setcam", x, y] => Ok(self.camera_pos = vec2(x.parse()?, y.parse()?)),
             &["sanitycheck" | "sc"] => sanity_check(self),
@@ -44,7 +44,7 @@ impl G {
             &["i" | "inspect_under_cursor"] => Ok(toggle(&mut self.debug.inspect_under_cursor)),
             &["tr" | "trace"] => Ok(self.selected_entities().for_each(|e| e.get_traced().set(true))),
             //&["ut" | "untrace"] => Ok(self.entities().for_each(|e| e.traced().set(false))),
-            //&["kill"] => Ok(self.selected_entities().for_each(|e| e.kill())),
+            &["kill"] => Ok(self.selected_entity_ids().for_each(|id| self.kill_id(id))),
             &[cmd, ..] => Err(anyhow!("unknown command: {cmd:?}")),
             &[] => Ok(()),
         }

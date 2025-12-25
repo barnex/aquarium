@@ -33,7 +33,16 @@ impl HasId3 for Pawn {
 impl EntityT for Pawn {
     fn on_killed(&self, g: &G) {
         trace!(self);
+
+        // ☠️ remove dead worker from factory
         self.home(g).map(|h| h.workers().remove(&self.id()));
+
+        // ☘️ drop cargo on the floor (if floor empty).
+        if let Some(res) = self.cargo() {
+            if g.resources.at(self.tile()).is_none() {
+                g.resources.insert(self.tile(), res);
+            }
+        }
     }
 
     fn draw(&self, g: &G, out: &mut Out) {

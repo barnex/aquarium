@@ -81,9 +81,16 @@ impl G {
         self.entities.insert(e).with(|e| e.on_spawned(self))
     }
 
+    // TODO: papercut: does not Accept Entity<'g> :(
     pub fn kill<T: EntityT>(&self, e: &T) {
         self.entities.remove(e.id());
         e.on_killed(self)
+    }
+
+    pub fn kill_id(&self, id: Id) {
+        if let Some(e) = self.entities.remove(id) {
+            e.on_killed(self)
+        }
     }
 
     pub fn entity(&self, id: Id) -> Option<Entity> {
