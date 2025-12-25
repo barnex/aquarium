@@ -65,7 +65,6 @@ impl Pawn {
         Self {
             base: Base::new(tile, team, typ.default_health()),
             typ,
-
             route: default(),
             home: None.cel(),
             cargo: None.cel(),
@@ -97,7 +96,7 @@ impl Pawn {
             self.tick_attack(g)
         }
 
-        // 😴
+        // 😴 nothing left to do
         if self.can_move() {
             self.take_personal_space(g);
         }
@@ -117,6 +116,8 @@ impl Pawn {
     }
 
     fn tick_delivery_work(&self, g: &G, home: &Building) {
+        self.try_pick_up_cargo(g, home);
+
         let on_building = g.building_at(self.tile());
         let on_home = on_building.map(|b| b.id()) == Some(home.id());
 
@@ -156,7 +157,6 @@ impl Pawn {
     ///   +----+
     fn tick_away_from_building(&self, g: &G, home: &Building) {
         trace!(self);
-        self.try_pick_up_cargo(g, home);
         match self.cargo() {
             Some(_) => self.go_home(g),
             None => self.go_to_near_resource(g, home).or_else(|| self.go_home(g)),
