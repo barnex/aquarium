@@ -87,12 +87,6 @@ impl G {
         e.on_killed(self)
     }
 
-    //pub fn kill_id(&self, id: Id) {
-    //    if let Some(e) = self.entities.remove(id) {
-    //        e.on_killed(self)
-    //    }
-    //}
-
     pub fn entity(&self, id: Id) -> Option<Entity> {
         self.entities.get_dyn(id)
     }
@@ -476,7 +470,7 @@ impl G {
         }
     }
 
-    pub(crate) fn deal_damage(&self, victim: &Pawn, amount: u8) {
+    pub(crate) fn deal_damage(&self, victim: Entity, amount: u8) {
         victim.get_health().saturating_sub(amount);
         if victim.health() == 0 {
             self.kill(victim);

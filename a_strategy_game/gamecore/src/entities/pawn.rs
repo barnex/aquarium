@@ -368,34 +368,43 @@ impl Pawn {
     fn tick_attack(&self, g: &G) {
         debug_assert!(self.can_attack());
 
-        match self.target.and_then(|id| g.pawn(id)) {
-            Some(pawn) => self.attack(g, pawn),
+        match self.target(g) {
+            Some(e) => self.attack(g, e),
             None => self.find_target(g),
         }
+    }
+
+    fn target<'g>(&self, g: &'g G) -> Option<Entity<'g>> {
+        self.target.and_then(|id| g.entity(id))
     }
 
     fn find_target(&self, g: &G) {
         let attack_radius = 12; // TODO
         self.target.set(g.find_entity(self.tile(), attack_radius, |p| self.team().is_hostile_to(p.team())).map(|e| e.id()));
-        //trace!(self, "find_target: {:?}", self.target);
+
+        //#[cfg(debug_assertions)]
+        //if let Some(target) = self.target.get() {
+        //    trace!(self, "target={target}")
+        //}
+
         self.sleep(1);
     }
 
-    fn attack(&self, g: &G, victim: &Pawn) {
+    fn attack<'g>(&self, g: &'g G, victim: Entity) {
         match self.typ {
             PawnTyp::Turret => self.turret_attack(g, victim),
             _ => self.attack_base(g, victim),
         }
     }
 
-    fn attack_base(&self, g: &G, victim: &Pawn) {
+    fn attack_base(&self, g: &G, victim: Entity) {
         //trace!(self, "Attack {victim}");
         g.effects.add_bolt(g, self.center(), victim.center());
         g.deal_damage(victim, self.attack_strength());
         self.sleep(1);
     }
 
-    fn turret_attack(&self, g: &G, victim: &Pawn) {
+    fn turret_attack(&self, g: &G, victim: Entity) {
         let dir = (victim.center() - self.center()).as_f32();
         let rot = f32::atan2(dir.x(), -dir.y());
         self.rot.set(rot);
