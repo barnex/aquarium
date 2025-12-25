@@ -96,13 +96,14 @@ impl Pawn {
 
     pub(crate) fn can_assign_to(&self, building: &Building) -> bool {
         if !self.typ.is_worker() {
-            //trace!(self, "assign {self} to {building}: is not a worker");
+            //trace!(self, "is not a worker");
             return false;
         }
         if self.team() != building.team() {
-            //trace!(self, "assign {self} to {building}: wrong team: {} != {}", self.team, building.team);
+            //trace!(self, "wrong team: {} != {}", self.team(), building.team());
             return false;
         }
+        //trace!(self, "can assign");
         true
     }
 

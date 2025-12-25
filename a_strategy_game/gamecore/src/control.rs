@@ -65,6 +65,7 @@ fn drag_to_select(g: &mut G) {
 fn update_contextual_action(g: &mut G) {
     if g.ui.active_tool != Tool::Pointer {
         g.contextual_action = Action::None;
+        return;
     }
 
     let mouse = g.mouse_tile();
@@ -73,11 +74,10 @@ fn update_contextual_action(g: &mut G) {
     // Only show Assign action if some pawns can be assigned.
     //log::warn!("todo");
     //if let Some(building) = g.entities_at::<Building>(mouse).next() {
-    if g.entities_at::<Building>(mouse).next().is_some() {
-        // TODO: check if can assign
-        //if g.selected_entities().any(|p| p.can_assign_to(&building)) {
-        return g.contextual_action = Action::Assign;
-        //}
+    if let Some(building) = g.building_at(mouse) {
+        if g.selected_entities().filter_map(|e| e.downcast::<Pawn>()).any(|p| p.can_assign_to(&building)) {
+            return g.contextual_action = Action::Assign;
+        }
     }
 
     // 🥾 Move to location

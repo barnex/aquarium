@@ -422,25 +422,6 @@ impl G {
         self.buildings().find(|v| v.bounds().contains_incl(tile))
     }
 
-    // Add a building, if the location is suitable.
-    //pub fn spawn_building(&self, building: Building) -> Option<&Building> {
-    //    //❓check if building fits here
-    //    let bounds = building.bounds();
-    //    let mut footprint = cross(bounds.x_range(), bounds.y_range());
-    //    let can_build = footprint.all(|(x, y)| self.is_buildable(vec2(x, y), building.typ));
-    //    if !can_build {
-    //        log::trace!("ERROR spawning {:?} @ {}: cannot build here", building.typ, building.tile());
-    //        return None;
-    //    }
-
-    //    log::trace!("spawn {:?} @ {}", building.typ, building.tile());
-    //    let building = self.spawn(building);
-
-    //    building.init(self);
-
-    //    Some(building)
-    //}
-
     // -------------------------------- Mouse
 
     /// Current mouse position in world coordinates.
