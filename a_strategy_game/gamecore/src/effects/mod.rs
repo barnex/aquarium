@@ -10,12 +10,40 @@ pub struct Effects {
 #[enum_dispatch]
 pub enum Effect {
     Bolt,
+    Crater,
 }
 
 #[enum_dispatch(Effect)]
 trait EffectT {
     fn draw(&self, out: &mut Out);
     fn ttl(&self) -> u64;
+}
+
+pub struct Bolt {
+    start: vec2i,
+    end: vec2i,
+}
+
+impl EffectT for Bolt {
+    fn draw(&self, out: &mut Out) {
+        out.draw_line(L_EFFECTS, Line::new(self.start, self.end).with_color(RGBA::YELLOW.with_alpha(128)).with_width(3));
+    }
+    fn ttl(&self) -> u64 {
+        1
+    }
+}
+
+pub struct Crater {
+    tile: vec2i16,
+}
+
+impl EffectT for Crater {
+    fn draw(&self, out: &mut Out) {
+        out.draw_sprite(L_EFFECTS, sprite!("crater"), self.tile.pos());
+    }
+    fn ttl(&self) -> u64 {
+        30
+    }
 }
 
 impl Effects {
@@ -38,19 +66,7 @@ impl Effects {
         }
     }
 
-    pub fn add_crater(&self, tile: vec2i16) {}
-}
-
-pub struct Bolt {
-    start: vec2i,
-    end: vec2i,
-}
-
-impl EffectT for Bolt {
-    fn draw(&self, out: &mut Out) {
-        out.draw_line(L_EFFECTS, Line::new(self.start, self.end).with_color(RGBA::YELLOW.with_alpha(128)).with_width(3));
-    }
-    fn ttl(&self) -> u64 {
-        1
+    pub fn add_crater(&self, g: &G, tile: vec2i16) {
+        self.add(g, Crater { tile });
     }
 }

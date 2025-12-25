@@ -44,7 +44,7 @@ impl EntityT for Pawn {
             }
         }
 
-        g.effects.add_crater(self.tile())
+        g.effects.add_crater(g, self.tile())
     }
 
     fn draw(&self, g: &G, out: &mut Out) {
