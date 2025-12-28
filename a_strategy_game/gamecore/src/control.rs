@@ -47,7 +47,7 @@ fn drag_to_select(g: &mut G) {
 
             let end = g.mouse_position_world();
             let selection = Bounds2D::new_sorted(start.to_tile(), end.to_tile());
-            let selection = selection.with(|s| s.max += 1);
+            //let selection = selection.with(|s| s.max += 1);
 
             for e in g.entities() {
                 if selection.overlaps(&e.bounds()) {
