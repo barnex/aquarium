@@ -229,20 +229,26 @@ impl Pawn {
 
         let resource = self.cargo.take()?;
         match building.add_resource(resource) {
-            OK => OK,
+            OK => {
+                trace!(self, "OK: {resource:?}");
+                OK
+            }
             FAIL => {
                 // TODO: go sleep a bit or so
                 //trace!(self, "failed");
+                trace!(self, "FAIL: {resource:?}");
                 self.cargo.set(Some(resource));
+                self.sleep(5);
                 FAIL
             }
         }
     }
 
     pub fn try_pick_up_cargo(&self, g: &G, home: &Building) -> Status {
+        self.sleep(1);
         let res = g.resources.at(self.tile());
-        //trace!(self, "res={res:?}");
         if home.can_accept_resource(res?) {
+            trace!(self, "OK: {res:?}");
             self.cargo.set(g.resources.remove(self.tile()));
             OK
         } else {

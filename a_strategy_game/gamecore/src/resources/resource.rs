@@ -5,11 +5,13 @@ use crate::prelude::*;
 pub enum ResourceTyp {
     Leaf = 1,
     Rock = 2,
+    Dryweed = 3,
+    Brick = 4,
     // ⚠️👇 update `all()` below!
 }
 
 impl ResourceTyp {
-    pub const MAX: Self = Self::Rock; // 👈⚠️ keep in sync! Use variant_count <https://github.com/rust-lang/rust/issues/73662> when stable
+    pub const MAX: Self = Self::Brick; // 👈⚠️ keep in sync! Use variant_count <https://github.com/rust-lang/rust/issues/73662> when stable
     pub const COUNT: usize = Self::MAX as usize + 1;
 
     pub fn all() -> impl Iterator<Item = Self> {
@@ -23,6 +25,8 @@ impl ResourceTyp {
         match self {
             Leaf => sprite!("leaf"),
             Rock => sprite!("rock"),
+            Dryweed => sprite!("dryweed"),
+            Brick => sprite!("brick"),
         }
     }
 }
