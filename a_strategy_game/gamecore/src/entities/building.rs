@@ -73,7 +73,7 @@ impl Building {
     pub const MAX_RES_SLOTS: usize = 4;
 
     //-------------------------------------------------------------------------------- spawn/init
-    pub fn new(typ: BuildingTyp, tile: impl Into<Vector<i16, 2>>, team: Team) -> Self {
+    pub fn new(typ: BuildingTyp, tile: impl Into<vec2i16>, team: Team) -> Self {
         let tile = tile.into();
         Self {
             base: Base::new(tile, team, typ.default_health()),
@@ -113,8 +113,19 @@ impl Building {
             BuildingTyp::Farm => (),
             BuildingTyp::Quarry => (),
             BuildingTyp::StarNest => self.tick_star_nest(g),
-            BuildingTyp::FoodPacker => (),
-            BuildingTyp::RockPacker => (),
+            BuildingTyp::FoodPacker => self.tick_factory(3, ResourceTyp::Leaf, ResourceTyp::Dryweed, 20),
+            BuildingTyp::RockPacker => self.tick_factory(3, ResourceTyp::Rock, ResourceTyp::Brick, 20),
+        }
+    }
+
+    fn tick_factory(&self, from_n: u16, from: ResourceTyp, to: ResourceTyp, ticks: u8) {
+        let from_slot = self.resource_slot(from).unwrap();
+        let to_slot = self.resource_slot(to).unwrap();
+        if from_slot.0.get() >= from_n && to_slot.0.get() < to_slot.1 {
+            trace!(self, "produce :)");
+            from_slot.0.sub(from_n);
+            to_slot.0.inc(1);
+            self.sleep(ticks);
         }
     }
 

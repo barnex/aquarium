@@ -49,7 +49,7 @@ impl BuildingTyp {
     /// 0 unused :(
     pub fn _resource_metadata(self) -> [Option<(usize, u16)>; ResourceTyp::COUNT] {
         match self {
-            BuildingTyp::HQ => [None, Some((0, 1000)), Some((1, 1000)), None, None],
+            BuildingTyp::HQ => [None, None, None, Some((0, 1000)), Some((1, 1000))],
             BuildingTyp::Farm => [None, Some((0, 20)), None, None, None],
             BuildingTyp::Quarry => [None, None, Some((0, 30)), None, None],
             BuildingTyp::StarNest => [None, Some((0, 100)), None, None, None],
