@@ -108,13 +108,16 @@ impl Building {
     }
 
     pub fn tick(&self, g: &G) {
+        if self.base.tick_sleep() {
+            return;
+        }
         match self.typ {
             BuildingTyp::HQ => (),
             BuildingTyp::Farm => (),
             BuildingTyp::Quarry => (),
             BuildingTyp::StarNest => self.tick_star_nest(g),
-            BuildingTyp::FoodPacker => self.tick_factory(3, ResourceTyp::Leaf, ResourceTyp::Dryweed, 20),
-            BuildingTyp::RockPacker => self.tick_factory(3, ResourceTyp::Rock, ResourceTyp::Brick, 20),
+            BuildingTyp::FoodPacker => self.tick_factory(3, ResourceTyp::Leaf, ResourceTyp::Dryweed, 50),
+            BuildingTyp::RockPacker => self.tick_factory(3, ResourceTyp::Rock, ResourceTyp::Brick, 50),
         }
     }
 

@@ -77,8 +77,7 @@ impl Pawn {
 
     // ⏱️
     pub(crate) fn tick(&self, g: &G) {
-        if self.base.sleep.get() != 0 {
-            self.base.sleep.saturating_sub(1);
+        if self.base.tick_sleep() {
             return;
         }
 

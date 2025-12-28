@@ -22,9 +22,19 @@ impl Base {
             traced: false.cel(),
         }
     }
+
+    #[must_use = "tick must early return on true"]
+    pub fn tick_sleep(&self) -> bool {
+        if self.sleep.get() != 0 {
+            self.sleep.saturating_sub(1);
+            true
+        } else {
+            false
+        }
+    }
 }
 
-pub trait BaseT {
+pub trait BaseT: Display {
     fn base(&self) -> &Base;
 
     #[inline]
@@ -54,6 +64,7 @@ pub trait BaseT {
 
     #[inline]
     fn sleep(&self, ticks: u8) {
+        trace!(self, "{ticks}");
         self.get_sleep().set(ticks);
     }
 
