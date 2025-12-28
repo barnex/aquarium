@@ -117,7 +117,7 @@ fn doodle_on_map(g: &mut G) {
             Tool::Tile(mat) => {
                 g.set_tile(mouse, mat);
                 match mat {
-                    Tile::GreyStone => g.renewables.at_tile.insert(mouse, 100),
+                    Tile::GreyStone => g.renewables.at_tile.insert(mouse, 10), // << TODO: insert reasonable amount of resources
                     _ => (),
                 }
             }

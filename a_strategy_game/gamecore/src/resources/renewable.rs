@@ -3,7 +3,7 @@ use std::hash::Hash;
 use crate::prelude::*;
 
 #[derive(Default, Debug, Serialize, Deserialize)]
-pub struct CMap<K: Hash + Eq, V>(RefCell<HashMap<K, V>>);
+pub struct CMap<K: Hash + Eq, V>(pub RefCell<HashMap<K, V>>);
 
 impl<K: Hash + Eq + Copy, V: Copy> CMap<K, V> {
     pub fn insert(&self, k: K, v: V) {

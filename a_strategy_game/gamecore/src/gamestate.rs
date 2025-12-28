@@ -229,6 +229,7 @@ impl G {
         TICK_FOR_LOGGING.store(self.tick, std::sync::atomic::Ordering::Relaxed);
         self.tick_entities();
         self.tick_farmland();
+        self.tick_renewables();
         self.update_text_overlay();
     }
 
@@ -253,6 +254,42 @@ impl G {
     fn tick_entities(&mut self) {
         self.entities.iter::<Pawn>().for_each(|p| p.tick(self));
         self.entities.iter::<Building>().for_each(|p| p.tick(self));
+    }
+
+    pub(crate) fn tick_renewables(&mut self) {
+        let mut depleted = Vec::new();
+
+        'outer: for (&tile, amount) in self.renewables.at_tile.0.borrow_mut().iter_mut() {
+            // map tile determines which resource spawns here.
+            let typ = match self.tile_at(tile) {
+                Tile::GreyStone => ResourceTyp::Rock,
+                bad => {
+                    debug_assert!(false, "renewable on unknown tile: {bad} @ {tile}");
+                    depleted.push(tile);
+                    continue;
+                }
+            };
+            // spawn at neighbors.
+            for delta in [(-1, 0), (1, 0), (0, 1), (0, -1)] {
+                let neigh = tile + vec2::from(delta);
+                if self.tile_at(neigh).is_default_walkable() && self.resources.at(neigh).is_none() {
+                    if *amount == 0 {
+                        depleted.push(tile);
+                        continue 'outer;
+                    } else {
+                        *amount -= 1;
+                        self.resources.insert(neigh, typ);
+                        continue;
+                    }
+                }
+            }
+        }
+        // remove depleted resource tiles
+        for tile in depleted {
+            self.renewables.at_tile.0.borrow_mut().remove(&tile);
+            self._tilemap.set(tile, Tile::Sand); // << TODO: base on underlying tile.
+            self.effects.add_crater(self, tile);
+        }
     }
 
     pub(crate) fn tick_farmland(&mut self) {
