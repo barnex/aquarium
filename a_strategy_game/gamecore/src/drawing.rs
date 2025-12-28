@@ -76,8 +76,15 @@ fn draw_tilemap(g: &G, out: &mut Out) {
 }
 
 fn draw_resources(g: &G, out: &mut Out) {
+    // TODO: check is_visible
     for (tile, res) in g.resources.iter() {
         out.draw_sprite(L_SPRITES, res.sprite(), tile.pos());
+    }
+
+    for (tile, _) in visible_tiles(g) {
+        if let Some(amount) = g.renewables.at_tile.get(tile) {
+            out.draw_text(L_SPRITES, &format!("{amount}"), tile.pos());
+        }
     }
 }
 

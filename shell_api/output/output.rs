@@ -111,7 +111,8 @@ impl Out {
         self.push_sprite(layer, DrawSprite { sprite, pos, dst_size: None, src_pos: None, rot });
     }
 
-    pub fn draw_text(&mut self, layer: u8, text: &str, world_pos: vec2i) {
+    pub fn draw_text(&mut self, layer: u8, text: impl AsRef<str>, world_pos: vec2i) {
+        let text = text.as_ref();
         self.draw_text_screen(layer, world_pos - self.camera_pos, text);
     }
 

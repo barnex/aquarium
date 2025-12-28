@@ -19,6 +19,7 @@ pub struct G {
     pub name: String,
     pub _tilemap: Tilemap,
     pub resources: ResourceMap,
+    pub renewables: Renewables,
 
     pub entities: Entities,
 
@@ -155,6 +156,7 @@ impl G {
             paused: false,
             entities: Entities::new(),
             resources: default(),
+            renewables: default(),
             selected_entity_ids: default(), // <<< TODO: remove
             inspected: default(),
             selection_start: None,

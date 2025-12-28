@@ -114,7 +114,13 @@ fn doodle_on_map(g: &mut G) {
 
         match g.ui.active_tool {
             Tool::Pointer => (),
-            Tool::Tile(mat) => g.set_tile(mouse, mat),
+            Tool::Tile(mat) => {
+                g.set_tile(mouse, mat);
+                match mat {
+                    Tile::GreyStone => g.renewables.at_tile.insert(mouse, 100),
+                    _ => (),
+                }
+            }
             Tool::Pawn2(typ, team) => {
                 if g.inputs.just_pressed(K_MOUSE1) {
                     log::trace!("player spawns pawn {typ:?} {team:?} @ {mouse}");
