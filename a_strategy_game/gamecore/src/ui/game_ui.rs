@@ -59,7 +59,7 @@ impl GameUi {
         let margin = 3;
         Palette {
             pos: vec2(0, 24),
-            cols: 3,
+            cols: 4,
             rows: 8,
             button_size: vec2(TILE_SIZE, TILE_SIZE),
             margin,

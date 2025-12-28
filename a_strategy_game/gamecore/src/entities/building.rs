@@ -113,6 +113,8 @@ impl Building {
             BuildingTyp::Farm => (),
             BuildingTyp::Quarry => (),
             BuildingTyp::StarNest => self.tick_star_nest(g),
+            BuildingTyp::FoodPacker => (),
+            BuildingTyp::RockPacker => (),
         }
     }
 
@@ -165,6 +167,8 @@ impl Building {
             BuildingTyp::Farm => false,
             BuildingTyp::Quarry => false,
             BuildingTyp::StarNest => false,
+            BuildingTyp::FoodPacker => true,
+            BuildingTyp::RockPacker => true,
         }
     }
 

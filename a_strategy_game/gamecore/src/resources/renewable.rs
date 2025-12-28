@@ -10,6 +10,10 @@ impl<K: Hash + Eq + Copy, V: Copy> CMap<K, V> {
         self.0.borrow_mut().insert(k, v);
     }
 
+    pub fn remove(&self, k: K) {
+        self.0.borrow_mut().remove(&k);
+    }
+
     pub fn get(&self, k: K) -> Option<V> {
         self.0.borrow_mut().get(&k).copied()
     }
