@@ -241,8 +241,8 @@ impl G {
         // print total resources
         let mut total_resources = [0u32; ResourceTyp::COUNT];
         for b in self.buildings() {
-            for (res, count) in b.iter_resources() {
-                total_resources[res as usize] += count as u32
+            for slot in b.resource_slots() {
+                total_resources[slot.typ as usize] += slot.amount() as u32
             }
         }
         for res in ResourceTyp::all() {

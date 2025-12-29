@@ -45,16 +45,27 @@ impl BuildingTyp {
         .into()
     }
 
-    /// Index in Building.resrouces and max capacity.
-    /// 0 unused :(
-    pub fn _resource_metadata(self) -> [Option<(usize, u16)>; ResourceTyp::COUNT] {
+    pub fn input_resources(self) -> &'static [(ResourceTyp, u16)] {
+        use ResourceTyp::*;
         match self {
-            BuildingTyp::HQ => [None, None, None, Some((0, 1000)), Some((1, 1000))],
-            BuildingTyp::Farm => [None, Some((0, 20)), None, None, None],
-            BuildingTyp::Quarry => [None, None, Some((0, 30)), None, None],
-            BuildingTyp::StarNest => [None, Some((0, 100)), None, None, None],
-            BuildingTyp::FoodPacker => [None, Some((0, 10)), None, Some((2, 10)), None],
-            BuildingTyp::RockPacker => [None, None, Some((1, 10)), None, Some((3, 10))],
+            BuildingTyp::HQ => &[(Dryweed, 1000), (Brick, 1000)],
+            BuildingTyp::Farm => &[(Leaf, 30)],
+            BuildingTyp::Quarry => &[(Rock, 30)],
+            BuildingTyp::StarNest => &[(Leaf, 100)],
+            BuildingTyp::FoodPacker => &[(Leaf, 10)],
+            BuildingTyp::RockPacker => &[(Rock, 10)],
+        }
+    }
+
+    pub fn output_resources(self) -> &'static [(ResourceTyp, u16)] {
+        use ResourceTyp::*;
+        match self {
+            BuildingTyp::HQ => &[],
+            BuildingTyp::Farm => &[(Dryweed, 30)],
+            BuildingTyp::Quarry => &[(Brick, 30)],
+            BuildingTyp::StarNest => &[],
+            BuildingTyp::FoodPacker => &[], // TODO
+            BuildingTyp::RockPacker => &[], // TODO
         }
     }
 

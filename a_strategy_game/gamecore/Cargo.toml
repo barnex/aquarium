@@ -24,6 +24,7 @@ rand_chacha = { workspace = true }
 ron = { workspace = true }
 serde = { workspace = true }
 shell_api = { workspace = true }
+smallvec = { workspace = true }
 vector = { workspace = true }
 
 [dev-dependencies]

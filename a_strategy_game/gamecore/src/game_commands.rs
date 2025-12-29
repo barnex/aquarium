@@ -23,7 +23,7 @@ impl G {
     /// execute a single command
     fn exec_command(&mut self, cmd: &str) -> Result<()> {
         match cmd.trim().split_ascii_whitespace().collect_vec().as_slice() {
-            &["drain" | "dr"] => Ok(self.selected::<Building>().for_each(|e| e.resources.iter().for_each(|v| v.set(0)))),
+            &["drain" | "dr"] => Ok(self.selected::<Building>().for_each(|e| e.resources.iter().for_each(|s| s.get_amount().set(0)))),
             &["inspect" | "in"] => Ok(self.selected_entities().for_each(|e| self.inspect(e))),
             &["uninspect" | "unin"] => Ok(self.inspected.clear()),
             &["sleep" | "sl", t] => Ok(t.parse::<u8>()?.pipe(|t| self.selected_entities().for_each(|e| e.sleep(t)))),

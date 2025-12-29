@@ -34,6 +34,7 @@ pub use std::ops::{Range, RangeInclusive};
 
 pub type HashSet<T> = fnv::FnvHashSet<T>;
 pub type HashMap<K, V> = fnv::FnvHashMap<K, V>;
+pub type SmallVec<T, const N: usize> = smallvec::SmallVec<[T; N]>;
 
 /// Rectangle on the screen, positions in pixels.
 pub type Bounds = Bounds2D<i32>;

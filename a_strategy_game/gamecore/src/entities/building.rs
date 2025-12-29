@@ -8,7 +8,82 @@ pub struct Building {
     workers: CSet<Id>,
     pub _downstream: CSet<Id>,
     pub _upstream: CSet<Id>,
-    pub resources: [Cel<u16>; Self::MAX_RES_SLOTS],
+    //pub resources: [Cel<u16>; Self::MAX_RES_SLOTS],
+    pub resources: SmallVec<ResourceSlot, 4>,
+}
+
+/// An factory input or output slot. Can hold up to some maximum amount of resources.
+/// E.g. `Leaf: 7 out of 100`
+#[derive(Serialize, Deserialize)]
+pub struct ResourceSlot {
+    /// Type of Resource stored. E.g. Leaf, Rock.
+    pub typ: ResourceTyp,
+    /// Current amount stored. Always <= max.
+    pub amount: Cel<u16>,
+    /// Maximum amount stored.
+    pub max: u16,
+}
+
+impl ResourceSlot {
+    fn new(typ: ResourceTyp, max: u16) -> Self {
+        debug_assert!(max > 0);
+        Self { typ, max, amount: 0.cel() }
+    }
+    pub fn is_full(&self) -> bool {
+        self.amount() >= self.max
+    }
+
+    pub fn is_empty(&self) -> bool {
+        self.amount() == 0
+    }
+
+    /// Try to take one resource, return it if successful or None otherwise (slot was empty).
+    pub fn try_take_one(&self) -> Option<ResourceTyp> {
+        if self.amount() > 0 {
+            self.amount.sub(1);
+            Some(self.typ)
+        } else {
+            None
+        }
+    }
+
+    /// Slot has at least `n` items. So we can successfully `take(n)`.
+    pub fn has_at_least(&self, n: u16) -> bool {
+        self.amount() >= n
+    }
+
+    pub fn take(&self, n: u16) -> Option<()> {
+        debug_assert!(self.has_at_least(n));
+        if self.has_at_least(n) {
+            self.amount.sub(n);
+            OK
+        } else {
+            FAIL
+        }
+    }
+
+    pub fn can_accept(&self, n: u16) -> bool {
+        self.amount() + n <= self.max
+    }
+
+    pub fn add_one(&self) -> Option<()> {
+        if self.amount() < self.max {
+            self.amount.inc(1);
+            OK
+        } else {
+            FAIL
+        }
+    }
+
+    #[inline]
+    pub fn amount(&self) -> u16 {
+        self.amount.get()
+    }
+
+    /// For internal use/debug only.
+    pub(crate) fn get_amount(&self) -> &Cel<u16> {
+        &self.amount
+    }
 }
 
 impl BaseT for Building {
@@ -52,9 +127,9 @@ impl EntityT for Building {
         // ☘️ Resource amounts
         let vstride = 18; // some fiddly offsets to make it look better
         let mut cursor = building.tile().pos() - vec2(4, 4);
-        for (typ, count) in building.iter_resources() {
-            out.draw_sprite(L_SPRITES + 1, typ.sprite(), cursor - vec2(0, 4));
-            out.draw_text(L_SPRITES + 1, &format!("{count}"), cursor + vec2::EX * TILE_ISIZE);
+        for slot in building.resources.iter() {
+            out.draw_sprite(L_SPRITES + 1, slot.typ.sprite(), cursor - vec2(0, 4));
+            out.draw_text(L_SPRITES + 1, &format!("{}/{}", slot.amount, slot.max), cursor + vec2::EX * TILE_ISIZE);
             cursor[1] += vstride;
         }
     }
@@ -75,14 +150,71 @@ impl Building {
     //-------------------------------------------------------------------------------- spawn/init
     pub fn new(typ: BuildingTyp, tile: impl Into<vec2i16>, team: Team) -> Self {
         let tile = tile.into();
-        Self {
+        Self {{
             base: Base::new(tile, team, typ.default_health()),
             typ,
             workers: default(),
-            resources: default(),
+            resources: typ.input_resources().iter().map(|&(typ, max)| ResourceSlot::new(typ, max)).collect(),
             _downstream: default(),
             _upstream: default(),
         }
+    }
+
+    //-------------------------------------------------------------------------------- building function
+
+    pub fn is_full(&self) -> bool {
+        self.resources.iter().all(|slot| slot.is_full())
+    }
+
+    pub fn downstream_buildings<'g>(&self, g: &'g G) -> impl Iterator<Item = &'g Building> {
+        self._downstream.iter().filter_map(|id| g.building(id))
+    }
+
+    /// Depots accept resources transferred from other buildings.
+    /// E.g. a Farm is *not* a depot as it only harvests fresh food,
+    /// whereas headquarters is a huge depot that receives only from others.
+    pub fn is_depot(&self) -> bool {
+        match self.typ {
+            BuildingTyp::HQ => true,
+            BuildingTyp::Farm => false,
+            BuildingTyp::Quarry => false,
+            BuildingTyp::StarNest => false,
+            BuildingTyp::FoodPacker => true,
+            BuildingTyp::RockPacker => true,
+        }
+    }
+
+    /// Is building interested in this resource (pending capacity)?
+    pub fn has_resource_slot(&self, res: ResourceTyp) -> bool {
+        self.resource_slot(res).is_some()
+    }
+
+    /// Is there capacity to receive one resource of given type (e.g. one rock)?
+    pub fn can_accept_resource(&self, res: ResourceTyp) -> bool {
+        match self.resource_slot(res) {
+            None => false,
+            Some(slot) => !slot.is_full(),
+        }
+    }
+
+    pub fn add_resource(&self, res: ResourceTyp) -> Status {
+        trace!(self, "{res}");
+        self.resource_slot(res)?.add_one()
+    }
+
+    pub fn take_resource(&self, res: ResourceTyp) -> Option<ResourceTyp> {
+        trace!(self, "{res}");
+        self.resource_slot(res)?.try_take_one()
+    }
+
+    /// Current number and maximum capacity for given resource.
+    pub fn resource_slot(&self, typ: ResourceTyp) -> Option<&ResourceSlot> {
+        self.resources.iter().find(|slot| slot.typ == typ)
+    }
+    ///
+    /// Current number and maximum capacity for given resource.
+    pub fn resource_slots(&self) -> impl Iterator<Item = &ResourceSlot> {
+        self.resources.iter()
     }
 
     pub fn can_spawn(&self, g: &G) -> bool {
@@ -124,10 +256,10 @@ impl Building {
     fn tick_factory(&self, from_n: u16, from: ResourceTyp, to: ResourceTyp, ticks: u8) {
         let from_slot = self.resource_slot(from).unwrap();
         let to_slot = self.resource_slot(to).unwrap();
-        if from_slot.0.get() >= from_n && to_slot.0.get() < to_slot.1 {
+        if (from_slot.amount() >= from_n) && !to_slot.is_full() {
             trace!(self, "produce :)");
-            from_slot.0.sub(from_n);
-            to_slot.0.inc(1);
+            from_slot.take(from_n);
+            to_slot.add_one();
             self.sleep(ticks);
         }
     }
@@ -156,95 +288,11 @@ impl Building {
         }
         // slowly drain resources
         if g.tick % 16 == 0 {
-            if self.resources[0].get() > 0 {
+            if self.resources[0].has_at_least(1) {
+                self.resources[0].take(1);
                 self.get_health().clamped_add(self.typ.default_health(), 1);
-                self.resources[0].saturating_sub(1);
             }
         }
-    }
-
-    //-------------------------------------------------------------------------------- building function
-    pub fn is_full(&self) -> bool {
-        self.resource_slots().all(|(_, slot, cap)| slot.get() >= cap)
-    }
-
-    pub fn downstream_buildings<'g>(&self, g: &'g G) -> impl Iterator<Item = &'g Building> {
-        self._downstream.iter().filter_map(|id| g.building(id))
-    }
-
-    /// Depots accept resources transferred from other buildings.
-    /// E.g. a Farm is *not* a depot as it only harvests fresh food,
-    /// whereas headquarters is a huge depot that receives only from others.
-    pub fn is_depot(&self) -> bool {
-        match self.typ {
-            BuildingTyp::HQ => true,
-            BuildingTyp::Farm => false,
-            BuildingTyp::Quarry => false,
-            BuildingTyp::StarNest => false,
-            BuildingTyp::FoodPacker => true,
-            BuildingTyp::RockPacker => true,
-        }
-    }
-
-    /// Is building interested in this resource (pending capacity)?
-    pub fn has_resource_slot(&self, res: ResourceTyp) -> bool {
-        self.resource_slot(res).is_some()
-    }
-
-    /// Is there capacity to receive one resource of given type (e.g. one rock)?
-    pub fn can_accept_resource(&self, res: ResourceTyp) -> bool {
-        match self.resource_slot(res) {
-            None => false,
-            Some((count, cap)) => count.get() < cap,
-        }
-    }
-
-    pub fn add_resource(&self, res: ResourceTyp) -> Status {
-        let (slot, cap) = self.resource_slot(res)?;
-        if slot.get() < cap {
-            debug_assert!(self.can_accept_resource(res));
-            slot.inc(1);
-            OK
-        } else {
-            FAIL
-        }
-    }
-
-    pub fn take_resource(&self, res: ResourceTyp) -> Option<ResourceTyp> {
-        let (slot, _) = self.resource_slot(res)?;
-        if slot.get() > 0 {
-            slot.sub(1);
-            Some(res)
-        } else {
-            None
-        }
-    }
-
-    /// Current number and maximum capacity for given resource.
-    pub fn resource_slot(&self, res: ResourceTyp) -> Option<(&Cel<u16>, u16)> {
-        let (i, cap) = self.typ._resource_metadata()[res as usize]?;
-        Some((&self.resources[i], cap))
-    }
-
-    /// Iterate Resource type, current amount, and maximum capacity.
-    pub fn resource_slots(&self) -> impl Iterator<Item = (ResourceTyp, &Cel<u16>, u16)> {
-        self.typ
-            ._resource_metadata()
-            .into_iter()
-            .enumerate()
-            .filter_map(|(r, v)| v.map(|(i, cap)| (r, i, cap)))
-            .map(|(r, i, cap)| (ResourceTyp::try_from_primitive(r as u8).unwrap(), &self.resources[i], cap))
-    }
-
-    pub fn iter_resources(&self) -> impl Iterator<Item = (ResourceTyp, u16)> {
-        // TODO: reverse index instead of linear search
-        self.typ
-            ._resource_metadata()
-            .into_iter()
-            .enumerate()
-            .filter_map(|(r, v)| v.map(|(i, _cap)| (r, i)))
-            .map(|(r, i)| (ResourceTyp::try_from_primitive(r as u8).unwrap(), i))
-            .map(|(r, i)| (r, self.resources[i as usize].get()))
     }
 
     //pub fn tile_bounds(&self) -> Bounds2Di16 {
@@ -263,14 +311,14 @@ fn update_downstream_buildings(g: &G) {
     // 🪲 TODO: quadratic in #buildings. Use spatial queries instead.
     const MAX_DIST2: i32 = 30 * 30; // TODO
     for building in g.buildings().filter(|b| b.id() != hq.id()) {
-        let my_resources = building.iter_resources().map(|(r, _)| r).collect::<HashSet<_>>();
+        let my_resources = building.resources.iter().map(|slot| slot.typ).collect::<HashSet<_>>();
         let neighbors = g
             .buildings() //_
             .filter(|b| b.id() != building.id())
             .filter(|b| b.is_depot())
             .filter(|b| b.tile().distance_squared(building.tile()) < MAX_DIST2)
             .filter(|b| b.tile().distance_squared(hq.tile()) < building.tile().distance_squared(hq.tile()))
-            .filter(|b| b.iter_resources().map(|(r, _)| r).any(|r| my_resources.contains(&r)))
+            .filter(|b| b.resources.iter().map(|slot| slot.typ).any(|r| my_resources.contains(&r)))
             .map(|b| b.id());
         building._downstream.clear();
         building._downstream.extend(neighbors);
