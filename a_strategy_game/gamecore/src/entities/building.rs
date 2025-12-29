@@ -10,6 +10,7 @@ pub struct Building {
     pub _upstream: CSet<Id>,
     //pub resources: [Cel<u16>; Self::MAX_RES_SLOTS],
     pub inputs: SmallVec<ResourceSlot, 3>,
+    pub outputs: SmallVec<ResourceSlot, 2>,
 }
 
 /// An factory input or output slot. Can hold up to some maximum amount of resources.
@@ -128,7 +129,7 @@ impl EntityT for Building {
         // ☘️ Resource amounts
         let vstride = 18; // some fiddly offsets to make it look better
         let mut cursor = building.tile().pos() - vec2(4, 4);
-        for slot in building.inputs.iter() {
+        for slot in building.inputs.iter().chain(building.outputs.iter()) {
             out.draw_sprite(L_SPRITES + 1, slot.typ.sprite(), cursor - vec2(0, 4));
             out.draw_text(L_SPRITES + 1, &format!("{}/{}", slot.amount, slot.max), cursor + vec2::EX * TILE_ISIZE);
             cursor[1] += vstride;
@@ -156,6 +157,7 @@ impl Building {
             typ,
             workers: default(),
             inputs: typ.input_resources().iter().map(|&(typ, max)| ResourceSlot::new(typ, max)).collect(),
+            outputs: typ.output_resources().iter().map(|&(typ, max)| ResourceSlot::new(typ, max)).collect(),
             _downstream: default(),
             _upstream: default(),
         }
