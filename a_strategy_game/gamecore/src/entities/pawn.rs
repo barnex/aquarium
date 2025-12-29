@@ -210,7 +210,7 @@ impl Pawn {
             .downstream_buildings(g) //_
             .sorted_by_key(|d| d.tile().distance_squared(home.tile()))
         {
-            for slot in home.resource_slots() {
+            for slot in home.inputs() {
                 if slot.has_at_least(1) && downstream.can_accept_resource(slot.typ) {
                     self.cargo.set(slot.try_take_one());
                     if self.set_destination(g, downstream.entrance()).is_some() {
@@ -259,7 +259,7 @@ impl Pawn {
         //trace!(self, "building={building}");
         debug_assert!(self.home.get() == Some(home.id()));
 
-        for slot in building.resource_slots() {
+        for slot in building.inputs() {
             if slot.has_at_least(1) && home.can_accept_resource(slot.typ) {
                 self.cargo.set(slot.try_take_one());
                 if self.set_destination(g, home.entrance()).is_some() {

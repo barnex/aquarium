@@ -9,7 +9,7 @@ pub struct Building {
     pub _downstream: CSet<Id>,
     pub _upstream: CSet<Id>,
     //pub resources: [Cel<u16>; Self::MAX_RES_SLOTS],
-    pub resources: SmallVec<ResourceSlot, 4>,
+    pub inputs: SmallVec<ResourceSlot, 3>,
 }
 
 /// An factory input or output slot. Can hold up to some maximum amount of resources.
@@ -29,6 +29,7 @@ impl ResourceSlot {
         debug_assert!(max > 0);
         Self { typ, max, amount: 0.cel() }
     }
+
     pub fn is_full(&self) -> bool {
         self.amount() >= self.max
     }
@@ -127,7 +128,7 @@ impl EntityT for Building {
         // ☘️ Resource amounts
         let vstride = 18; // some fiddly offsets to make it look better
         let mut cursor = building.tile().pos() - vec2(4, 4);
-        for slot in building.resources.iter() {
+        for slot in building.inputs.iter() {
             out.draw_sprite(L_SPRITES + 1, slot.typ.sprite(), cursor - vec2(0, 4));
             out.draw_text(L_SPRITES + 1, &format!("{}/{}", slot.amount, slot.max), cursor + vec2::EX * TILE_ISIZE);
             cursor[1] += vstride;
@@ -150,11 +151,11 @@ impl Building {
     //-------------------------------------------------------------------------------- spawn/init
     pub fn new(typ: BuildingTyp, tile: impl Into<vec2i16>, team: Team) -> Self {
         let tile = tile.into();
-        Self {{
+        Self {
             base: Base::new(tile, team, typ.default_health()),
             typ,
             workers: default(),
-            resources: typ.input_resources().iter().map(|&(typ, max)| ResourceSlot::new(typ, max)).collect(),
+            inputs: typ.input_resources().iter().map(|&(typ, max)| ResourceSlot::new(typ, max)).collect(),
             _downstream: default(),
             _upstream: default(),
         }
@@ -163,7 +164,7 @@ impl Building {
     //-------------------------------------------------------------------------------- building function
 
     pub fn is_full(&self) -> bool {
-        self.resources.iter().all(|slot| slot.is_full())
+        self.inputs.iter().all(|slot| slot.is_full())
     }
 
     pub fn downstream_buildings<'g>(&self, g: &'g G) -> impl Iterator<Item = &'g Building> {
@@ -209,12 +210,12 @@ impl Building {
 
     /// Current number and maximum capacity for given resource.
     pub fn resource_slot(&self, typ: ResourceTyp) -> Option<&ResourceSlot> {
-        self.resources.iter().find(|slot| slot.typ == typ)
+        self.inputs.iter().find(|slot| slot.typ == typ)
     }
     ///
     /// Current number and maximum capacity for given resource.
-    pub fn resource_slots(&self) -> impl Iterator<Item = &ResourceSlot> {
-        self.resources.iter()
+    pub fn inputs(&self) -> impl Iterator<Item = &ResourceSlot> {
+        self.inputs.iter()
     }
 
     pub fn can_spawn(&self, g: &G) -> bool {
@@ -288,8 +289,8 @@ impl Building {
         }
         // slowly drain resources
         if g.tick % 16 == 0 {
-            if self.resources[0].has_at_least(1) {
-                self.resources[0].take(1);
+            if self.inputs[0].has_at_least(1) {
+                self.inputs[0].take(1);
                 self.get_health().clamped_add(self.typ.default_health(), 1);
             }
         }
@@ -311,14 +312,14 @@ fn update_downstream_buildings(g: &G) {
     // 🪲 TODO: quadratic in #buildings. Use spatial queries instead.
     const MAX_DIST2: i32 = 30 * 30; // TODO
     for building in g.buildings().filter(|b| b.id() != hq.id()) {
-        let my_resources = building.resources.iter().map(|slot| slot.typ).collect::<HashSet<_>>();
+        let my_resources = building.inputs.iter().map(|slot| slot.typ).collect::<HashSet<_>>();
         let neighbors = g
             .buildings() //_
             .filter(|b| b.id() != building.id())
             .filter(|b| b.is_depot())
             .filter(|b| b.tile().distance_squared(building.tile()) < MAX_DIST2)
             .filter(|b| b.tile().distance_squared(hq.tile()) < building.tile().distance_squared(hq.tile()))
-            .filter(|b| b.resources.iter().map(|slot| slot.typ).any(|r| my_resources.contains(&r)))
+            .filter(|b| b.inputs.iter().map(|slot| slot.typ).any(|r| my_resources.contains(&r)))
             .map(|b| b.id());
         building._downstream.clear();
         building._downstream.extend(neighbors);
