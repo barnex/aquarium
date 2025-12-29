@@ -4,10 +4,8 @@ use crate::prelude::*;
 pub struct Building {
     base: Base,
 
-    pub typ: BuildingTyp,
+    typ: BuildingTyp,
     workers: CSet<Id>,
-    pub _downstream: CSet<Id>,
-    pub _upstream: CSet<Id>,
     inputs: SmallVec<ResourceSlot, 3>,
     outputs: SmallVec<ResourceSlot, 2>,
 }
@@ -32,6 +30,10 @@ impl ResourceSlot {
 
     pub fn is_full(&self) -> bool {
         self.amount() >= self.max
+    }
+
+    pub fn fullness_pct(&self) -> u32 {
+        (self.amount() as u32 * 100) / (self.max as u32)
     }
 
     pub fn is_empty(&self) -> bool {
@@ -103,7 +105,7 @@ impl EntityT for Building {
     fn on_spawned(&self, g: &G) {
         trace!(self);
         self.spawn_default_workers(g);
-        update_downstream_buildings(g); // << inefficient
+        //update_downstream_buildings(g); // << inefficient
     }
 
     fn on_killed(&self, g: &G) {
@@ -157,8 +159,6 @@ impl Building {
             workers: default(),
             inputs: typ.input_resources().iter().map(|&(typ, max)| ResourceSlot::new(typ, max)).collect(),
             outputs: typ.output_resources().iter().map(|&(typ, max)| ResourceSlot::new(typ, max)).collect(),
-            _downstream: default(),
-            _upstream: default(),
         }
     }
 
@@ -166,10 +166,6 @@ impl Building {
 
     pub fn is_full(&self) -> bool {
         self.inputs.iter().all(|slot| slot.is_full())
-    }
-
-    pub fn downstream_buildings<'g>(&self, g: &'g G) -> impl Iterator<Item = &'g Building> {
-        self._downstream.iter().filter_map(|id| g.building(id))
     }
 
     /// Depots accept resources transferred from other buildings.
@@ -187,15 +183,26 @@ impl Building {
     }
 
     /// Is building interested in this resource (pending capacity)?
-    pub fn has_resource_slot(&self, res: ResourceTyp) -> bool {
+    pub fn has_input(&self, res: ResourceTyp) -> bool {
         self.input(res).is_some()
     }
 
+    pub fn has_output(&self, res: ResourceTyp) -> bool {
+        self.output(res).is_some()
+    }
+
     /// Is there capacity to receive one resource of given type (e.g. one rock)?
-    pub fn can_accept_resource(&self, res: ResourceTyp) -> bool {
+    pub fn can_accept(&self, res: ResourceTyp) -> bool {
         match self.input(res) {
             None => false,
             Some(slot) => !slot.is_full(),
+        }
+    }
+
+    pub fn can_provide(&self, res: ResourceTyp) -> bool {
+        match self.output(res) {
+            None => false,
+            Some(slot) => !slot.is_empty(),
         }
     }
 
@@ -317,40 +324,41 @@ impl Building {
     }
 }
 
-fn update_downstream_buildings(g: &G) {
-    log::trace!("update downstream buildings");
-    let Some(hq) = g.buildings().find(|b| b.typ == BuildingTyp::HQ) else { return log::error!("No HQ") };
-
-    // 🪲 TODO: quadratic in #buildings. Use spatial queries instead.
-    const MAX_DIST2: i32 = 30 * 30; // TODO
-    for building in g.buildings().filter(|b| b.id() != hq.id()) {
-        let my_resources = building.inputs.iter().map(|slot| slot.typ).collect::<HashSet<_>>();
-        let neighbors = g
-            .buildings() //_
-            .filter(|b| b.id() != building.id())
-            .filter(|b| b.is_depot())
-            .filter(|b| b.tile().distance_squared(building.tile()) < MAX_DIST2)
-            .filter(|b| b.tile().distance_squared(hq.tile()) < building.tile().distance_squared(hq.tile()))
-            .filter(|b| b.inputs.iter().map(|slot| slot.typ).any(|r| my_resources.contains(&r)))
-            .map(|b| b.id());
-        building._downstream.clear();
-        building._downstream.extend(neighbors);
-    }
-
-    // upstream
-    // for building in self.buildings() {
-    //     let my_resources = building.iter_resources().map(|(r, _)| r).collect::<HashSet<_>>();
-    //     let neighbors = self
-    //         .buildings() //_
-    //         .filter(|b| b.id != building.id)
-    //         .filter(|b| b.tile.distance_squared(building.tile) < MAX_DIST2)
-    //         .filter(|b| b.tile.distance_squared(hq.tile) >= building.tile.distance_squared(hq.tile))
-    //         .filter(|b| b.iter_resources().map(|(r, _)| r).any(|r| my_resources.contains(&r)))
-    //         .map(|b| b.id);
-    //     building._downstream.clear();
-    //     building._downstream.extend(neighbors);
-    // }
-}
+//🪲 Remove for now. Not correctly sync. Just calculate as needed.
+//fn update_downstream_buildings(g: &G) {
+//    log::trace!("update downstream buildings");
+//    let Some(hq) = g.buildings().find(|b| b.typ == BuildingTyp::HQ) else { return log::error!("No HQ") };
+//
+//    // 🪲 TODO: quadratic in #buildings. Use spatial queries instead.
+//    const MAX_DIST2: i32 = 30 * 30; // TODO
+//    for building in g.buildings().filter(|b| b.id() != hq.id()) {
+//        let my_resources = building.outputs().map(|slot| slot.typ).collect::<HashSet<_>>();
+//        let neighbors = g
+//            .buildings() //_
+//            .filter(|b| b.id() != building.id())
+//            .filter(|b| b.is_depot())
+//            .filter(|b| b.tile().distance_squared(building.tile()) < MAX_DIST2)
+//            .filter(|b| b.tile().distance_squared(hq.tile()) < building.tile().distance_squared(hq.tile()))
+//            .filter(|b| b.inputs.iter().map(|slot| slot.typ).any(|r| my_resources.contains(&r)))
+//            .map(|b| b.id());
+//        building._downstream.clear();
+//        building._downstream.extend(neighbors);
+//    }
+//
+//    // upstream
+//    // for building in self.buildings() {
+//    //     let my_resources = building.iter_resources().map(|(r, _)| r).collect::<HashSet<_>>();
+//    //     let neighbors = self
+//    //         .buildings() //_
+//    //         .filter(|b| b.id != building.id)
+//    //         .filter(|b| b.tile.distance_squared(building.tile) < MAX_DIST2)
+//    //         .filter(|b| b.tile.distance_squared(hq.tile) >= building.tile.distance_squared(hq.tile))
+//    //         .filter(|b| b.iter_resources().map(|(r, _)| r).any(|r| my_resources.contains(&r)))
+//    //         .map(|b| b.id);
+//    //     building._downstream.clear();
+//    //     building._downstream.extend(neighbors);
+//    // }
+//}
 
 impl Display for Building {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
