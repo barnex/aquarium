@@ -8,9 +8,8 @@ pub struct Building {
     workers: CSet<Id>,
     pub _downstream: CSet<Id>,
     pub _upstream: CSet<Id>,
-    //pub resources: [Cel<u16>; Self::MAX_RES_SLOTS],
-    pub inputs: SmallVec<ResourceSlot, 3>,
-    pub outputs: SmallVec<ResourceSlot, 2>,
+    inputs: SmallVec<ResourceSlot, 3>,
+    outputs: SmallVec<ResourceSlot, 2>,
 }
 
 /// An factory input or output slot. Can hold up to some maximum amount of resources.
@@ -129,7 +128,7 @@ impl EntityT for Building {
         // ☘️ Resource amounts
         let vstride = 18; // some fiddly offsets to make it look better
         let mut cursor = building.tile().pos() - vec2(4, 4);
-        for slot in building.inputs.iter().chain(building.outputs.iter()) {
+        for slot in building.inputs().chain(building.outputs()) {
             out.draw_sprite(L_SPRITES + 1, slot.typ.sprite(), cursor - vec2(0, 4));
             out.draw_text(L_SPRITES + 1, &format!("{}/{}", slot.amount, slot.max), cursor + vec2::EX * TILE_ISIZE);
             cursor[1] += vstride;
@@ -189,12 +188,12 @@ impl Building {
 
     /// Is building interested in this resource (pending capacity)?
     pub fn has_resource_slot(&self, res: ResourceTyp) -> bool {
-        self.resource_slot(res).is_some()
+        self.input(res).is_some()
     }
 
     /// Is there capacity to receive one resource of given type (e.g. one rock)?
     pub fn can_accept_resource(&self, res: ResourceTyp) -> bool {
-        match self.resource_slot(res) {
+        match self.input(res) {
             None => false,
             Some(slot) => !slot.is_full(),
         }
@@ -202,22 +201,31 @@ impl Building {
 
     pub fn add_resource(&self, res: ResourceTyp) -> Status {
         trace!(self, "{res}");
-        self.resource_slot(res)?.add_one()
+        self.input(res)?.add_one()
     }
 
     pub fn take_resource(&self, res: ResourceTyp) -> Option<ResourceTyp> {
         trace!(self, "{res}");
-        self.resource_slot(res)?.try_take_one()
+        self.input(res)?.try_take_one()
     }
 
     /// Current number and maximum capacity for given resource.
-    pub fn resource_slot(&self, typ: ResourceTyp) -> Option<&ResourceSlot> {
-        self.inputs.iter().find(|slot| slot.typ == typ)
+    pub fn input(&self, typ: ResourceTyp) -> Option<&ResourceSlot> {
+        self.inputs().find(|slot| slot.typ == typ)
     }
+
+    pub fn output(&self, typ: ResourceTyp) -> Option<&ResourceSlot> {
+        self.outputs().find(|slot| slot.typ == typ)
+    }
+
     ///
     /// Current number and maximum capacity for given resource.
     pub fn inputs(&self) -> impl Iterator<Item = &ResourceSlot> {
         self.inputs.iter()
+    }
+
+    pub fn outputs(&self) -> impl Iterator<Item = &ResourceSlot> {
+        self.outputs.iter()
     }
 
     pub fn can_spawn(&self, g: &G) -> bool {
@@ -246,19 +254,21 @@ impl Building {
         if self.base.tick_sleep() {
             return;
         }
+
+        use ResourceTyp::*;
         match self.typ {
             BuildingTyp::HQ => (),
-            BuildingTyp::Farm => (),
-            BuildingTyp::Quarry => (),
+            BuildingTyp::Farm => self.tick_factory(3, Leaf, Dryweed, 50),
+            BuildingTyp::Quarry => self.tick_factory(3, Rock, Brick, 50),
             BuildingTyp::StarNest => self.tick_star_nest(g),
-            BuildingTyp::FoodPacker => self.tick_factory(3, ResourceTyp::Leaf, ResourceTyp::Dryweed, 50),
-            BuildingTyp::RockPacker => self.tick_factory(3, ResourceTyp::Rock, ResourceTyp::Brick, 50),
+            BuildingTyp::FoodPacker => self.tick_factory(3, Leaf, Dryweed, 50),
+            BuildingTyp::RockPacker => self.tick_factory(3, Rock, Brick, 50),
         }
     }
 
     fn tick_factory(&self, from_n: u16, from: ResourceTyp, to: ResourceTyp, ticks: u8) {
-        let from_slot = self.resource_slot(from).unwrap();
-        let to_slot = self.resource_slot(to).unwrap();
+        let from_slot = self.input(from).unwrap();
+        let to_slot = self.output(to).unwrap();
         if (from_slot.amount() >= from_n) && !to_slot.is_full() {
             trace!(self, "produce :)");
             from_slot.take(from_n);

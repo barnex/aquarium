@@ -256,10 +256,10 @@ impl Pawn {
     }
 
     fn steal_any_resource(&self, g: &G, home: &Building, building: &Building) -> Status {
-        //trace!(self, "building={building}");
+        trace!(self, "from {building}?");
         debug_assert!(self.home.get() == Some(home.id()));
 
-        for slot in building.inputs() {
+        for slot in building.outputs() {
             if slot.has_at_least(1) && home.can_accept_resource(slot.typ) {
                 self.cargo.set(slot.try_take_one());
                 if self.set_destination(g, home.entrance()).is_some() {
