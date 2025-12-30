@@ -12,6 +12,7 @@ pub struct Pawn {
     // work
     pub home: Cel<Option<Id>>,
     pub cargo: Cel<Option<ResourceTyp>>,
+    pub plan: Cel<WorkPlan>,
 
     // attack
     pub target: Cel<Option<Id>>,
@@ -76,6 +77,7 @@ impl Pawn {
             route: default(),
             home: None.cel(),
             cargo: None.cel(),
+            plan: WorkPlan::None.cel(),
             target: None.cel(),
             rot: default(),
         }
@@ -177,7 +179,19 @@ impl Pawn {
         }
     }
 
-    pub fn set_destination(&self, g: &G, dest: vec2i16) -> Status {
+    pub fn set_destination(&self, g: &G, dest: vec2i16) {
+        if !self.can_move() {
+            return trace!(self, "cannot move");
+        }
+        let max_dist = 42;
+        let distance_map = DistanceMap::new(dest, max_dist, |p| self.can_walk_on_tile(g.tile_at(p)));
+        match distance_map.path_to_center(self.tile()) {
+            Some(path) => self.route.set(path.with(|p| trace!(self, "set_destination path len={:?}", p.len()))),
+            None => trace!(self, "no path"),
+        }
+    }
+
+    pub fn set_destination_OLD(&self, g: &G, dest: vec2i16) -> Status {
         if !self.can_move() {
             trace!(self, "cannot move");
             return FAIL;

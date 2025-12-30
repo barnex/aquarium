@@ -1,10 +1,146 @@
 use crate::prelude::*;
 
+#[derive(Serialize, Deserialize, Debug, Clone, Copy, PartialEq, Eq)]
+pub enum WorkPlan {
+    None,
+    Harvest(ResourceTyp),
+    DeliverToBuilding(Id),
+    TakeFromBuilding(Id, ResourceTyp),
+}
+
 impl Pawn {
     /// 📦📍 Called when a pawn has reached their destination and thus can pick up/drop off their cargo.
     /// TODO: Remove Status returns, always check if the status is as desired (e.g. destination.is_some());
     /// TODO: Simplify, avoid deadlocks?
     pub(crate) fn tick_delivery_work(&self, g: &G, home: &Building) {
+        trace!(self, "plan: {:?}", self.plan);
+
+        // Plan == why am I here?
+        match self.plan.get() {
+            WorkPlan::None if self.is_at_building(home) =>  self.make_plan(g, home),
+            WorkPlan::None /*if not at home*/ =>  self.set_destination(g, home.entrance()),
+            WorkPlan::Harvest(res) => (),
+            WorkPlan::DeliverToBuilding(id) => (),
+            WorkPlan::TakeFromBuilding(id, res) => (),
+        }
+    }
+
+    fn make_plan(&self, g: &G, home: &Building) {
+        trace!(self);
+
+        match self.cargo() {
+            Some(cargo) if home.has_input(cargo) => {
+                self.plan.set(WorkPlan::DeliverToBuilding(home.id()));
+                self.set_destination(g, home.entrance());
+            }
+            Some(cargo) /*if not for home */=> {
+                if let Some(building) = self.find_near_receptor(g, cargo){
+                    self.plan.set(WorkPlan::DeliverToBuilding(building.id()));
+                    self.set_destination(g, building.entrance());
+                }
+            }
+            None => {
+                // inputs/outputs, sorted by who has the biggest need.
+                // Input need = how empty they are, Output need is how full they are.
+                // E.g. if the input is 60% full and and the output is 90% full, the output has the biggest need.
+                for (io, slot) in Self::slots_by_priority(home) {
+                    trace!(self, "considering resource slot: {io:?} {} {}% full", slot.typ, slot.fullness_pct());
+                    match io {
+                        InOut::In => {
+                            if let Some(tile) = self.find_near_resource(g, slot.typ) {
+                                trace!(self, "most urgent: harvest {}", slot.typ);
+                                debug_assert_eq!(g.resources.at(tile), Some(slot.typ));
+                                self.set_destination(g, tile);
+                                self.plan.set(WorkPlan::Harvest(slot.typ));
+                                return; //👈
+                            }
+                            if let Some(building) = self.find_near_provider(g, slot.typ) {
+                                trace!(self, "most urgent: collect {}", slot.typ);
+                                self.set_destination(g, building.entrance());
+                                self.plan.set(WorkPlan::TakeFromBuilding(building.id(), slot.typ));
+                                return; //👈
+                            }
+                        }
+                        InOut::Out => {
+                            if let Some(building) = self.find_near_receptor(g, slot.typ) {
+                                trace!(self, "most urgent: bring {} to {building}", slot.typ);
+                                self.cargo.set(slot.try_take_one());
+                                debug_assert!(self.cargo().is_some());
+                                self.set_destination(g, building.tile());
+                                self.plan.set(WorkPlan::DeliverToBuilding(building.id()));
+                                return; //👈
+                            }
+                        }
+                    }
+                }
+            }
+        }
+        if self.plan == WorkPlan::None {
+            trace!(self, "failed to make a plan");
+            self.sleep(Self::FAIL_DELAY);
+        }
+    }
+
+    fn slots_by_priority(home: &Building) -> impl Iterator<Item = (InOut, &ResourceSlot)> {
+        home.inputs() //_
+            .filter_map(|s| (!s.is_full()).then_some((InOut::In, s)))
+            .chain(home.outputs().filter_map(|s| (!s.is_empty()).then_some((InOut::Out, s))))
+            .sorted_by_key(|(io, s)| match io {
+                InOut::In => s.fullness_pct() as i32,
+                InOut::Out => 100 - (s.fullness_pct() as i32),
+            })
+    }
+
+    fn is_at_building(&self, building: &Building) -> bool {
+        building.bounds().contains(self.tile())
+    }
+
+    #[must_use]
+    fn find_near_resource(&self, g: &G, typ: ResourceTyp) -> Option<vec2i16> {
+        g.resources //__
+            .iter()
+            .filter(|&(_, res)| res == typ)
+            .min_by_key(|(tile, _)| tile.distance_squared(self.tile()))
+            .map(|(tile, _)| tile)
+            .with(|v| trace!(self, "find_near_resource: {v:?}"))
+    }
+
+    fn find_near_receptor<'g>(&self, g: &'g G, res: ResourceTyp) -> Option<&'g Building> {
+        g.buildings() //__
+            .filter(|b| b.has_nonfull_input(res))
+            .min_by_key(|b| b.tile().distance_squared(self.tile()))
+            .with(|v| trace!(self, "find_near_receptor: {v:?}"))
+    }
+
+    fn find_near_provider<'g>(&self, g: &'g G, res: ResourceTyp) -> Option<&'g Building> {
+        g.buildings() //__
+            .filter(|b| b.has_nonempty_output(res))
+            .min_by_key(|b| b.tile().distance_squared(self.tile()))
+            .with(|v| trace!(self, "find_near_provider: {v:?}"))
+    }
+
+    fn try_deliver_cargo(&self, building: &Building) {
+        trace!(self, "{:?} to {building}", self.cargo);
+        debug_assert!(self.is_at_building(building));
+        debug_assert!(self.cargo().is_some());
+
+        let Some(cargo) = self.cargo() else { return trace!(self, "ERROR: I have no cargo") };
+
+        match building.add_resource(cargo) {
+            OK => {
+                trace!(self, "OK: delivered {}", cargo);
+                self.cargo.set(None);
+            }
+            FAIL => {
+                trace!(self, "FAILed to deliver {cargo}");
+                self.cargo.set(Some(cargo));
+            }
+        }
+    }
+}
+/*
+    // -------------
+    pub(crate) fn tick_delivery_work_OLD(&self, g: &G, home: &Building) {
         trace!(self);
 
         //👇 corner case: cargo can be on top of a building :(
@@ -173,7 +309,7 @@ impl Pawn {
             .with(|v| trace!(self, "find_near_provider: {v:?}"))
     }
 
-    fn go_home(&self, g: &G) -> Status {
+    fn go_home_OLD(&self, g: &G) -> Status {
         trace!(self);
         self.set_destination(g, g.building(self.home.get()?)?.entrance());
         OK
@@ -233,4 +369,11 @@ impl Pawn {
         }
         FAIL
     }
+}
+*/
+
+#[derive(Debug)]
+enum InOut {
+    In,
+    Out,
 }
