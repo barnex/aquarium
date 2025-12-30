@@ -27,11 +27,16 @@ impl Base {
     #[must_use = "tick must early return on true"]
     pub fn tick_sleep(&self) -> bool {
         if self.sleep.get() != 0 {
+            trace!(&self, "{} ticks", self.sleep.get());
             self.sleep.saturating_sub(1);
             true
         } else {
             false
         }
+    }
+
+    pub fn traced(&self) -> bool {
+        self.traced.get()
     }
 }
 
@@ -90,9 +95,8 @@ pub trait BaseT: Display {
     }
 }
 
-//fn set_id3(&mut self, id: Id) {
-//    self.id = id
-//}
-//fn id(&self) -> Id {
-//    self.id
-//}
+impl Display for Base {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        write!(f, "<Base:{:?}>{}", self.id.type_id(), self.id)
+    }
+}

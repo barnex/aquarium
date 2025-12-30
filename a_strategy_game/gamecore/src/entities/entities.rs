@@ -1,3 +1,5 @@
+use std::any::TypeId;
+
 use crate::prelude::*;
 use memkeep::MemKeep;
 
@@ -175,6 +177,10 @@ impl Id {
         id: memkeep::Id::INVALID,
         type_id: EntityType::Pawn,
     }; // << ??
+
+    pub fn type_id(&self) -> EntityType {
+        self.type_id
+    }
 }
 
 impl Display for Id {
