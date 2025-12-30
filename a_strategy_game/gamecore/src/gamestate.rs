@@ -196,23 +196,21 @@ impl G {
 
         if !self.paused {
             self.frame += 1;
-
             if self.frame % (self.frames_per_tick as u64) == 0 {
                 // 🪲 TODO: time major tick
                 self.major_tick();
-                self.water.major_tick(&self._tilemap);
+                self.water.major_tick(&self._tilemap); //👈 MAJOR
             } else {
-                // 🪲 TODO: properly pace, make testable
-                self.water.minor_tick(&self._tilemap);
+                self.water.minor_tick(&self._tilemap); //👈 m i n o r
             }
-
-            #[cfg(debug_assertions)]
-            if let Err(e) = sanity_check(self) {
-                log::error!("sanity check failed: {e}");
-                self.last_sanity_error = Some(e.to_string());
-                if self.debug.pause_on_sanity_failure {
-                    self.paused = true;
-                }
+        } else {
+            // When paused: manually tick by pressing spacebar.
+            // Handy for debugging.
+            if self.inputs.just_pressed(K_SPACE) {
+                self.frame = (self.frame + self.frames_per_tick as u64) % self.frames_per_tick as u64;
+                self.major_tick();
+                self.water.major_tick(&self._tilemap);
+                self.water.minor_tick(&self._tilemap);
             }
         }
 
@@ -231,6 +229,19 @@ impl G {
         self.tick_farmland();
         self.tick_renewables();
         self.update_text_overlay();
+
+        self.sanity_check();
+    }
+
+    fn sanity_check(&mut self) {
+        #[cfg(debug_assertions)]
+        if let Err(e) = sanity_check(self) {
+            log::error!("sanity check failed: {e}");
+            self.last_sanity_error = Some(e.to_string());
+            if self.debug.pause_on_sanity_failure {
+                self.paused = true;
+            }
+        }
     }
 
     /// Update the text shown at the top of the screen:

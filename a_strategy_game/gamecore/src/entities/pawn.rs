@@ -139,7 +139,9 @@ impl Pawn {
     ///   +----+
     fn tick_on_home(&self, g: &G, home: &Building) {
         trace!(self, "{home}");
+
         self.try_deliver_cargo(home);
+        //may be holding output, go to dest
 
         if self.cargo().is_some() {
             trace!(self, "home is full, cannot deliver, waiting...");
@@ -165,7 +167,7 @@ impl Pawn {
             .chain(home.outputs().filter_map(|s| (!s.is_empty()).then_some((InOut::Out, s))))
             .sorted_by_key(|(io, s)| match io {
                 InOut::In => s.fullness_pct() as i32,
-                InOut::Out => -(s.fullness_pct() as i32),
+                InOut::Out => 100 - (s.fullness_pct() as i32),
             })
         {
             match io {
