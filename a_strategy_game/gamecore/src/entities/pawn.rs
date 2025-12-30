@@ -63,8 +63,11 @@ impl EntityT for Pawn {
 }
 
 impl Pawn {
-    // Ticks needed to pick up a resource
+    // Ticks needed to pick up a resource.
     const PICKUP_DELAY: u8 = 1;
+
+    // Ticks Paused after failing at something, so we don't super aggressively retry.
+    const FAIL_DELAY: u8 = 5;
 
     pub fn new(typ: PawnTyp, tile: vec2i16, team: Team) -> Self {
         Self {
@@ -145,26 +148,32 @@ impl Pawn {
         trace!(self, "{home}");
 
         self.try_deliver_cargo(home);
-        //may be holding output, go to dest
 
-        if self.cargo().is_some() {
-            trace!(self, "home is full, cannot deliver, waiting...");
+        if let Some(cargo) = self.cargo() {
+            trace!(self, "failed to deliver cargo");
             // TODO: drop cargo if undelivered after a very long time. Might need hands to take output instead.
-            self.take_personal_space(g);
-            self.sleep(20);
+            if !home.has_input(cargo) {
+                // unlikely, but possible e.g. when a worker who was already carrying something got re-assigned.
+                trace!(self, "home does not have {cargo} input");
+                self.drop_cargo(g);
+            }
+            self.sleep(Self::FAIL_DELAY);
             return;
         }
 
+        // 🙌 Hands are now empty.
+        debug_assert!(self.cargo().is_none());
         // Decide what to do next
-
-        // Try serve the input/output in biggest need
-
+        // Try serve the input/output in biggest need.
+        debug_assert!(self.cargo().is_none());
+        #[derive(Debug)]
         enum InOut {
             In,
             Out,
         }
-
-        // inputs/outputs, sorted by who needs works most urgently
+        // inputs/outputs, sorted by who has the biggest need.
+        // Input need = how empty they are, Output need is how full they are.
+        // E.g. if the input is 60% full and and the output is 90% full, the output has the biggest need.
         for (io, slot) in home
             .inputs() //_
             .filter_map(|s| (!s.is_full()).then_some((InOut::In, s)))
@@ -174,6 +183,7 @@ impl Pawn {
                 InOut::Out => 100 - (s.fullness_pct() as i32),
             })
         {
+            trace!(self, "considering resource slot: {io:?} {} {}% full", slot.typ, slot.fullness_pct());
             match io {
                 InOut::In => {
                     if let Some(tile) = self.find_near_resource(g, slot.typ) {
@@ -195,34 +205,64 @@ impl Pawn {
         }
     }
 
+    fn drop_cargo(&self, g: &G) -> Status {
+        trace!(self, "{:?}", self.cargo());
+        debug_assert!(self.cargo().is_some());
+        g.resources.insert(self.tile(), self.cargo.take()?);
+        OK
+    }
+
     /// +-HQ-+   +home+
     /// | 🦀 |   |    |    ☘️️️ ☘️️
     /// +----+   +----+
     fn tick_on_other_building(&self, g: &G, home: &Building, building: &Building) {
-        trace!(self, "{building}");
+        trace!(self, "on {building} with cargo {:?}", self.cargo());
         self.try_deliver_cargo(building);
-        match self.cargo() {
-            None => self.go_to_near_resource(g, home).or_else(|| self.go_home(g)),
-            Some(_) => self.go_home(g),
-        };
+
+        // Still holding cargo
+        if let Some(cargo) = self.cargo() {
+            if home.has_input(cargo) {
+                trace!(self, "home has {cargo} input, going there");
+                self.go_home(g);
+                return;
+            } else {
+                if let Some(building) = self.find_near_receptor(g, cargo) {
+                    trace!(self, "{building} can accept {cargo} input, going there");
+                    self.set_destination(g, building.entrance());
+                    return;
+                } else {
+                    trace!(self, "nowhere to drop {cargo}");
+                    self.sleep(Self::FAIL_DELAY);
+                    self.take_personal_space(g);
+                }
+            }
+        }
     }
 
     ///   +home+
     ///   |    |    🦀 ☘️️
     ///   +----+
     fn tick_away_from_building(&self, g: &G, home: &Building) {
-        trace!(self);
+        trace!(self, "with cargo {:?}", self.cargo());
         match self.cargo() {
-            Some(_) => self.go_home(g),
-            None => self.go_to_near_resource(g, home).or_else(|| self.go_home(g)),
+            Some(cargo) if home.has_input(cargo) => self.go_home(g).ignore(),
+            Some(cargo) => {
+                if let Some(building) = self.find_near_receptor(g, cargo) {
+                    self.set_destination(g, building.entrance());
+                }
+            }
+            None => self.go_to_near_resource(g, home).or_else(|| self.go_home(g)).ignore(),
         };
     }
 
     fn go_to_near_resource(&self, g: &G, home: &Building) -> Status {
-        trace!(self);
-        let new_dest = g.resources.iter().filter(|(_, res)| home.has_nonfull_input(*res)).min_by_key(|(tile, _)| tile.distance_squared(self.tile())).map(|(tile, _)| tile)?;
-        self.set_destination(g, new_dest);
-        OK
+        if let Some(new_dest) = g.resources.iter().filter(|(_, res)| home.has_nonfull_input(*res)).min_by_key(|(tile, _)| tile.distance_squared(self.tile())).map(|(tile, _)| tile) {
+            trace!(self, "found {new_dest}");
+            self.set_destination(g, new_dest)
+        } else {
+            trace!(self, "None found");
+            FAIL
+        }
     }
 
     fn find_near_resource(&self, g: &G, typ: ResourceTyp) -> Option<vec2i16> {
@@ -300,7 +340,6 @@ impl Pawn {
             FAIL => {
                 trace!(self, "FAILed to deliver {resource:?}");
                 self.cargo.set(Some(resource));
-                self.sleep(5);
                 FAIL
             }
         }

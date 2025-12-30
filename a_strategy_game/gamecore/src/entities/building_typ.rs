@@ -49,8 +49,8 @@ impl BuildingTyp {
         use ResourceTyp::*;
         match self {
             BuildingTyp::HQ => &[(Dryweed, 1000), (Brick, 1000)],
-            BuildingTyp::Farm => &[(Leaf, 30)],
-            BuildingTyp::Quarry => &[(Rock, 30)],
+            BuildingTyp::Farm => &[(Leaf, 10)],
+            BuildingTyp::Quarry => &[(Rock, 10)],
             BuildingTyp::StarNest => &[(Leaf, 100)],
             BuildingTyp::FoodPacker => &[(Leaf, 10)],
             BuildingTyp::RockPacker => &[(Rock, 10)],
@@ -61,8 +61,8 @@ impl BuildingTyp {
         use ResourceTyp::*;
         match self {
             BuildingTyp::HQ => &[],
-            BuildingTyp::Farm => &[(Dryweed, 30)],
-            BuildingTyp::Quarry => &[(Brick, 30)],
+            BuildingTyp::Farm => &[(Dryweed, 10)],
+            BuildingTyp::Quarry => &[(Brick, 10)],
             BuildingTyp::StarNest => &[],
             BuildingTyp::FoodPacker => &[], // TODO
             BuildingTyp::RockPacker => &[], // TODO

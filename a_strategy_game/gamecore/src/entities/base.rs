@@ -70,8 +70,8 @@ pub trait BaseT: Display {
 
     #[inline]
     fn sleep(&self, ticks: u8) {
-        trace!(self, "{ticks}");
-        self.get_sleep().set(ticks);
+        self.get_sleep().saturating_inc(ticks);
+        trace!(self, "add {ticks} ticks, {} total scheduled", self.get_sleep());
     }
 
     #[inline]

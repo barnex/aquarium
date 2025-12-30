@@ -114,10 +114,16 @@ impl<T: Copy + Sub<Output = T>> Cel<T> {
 }
 
 impl Cel<u8> {
-    /// Decrement value by `rhs`.
+    /// Decrement value by `rhs`, saturating on underflow.
     #[inline(always)]
     pub fn saturating_sub(&self, rhs: u8) {
         self.set(self.get().saturating_sub(rhs));
+    }
+
+    /// Icrement value by `rhs`, saturating on overflow.
+    #[inline(always)]
+    pub fn saturating_inc(&self, rhs: u8) {
+        self.set(self.get().saturating_add(rhs));
     }
 }
 
