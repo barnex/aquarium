@@ -123,6 +123,8 @@ impl Pawn {
     }
 
     /// 📦📍 Called when a pawn has reached their destination and thus can pick up/drop off their cargo.
+    /// TODO: Remove Status returns, always check if the status is as desired (e.g. destination.is_some());
+    /// TODO: Simplify, avoid deadlocks?
     fn tick_delivery_work(&self, g: &G, home: &Building) {
         trace!(self);
 
@@ -219,6 +221,8 @@ impl Pawn {
         trace!(self, "on {building} with cargo {:?}", self.cargo());
         self.try_deliver_cargo(building);
 
+        self.steal_any_resource(g, home, building);
+
         // Still holding cargo
         if let Some(cargo) = self.cargo() {
             if home.has_input(cargo) {
@@ -265,18 +269,29 @@ impl Pawn {
         }
     }
 
+    #[must_use]
     fn find_near_resource(&self, g: &G, typ: ResourceTyp) -> Option<vec2i16> {
         g.resources //__
             .iter()
             .filter(|&(_, res)| res == typ)
             .min_by_key(|(tile, _)| tile.distance_squared(self.tile()))
             .map(|(tile, _)| tile)
+            .or_else(|| self.find_near_provider(g, typ).map(|b| b.tile()))
+            .with(|v| trace!(self, "find_near_resource: {v:?}"))
     }
 
     fn find_near_receptor<'g>(&self, g: &'g G, res: ResourceTyp) -> Option<&'g Building> {
         g.buildings() //__
             .filter(|b| b.has_nonfull_input(res))
             .min_by_key(|b| b.tile().distance_squared(self.tile()))
+            .with(|v| trace!(self, "find_near_receptor: {v:?}"))
+    }
+
+    fn find_near_provider<'g>(&self, g: &'g G, res: ResourceTyp) -> Option<&'g Building> {
+        g.buildings() //__
+            .filter(|b| b.has_nonempty_output(res))
+            .min_by_key(|b| b.tile().distance_squared(self.tile()))
+            .with(|v| trace!(self, "find_near_provider: {v:?}"))
     }
 
     fn go_home(&self, g: &G) -> Status {
@@ -375,11 +390,9 @@ impl Pawn {
 
         for slot in building.outputs() {
             if slot.has_at_least(1) && home.has_nonfull_input(slot.typ) {
-                self.cargo.set(slot.try_take_one());
-                if self.set_destination(g, home.entrance()).is_some() {
-                    //trace!(self, "take {:?} home to {:?}", self.cargo(), home.typ);
-                    return OK;
-                }
+                self.cargo.set(slot.try_take_one().with(|v| trace!(self, "steal_any_resource: took {v:?}")));
+                self.go_home(g);
+                return OK;
             }
         }
         FAIL

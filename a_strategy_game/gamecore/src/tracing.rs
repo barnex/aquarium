@@ -3,6 +3,7 @@ use crate::prelude::*;
 #[macro_export]
 macro_rules! trace {
     ($slf:expr) => {
+        {
         #[cfg(debug_assertions)]
         {
             let slf = $slf;
@@ -10,14 +11,17 @@ macro_rules! trace {
                 log::trace!("{}: {}", slf, caller!());
             }
         }
+        }
     };
     ($slf:expr, $($arg:tt)*) => {
+        {
         #[cfg(debug_assertions)]
         {
             let slf = $slf;
             if slf.traced(){
                 log::trace!("{}: {}: {}", slf, caller!(), format!($($arg)*));
             }
+        }
         }
     };
 }
