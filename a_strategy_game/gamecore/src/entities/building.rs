@@ -10,85 +10,6 @@ pub struct Building {
     outputs: SmallVec<ResourceSlot, 2>,
 }
 
-/// An factory input or output slot. Can hold up to some maximum amount of resources.
-/// E.g. `Leaf: 7 out of 100`
-#[derive(Serialize, Deserialize)]
-pub struct ResourceSlot {
-    /// Type of Resource stored. E.g. Leaf, Rock.
-    pub typ: ResourceTyp,
-    /// Current amount stored. Always <= max.
-    pub amount: Cel<u16>,
-    /// Maximum amount stored.
-    pub max: u16,
-}
-
-impl ResourceSlot {
-    fn new(typ: ResourceTyp, max: u16) -> Self {
-        debug_assert!(max > 0);
-        Self { typ, max, amount: 0.cel() }
-    }
-
-    pub fn is_full(&self) -> bool {
-        self.amount() >= self.max
-    }
-
-    pub fn fullness_pct(&self) -> u32 {
-        (self.amount() as u32 * 100) / (self.max as u32)
-    }
-
-    pub fn is_empty(&self) -> bool {
-        self.amount() == 0
-    }
-
-    /// Try to take one resource, return it if successful or None otherwise (slot was empty).
-    pub fn try_take_one(&self) -> Option<ResourceTyp> {
-        if self.amount() > 0 {
-            self.amount.sub(1);
-            Some(self.typ)
-        } else {
-            None
-        }
-    }
-
-    /// Slot has at least `n` items. So we can successfully `take(n)`.
-    pub fn has_at_least(&self, n: u16) -> bool {
-        self.amount() >= n
-    }
-
-    pub fn take(&self, n: u16) -> Option<()> {
-        debug_assert!(self.has_at_least(n));
-        if self.has_at_least(n) {
-            self.amount.sub(n);
-            OK
-        } else {
-            FAIL
-        }
-    }
-
-    pub fn can_accept(&self, n: u16) -> bool {
-        self.amount() + n <= self.max
-    }
-
-    pub fn add_one(&self) -> Option<()> {
-        if self.amount() < self.max {
-            self.amount.inc(1);
-            OK
-        } else {
-            FAIL
-        }
-    }
-
-    #[inline]
-    pub fn amount(&self) -> u16 {
-        self.amount.get()
-    }
-
-    /// For internal use/debug only.
-    pub(crate) fn get_amount(&self) -> &Cel<u16> {
-        &self.amount
-    }
-}
-
 impl BaseT for Building {
     fn base(&self) -> &Base {
         &self.base
@@ -182,24 +103,26 @@ impl Building {
         }
     }
 
-    /// Is building interested in this resource (pending capacity)?
+    /// Does the building have this kind of input slot?
     pub fn has_input(&self, res: ResourceTyp) -> bool {
         self.input(res).is_some()
     }
 
-    pub fn has_output(&self, res: ResourceTyp) -> bool {
-        self.output(res).is_some()
-    }
-
-    /// Is there capacity to receive one resource of given type (e.g. one rock)?
-    pub fn can_accept(&self, res: ResourceTyp) -> bool {
+    /// Has the building such input slot with some free space right now?
+    pub fn has_nonfull_input(&self, res: ResourceTyp) -> bool {
         match self.input(res) {
             None => false,
             Some(slot) => !slot.is_full(),
         }
     }
 
-    pub fn can_provide(&self, res: ResourceTyp) -> bool {
+    /// Does the buidling have this kind of output slot?
+    pub fn has_output(&self, res: ResourceTyp) -> bool {
+        self.output(res).is_some()
+    }
+
+    /// Has the building a non-empty output slot right now?
+    pub fn has_nonempty_output(&self, res: ResourceTyp) -> bool {
         match self.output(res) {
             None => false,
             Some(slot) => !slot.is_empty(),

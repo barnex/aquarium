@@ -5,6 +5,7 @@ mod entities;
 mod entity;
 mod pawn;
 mod pawn_typ;
+mod resource_slot;
 mod route;
 mod team;
 
@@ -15,5 +16,6 @@ pub use entities::*;
 pub use entity::*;
 pub use pawn::*;
 pub use pawn_typ::*;
+pub use resource_slot::*;
 pub use route::*;
 pub use team::*;

@@ -63,6 +63,9 @@ impl EntityT for Pawn {
 }
 
 impl Pawn {
+    // Ticks needed to pick up a resource
+    const PICKUP_DELAY: u8 = 1;
+
     pub fn new(typ: PawnTyp, tile: vec2i16, team: Team) -> Self {
         Self {
             base: Base::new(tile, team, typ.default_health()),
@@ -78,13 +81,13 @@ impl Pawn {
     // ⏱️
     pub(crate) fn tick(&self, g: &G) {
         if self.base.tick_sleep() {
-            return;
+            return; // 👈
         }
 
         // 🥾 always first go where you were going
         if self.can_move() && !self.is_at_destination() {
             self.walk_to_destination(g);
-            return;
+            return; //👈
         }
 
         // 📍 now you are at destination
@@ -116,6 +119,7 @@ impl Pawn {
         true
     }
 
+    /// 📦📍 Called when a pawn has reached their destination and thus can pick up/drop off their cargo.
     fn tick_delivery_work(&self, g: &G, home: &Building) {
         trace!(self);
 
@@ -216,7 +220,7 @@ impl Pawn {
 
     fn go_to_near_resource(&self, g: &G, home: &Building) -> Status {
         trace!(self);
-        let new_dest = g.resources.iter().filter(|(_, res)| home.can_accept(*res)).min_by_key(|(tile, _)| tile.distance_squared(self.tile())).map(|(tile, _)| tile)?;
+        let new_dest = g.resources.iter().filter(|(_, res)| home.has_nonfull_input(*res)).min_by_key(|(tile, _)| tile.distance_squared(self.tile())).map(|(tile, _)| tile)?;
         self.set_destination(g, new_dest);
         OK
     }
@@ -231,7 +235,7 @@ impl Pawn {
 
     fn find_near_receptor<'g>(&self, g: &'g G, res: ResourceTyp) -> Option<&'g Building> {
         g.buildings() //__
-            .filter(|b| b.can_accept(res))
+            .filter(|b| b.has_nonfull_input(res))
             .min_by_key(|b| b.tile().distance_squared(self.tile()))
     }
 
@@ -303,15 +307,26 @@ impl Pawn {
     }
 
     pub fn try_pick_up_cargo(&self, g: &G, home: &Building) -> Status {
-        self.sleep(1);
-        let res = g.resources.at(self.tile());
-        if home.can_accept(res?) {
-            trace!(self, "OK: {res:?}");
+        let res = match g.resources.at(self.tile()) {
+            Some(res) => {
+                trace!(self, "found {res}");
+                res
+            }
+            None => {
+                trace!(self, "nothing here");
+                return FAIL;
+            }
+        };
+
+        if home.has_input(res) {
+            trace!(self, "home has {res} input: picking up");
             self.cargo.set(g.resources.remove(self.tile()));
+            self.sleep(Self::PICKUP_DELAY);
+            debug_assert_eq!(self.cargo(), Some(res));
             OK
         } else {
-            trace!(self, "FAIL");
-            FAIL
+            trace!(self, "home does not have {res} input");
+            return FAIL;
         }
     }
 
@@ -320,7 +335,7 @@ impl Pawn {
         debug_assert!(self.home.get() == Some(home.id()));
 
         for slot in building.outputs() {
-            if slot.has_at_least(1) && home.can_accept(slot.typ) {
+            if slot.has_at_least(1) && home.has_nonfull_input(slot.typ) {
                 self.cargo.set(slot.try_take_one());
                 if self.set_destination(g, home.entrance()).is_some() {
                     //trace!(self, "take {:?} home to {:?}", self.cargo(), home.typ);
