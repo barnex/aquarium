@@ -24,6 +24,7 @@ impl G {
     fn exec_command(&mut self, cmd: &str) -> Result<()> {
         match cmd.trim().split_ascii_whitespace().collect_vec().as_slice() {
             &["drain" | "dr"] => Ok(self.selected::<Building>().for_each(|b| b.inputs().chain(b.outputs()).for_each(|s| s.get_amount().set(0)))),
+            &["fill"] => Ok(self.selected::<Building>().for_each(|b| b.inputs().chain(b.outputs()).for_each(|s| s.get_amount().set(s.max)))),
             &["inspect" | "in"] => Ok(self.selected_entities().for_each(|e| self.inspect(e))),
             &["uninspect" | "unin"] => Ok(self.inspected.clear()),
             &["sleep" | "sl", t] => Ok(t.parse::<u8>()?.pipe(|t| self.selected_entities().for_each(|e| e.sleep(t)))),

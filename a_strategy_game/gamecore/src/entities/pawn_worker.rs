@@ -4,6 +4,7 @@ use crate::prelude::*;
 pub enum WorkPlan {
     None,
     Harvest(ResourceTyp),
+    HomeDelivery,
     DeliverToBuilding(Id),
     TakeFromBuilding(Id, ResourceTyp),
 }
@@ -18,11 +19,116 @@ impl Pawn {
         // Plan == why am I here?
         match self.plan.get() {
             WorkPlan::None if self.is_at_building(home) =>  self.make_plan(g, home),
-            WorkPlan::None /*if not at home*/ =>  self.set_destination(g, home.entrance()),
-            WorkPlan::Harvest(res) => (),
-            WorkPlan::DeliverToBuilding(id) => (),
-            WorkPlan::TakeFromBuilding(id, res) => (),
+            WorkPlan::None /*if not at home*/ =>  self.go_home(g),
+            WorkPlan::Harvest(res) => self.harvest(g, res),
+            WorkPlan::HomeDelivery => self.home_delivery(g),
+            WorkPlan::DeliverToBuilding(id) => self.deliver_to_building(g, id),
+            WorkPlan::TakeFromBuilding(id, res) => self.take_from_building(g, id, res),
         }
+    }
+
+    fn take_from_building(&self, g: &G, id: Id, res: ResourceTyp) {
+        todo!()
+        //trace!(self, "{id} {res}");
+        //let Some(building) = g.building(id) else { return self.bail(g, "no such building") };
+        //let Some(output) = building.output(res) else { return self.bail(g, "no output for {cargo}") };
+        //debug_assert!(self.cargo().is_none());
+        //if self.cargo().is_some() {
+        //    return self.bail(g, "already carrying cargo");
+        //}
+        //match output.try_take_one(){
+        //    None
+        //}
+    }
+
+    fn home_delivery(&self, g: &G) {
+        trace!(self, "cargo={:?}", self.cargo());
+        let Some(home) = self.home(g) else { return self.bail(g, "home_delivery: no home") };
+
+        self.try_deliver_at(g, home);
+        if self.cargo().is_none() {
+            trace!(self, "delivered")
+        } else {
+            trace!(self, "full");
+            self.sleep(1);
+        }
+    }
+
+    fn deliver_to_building(&self, g: &G, id: Id) {
+        trace!(self, "{:?}", self.cargo());
+        let Some(building) = g.building(id) else { return self.bail(g, "no such building") };
+        self.try_deliver_at(g, building);
+        if let Some(cargo) = self.cargo() {
+            trace!(self, "failed");
+            if let Some(alternative) = self.find_near_receptor(g, cargo) {
+                self.set_destination(g, alternative.entrance());
+                self.plan.set(WorkPlan::DeliverToBuilding(alternative.id()));
+            } else {
+                trace!(self, "TODO: drop cargo if no building with such input even exists");
+                self.sleep(Self::FAIL_DELAY);
+            }
+        }
+    }
+
+    fn try_deliver_at(&self, g: &G, building: &Building) {
+        if !self.is_at_building(building) {
+            return self.bail(g, "try_deliver_at: not at building");
+        };
+        let Some(cargo) = self.cargo() else { return self.bail(g, "no cargo") };
+        let Some(input) = building.input(cargo) else { return self.bail(g, "no input for {cargo}") };
+        match input.add_one() {
+            OK => {
+                self.cargo.set(None);
+                self.plan.set(WorkPlan::None);
+                trace!(self, "delivered {cargo}")
+            }
+            FAIL => trace!(self, "failed"),
+        }
+    }
+
+    fn harvest(&self, g: &G, res: ResourceTyp) {
+        trace!(self, "{res}");
+        debug_assert_eq!(self.cargo(), None);
+        if self.cargo().is_some() {
+            return self.bail(g, "harvest: already has cargo");
+        }
+
+        if g.resources.at(self.tile()) == Some(res) {
+            trace!(self, "pick up {res}");
+            let Some(home) = self.home(g) else { return self.bail(g, "harvest: no home") };
+            self.cargo.set(g.resources.remove(self.tile()));
+            self.plan.set(WorkPlan::DeliverToBuilding(home.id()));
+            return self.go_home(g);
+        } else {
+            trace!(self, "no {res} here");
+            if let Some(dest) = self.find_near_resource(g, res) {
+                return self.set_destination(g, dest);
+            }
+        }
+        self.bail(g, "harvest failed, no fallback")
+    }
+
+    /// When a very unexpected, but not neccesarily impossible state was reached,
+    /// we bail out: go home and reset plan, then try again.
+    /// E.g.: Should harvest but already carrying some cargo. Or home has exploded.
+    fn bail(&self, g: &G, reason: &str) {
+        trace!(self, "{reason}");
+        self.plan.set(WorkPlan::None);
+        self.go_home(g);
+        self.sleep(Self::FAIL_DELAY);
+    }
+
+    fn go_home(&self, g: &G) {
+        trace!(self);
+        match self.home(g) {
+            Some(home) => self.set_destination(g, home.entrance()),
+            None => self.find_new_home(g),
+        }
+    }
+
+    fn find_new_home(&self, g: &G) {
+        trace!(self, "TODO: unimplemented");
+        self.sleep(255);
     }
 
     fn make_plan(&self, g: &G, home: &Building) {
