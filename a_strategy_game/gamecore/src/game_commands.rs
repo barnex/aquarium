@@ -23,6 +23,7 @@ impl G {
     /// execute a single command
     fn exec_command(&mut self, cmd: &str) -> Result<()> {
         match cmd.trim().split_ascii_whitespace().collect_vec().as_slice() {
+            &["speed", factor] => Ok(self.micros_per_tick = (200_000.0 / factor.parse::<f64>()?).clamp(1.0, 1e6).as_()),
             &["pace", micros] => Ok(self.micros_per_tick = micros.parse()?),
             &["print" | "pr", "time"] => Ok(log::info!("current secs: {}", (self.clock.micros() as f64) / 1e6)),
             &["print" | "pr", "dt"] => Ok(log::info!("current dt smoothed: {}", self.clock.dt_secs_smooth())),
