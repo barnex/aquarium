@@ -9,7 +9,7 @@ use mq_storage::*;
 
 use std::collections::VecDeque;
 use std::sync::atomic::AtomicU64;
-use std::time::{Instant, SystemTime, UNIX_EPOCH};
+use std::time::SystemTime;
 
 use macroquad::prelude as mq;
 use shell_api::*;
@@ -42,8 +42,6 @@ pub async fn mq_main<G: GameCore>() {
     };
 
     let mut out = Out::default();
-    let start = Instant::now();
-
     mq::prevent_quit();
 
     // ⚠️ 🕣 Time reference does not use UNIX Epoch and gets reset on program restart.
@@ -57,13 +55,13 @@ pub async fn mq_main<G: GameCore>() {
             return; // 👈 exit
         }
 
-        let unix_micros = SystemTime::now().duration_since(start_time).expect("time works").as_micros() as u64;
+        let micros = SystemTime::now().duration_since(start_time).expect("time works").as_micros() as u64;
         out.clear();
 
         out.viewport_size = vec2(mq::screen_width(), mq::screen_height()).as_u32();
         capture_input_events(&mut input_events);
 
-        g.tick(unix_micros, input_events.drain(..), &mut out);
+        g.tick(micros, input_events.drain(..), &mut out);
         mq_draw(&mut res, &out);
 
         //if !g.paused {

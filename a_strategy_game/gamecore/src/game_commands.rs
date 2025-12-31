@@ -23,6 +23,9 @@ impl G {
     /// execute a single command
     fn exec_command(&mut self, cmd: &str) -> Result<()> {
         match cmd.trim().split_ascii_whitespace().collect_vec().as_slice() {
+            &["print" | "pr", "time"] => Ok(log::info!("current secs: {}", (self.clock.micros() as f64) / 1e6)),
+            &["print" | "pr", "dt"] => Ok(log::info!("current dt smoothed: {}", self.clock.dt_secs_smooth())),
+            &["print" | "pr", "fps"] => Ok(log::info!("current FPS: {}", self.clock.fps())),
             &["drain" | "dr"] => Ok(self.selected::<Building>().for_each(|b| b.inputs().chain(b.outputs()).for_each(|s| s.get_amount().set(0)))),
             &["fill"] => Ok(self.selected::<Building>().for_each(|b| b.inputs().chain(b.outputs()).for_each(|s| s.get_amount().set(s.max)))),
             &["inspect" | "in"] => Ok(self.selected_entities().for_each(|e| self.inspect(e))),

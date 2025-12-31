@@ -1,24 +1,17 @@
 #[allow(mismatched_lifetime_syntaxes)]
 use crate::prelude::*;
 
+
 /// The Game State.
 /// Short name `g: &G`, because it's passed down ehhhhhhverywhere.
 #[derive(Serialize, Deserialize)]
 pub struct G {
-    // 🕣 timekeeping
-    frame: u64,
-    now_micros: u64,
-
-    // 📺 Rendering FPS estimate
-    prev_frame_micros: u64,
-    dt: f64,
-    dt_smooth: f64,
+    pub clock: MonotonicClock,
 
     // 🌍 Simulation pacing
     pub paused: bool,
     pub curr_sim_tick: u64,
     pub target_secs_per_sim_tick: f64,
-    //pub last_tick_instant: f64,
 
     // 🌍 game world
     pub name: String,
@@ -140,7 +133,7 @@ impl G {
         ]);
 
         Self {
-            prev_frame_micros: 0,
+            clock: default(),
             _rng: RefCell::new(ChaCha8Rng::seed_from_u64(12345678)),
             _tilemap: Tilemap::new(size),
             player,
@@ -149,15 +142,11 @@ impl G {
             contextual_action: Action::None,
             debug,
             target_secs_per_sim_tick: 0.200,
-            dt: 1.0 / 60.0, // initial fps guess
-            dt_smooth: 1.0 / 60.0,
-            frame: 0,
             header_text: default(),
             inputs: default(),
             keymap,
             last_sanity_error: None,
             name: "".into(),
-            now_micros: 0,
             paused: false,
             entities: Entities::new(),
             resources: default(),
@@ -180,8 +169,8 @@ impl G {
     ///   * Apply given input events and new wall time `now_secs`.
     ///   * Advance the state one tick.
     ///   * Render state to `out` (scenegraph).
-    pub fn tick_and_draw(&mut self, unix_micros: u64, events: impl Iterator<Item = InputEvent>, out: &mut Out) {
-        self.now_micros = unix_micros;
+    pub fn tick_and_draw(&mut self, micros: u64, events: impl Iterator<Item = InputEvent>, out: &mut Out) {
+        self.clock.tick(micros);
         self.inputs.tick(&self.keymap, events);
 
         self.viewport_size = out.viewport_size; //👈
@@ -189,7 +178,6 @@ impl G {
 
         self.commands.extend(&mut self.inputs.drain_commands());
 
-        self.update_fps(); // 👈 FPS is gamespeed independent
         self.exec_commands(); // 👈 exec commands even when paused (speed 0)
 
         if let Some(cmd) = self.console.tick(&self.inputs) {
@@ -202,19 +190,19 @@ impl G {
         }
 
         if !self.paused {
-            self.frame += 1;
-            if self.frame % (16) == 0 {
+            //self.frame += 1;
+            //if self.frame % (16) == 0 {
                 // 🪲 TODO: time major tick
                 self.major_tick();
                 self.water.major_tick(&self._tilemap); //👈 MAJOR
-            } else {
+                //} else {
                 self.water.minor_tick(&self._tilemap); //👈 m i n o r
-            }
+                //}
         } else {
             // When paused: manually tick by pressing spacebar.
             // Handy for debugging.
             if self.inputs.just_pressed(K_SPACE) {
-                self.frame = ((self.frame + 16) % 16); //🪲 bad pacing
+                //self.frame = ((self.frame + 16) % 16); //🪲 bad pacing
                 self.major_tick();
                 self.water.major_tick(&self._tilemap);
                 self.water.minor_tick(&self._tilemap);
@@ -498,12 +486,6 @@ impl G {
         self.mouse_position_world().to_tile()
     }
 
-    fn update_fps(&mut self) {
-        self.dt = (((self.now_micros - self.prev_frame_micros) as f64) / 1e6).clamp(0.001, 0.1); // clamp dt to 1-100ms to avoid craziness on clock suspend etc.
-        self.prev_frame_micros = self.now_micros;
-        self.dt_smooth = lerp(self.dt_smooth, self.dt, 0.02);
-    }
-
     pub fn set_tile(&mut self, idx: Vector<i16, 2>, v: Tile) {
         self._tilemap.set(idx, v);
 
@@ -536,8 +518,8 @@ impl G {
 }
 
 impl GameCore for G {
-    fn tick(&mut self, unix_micros: u64, events: impl Iterator<Item = InputEvent>, out: &mut Out) {
-        self.tick_and_draw(unix_micros, events, out)
+    fn tick(&mut self, micros: u64, events: impl Iterator<Item = InputEvent>, out: &mut Out) {
+        self.tick_and_draw(micros, events, out)
     }
 
     fn reset(&mut self) {

@@ -55,6 +55,10 @@ pub fn lib_main<G: GameCore>() {
     {
         log::warn!("debug_assertions enabled, performance will suffer");
     }
+    log::info!("info logging enabled");
+    log::warn!("warning logging enabled");
+    log::debug!("debug logging enabled");
+    log::trace!("tracing logging enabled");
     wasm_bindgen_futures::spawn_local(async { start::<G>().await.expect("main") })
 }
 
