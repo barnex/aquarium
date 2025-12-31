@@ -6,14 +6,16 @@ use crate::prelude::*;
 #[derive(Serialize, Deserialize)]
 pub struct G {
     // 🕣 timekeeping
-    pub paused: bool,
     pub frame: u64,
-    pub tick: u64,
     pub now_secs: f64,
-    _prev_secs: f64, // to compute dt
-    pub dt: f64,
-    pub dt_smooth: f64,
-    pub frames_per_tick: u32,
+
+    // 📺 Rendering FPS estimate
+    prev_frame_instant: f64,
+    dt: f64,
+    dt_smooth: f64,
+
+    pub paused: bool,
+    pub tick: u64,
 
     // 🌍 game world
     pub name: String,
@@ -135,7 +137,7 @@ impl G {
         ]);
 
         Self {
-            _prev_secs: 0.0,
+            prev_frame_instant: 0.0,
             _rng: RefCell::new(ChaCha8Rng::seed_from_u64(12345678)),
             _tilemap: Tilemap::new(size),
             player,
@@ -146,7 +148,6 @@ impl G {
             dt: 1.0 / 60.0, // initial fps guess
             dt_smooth: 1.0 / 60.0,
             frame: 0,
-            frames_per_tick: 8,
             header_text: default(),
             inputs: default(),
             keymap,
@@ -169,11 +170,13 @@ impl G {
         }
     }
 
+    /// 📺 Called whenever a new frame needs to be rendered.
+    ///
     /// ⏱️ Advance the game state one frame:
     ///   * Apply given input events and new wall time `now_secs`.
     ///   * Advance the state one tick.
     ///   * Render state to `out` (scenegraph).
-    pub fn tick(&mut self, now_secs: f64, events: impl Iterator<Item = InputEvent>, out: &mut Out) {
+    pub fn tick_and_draw(&mut self, now_secs: f64, events: impl Iterator<Item = InputEvent>, out: &mut Out) {
         self.now_secs = now_secs;
         self.inputs.tick(&self.keymap, events);
 
@@ -196,7 +199,7 @@ impl G {
 
         if !self.paused {
             self.frame += 1;
-            if self.frame % (self.frames_per_tick as u64) == 0 {
+            if self.frame % (16) == 0 {
                 // 🪲 TODO: time major tick
                 self.major_tick();
                 self.water.major_tick(&self._tilemap); //👈 MAJOR
@@ -207,7 +210,7 @@ impl G {
             // When paused: manually tick by pressing spacebar.
             // Handy for debugging.
             if self.inputs.just_pressed(K_SPACE) {
-                self.frame = (self.frame + self.frames_per_tick as u64) % self.frames_per_tick as u64;
+                self.frame = ((self.frame + 16) % 16); //🪲 bad pacing
                 self.major_tick();
                 self.water.major_tick(&self._tilemap);
                 self.water.minor_tick(&self._tilemap);
@@ -492,8 +495,8 @@ impl G {
     }
 
     fn update_fps(&mut self) {
-        self.dt = (self.now_secs - self._prev_secs).clamp(0.001, 0.1); // clamp dt to 1-100ms to avoid craziness on clock suspend etc.
-        self._prev_secs = self.now_secs;
+        self.dt = (self.now_secs - self.prev_frame_instant).clamp(0.001, 0.1); // clamp dt to 1-100ms to avoid craziness on clock suspend etc.
+        self.prev_frame_instant = self.now_secs;
         self.dt_smooth = lerp(self.dt_smooth, self.dt, 0.02);
     }
 
@@ -530,7 +533,7 @@ impl G {
 
 impl GameCore for G {
     fn tick(&mut self, now_secs: f64, events: impl Iterator<Item = InputEvent>, out: &mut Out) {
-        self.tick(now_secs, events, out)
+        self.tick_and_draw(now_secs, events, out)
     }
 
     fn reset(&mut self) {

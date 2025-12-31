@@ -60,7 +60,7 @@ fn test_world(size: vec2u16, name: &str) -> G {
         g.ui.hidden = true; // don't accidentally click on UI
         g.debug.draw_mouse = true; // see mouse position in screenshots
         g.debug.show_home = true;
-        g.frames_per_tick = 1; // time moves fast, don't spend screenshots on pure animation
+        //g.frames_per_tick = 1; // time moves fast, don't spend screenshots on pure animation
     })
 }
 

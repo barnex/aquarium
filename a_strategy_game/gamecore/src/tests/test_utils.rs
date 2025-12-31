@@ -25,7 +25,7 @@ pub fn tick(g: &mut G, inputs: impl IntoIterator<Item = InputEvent> + 'static) {
         let mut out = Out::default();
         out.viewport_size = vec2(480, 320);
         let now = g.now_secs + 0.016;
-        g.tick(now, inputs.into_iter(), &mut out);
+        g.tick_and_draw(now, inputs.into_iter(), &mut out);
 
         screenshot(g, &out);
 

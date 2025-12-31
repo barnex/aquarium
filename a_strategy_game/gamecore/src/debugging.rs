@@ -95,7 +95,8 @@ pub(crate) fn write_debug_output(g: &G, out: &mut Out) {
         writeln!(debug, "SANITY CHECK FAILED: {e}").ignore_err();
     }
 
-    writeln!(debug, "now: {:.04}s, frame: {}, tick: {}, FPS: {:.01}", g.now_secs, g.frame, g.tick, 1.0 / g.dt_smooth).unwrap();
+    // TODO: FPS reporting
+    //writeln!(debug, "now: {:.04}s, frame: {}, tick: {}, FPS: {:.01}", g.now_secs, g.frame, g.tick, 1.0 / g.dt_smooth).unwrap();
 
     let total_water = g.water.h.values().sum::<f32>();
     let max_water = g.water.h.values().copied().max_by(|a, b| a.total_cmp(b)).unwrap_or_default();
