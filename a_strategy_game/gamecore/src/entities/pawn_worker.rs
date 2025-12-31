@@ -1,12 +1,20 @@
 use crate::prelude::*;
 
+/// What to do upon reaching destination.
 #[derive(Serialize, Deserialize, Debug, Clone, Copy, PartialEq, Eq)]
-pub enum WorkPlan {
+pub enum Task {
     None,
+    /// Should pick up resource from map at destination.
+    /// Expectation: map has this resources at destination.
     Harvest(ResourceTyp),
-    HomeDelivery,
-    DeliverToBuilding(Id),
+    /// Should take resource from factory output.
+    /// TODO: Factory should drop it on the map instead?
+    /// Expectation: Factory `Id` is at destination and has such output.
     TakeFromBuilding(Id, ResourceTyp),
+    /// Bring your current cargo home.
+    HomeDelivery,
+    /// Bring your current cargo to factory `Id` at destination.
+    DeliverToBuilding(Id),
 }
 
 impl Pawn {
@@ -14,16 +22,16 @@ impl Pawn {
     /// TODO: Remove Status returns, always check if the status is as desired (e.g. destination.is_some());
     /// TODO: Simplify, avoid deadlocks?
     pub(crate) fn tick_delivery_work(&self, g: &G, home: &Building) {
-        trace!(self, "plan: {:?}", self.plan);
+        trace!(self, "plan: {:?}", self.task);
 
         // Plan == why am I here?
-        match self.plan.get() {
-            WorkPlan::None if self.is_at_building(home) =>  self.make_plan(g, home),
-            WorkPlan::None /*if not at home*/ =>  self.go_home(g),
-            WorkPlan::Harvest(res) => self.harvest(g, res),
-            WorkPlan::HomeDelivery => self.home_delivery(g),
-            WorkPlan::DeliverToBuilding(id) => self.deliver_to_building(g, id),
-            WorkPlan::TakeFromBuilding(id, res) => self.take_from_building(g, id, res),
+        match self.task.get() {
+            Task::None if self.is_at_building(home) =>  self.make_plan(g, home),
+            Task::None /*if not at home*/ =>  self.go_home(g),
+            Task::Harvest(res) => self.harvest(g, res),
+            Task::HomeDelivery => self.home_delivery(g),
+            Task::DeliverToBuilding(id) => self.deliver_to_building(g, id),
+            Task::TakeFromBuilding(id, res) => self.take_from_building(g, id, res),
         }
     }
 
@@ -62,7 +70,7 @@ impl Pawn {
             trace!(self, "failed");
             if let Some(alternative) = self.find_near_receptor(g, cargo) {
                 self.set_destination(g, alternative.entrance());
-                self.plan.set(WorkPlan::DeliverToBuilding(alternative.id()));
+                self.task.set(Task::DeliverToBuilding(alternative.id()));
             } else {
                 trace!(self, "TODO: drop cargo if no building with such input even exists");
                 self.sleep(Self::FAIL_DELAY);
@@ -79,7 +87,7 @@ impl Pawn {
         match input.add_one() {
             OK => {
                 self.cargo.set(None);
-                self.plan.set(WorkPlan::None);
+                self.task.set(Task::None);
                 trace!(self, "delivered {cargo}")
             }
             FAIL => trace!(self, "failed"),
@@ -97,7 +105,7 @@ impl Pawn {
             trace!(self, "pick up {res}");
             let Some(home) = self.home(g) else { return self.bail(g, "harvest: no home") };
             self.cargo.set(g.resources.remove(self.tile()));
-            self.plan.set(WorkPlan::DeliverToBuilding(home.id()));
+            self.task.set(Task::DeliverToBuilding(home.id()));
             return self.go_home(g);
         } else {
             trace!(self, "no {res} here");
@@ -113,7 +121,7 @@ impl Pawn {
     /// E.g.: Should harvest but already carrying some cargo. Or home has exploded.
     fn bail(&self, g: &G, reason: &str) {
         trace!(self, "{reason}");
-        self.plan.set(WorkPlan::None);
+        self.task.set(Task::None);
         self.go_home(g);
         self.sleep(Self::FAIL_DELAY);
     }
@@ -136,12 +144,12 @@ impl Pawn {
 
         match self.cargo() {
             Some(cargo) if home.has_input(cargo) => {
-                self.plan.set(WorkPlan::DeliverToBuilding(home.id()));
+                self.task.set(Task::DeliverToBuilding(home.id()));
                 self.set_destination(g, home.entrance());
             }
             Some(cargo) /*if not for home */=> {
                 if let Some(building) = self.find_near_receptor(g, cargo){
-                    self.plan.set(WorkPlan::DeliverToBuilding(building.id()));
+                    self.task.set(Task::DeliverToBuilding(building.id()));
                     self.set_destination(g, building.entrance());
                 }
             }
@@ -157,13 +165,13 @@ impl Pawn {
                                 trace!(self, "most urgent: harvest {}", slot.typ);
                                 debug_assert_eq!(g.resources.at(tile), Some(slot.typ));
                                 self.set_destination(g, tile);
-                                self.plan.set(WorkPlan::Harvest(slot.typ));
+                                self.task.set(Task::Harvest(slot.typ));
                                 return; //👈
                             }
                             if let Some(building) = self.find_near_provider(g, slot.typ) {
                                 trace!(self, "most urgent: collect {}", slot.typ);
                                 self.set_destination(g, building.entrance());
-                                self.plan.set(WorkPlan::TakeFromBuilding(building.id(), slot.typ));
+                                self.task.set(Task::TakeFromBuilding(building.id(), slot.typ));
                                 return; //👈
                             }
                         }
@@ -173,7 +181,7 @@ impl Pawn {
                                 self.cargo.set(slot.try_take_one());
                                 debug_assert!(self.cargo().is_some());
                                 self.set_destination(g, building.tile());
-                                self.plan.set(WorkPlan::DeliverToBuilding(building.id()));
+                                self.task.set(Task::DeliverToBuilding(building.id()));
                                 return; //👈
                             }
                         }
@@ -181,7 +189,7 @@ impl Pawn {
                 }
             }
         }
-        if self.plan == WorkPlan::None {
+        if self.task == Task::None {
             trace!(self, "failed to make a plan");
             self.sleep(Self::FAIL_DELAY);
         }

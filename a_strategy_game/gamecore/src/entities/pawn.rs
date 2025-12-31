@@ -6,13 +6,17 @@ pub struct Pawn {
 
     pub typ: PawnTyp,
 
-    // move
+    /// Where you are going.
+    /// Upon reaching destination, `task` will tell you what to do.
     pub route: Route,
 
     // work
+    /// TODO: rename: `workplace`?
     pub home: Cel<Option<Id>>,
+    /// What you are carrying.
     pub cargo: Cel<Option<ResourceTyp>>,
-    pub plan: Cel<WorkPlan>,
+    /// What to do upon reaching your destination.
+    pub task: Cel<Task>,
 
     // attack
     pub target: Cel<Option<Id>>,
@@ -77,7 +81,7 @@ impl Pawn {
             route: default(),
             home: None.cel(),
             cargo: None.cel(),
-            plan: WorkPlan::None.cel(),
+            task: Task::None.cel(),
             target: None.cel(),
             rot: default(),
         }
