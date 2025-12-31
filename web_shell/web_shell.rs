@@ -50,7 +50,7 @@ const TILE_SIZE: u32 = 24; // TODO: don't depend on this being hard-coded.
 pub fn lib_main<G: GameCore>() {
     web_sys::console::log_1(&"WASM main started. Hello from Rust.".into());
     console_error_panic_hook::set_once();
-    console_log::init_with_level(log::Level::Info).expect("error initializing logger");
+    console_log::init_with_level(log::Level::Trace).expect("error initializing logger");
     #[cfg(debug_assertions)]
     {
         log::warn!("debug_assertions enabled, performance will suffer");

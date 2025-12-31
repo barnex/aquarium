@@ -1,7 +1,6 @@
 #[allow(mismatched_lifetime_syntaxes)]
 use crate::prelude::*;
 
-
 /// The Game State.
 /// Short name `g: &G`, because it's passed down ehhhhhhverywhere.
 #[derive(Serialize, Deserialize)]
@@ -10,8 +9,10 @@ pub struct G {
 
     // 🌍 Simulation pacing
     pub paused: bool,
+    pub last_tick_micros: u64,
+    pub micros_per_tick: u64,
+
     pub curr_sim_tick: u64,
-    pub target_secs_per_sim_tick: f64,
 
     // 🌍 game world
     pub name: String,
@@ -141,7 +142,8 @@ impl G {
             commands: default(),
             contextual_action: Action::None,
             debug,
-            target_secs_per_sim_tick: 0.200,
+            micros_per_tick: 200_000,
+            last_tick_micros: 0,
             header_text: default(),
             inputs: default(),
             keymap,
@@ -172,14 +174,12 @@ impl G {
     pub fn tick_and_draw(&mut self, micros: u64, events: impl Iterator<Item = InputEvent>, out: &mut Out) {
         self.clock.tick(micros);
         self.inputs.tick(&self.keymap, events);
+        self.commands.extend(&mut self.inputs.drain_commands()); // 🪲 Obsolete?
 
         self.viewport_size = out.viewport_size; //👈
         out.camera_pos = self.camera_pos; //👈
 
-        self.commands.extend(&mut self.inputs.drain_commands());
-
         self.exec_commands(); // 👈 exec commands even when paused (speed 0)
-
         if let Some(cmd) = self.console.tick(&self.inputs) {
             self.commands.push_back(cmd);
         }
@@ -189,25 +189,34 @@ impl G {
             self.command_game();
         }
 
-        if !self.paused {
-            //self.frame += 1;
-            //if self.frame % (16) == 0 {
-                // 🪲 TODO: time major tick
-                self.major_tick();
-                self.water.major_tick(&self._tilemap); //👈 MAJOR
-                //} else {
-                self.water.minor_tick(&self._tilemap); //👈 m i n o r
-                //}
-        } else {
-            // When paused: manually tick by pressing spacebar.
-            // Handy for debugging.
-            if self.inputs.just_pressed(K_SPACE) {
-                //self.frame = ((self.frame + 16) % 16); //🪲 bad pacing
-                self.major_tick();
-                self.water.major_tick(&self._tilemap);
-                self.water.minor_tick(&self._tilemap);
+        if !self.paused || self.inputs.just_pressed(K_SPACE) {
+            let now = self.clock.micros();
+            let dt = self.micros_per_tick;
+            if now > self.last_tick_micros + dt {
+                self.last_tick_micros = (self.last_tick_micros + dt).clamp(now - dt, now + dt);
+                self.simulation_tick();
             }
         }
+
+        //if !self.paused {
+        //    //self.frame += 1;
+        //    //if self.frame % (16) == 0 {
+        //        // 🪲 TODO: time major tick
+        //        self.major_tick();
+        //        self.water.major_tick(&self._tilemap); //👈 MAJOR
+        //        //} else {
+        //        self.water.minor_tick(&self._tilemap); //👈 m i n o r
+        //        //}
+        //} else {
+        //    // When paused: manually tick by pressing spacebar.
+        //    // Handy for debugging.
+        //    if self.inputs.just_pressed(K_SPACE) {
+        //        //self.frame = ((self.frame + 16) % 16); //🪲 bad pacing
+        //        self.major_tick();
+        //        self.water.major_tick(&self._tilemap);
+        //        self.water.minor_tick(&self._tilemap);
+        //    }
+        //}
 
         self.draw_world(out);
         self.console.draw(out);
@@ -215,14 +224,14 @@ impl G {
         self.entities.gc();
     }
 
-    pub(crate) fn major_tick(&mut self) {
-        //self.tick_inspect(); //👈 must be first
-
+    pub(crate) fn simulation_tick(&mut self) {
         self.curr_sim_tick += 1;
         TICK_FOR_LOGGING.store(self.curr_sim_tick, std::sync::atomic::Ordering::Relaxed);
         self.tick_entities();
         self.tick_farmland();
         self.tick_renewables();
+        self.water.major_tick(&self._tilemap);
+        self.water.minor_tick(&self._tilemap);
         self.update_text_overlay();
 
         self.sanity_check();

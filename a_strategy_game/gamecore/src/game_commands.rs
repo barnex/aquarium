@@ -56,7 +56,7 @@ impl G {
     }
 
     fn cmd_tick(&mut self) -> Result<()> {
-        self.major_tick();
+        self.simulation_tick();
         Ok(())
     }
 }
