@@ -51,6 +51,9 @@ pub struct G {
     pub camera_pos: vec2i,
     pub viewport_size: vec2u,
 
+    #[serde(skip)]
+    pub anim: RefCell<AnimationState>,
+
     /// Use methods `random_XYZ()`.
     pub(super) _rng: RefCell<ChaCha8Rng>,
 
@@ -162,6 +165,7 @@ impl G {
             water: default(),
             console: Console::with_hotkey(K_CLI),
             effects: default(),
+            anim: default(),
         }
     }
 

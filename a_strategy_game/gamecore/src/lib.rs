@@ -1,5 +1,6 @@
 pub(crate) mod prelude;
 
+mod animation;
 mod control;
 mod debugging;
 mod drawing;
@@ -23,6 +24,7 @@ mod water_sim;
 #[cfg(test)]
 mod tests;
 
+pub use animation::*;
 pub use control::*;
 pub use debugging::*;
 pub use drawing::*;

@@ -5,6 +5,8 @@ impl G {
     pub fn draw_world(&self, out: &mut Out) {
         debug_assert!(out.viewport_size != vec2::ZERO);
 
+        self.anim.borrow_mut().next_frame(self.micros_per_tick, self.curr_sim_tick, self.clock.micros());
+
         out.draw_text_screen(L_TEXT, vec2(0, 0), &self.header_text);
 
         // Note: ⚠️ UI already rendered (may consume input events)

@@ -288,10 +288,16 @@ impl Pawn {
         self.attack_base(g, victim);
     }
 
-    fn base_draw(&self, _g: &G, out: &mut Out) {
-        out.draw_sprite_rot(L_SPRITES, self.sprite(), self.tile().pos(), self.rot.get());
+    fn base_draw(&self, g: &G, out: &mut Out) {
+        let pos = self.tile().pos();
+        let mut anim = g.anim.borrow_mut();
+
+        let pos = anim.smooth_pos(self.id(), pos);
+
+        out.draw_sprite_rot(L_SPRITES, self.sprite(), pos, self.rot.get());
         if let Some(res) = self.cargo.get() {
-            out.draw_sprite(L_SPRITES + 1, res.sprite(), self.tile().pos() + vec2(0, 8));
+            const CARGO_OFFSET: i32 = 8;
+            out.draw_sprite(L_SPRITES + 1, res.sprite(), pos + vec2(0, CARGO_OFFSET));
         }
     }
 
