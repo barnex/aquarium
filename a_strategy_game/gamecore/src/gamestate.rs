@@ -179,17 +179,21 @@ impl G {
         self.viewport_size = out.viewport_size; //👈
         out.camera_pos = self.camera_pos; //👈
 
-        self.exec_commands(); // 👈 exec commands even when paused (speed 0)
         if let Some(cmd) = self.console.tick(&self.inputs) {
             self.commands.push_back(cmd);
         }
+        self.exec_commands(); // 👈 exec commands even when paused (speed 0)
+
         // 👇 📺 console overlays normal game. Disables game control when active.
         if !self.console.active {
             self.ui.update_and_draw(&mut self.inputs, out); // 👈 may consume inputs
             self.command_game();
         }
 
+        // ⏱️ Tick the simulation.
+        // Tapping spacebar ticks forward if paused.
         if !self.paused || self.inputs.just_pressed(K_SPACE) {
+            // clean paceing
             let now = self.clock.micros();
             let dt = self.micros_per_tick;
             if now > self.last_tick_micros + dt {
@@ -197,26 +201,6 @@ impl G {
                 self.simulation_tick();
             }
         }
-
-        //if !self.paused {
-        //    //self.frame += 1;
-        //    //if self.frame % (16) == 0 {
-        //        // 🪲 TODO: time major tick
-        //        self.major_tick();
-        //        self.water.major_tick(&self._tilemap); //👈 MAJOR
-        //        //} else {
-        //        self.water.minor_tick(&self._tilemap); //👈 m i n o r
-        //        //}
-        //} else {
-        //    // When paused: manually tick by pressing spacebar.
-        //    // Handy for debugging.
-        //    if self.inputs.just_pressed(K_SPACE) {
-        //        //self.frame = ((self.frame + 16) % 16); //🪲 bad pacing
-        //        self.major_tick();
-        //        self.water.major_tick(&self._tilemap);
-        //        self.water.minor_tick(&self._tilemap);
-        //    }
-        //}
 
         self.draw_world(out);
         self.console.draw(out);
