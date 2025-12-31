@@ -6,8 +6,8 @@ use crate::prelude::*;
 #[derive(Serialize, Deserialize)]
 pub struct G {
     // 🕣 timekeeping
-    pub frame: u64,
-    pub now_micros: u64,
+    frame: u64,
+    now_micros: u64,
 
     // 📺 Rendering FPS estimate
     prev_frame_micros: u64,

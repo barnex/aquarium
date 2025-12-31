@@ -45,6 +45,11 @@ pub async fn mq_main<G: GameCore>() {
     let start = Instant::now();
 
     mq::prevent_quit();
+
+    // ⚠️ 🕣 Time reference does not use UNIX Epoch and gets reset on program restart.
+    // This mirrors Javascript and forces robust timekeeping logic to get excercised even inside macroquad.
+    let start_time = SystemTime::now();
+
     loop {
         if mq::is_quit_requested() {
             log::info!("quitting...");
@@ -52,7 +57,7 @@ pub async fn mq_main<G: GameCore>() {
             return; // 👈 exit
         }
 
-        let unix_micros = SystemTime::now().duration_since(UNIX_EPOCH).expect("time works").as_micros() as u64;
+        let unix_micros = SystemTime::now().duration_since(start_time).expect("time works").as_micros() as u64;
         out.clear();
 
         out.viewport_size = vec2(mq::screen_width(), mq::screen_height()).as_u32();

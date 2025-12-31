@@ -2,9 +2,13 @@
 //!   * Synthetic input events.
 //!   * Synthetic `tick`s to advance time.
 //!   * Save screenshots to disk.
+use std::sync::atomic::AtomicU64;
+
 use crate::prelude::*;
 use crate::tests::headless_renderer::render_headless;
 use crate::tests::test_setup::*;
+
+static FAKE_CLOCK: AtomicU64 = AtomicU64::new(12345);
 
 /// Synthetically advance game state one tick, with given fake inputs happening right before the tick.
 /// Time advances 16ms (~60 FPS)
@@ -24,7 +28,7 @@ pub fn tick(g: &mut G, inputs: impl IntoIterator<Item = InputEvent> + 'static) {
 
         let mut out = Out::default();
         out.viewport_size = vec2(480, 320);
-        let now = g.now_micros + 16_666; // fake frame time
+        let now = FAKE_CLOCK.fetch_add(16_666, std::sync::atomic::Ordering::SeqCst);
         g.tick_and_draw(now, inputs.into_iter(), &mut out);
 
         screenshot(g, &out);
