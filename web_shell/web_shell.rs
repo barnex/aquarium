@@ -88,7 +88,7 @@ async fn start<G: GameCore>() -> JsResult<()> {
         out.clear();
         out.viewport_size = vec2(canvas.width(), canvas.height());
 
-        g.tick(now_secs(), input_events.borrow_mut().drain(..), &mut out);
+        g.tick(now_micros(), input_events.borrow_mut().drain(..), &mut out);
 
         draw(&canvas, &ctx, &mut res, &out);
 

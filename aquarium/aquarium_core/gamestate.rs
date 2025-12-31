@@ -57,8 +57,8 @@ impl GameState {
         }
     }
 
-    fn tick_and_draw(&mut self, now_secs: f64, events: impl Iterator<Item = shell_api::InputEvent>, out: &mut shell_api::Out) {
-        self.update_inputs(now_secs, events);
+    fn tick_and_draw(&mut self, now_micros: u64, events: impl Iterator<Item = shell_api::InputEvent>, out: &mut shell_api::Out) {
+        self.update_inputs(now_micros, events);
 
         self.console.tick_and_draw(&self.inputs, out).map(|cmd| self.exec_command(&cmd));
         if !self.console.active {
@@ -135,8 +135,8 @@ impl GameState {
         out.bloom = true;
     }
 
-    fn update_inputs(&mut self, now_secs: f64, events: impl Iterator<Item = InputEvent>) {
-        self.now_secs = now_secs;
+    fn update_inputs(&mut self, now_micros: u64, events: impl Iterator<Item = InputEvent>) {
+        self.now_secs = (now_micros as f64 / 1e6);
         self.tick += 1;
         TICK_FOR_LOGGING.store(self.tick, std::sync::atomic::Ordering::Relaxed);
 
@@ -199,8 +199,8 @@ impl Default for GameState {
 }
 
 impl shell_api::GameCore for GameState {
-    fn tick(&mut self, now_secs: f64, events: impl Iterator<Item = shell_api::InputEvent>, out: &mut shell_api::Out) {
-        self.tick_and_draw(now_secs, events, out)
+    fn tick(&mut self, now_micros: u64, events: impl Iterator<Item = shell_api::InputEvent>, out: &mut shell_api::Out) {
+        self.tick_and_draw(now_micros, events, out)
     }
 
     fn reset(&mut self) {

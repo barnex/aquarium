@@ -24,7 +24,7 @@ pub fn tick(g: &mut G, inputs: impl IntoIterator<Item = InputEvent> + 'static) {
 
         let mut out = Out::default();
         out.viewport_size = vec2(480, 320);
-        let now = g.now_secs + 0.016;
+        let now = g.now_micros + 16_666; // fake frame time
         g.tick_and_draw(now, inputs.into_iter(), &mut out);
 
         screenshot(g, &out);
@@ -45,7 +45,7 @@ pub fn tick_n(g: &mut G, n: usize) {
 /// Render gamestate (headless), save under `test_output/<test_name>/frame_1234.png`.
 /// Automatically called on `tick`.
 pub(crate) fn screenshot(g: &mut G, out: &Out) {
-    let fname = test_output_dir(&g.name).join(format!("tick_{:04}.png", g.tick));
+    let fname = test_output_dir(&g.name).join(format!("tick_{:04}.png", g.curr_sim_tick));
     if let Some(dir) = fname.parent() {
         std::fs::create_dir_all(dir).log_err().swallow_err();
     }

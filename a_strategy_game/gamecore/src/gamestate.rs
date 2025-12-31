@@ -7,15 +7,18 @@ use crate::prelude::*;
 pub struct G {
     // 🕣 timekeeping
     pub frame: u64,
-    pub now_secs: f64,
+    pub now_micros: u64,
 
     // 📺 Rendering FPS estimate
-    prev_frame_instant: f64,
+    prev_frame_micros: u64,
     dt: f64,
     dt_smooth: f64,
 
+    // 🌍 Simulation pacing
     pub paused: bool,
-    pub tick: u64,
+    pub curr_sim_tick: u64,
+    pub target_secs_per_sim_tick: f64,
+    //pub last_tick_instant: f64,
 
     // 🌍 game world
     pub name: String,
@@ -137,7 +140,7 @@ impl G {
         ]);
 
         Self {
-            prev_frame_instant: 0.0,
+            prev_frame_micros: 0,
             _rng: RefCell::new(ChaCha8Rng::seed_from_u64(12345678)),
             _tilemap: Tilemap::new(size),
             player,
@@ -145,6 +148,7 @@ impl G {
             commands: default(),
             contextual_action: Action::None,
             debug,
+            target_secs_per_sim_tick: 0.200,
             dt: 1.0 / 60.0, // initial fps guess
             dt_smooth: 1.0 / 60.0,
             frame: 0,
@@ -153,7 +157,7 @@ impl G {
             keymap,
             last_sanity_error: None,
             name: "".into(),
-            now_secs: 0.0,
+            now_micros: 0,
             paused: false,
             entities: Entities::new(),
             resources: default(),
@@ -161,7 +165,7 @@ impl G {
             selected_entity_ids: default(), // <<< TODO: remove
             inspected: default(),
             selection_start: None,
-            tick: 0,
+            curr_sim_tick: 0,
             ui: GameUi::new(),
             viewport_size: vec2(0, 0),
             water: default(),
@@ -176,8 +180,8 @@ impl G {
     ///   * Apply given input events and new wall time `now_secs`.
     ///   * Advance the state one tick.
     ///   * Render state to `out` (scenegraph).
-    pub fn tick_and_draw(&mut self, now_secs: f64, events: impl Iterator<Item = InputEvent>, out: &mut Out) {
-        self.now_secs = now_secs;
+    pub fn tick_and_draw(&mut self, unix_micros: u64, events: impl Iterator<Item = InputEvent>, out: &mut Out) {
+        self.now_micros = unix_micros;
         self.inputs.tick(&self.keymap, events);
 
         self.viewport_size = out.viewport_size; //👈
@@ -226,8 +230,8 @@ impl G {
     pub(crate) fn major_tick(&mut self) {
         //self.tick_inspect(); //👈 must be first
 
-        self.tick += 1;
-        TICK_FOR_LOGGING.store(self.tick, std::sync::atomic::Ordering::Relaxed);
+        self.curr_sim_tick += 1;
+        TICK_FOR_LOGGING.store(self.curr_sim_tick, std::sync::atomic::Ordering::Relaxed);
         self.tick_entities();
         self.tick_farmland();
         self.tick_renewables();
@@ -495,8 +499,8 @@ impl G {
     }
 
     fn update_fps(&mut self) {
-        self.dt = (self.now_secs - self.prev_frame_instant).clamp(0.001, 0.1); // clamp dt to 1-100ms to avoid craziness on clock suspend etc.
-        self.prev_frame_instant = self.now_secs;
+        self.dt = (((self.now_micros - self.prev_frame_micros) as f64) / 1e6).clamp(0.001, 0.1); // clamp dt to 1-100ms to avoid craziness on clock suspend etc.
+        self.prev_frame_micros = self.now_micros;
         self.dt_smooth = lerp(self.dt_smooth, self.dt, 0.02);
     }
 
@@ -532,8 +536,8 @@ impl G {
 }
 
 impl GameCore for G {
-    fn tick(&mut self, now_secs: f64, events: impl Iterator<Item = InputEvent>, out: &mut Out) {
-        self.tick_and_draw(now_secs, events, out)
+    fn tick(&mut self, unix_micros: u64, events: impl Iterator<Item = InputEvent>, out: &mut Out) {
+        self.tick_and_draw(unix_micros, events, out)
     }
 
     fn reset(&mut self) {

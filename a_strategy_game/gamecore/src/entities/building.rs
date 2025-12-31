@@ -224,13 +224,13 @@ impl Building {
 
     fn tick_star_nest(&self, g: &G) {
         // TODO: delay
-        if g.tick % 128 == 0 {
+        if g.curr_sim_tick % 128 == 0 {
             if self.workers.is_empty() {
                 self.spawn_default_workers(g);
             }
         }
         // slowly drain resources
-        if g.tick % 16 == 0 {
+        if g.curr_sim_tick % 16 == 0 {
             if self.inputs[0].has_at_least(1) {
                 self.inputs[0].take(1);
                 self.get_health().clamped_add(self.typ.default_health(), 1);

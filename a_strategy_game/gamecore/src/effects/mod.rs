@@ -53,13 +53,13 @@ impl Effects {
 
     pub fn add(&self, g: &G, effect: impl Into<Effect>) {
         let effect = effect.into();
-        self.effects.borrow_mut().push((g.tick + effect.ttl(), effect));
+        self.effects.borrow_mut().push((g.curr_sim_tick + effect.ttl(), effect));
     }
 
     pub fn tick_and_draw(&self, g: &G, out: &mut Out) {
         let mut effects = self.effects.borrow_mut();
 
-        effects.retain(|(eol, _)| *eol > g.tick);
+        effects.retain(|(eol, _)| *eol > g.curr_sim_tick);
 
         for (_, b) in effects.iter() {
             b.draw(out)
