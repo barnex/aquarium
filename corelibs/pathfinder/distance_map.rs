@@ -1,5 +1,11 @@
 use crate::internal::*;
 
+/// TODO: quite inefficient. Use A* instead. Factories should compute one distance map and re-use for all paths to nearby points of interest.
+pub fn path_to(start: vec2i16, dest: vec2i16, max_dist: u16, walkable: impl Fn(vec2i16) -> bool) -> Option<Vec<vec2i16>> {
+    let distance_map = DistanceMap::new(dest, max_dist, walkable);
+    distance_map.path_to_center(start)
+}
+
 #[derive(Default, Serialize, Deserialize, Clone)]
 pub struct DistanceMap {
     radius: u16,
