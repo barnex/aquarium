@@ -112,21 +112,21 @@ mod constructors {
 	#[inline(always)] pub const fn vec3u(x: u32, y: u32, z: u32        ) -> vec3u { Vector([x, y, z]) }
 	/// Constructor
 	#[inline(always)] pub const fn vec4u(x: u32, y: u32, z: u32, w: u32) -> vec4u { Vector([x, y, z, w]) }
-    
+
 	/// Constructor
 	#[inline(always)] pub const fn vec2u8(x: u8, y: u8               ) -> vec2u8 { Vector([x, y]) }
 	/// Constructor
 	#[inline(always)] pub const fn vec3u8(x: u8, y: u8, z: u8        ) -> vec3u8 { Vector([x, y, z]) }
 	/// Constructor
 	#[inline(always)] pub const fn vec4u8(x: u8, y: u8, z: u8, w: u8)  -> vec4u8{ Vector([x, y, z, w]) }
-    
+
 	/// Constructor
 	#[inline(always)] pub const fn vec2u16(x: u16, y: u16                ) -> vec2u16 { Vector([x, y]) }
 	/// Constructor
 	#[inline(always)] pub const fn vec3u16(x: u16, y: u16, z: u16        ) -> vec3u16 { Vector([x, y, z]) }
 	/// Constructor
 	#[inline(always)] pub const fn vec4u16(x: u16, y: u16, z: u16, w: u16) -> vec4u16 { Vector([x, y, z, w]) }
-    
+
 	/// Constructor
 	#[inline(always)] pub const fn vec2i16(x: i16, y: i16                ) -> vec2i16 { Vector([x, y]) }
 	/// Constructor
@@ -180,14 +180,14 @@ mod constants {
 	impl Number for i32 { const ONE: Self = 1; const ZERO: Self = 0; }
 	impl Number for i64 { const ONE: Self = 1; const ZERO: Self = 0; }
 
-	impl<T: Number, const N: usize> Vector<T, N> { 
+	impl<T: Number, const N: usize> Vector<T, N> {
 		/// All components set to 0.
-		pub const ZERO: Self = Self::splat(T::ZERO); 
+		pub const ZERO: Self = Self::splat(T::ZERO);
 		/// All components set to 1.
-		pub const ONES: Self = Self::splat(T::ONE); 
+		pub const ONES: Self = Self::splat(T::ONE);
 	}
 
-	impl<T: Number> Vector<T, 2> { 
+	impl<T: Number> Vector<T, 2> {
 		/// X unit vector.
 		pub const EX: Self = Self([T::ONE, T::ZERO]);
 		/// Y unit vector.
@@ -195,7 +195,7 @@ mod constants {
 		/// X and Y unit vectors.
 		pub const UNIT: [Self; 2] = [Self::EX, Self::EY];
 	}
-	impl<T: Number> Vector<T, 3> { 
+	impl<T: Number> Vector<T, 3> {
 		/// X unit vector.
 		pub const EX: Self = Self([T::ONE, T::ZERO, T::ZERO]);
 		/// Y unit vector.
@@ -205,7 +205,7 @@ mod constants {
 		/// X, Y, Z unit vectors.
 		pub const UNIT: [Self; 3] = [Self::EX, Self::EY, Self::EZ];
 	}
-	impl<T: Number> Vector<T, 4> { 
+	impl<T: Number> Vector<T, 4> {
 		/// X unit vector.
 		pub const EX: Self = Self([T::ONE, T::ZERO, T::ZERO, T::ZERO]);
 		/// Y unit vector.
@@ -270,7 +270,7 @@ mod swizzle {
 		#[inline(always)] pub const fn xyz(self) -> vec3<T> { Vector([self.0[0], self.0[1], self.0[2]]) }
 	}
 
-	impl<T> vec2<T> { 
+	impl<T> vec2<T> {
 		/// Append Z component.
 		/// ```
 		/// # use vector::*;
@@ -280,7 +280,7 @@ mod swizzle {
 		#[must_use]
 		pub fn append(self, z: T) -> vec3<T> { let Vector([x, y]) = self;    Vector([x, y, z]) }
 	 }
-	impl<T> vec3<T> { 
+	impl<T> vec3<T> {
 		/// Append W component.
 		/// ```
 		/// # use vector::*;
@@ -574,6 +574,23 @@ where
     }
 }
 
+/// The addition operator `+`.
+/// ```
+/// # use vector::*;
+/// assert_eq!(vec2(1,2) + (3,4), vec2(4,6));
+/// assert_eq!(vec3u(1,2,3) + (4,5,6), vec3u(5,7,9));
+/// ```
+impl<T> Add<(T, T)> for Vector<T, 2>
+where
+    T: Add<Output = T>,
+{
+    type Output = Self;
+
+    fn add(self, rhs: (T, T)) -> Self::Output {
+        self + Self::from(rhs)
+    }
+}
+
 /// Vector + constant adds the constant to each component.
 /// ```
 /// # use vector::*;
@@ -775,7 +792,7 @@ where
     }
 }
 
-/// Left-multiply primitive types (f32,...) with `vec`. E.g. `2 * vec3(1, 2, 3)`. 
+/// Left-multiply primitive types (f32,...) with `vec`. E.g. `2 * vec3(1, 2, 3)`.
 #[rustfmt::skip]
 mod mul_primitive{
 	use super::*;
