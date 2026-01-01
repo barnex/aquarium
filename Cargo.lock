@@ -507,7 +507,7 @@ dependencies = [
  "memkeep",
  "num-traits",
  "num_enum",
- "pathfinder",
+ "pathfinding",
  "proc_macros",
  "rand",
  "rand_chacha",
@@ -843,6 +843,7 @@ dependencies = [
  "itertools",
  "pathfinding",
  "serde",
+ "smallvec",
  "vector",
 ]
 

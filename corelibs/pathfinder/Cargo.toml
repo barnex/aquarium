@@ -13,3 +13,4 @@ itertools = { workspace = true }
 pathfinding = { workspace = true }
 serde = { workspace = true }
 vector = { workspace = true }
+smallvec = { workspace = true }

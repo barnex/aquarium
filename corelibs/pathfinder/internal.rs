@@ -5,3 +5,4 @@ pub use vector::*;
 pub type HashMap<K, V> = fnv::FnvHashMap<K, V>;
 pub use itertools::Itertools as _;
 pub use std::collections::VecDeque;
+pub type SmallVec<T, const N: usize> = smallvec::SmallVec<[T; N]>;

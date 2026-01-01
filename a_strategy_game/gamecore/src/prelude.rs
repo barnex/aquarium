@@ -3,7 +3,6 @@ pub use cel::*;
 pub use gamelib::*;
 pub use geometry::*;
 pub use num_traits::AsPrimitive;
-pub use pathfinder::*;
 pub use shell_api::*;
 pub use vector::*;
 

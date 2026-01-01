@@ -62,7 +62,7 @@ rand = { version = "0.8", default-features = false }
 rand_chacha = { version = "0.3", features = ["serde1"] }
 ron = "0.10"
 serde = { version = "1", features = ["derive"] }
-smallvec = {version = "1", features = ["serde"] }
+smallvec = {version = "1.15", features = ["serde", "const_generics", "const_new", "union"] }
 tiny-skia = "0.11"
 pathfinding = "4"
 

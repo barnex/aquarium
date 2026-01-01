@@ -1,3 +1,5 @@
+use smallvec::SmallVec;
+
 use crate::internal::*;
 
 pub fn weighted_path_to(start: vec2i16, goal: vec2i16, max_dist: u16, walkable: impl Fn(vec2i16) -> bool, cost: impl Fn(vec2i16) -> u8) -> Option<Vec<vec2i16>> {
@@ -6,7 +8,7 @@ pub fn weighted_path_to(start: vec2i16, goal: vec2i16, max_dist: u16, walkable: 
     let result = astar(
         &start,
         /* neighbors and distance: */
-        |&cursor| neighbors(cursor).into_iter().filter(|&p| walkable(p) && start.distance_squared(p) < max_dist_square).map(|p| (p, cost(p) as i32)),
+        |&cursor| neighbors4(cursor).into_iter().filter(|&p| walkable(p) && start.distance_squared(p) < max_dist_square).map(|p| (p, cost(p) as i32)),
         /* heuristic: */
         |&pos| (pos.as_f64().distance_to(goal.as_f64()) + cost(pos) as f64) as i32, // TODO: is this efficient?
         |&pos| pos == goal,
@@ -123,6 +125,12 @@ impl DistanceMap {
 }
 */
 
-fn neighbors(pos: vec2i16) -> [vec2i16; 4] {
+fn neighbors4(pos: vec2i16) -> [vec2i16; 4] {
     [(-1, 0), (1, 0), (0, -1), (0, 1)].map(|v| pos + vec2::from(v))
 }
+
+//fn neighbors8(g: &G, pos: vec2i16) -> SmallVec<vec2i16, 8> {
+//    let mut result = SmallVec::new();
+//    for neigh in [(-1, 0), (1, 0), (0, -1), (0, 1)].map(|v| pos + vec2::from(v)) {}
+//    result
+//}
