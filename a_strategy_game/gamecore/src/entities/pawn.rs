@@ -189,7 +189,7 @@ impl Pawn {
         }
         let max_dist = 42;
         //let distance_map = DistanceMap::new(dest, max_dist, |p| self.can_walk_on_tile(g.tile_at(p)));
-        match path_to(self.tile(), dest, max_dist, |p| self.can_walk_on_tile(g.tile_at(p))) {
+        match weighted_path_to(self.tile(), dest, max_dist, |p| self.can_walk_on_tile(g.tile_at(p)), |p| g.tile_at(p).distance_weight()) {
             Some(path) => self.route.set(path.with(|p| trace!(self, "set_destination path len={:?}", p.len()))),
             None => trace!(self, "no path"),
         }

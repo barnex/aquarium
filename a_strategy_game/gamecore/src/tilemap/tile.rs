@@ -67,6 +67,14 @@ impl Tile {
             Tile::GreyStone => false,
         }
     }
+
+    /// How difficult it is to cross this tile
+    pub fn distance_weight(&self) -> u8 {
+        match self {
+            Tile::Road => 1,
+            _ => 2,
+        }
+    }
 }
 
 impl Display for Tile {

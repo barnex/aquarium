@@ -11,3 +11,4 @@ serde = { workspace = true }
 fnv = { workspace = true }
 vector = { workspace = true }
 core_util = { workspace = true }
+itertools = { workspace = true }

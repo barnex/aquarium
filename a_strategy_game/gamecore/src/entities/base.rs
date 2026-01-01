@@ -27,7 +27,7 @@ impl Base {
     #[must_use = "tick must early return on true"]
     pub fn tick_sleep(&self) -> bool {
         if self.sleep.get() != 0 {
-            trace!(&self, "{} ticks", self.sleep.get());
+            //trace!(&self, "{} ticks", self.sleep.get());
             self.sleep.saturating_sub(1);
             true
         } else {

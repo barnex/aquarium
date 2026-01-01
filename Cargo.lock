@@ -819,6 +819,7 @@ version = "2.0.0"
 dependencies = [
  "core_util",
  "fnv",
+ "itertools",
  "serde",
  "vector",
 ]

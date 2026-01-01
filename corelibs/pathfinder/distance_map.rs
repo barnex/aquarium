@@ -6,6 +6,11 @@ pub fn path_to(start: vec2i16, dest: vec2i16, max_dist: u16, walkable: impl Fn(v
     distance_map.path_to_center(start)
 }
 
+pub fn weighted_path_to(start: vec2i16, dest: vec2i16, max_dist: u16, walkable: impl Fn(vec2i16) -> bool, weight: impl Fn(vec2i16) -> u8) -> Option<Vec<vec2i16>> {
+    let distance_map = DistanceMap::new_weighted(dest, max_dist, walkable, weight);
+    distance_map.path_to_center(start)
+}
+
 #[derive(Default, Serialize, Deserialize, Clone)]
 pub struct DistanceMap {
     radius: u16,
@@ -14,7 +19,7 @@ pub struct DistanceMap {
 }
 
 impl DistanceMap {
-    pub fn new(center: vec2i16, max_dist: u16, walkable: impl Fn(vec2i16) -> bool) -> Self {
+    pub fn new_weighted(center: vec2i16, max_dist: u16, walkable: impl Fn(vec2i16) -> bool, weight: impl Fn(vec2i16) -> u8) -> Self {
         let mut dist_to = HashMap::<vec2i16, u16>::from_iter([(center, 0)]);
         let mut front = VecDeque::from([center]);
 
@@ -22,11 +27,14 @@ impl DistanceMap {
         let radius2 = (max_dist as i64) * (max_dist as i64);
 
         while let Some(pos) = front.pop_front() {
-            let neigh_dist = dist_to[&pos] + 1;
+            let neigh_dist = dist_to[&pos] + (weight(pos).with(|w| debug_assert!(*w != 0)) as u16);
             if neigh_dist <= (u8::MAX as u16) {
                 for pos in neighbors(pos) {
                     if center.as_i32().distance_squared(pos.as_i32()) < radius2 && !visited(&dist_to, pos) && walkable(pos) {
-                        dist_to.insert(pos, neigh_dist);
+                        let current_best = dist_to.get(&pos).copied().unwrap_or(u16::MAX);
+                        if neigh_dist < current_best {
+                            dist_to.insert(pos, neigh_dist);
+                        }
                         front.push_back(pos)
                     }
                 }
@@ -34,6 +42,10 @@ impl DistanceMap {
         }
 
         Self { center, radius: max_dist, dist_to }
+    }
+
+    pub fn new(center: vec2i16, max_dist: u16, walkable: impl Fn(vec2i16) -> bool) -> Self {
+        Self::new_weighted(center, max_dist, walkable, |_| 1)
     }
 
     /// Iterate all reachable positions and distances.
@@ -65,25 +77,33 @@ impl DistanceMap {
     }
 
     pub fn path_to_center(&self, start: vec2i16) -> Option<Vec<vec2i16>> {
-        let mut curr_dist = *self.dist_to.get(&start)?; // 👈 returns `None` if unreachable
-        let initial_dist = curr_dist;
-        let mut path = Vec::with_capacity(curr_dist as usize + 1); // exact capacity
-        path.push(start);
         let mut cursor = start;
+        let mut curr_dist = *self.dist_to.get(&start)?; // 👈 returns `None` if unreachable
+        let mut path = Vec::with_capacity(curr_dist as usize + 1); // exact capacity🪲 unless weighted
+
+        path.push(start);
         'next_tile: while curr_dist > 0 {
-            for neigh in neighbors(cursor) {
-                if let Some(&dist) = self.dist_to.get(&neigh) {
-                    if dist < curr_dist {
-                        curr_dist = dist;
-                        cursor = neigh;
-                        path.push(cursor);
-                        continue 'next_tile;
-                    }
+            eprintln!("*********************");
+            dbg!((cursor, curr_dist));
+            let neighbors = neighbors(cursor) //_
+                .into_iter()
+                .filter_map(|pos| self.dist_to.get(&pos).map(|dist| (pos, *dist)));
+            //.inspect(|(pos, dist)| dbg!((pos, dist)).ignore())
+            //.collect_vec() // << ☠️
+            //.into_iter();
+
+            for (neigh, dist) in neighbors.sorted_by_key(|(_, dist)| *dist) {
+                //🪲 sorted_by_key is inefficient. use min_by_key?
+                if dist < curr_dist {
+                    curr_dist = dist;
+                    cursor = neigh;
+                    path.push(cursor);
+                    continue 'next_tile;
                 }
             }
         }
 
-        debug_assert_eq!(path.len(), initial_dist as usize + 1); // check capacity was exact
+        //debug_assert_eq!(path.len(), initial_dist as usize + 1); // check capacity was exact
         Some(path)
     }
 
