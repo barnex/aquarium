@@ -49,14 +49,13 @@ impl AnimationState {
         // Linearly advance interpolation from 0.0 to 1.0 during the simulation tick.
         self.fractional_tick = (((curr_micros - self.curr_tick_start_micros) as f64) / (micros_per_tick as f64));
 
-        {
-            // Fail-safe in case of numerical weirdness. Should not be needed.
-            debug_assert!(self.fractional_tick >= 0.0 && self.fractional_tick <= 1.0);
-            if !self.fractional_tick.is_finite() {
-                self.fractional_tick = 0.0;
-            }
-            self.fractional_tick = self.fractional_tick.clamp(0.0, 1.0);
+        // Fail-safe in case of numerical weirdness. Should not be needed.
+        if !self.fractional_tick.is_finite() {
+            self.fractional_tick = 1.0;
         }
+        // If a tick arrives late (e.g. high CPU load),
+        // then don't interpolate out-of-range (>1.0).
+        self.fractional_tick = self.fractional_tick.clamp(0.0, 1.0);
     }
 
     /// Compute smoothed pixel position of entity with given Id and position in the current simulation tick.
