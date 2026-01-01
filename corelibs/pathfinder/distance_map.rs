@@ -6,19 +6,14 @@ pub fn path_to(start: vec2i16, dest: vec2i16, max_dist: u16, walkable: impl Fn(v
     distance_map.path_to_center(start)
 }
 
-pub fn weighted_path_to(start: vec2i16, goal: vec2i16, max_dist: u16, walkable: impl Fn(vec2i16) -> bool, weight: impl Fn(vec2i16) -> u8) -> Option<Vec<vec2i16>> {
-    //let distance_map = DistanceMap::new_weighted(dest, max_dist, walkable, weight);
-    //distance_map.path_to_center(start)
+pub fn weighted_path_to(start: vec2i16, goal: vec2i16, max_dist: u16, walkable: impl Fn(vec2i16) -> bool, cost: impl Fn(vec2i16) -> u8) -> Option<Vec<vec2i16>> {
     use pathfinding::prelude::astar;
-
-    //static GOAL: (i32, i32) = (4, 6);
     let result = astar(
         &start,
-        |&cursor| {
-            //vec![(x + 1, y + 2), (x + 1, y - 2), (x - 1, y + 2), (x - 1, y - 2), (x + 2, y + 1), (x + 2, y - 1), (x - 2, y + 1), (x - 2, y - 1)] .into_iter() .map(|p| (p, 1))
-            neighbors(cursor).into_iter().filter(|p| walkable(*p)).map(|p| (p, 1))
-        },
-        |&pos| pos.distance_squared(goal),
+        /* neighbors and distance: */
+        |&cursor| neighbors(cursor).into_iter().filter(|p| walkable(*p)).map(|p| (p, cost(p) as i32)),
+        /* heuristic: */
+        |&pos| (pos.as_f64().distance_to(goal.as_f64()) + cost(pos) as f64) as i32, // TODO: is this efficient?
         |&pos| pos == goal,
     );
     result.map(|(path, _dist)| path)
