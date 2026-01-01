@@ -1,17 +1,12 @@
 use crate::internal::*;
 
-/// TODO: quite inefficient. Use A* instead. Factories should compute one distance map and re-use for all paths to nearby points of interest.
-pub fn path_to(start: vec2i16, dest: vec2i16, max_dist: u16, walkable: impl Fn(vec2i16) -> bool) -> Option<Vec<vec2i16>> {
-    let distance_map = DistanceMap::new(dest, max_dist, walkable);
-    distance_map.path_to_center(start)
-}
-
 pub fn weighted_path_to(start: vec2i16, goal: vec2i16, max_dist: u16, walkable: impl Fn(vec2i16) -> bool, cost: impl Fn(vec2i16) -> u8) -> Option<Vec<vec2i16>> {
     use pathfinding::prelude::astar;
+    let max_dist_square = (max_dist as i32).pow(2);
     let result = astar(
         &start,
         /* neighbors and distance: */
-        |&cursor| neighbors(cursor).into_iter().filter(|p| walkable(*p)).map(|p| (p, cost(p) as i32)),
+        |&cursor| neighbors(cursor).into_iter().filter(|&p| walkable(p) && start.distance_squared(p) < max_dist_square).map(|p| (p, cost(p) as i32)),
         /* heuristic: */
         |&pos| (pos.as_f64().distance_to(goal.as_f64()) + cost(pos) as f64) as i32, // TODO: is this efficient?
         |&pos| pos == goal,
@@ -19,6 +14,13 @@ pub fn weighted_path_to(start: vec2i16, goal: vec2i16, max_dist: u16, walkable: 
     result.map(|(path, _dist)| path)
 }
 
+// TODO: quite inefficient. Use A* instead. Factories should compute one distance map and re-use for all paths to nearby points of interest.
+//pub fn path_to(start: vec2i16, dest: vec2i16, max_dist: u16, walkable: impl Fn(vec2i16) -> bool) -> Option<Vec<vec2i16>> {
+//    let distance_map = DistanceMap::new(dest, max_dist, walkable);
+//    distance_map.path_to_center(start)
+//}
+
+/*
 #[derive(Default, Serialize, Deserialize, Clone)]
 pub struct DistanceMap {
     radius: u16,
@@ -119,6 +121,7 @@ impl DistanceMap {
         self.path_to_center(destination).map(|v| v.with(|v| v.reverse()))
     }
 }
+*/
 
 fn neighbors(pos: vec2i16) -> [vec2i16; 4] {
     [(-1, 0), (1, 0), (0, -1), (0, 1)].map(|v| pos + vec2::from(v))
