@@ -7,8 +7,9 @@ edition = "2024"
 path = "pathfinder.rs"
 
 [dependencies]
-serde = { workspace = true }
-fnv = { workspace = true }
-vector = { workspace = true }
 core_util = { workspace = true }
+fnv = { workspace = true }
 itertools = { workspace = true }
+pathfinding = { workspace = true }
+serde = { workspace = true }
+vector = { workspace = true }

@@ -6,9 +6,22 @@ pub fn path_to(start: vec2i16, dest: vec2i16, max_dist: u16, walkable: impl Fn(v
     distance_map.path_to_center(start)
 }
 
-pub fn weighted_path_to(start: vec2i16, dest: vec2i16, max_dist: u16, walkable: impl Fn(vec2i16) -> bool, weight: impl Fn(vec2i16) -> u8) -> Option<Vec<vec2i16>> {
-    let distance_map = DistanceMap::new_weighted(dest, max_dist, walkable, weight);
-    distance_map.path_to_center(start)
+pub fn weighted_path_to(start: vec2i16, goal: vec2i16, max_dist: u16, walkable: impl Fn(vec2i16) -> bool, weight: impl Fn(vec2i16) -> u8) -> Option<Vec<vec2i16>> {
+    //let distance_map = DistanceMap::new_weighted(dest, max_dist, walkable, weight);
+    //distance_map.path_to_center(start)
+    use pathfinding::prelude::astar;
+
+    //static GOAL: (i32, i32) = (4, 6);
+    let result = astar(
+        &start,
+        |&cursor| {
+            //vec![(x + 1, y + 2), (x + 1, y - 2), (x - 1, y + 2), (x - 1, y - 2), (x + 2, y + 1), (x + 2, y - 1), (x - 2, y + 1), (x - 2, y - 1)] .into_iter() .map(|p| (p, 1))
+            neighbors(cursor).into_iter().filter(|p| walkable(*p)).map(|p| (p, 1))
+        },
+        |&pos| pos.distance_squared(goal),
+        |&pos| pos == goal,
+    );
+    result.map(|(path, _dist)| path)
 }
 
 #[derive(Default, Serialize, Deserialize, Clone)]
