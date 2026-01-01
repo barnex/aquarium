@@ -68,8 +68,9 @@ impl Tile {
         }
     }
 
-    /// How difficult it is to cross this tile
-    pub fn distance_weight(&self) -> u8 {
+    /// How difficult it is to cross this tile.
+    /// Should be nonzero.
+    pub fn distance_cost(&self) -> u8 {
         match self {
             Tile::Road => 1,
             _ => 2,

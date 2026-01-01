@@ -176,6 +176,9 @@ impl Pawn {
         if let Some(next_tile) = self.route.next() {
             if self.can_walk_on_tile(g.tile_at(next_tile)) {
                 self.get_tile().set(next_tile);
+                //💤 Go more slowly over hard-to-cross tiles (e.g. sand).
+                // Cost is at least 1 (e.g. road), which gets mapped to no delay (max speed).
+                self.sleep(g.tile_at(self.tile()).distance_cost() - 1);
             } else {
                 trace!(self, "cannot walk on {next_tile}, clearing route");
                 self.route.clear(); // ☹️
@@ -189,7 +192,7 @@ impl Pawn {
         }
         let max_dist = 42;
         //let distance_map = DistanceMap::new(dest, max_dist, |p| self.can_walk_on_tile(g.tile_at(p)));
-        match weighted_path_to(self.tile(), dest, max_dist, |p| self.can_walk_on_tile(g.tile_at(p)), |p| g.tile_at(p).distance_weight()) {
+        match weighted_path_to(self.tile(), dest, max_dist, |p| self.can_walk_on_tile(g.tile_at(p)), |p| g.tile_at(p).distance_cost()) {
             Some(path) => self.route.set(path.with(|p| trace!(self, "set_destination path len={:?}", p.len()))),
             None => trace!(self, "no path"),
         }
