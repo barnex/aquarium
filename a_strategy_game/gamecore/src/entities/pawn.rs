@@ -188,24 +188,11 @@ impl Pawn {
             return trace!(self, "cannot move");
         }
         let max_dist = 42;
-        let distance_map = DistanceMap::new(dest, max_dist, |p| self.can_walk_on_tile(g.tile_at(p)));
-        match distance_map.path_to_center(self.tile()) {
+        //let distance_map = DistanceMap::new(dest, max_dist, |p| self.can_walk_on_tile(g.tile_at(p)));
+        match path_to(self.tile(), dest, max_dist, |p| self.can_walk_on_tile(g.tile_at(p))) {
             Some(path) => self.route.set(path.with(|p| trace!(self, "set_destination path len={:?}", p.len()))),
             None => trace!(self, "no path"),
         }
-    }
-
-    pub fn set_destination_OLD(&self, g: &G, dest: vec2i16) -> Status {
-        if !self.can_move() {
-            trace!(self, "cannot move");
-            return FAIL;
-        }
-        let max_dist = 42;
-        let distance_map = DistanceMap::new(dest, max_dist, |p| self.can_walk_on_tile(g.tile_at(p)));
-        let path = distance_map.path_to_center(self.tile());
-        trace!(self, "dest={dest} path len={:?}", path.as_ref().map(|p| p.len()));
-        self.route.set(path?);
-        OK
     }
 
     pub fn destination(&self) -> Option<vec2i16> {
