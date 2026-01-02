@@ -266,6 +266,7 @@ impl G {
             // map tile determines which resource spawns here.
             let typ = match self.tile_at(tile) {
                 Tile::GreyStone => ResourceTyp::Rock,
+                Tile::OreStone => ResourceTyp::Ore,
                 bad => {
                     debug_assert!(false, "renewable on unknown tile: {bad} @ {tile}");
                     depleted.push(tile);

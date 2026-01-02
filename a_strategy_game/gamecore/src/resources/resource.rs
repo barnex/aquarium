@@ -7,11 +7,12 @@ pub enum ResourceTyp {
     Rock = 2,
     Dryweed = 3,
     Brick = 4,
+    Ore = 5,
     // ⚠️👇 update `all()` below!
 }
 
 impl ResourceTyp {
-    pub const MAX: Self = Self::Brick; // 👈⚠️ keep in sync! Use variant_count <https://github.com/rust-lang/rust/issues/73662> when stable
+    pub const MAX: Self = Self::Ore; // 👈⚠️ keep in sync! Use variant_count <https://github.com/rust-lang/rust/issues/73662> when stable
     pub const COUNT: usize = Self::MAX as usize + 1;
 
     pub fn all() -> impl Iterator<Item = Self> {
@@ -27,6 +28,7 @@ impl ResourceTyp {
             Rock => sprite!("rock"),
             Dryweed => sprite!("dryweed"),
             Brick => sprite!("brick"),
+            Ore => sprite!("ore"),
         }
     }
 }
