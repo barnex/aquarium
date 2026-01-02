@@ -238,6 +238,7 @@ impl Pawn {
 
     fn find_near_receptor<'g>(&self, g: &'g G, res: ResourceTyp) -> Option<&'g Building> {
         g.buildings() //__
+            .filter(|b| b.team() == self.team())
             .filter(|b| b.has_nonfull_input(res))
             .min_by_key(|b| b.tile().distance_squared(self.tile()))
             .with(|v| trace!(self, "find_near_receptor: {:?}", v.map(|v| v.id())))
@@ -245,6 +246,7 @@ impl Pawn {
 
     fn find_near_provider<'g>(&self, g: &'g G, res: ResourceTyp) -> Option<&'g Building> {
         g.buildings() //__
+            .filter(|b| b.team() == self.team()) //👈 no stealing from enemy buildings. TODO: have Raiders who *can* do this.
             .filter(|b| b.has_nonempty_output(res))
             .min_by_key(|b| b.tile().distance_squared(self.tile()))
             .with(|v| trace!(self, "find_near_provider: {:?}", v.map(|v| v.id())))
