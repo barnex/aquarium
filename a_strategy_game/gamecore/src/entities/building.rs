@@ -100,6 +100,8 @@ impl Building {
             BuildingTyp::StarNest => false,
             BuildingTyp::FoodPacker => true,
             BuildingTyp::RockPacker => true,
+            BuildingTyp::IronMine => false,
+            BuildingTyp::CoalMine => false,
         }
     }
 
@@ -193,6 +195,8 @@ impl Building {
             BuildingTyp::StarNest => self.tick_star_nest(g),
             BuildingTyp::FoodPacker => self.tick_factory(3, Leaf, Dryweed, 50),
             BuildingTyp::RockPacker => self.tick_factory(3, Rock, Brick, 50),
+            BuildingTyp::CoalMine => (/* ?? */),
+            BuildingTyp::IronMine => self.tick_factory2([(3, Ore), (1, Coal)], Iron, 50),
         }
     }
 
@@ -202,6 +206,21 @@ impl Building {
         if (from_slot.amount() >= from_n) && !to_slot.is_full() {
             trace!(self, "produce :)");
             from_slot.take(from_n);
+            to_slot.add_one();
+            self.sleep(ticks);
+        }
+    }
+
+    fn tick_factory2<const N: usize>(&self, from: [(u16, ResourceTyp); N], to: ResourceTyp, ticks: u8) {
+        let to_slot = self.output(to).unwrap();
+        if to_slot.is_full() {
+            return;
+        }
+        if from.into_iter().all(|(from_n, from)| self.input(from).unwrap().amount() >= from_n) {
+            trace!(self, "produce :)");
+            for (from_n, from) in from {
+                self.input(from).unwrap().take(from_n);
+            }
             to_slot.add_one();
             self.sleep(ticks);
         }

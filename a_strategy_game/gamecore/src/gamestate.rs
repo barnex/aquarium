@@ -267,6 +267,7 @@ impl G {
             let typ = match self.tile_at(tile) {
                 Tile::GreyStone => ResourceTyp::Rock,
                 Tile::OreStone => ResourceTyp::Ore,
+                Tile::CoalStone => ResourceTyp::Coal,
                 bad => {
                     debug_assert!(false, "renewable on unknown tile: {bad} @ {tile}");
                     depleted.push(tile);

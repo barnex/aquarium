@@ -119,6 +119,7 @@ fn doodle_on_map(g: &mut G) {
                 match mat {
                     Tile::GreyStone => g.renewables.at_tile.insert(mouse, 10), // << TODO: insert reasonable amount of resources
                     Tile::OreStone => g.renewables.at_tile.insert(mouse, 50),  // << TODO: insert reasonable amount of resources
+                    Tile::CoalStone => g.renewables.at_tile.insert(mouse, 20), // << TODO: insert reasonable amount of resources
                     _ => g.renewables.at_tile.remove(mouse),
                 }
             }

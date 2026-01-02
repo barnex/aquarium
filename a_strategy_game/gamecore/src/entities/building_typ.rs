@@ -9,13 +9,15 @@ pub enum BuildingTyp {
     StarNest = 4,
     FoodPacker = 5,
     RockPacker = 6,
+    IronMine = 7,
+    CoalMine = 8,
     // 👆 ⚠️ keep in sync!
 }
 
 impl BuildingTyp {
     pub fn all() -> impl Iterator<Item = Self> {
         let first = Self::HQ;
-        let last = Self::RockPacker; // 👈⚠️ keep in sync! Use variant_count <https://github.com/rust-lang/rust/issues/73662> when stable.
+        let last = Self::CoalMine; // 👈⚠️ keep in sync! Use variant_count <https://github.com/rust-lang/rust/issues/73662> when stable.
         ((first as u8)..=(last as u8)).map(|i| Self::try_from_primitive(i).unwrap())
     }
 
@@ -28,6 +30,8 @@ impl BuildingTyp {
             StarNest => sprite!("starnest"),
             FoodPacker => sprite!("factory"),
             RockPacker => sprite!("factory"),
+            IronMine => sprite!("quarry"), // TODO
+            CoalMine => sprite!("quarry"), // TODO
         }
     }
 
@@ -41,6 +45,8 @@ impl BuildingTyp {
             StarNest => (3, 3),
             FoodPacker => (3, 3),
             RockPacker => (3, 3),
+            IronMine => (2, 2),
+            CoalMine => (2, 2),
         }
         .into()
     }
@@ -54,6 +60,8 @@ impl BuildingTyp {
             BuildingTyp::StarNest => &[(Leaf, 100)],
             BuildingTyp::FoodPacker => &[(Leaf, 10)],
             BuildingTyp::RockPacker => &[(Rock, 10)],
+            BuildingTyp::IronMine => &[(Ore, 10), (Coal, 10)],
+            BuildingTyp::CoalMine => &[(Coal, 10)],
         }
     }
 
@@ -64,19 +72,24 @@ impl BuildingTyp {
             BuildingTyp::Farm => &[(Dryweed, 10)],
             BuildingTyp::Quarry => &[(Brick, 10)],
             BuildingTyp::StarNest => &[],
-            BuildingTyp::FoodPacker => &[], // TODO
-            BuildingTyp::RockPacker => &[], // TODO
+            BuildingTyp::FoodPacker => &[],
+            BuildingTyp::RockPacker => &[],
+            BuildingTyp::IronMine => &[(Iron, 10)],
+            BuildingTyp::CoalMine => &[],
         }
     }
 
     pub fn default_workers(self) -> (PawnTyp, usize) {
+        use PawnTyp::*;
         match self {
-            BuildingTyp::HQ => (PawnTyp::Cat, 2),
-            BuildingTyp::Farm => (PawnTyp::Cat, 1),
-            BuildingTyp::Quarry => (PawnTyp::Cat, 1),
-            BuildingTyp::StarNest => (PawnTyp::Starfish, 10),
-            BuildingTyp::FoodPacker => (PawnTyp::Cat, 1),
-            BuildingTyp::RockPacker => (PawnTyp::Cat, 1),
+            BuildingTyp::HQ => (Cat, 2),
+            BuildingTyp::Farm => (Cat, 1),
+            BuildingTyp::Quarry => (Cat, 1),
+            BuildingTyp::StarNest => (Starfish, 10),
+            BuildingTyp::FoodPacker => (Cat, 1),
+            BuildingTyp::RockPacker => (Cat, 1),
+            BuildingTyp::IronMine => (Cat, 2),
+            BuildingTyp::CoalMine => (Cat, 2),
         }
     }
 
