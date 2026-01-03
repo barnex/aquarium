@@ -68,10 +68,10 @@ impl PawnTyp {
         use Team::*;
         match (self, team) {
             (Kitten, _) => sprite!("kit7"),
-            (Cat, Red) => sprite!("kit4"),
+            (Cat, Red) => sprite!("Manneke_06"),
             (Cat, _) => sprite!("kit3"),
-            (Crab, Blue) => sprite!("ferrisblue"),
-            (Crab, _) => sprite!("ferris"),
+            (Crab, Blue) => sprite!("Manneke_40"),
+            (Crab, _) => sprite!("Manneke_42"),
             (Turret, Red) => sprite!("turret"),
             (Turret, Blue) => sprite!("turretblue"),
             (Turret, _) => sprite!("turret"),

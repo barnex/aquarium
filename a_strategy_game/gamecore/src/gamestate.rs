@@ -29,6 +29,7 @@ pub struct G {
     pub effects: Effects,
 
     // ⏯️ UI
+    //pub god_mode: bool,
     pub player: Team,
     #[serde(skip)]
     pub ui: GameUi,

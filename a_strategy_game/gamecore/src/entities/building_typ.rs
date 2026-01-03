@@ -54,7 +54,7 @@ impl BuildingTyp {
     pub fn input_resources(self) -> &'static [(ResourceTyp, u16)] {
         use ResourceTyp::*;
         match self {
-            BuildingTyp::HQ => &[(Dryweed, 1000), (Brick, 1000)],
+            BuildingTyp::HQ => &[(Dryweed, 1000), (Brick, 1000), (Iron, 1000)],
             BuildingTyp::Farm => &[(Leaf, 10)],
             BuildingTyp::Quarry => &[(Rock, 10)],
             BuildingTyp::StarNest => &[(Leaf, 100)],
