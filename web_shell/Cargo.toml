@@ -11,7 +11,6 @@ base64 = { workspace = true }
 bincode = { workspace = true }
 fixed_str = { workspace = true }
 fnv = { workspace = true }
-gamecore = { workspace = true }
 itertools = { workspace = true }
 log = { workspace = true }
 num-traits = { workspace = true }

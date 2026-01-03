@@ -1,8 +1,0 @@
-[package]
-name = "a_strategy_game_web"
-version = "1.0.0"
-edition = "2024"
-
-[dependencies]
-web_shell = { workspace = true }
-gamecore = { workspace = true }

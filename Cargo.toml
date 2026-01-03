@@ -3,9 +3,6 @@
 resolver = "2"
 
 members = [
-	"a_strategy_game",
-	"a_strategy_game/a_strategy_game_web",
-	"a_strategy_game/gamecore",
 	"aquarium",
 	"aquarium/aquarium_core",
 	"aquarium/aquarium_web",
@@ -32,7 +29,6 @@ binpack2d = { path = "corelibs/binpack2d" }
 cel = { path = "corelibs/cel" }
 core_util = { path = "corelibs/core_util" }
 fixed_str = { path = "corelibs/fixed_str" }
-gamecore = { path = "a_strategy_game/gamecore" }
 gamelib = { path = "gamelib" }
 geometry = { path = "corelibs/geometry" }
 macroquad_shell = { path = "macroquad_shell" }
@@ -72,7 +68,6 @@ pathfinding = "4"
 debug = "line-tables-only"
 split-debuginfo = "unpacked"
 opt-level = 1
-package.gamecore.opt-level = 1
 package.aquarium_core.opt-level = 1
 
 package.macroquad.opt-level = 3
